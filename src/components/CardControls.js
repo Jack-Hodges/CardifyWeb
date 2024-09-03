@@ -3,7 +3,7 @@ import Right from '../images/icons/rightArrow.png';
 
 function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }) {
     return (
-        <div className="w-full h-12 flex items-center justify-end mt-2">
+        <div className="w-full h-12 flex items-center justify-center sm:justify-end mt-2">
             <img 
                 className="h-12 pr-5 cursor-pointer" 
                 src={Left} 

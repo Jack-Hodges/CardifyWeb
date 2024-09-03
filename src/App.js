@@ -39,7 +39,7 @@ function App() {
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center">
-      <div className="w-3/5 h-1/2 m-auto">
+      <div className="w-full h-[80%] sm:w-3/5 sm:h-1/2 m-auto">
         <Card 
           frontContent={cards[currentCardIndex].frontContent} 
           backContent={cards[currentCardIndex].backContent} 
