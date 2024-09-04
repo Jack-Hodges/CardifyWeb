@@ -1,5 +1,5 @@
-import Left from '../images/icons/leftArrow.png';
-import Right from '../images/icons/rightArrow.png';
+import Left from '../../images/icons/leftArrow.png';
+import Right from '../../images/icons/rightArrow.png';
 
 function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }) {
     return (
