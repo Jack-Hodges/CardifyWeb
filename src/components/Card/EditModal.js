@@ -50,7 +50,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
@@ -59,24 +59,24 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 
                 {/* Question Input */}
                 <div className="mb-6">
-                    <label htmlFor="question" className="block text-lg font-medium mb-2">Question</label>
+                    <label htmlFor="question" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">Question</label>
                     <textarea
                         id="question"
                         value={frontContent}
                         onChange={(e) => setFrontContent(e.target.value)}
-                        className="w-full p-3 border rounded-md resize-none h-24"
+                        className="bg-white dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the question here"
                     />
                 </div>
                 
                 {/* Answer Input */}
                 <div className="mb-6">
-                    <label htmlFor="answer" className="block text-lg font-medium mb-2">Answer</label>
+                    <label htmlFor="answer" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">Answer</label>
                     <textarea
                         id="answer"
                         value={backContent}
                         onChange={(e) => setBackContent(e.target.value)}
-                        className="w-full p-3 border rounded-md resize-none h-24"
+                        className="bg-white dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the answer here"
                     />
                 </div>
@@ -85,7 +85,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 <div className="flex justify-end space-x-4">
                     <button
                         onClick={handleClose}
-                        className="px-5 py-2 bg-gray-100 rounded-md hover:bg-gray-200 text-red-600 transition duration-300"
+                        className="px-5 py-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-red-600 transition duration-300"
                     >
                         Cancel
                     </button>

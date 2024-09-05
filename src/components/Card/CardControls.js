@@ -10,7 +10,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }
                 alt="Previous Card" 
                 onClick={onPrevClick} 
             />
-            <p className="text-2xl text-gray-600 font-bold text-center w-16">
+            <p className="text-2xl text-gray-500 dark:text-gray-200 font-bold text-center w-16">
                 {currentCardIndex}/{totalCards}
             </p>
             <img 

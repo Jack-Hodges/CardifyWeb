@@ -1,7 +1,7 @@
 function IconButtons({ onEditClick, isEditing }) {
     return (
         <div className="flex absolute bottom-0 right-0 m-2">
-            <div className="rounded-md hover:bg-gray-200 bg-transparent p-1 mr-1 transition duration-300">
+            <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 mr-1 transition duration-300">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -16,7 +16,7 @@ function IconButtons({ onEditClick, isEditing }) {
                 </svg>
             </div>
 
-            <div className="rounded-md hover:bg-gray-200 bg-transparent p-1 transition duration-300">
+            <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 transition duration-300">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"

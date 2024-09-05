@@ -3,7 +3,7 @@ import MenuBar from './components/Navigation/MenuBar';
 
 function App() {
   return (
-    <div>
+    <div class="w-screen h-screen overflow-y-hidden bg-white dark:bg-gray-900">
       <MenuBar />
       <CardMain />
     </div>

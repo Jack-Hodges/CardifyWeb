@@ -53,26 +53,26 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
             >
                 {/* Front card */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 p-5 shadow-xl rounded-2xl select-none"
+                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 shadow-xl rounded-2xl select-none"
                     style={{
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(0deg)',
                     }}
                 >
-                    <p className="text-4xl">{newFrontContent}</p> {/* Display the card's current content */}
+                    <p className="text-4xl text-gray-500 dark:text-gray-200">{newFrontContent}</p> {/* Display the card's current content */}
                     <IconButtons onEditClick={handleEditClick} isEditing={isEditing} />
                 </div>
 
                 {/* Back card */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 p-5 shadow-xl rounded-2xl select-none"
+                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 shadow-xl rounded-2xl select-none"
                     style={{
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)',
                     }}
                 >
                     <p className="absolute top-0 font-bold text-2xl mt-2 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">Answer</p>
-                    <p className="text-4xl">{newBackContent}</p> {/* Display the card's current content */}
+                    <p className="text-4xl text-gray-500 dark:text-gray-200">{newBackContent}</p> {/* Display the card's current content */}
                     <IconButtons onEditClick={handleEditClick} isEditing={isEditing} />
                 </div>
             </div>

@@ -27,8 +27,8 @@ export default MenuBar;
 function TitleBar({ text, svg }) {
     return (
         <div className="flex items-center">
-            {svg && <span className="mr-2 text-gray-400">{svg}</span>}
-            <p className="font-bold text-xl text-gray-400">
+            {svg && <span className="mr-2 text-gray-400 dark:text-gray-200">{svg}</span>}
+            <p className="font-bold text-xl text-gray-400 dark:text-gray-200">
                 {text}
             </p>
         </div>
