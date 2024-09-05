@@ -25,12 +25,8 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
     };
 
     const handleSave = () => {
-        setIsClosing(true); // Start the closing animation on save
-        setTimeout(() => {
-            setIsClosing(false); // Reset closing state after animation
-            onSave(); // Trigger the actual onSave callback
-            setIsVisible(false); // Hide the modal after it fades out
-        }, 300); // 300ms to match the duration of the closing animation
+        onSave(frontContent, backContent); // Pass the updated content back to CardMain
+        handleClose(); // Close the modal after saving
     };
 
     if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
@@ -55,32 +51,38 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
-                <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">Edit Question and Answer</h2>
-                
+                <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">
+                    Edit Question and Answer
+                </h2>
+
                 {/* Question Input */}
                 <div className="mb-6">
-                    <label htmlFor="question" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">Question</label>
+                    <label htmlFor="question" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                        Question
+                    </label>
                     <textarea
                         id="question"
                         value={frontContent}
-                        onChange={(e) => setFrontContent(e.target.value)}
-                        className="bg-white dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+                        onChange={(e) => setFrontContent(e.target.value)} // Update the front content
+                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the question here"
                     />
                 </div>
-                
+
                 {/* Answer Input */}
                 <div className="mb-6">
-                    <label htmlFor="answer" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">Answer</label>
+                    <label htmlFor="answer" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                        Answer
+                    </label>
                     <textarea
                         id="answer"
                         value={backContent}
-                        onChange={(e) => setBackContent(e.target.value)}
-                        className="bg-white dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+                        onChange={(e) => setBackContent(e.target.value)} // Update the back content
+                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the answer here"
                     />
                 </div>
-                
+
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
                     <button
