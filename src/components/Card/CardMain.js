@@ -58,7 +58,7 @@ function CardMain() {
       backContent: newBackContent,
     };
     const updatedCards = [...cards, newCard]; // Add the new card to the existing cards array
-    setCards(updatedCards);
+    setCards(updatedCards); // Update the cards array, which will re-render the list
     saveCards(updatedCards); // Save the new card to the backend
   };
 

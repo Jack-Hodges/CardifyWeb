@@ -19,7 +19,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
   };
 
   return (
-    <div className="w-full px-4">
+    <div className="w-full h-[87%] overflow-y-scroll px-4">
       <div class="flex">
         <h2 className="font-bold text-2xl mb-4 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">All Flashcards</h2>
         <button
