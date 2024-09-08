@@ -52,6 +52,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
         backContent={newBackContent}
         setFrontContent={setNewFrontContent}
         setBackContent={setNewBackContent}
+        text="Add New Flashcard"
       />
     </div>
   );

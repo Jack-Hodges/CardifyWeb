@@ -127,6 +127,7 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                 backContent={modalBackContent}   // Pass the modal state for answer
                 setFrontContent={setModalFrontContent} // Update modal state for question
                 setBackContent={setModalBackContent}   // Update modal state for answer
+                text="Edit Question and Answer"
             />
 
             {/* Delete Confirmation Modal */}

@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 
-function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent }) {
+function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent, text }) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
 
@@ -52,7 +52,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
                 <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">
-                    Edit Question and Answer
+                    {text}
                 </h2>
 
                 {/* Question Input */}
