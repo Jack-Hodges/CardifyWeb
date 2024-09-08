@@ -34,7 +34,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
   return (
     <div className="w-full h-[87%] overflow-y-scroll px-4">
       <div className="flex items-center mb-4 justify-between">
-        <h2 className="font-bold text-2xl bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">All Flashcards</h2>
+        <h2 className="font-bold text-2xl text-yellow-500">All Flashcards</h2>
         <BackgroundButton 
           onClick={handleAddClick} 
           image={plusIcon} 
