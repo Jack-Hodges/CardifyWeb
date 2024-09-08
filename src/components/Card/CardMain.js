@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import supabase from '../../supabaseClient'; // Import Supabase client
 import Card from './Card';
 import CardControls from './CardControls';
 import CardList from './CardList';
@@ -13,53 +14,73 @@ function CardMain() {
   const [frontContent, setFrontContent] = useState(''); // State for modal frontContent
   const [backContent, setBackContent] = useState(''); // State for modal backContent
 
-  // Fetch cards from the backend API
+  // Fetch cards from the Supabase database
   useEffect(() => {
-    fetch('http://localhost:3001/cards')
-      .then((response) => response.json())
-      .then((data) => setCards(data))
-      .catch((error) => console.error('Error fetching cards:', error));
-  }, []);
+    const fetchCards = async () => {
+      const { data, error } = await supabase
+        .from('flashcards') // Table name in Supabase
+        .select('*')
+        .eq('subject_id', 1); // Only fetch flashcards with subject_id of 1
 
-  // Save cards to the backend (overwrite the JSON file)
-  const saveCards = (updatedCards) => {
-    fetch('http://localhost:3001/cards', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updatedCards), // Send the updated cards array
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          console.log('Cards saved successfully');
-        }
-      })
-      .catch((error) => console.error('Error saving cards:', error));
-  };
+      if (error) {
+        console.error('Error fetching flashcards:', error);
+      } else {
+        console.log('Flashcards fetched from Supabase:', data);
+        setCards(data);
+      }
+    };
+
+    fetchCards(); // Call the function to fetch data on component mount
+  }, []);
 
   // Update card content in the state and save it to the backend
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
     const updatedCards = cards.map((card, i) =>
       i === currentCardIndex
-        ? { frontContent: updatedFrontContent, backContent: updatedBackContent }
+        ? { ...card, question: updatedFrontContent, answer: updatedBackContent }
         : card
     );
     setCards(updatedCards);
     setIsModalOpen(false); // Close the modal
-    saveCards(updatedCards); // Save the updated cards to the backend
+    // Add the code to save the updated card to Supabase (omitted for brevity)
   };
 
-  // Handle adding a new flashcard
-  const handleAddNewCard = (newFrontContent, newBackContent) => {
+  // Handle adding a new flashcard (with subject_id of 1)
+  const handleAddNewCard = async (newFrontContent, newBackContent) => {
     const newCard = {
-      frontContent: newFrontContent,
-      backContent: newBackContent,
+      question: newFrontContent,
+      answer: newBackContent,
+      subject_id: 1 // Include subject_id of 1 for the new card
     };
-    const updatedCards = [...cards, newCard]; // Add the new card to the existing cards array
-    setCards(updatedCards); // Update the cards array, which will re-render the list
-    saveCards(updatedCards); // Save the new card to the backend
+
+    const { data, error } = await supabase
+      .from('flashcards')
+      .insert([newCard])
+      .select('*'); // Insert the new card into the Supabase table and return the full row
+
+    if (error) {
+      console.error('Error adding new card:', error);
+    } else if (data?.length > 0) {
+      const updatedCards = [...cards, data[0]]; // Add the new card from Supabase to the existing array
+      setCards(updatedCards); // Update the cards array, which will re-render the list
+    } else {
+      console.error('No data returned after inserting the new card.');
+    }
+  };
+
+  // Handle card deletion (remove the card from the state)
+  const handleDeleteCard = (cardId) => {
+    const updatedCards = cards.filter(card => card.id !== cardId); // Remove the deleted card by filtering it out
+
+    // Determine the new current index
+    let newCurrentIndex = currentCardIndex;
+    if (currentCardIndex === updatedCards.length) {
+      // If the current card is the last one, show the previous one
+      newCurrentIndex = currentCardIndex - 1;
+    }
+
+    setCards(updatedCards); // Update the cards array to reflect the removal
+    setCurrentCardIndex(Math.max(newCurrentIndex, 0)); // Ensure index is not negative
   };
 
   const handleCardClick = (index) => {
@@ -81,15 +102,17 @@ function CardMain() {
           <div className="w-full h-[80%] sm:h-1/2 mt-7 px-5">
             {cards.length > 0 ? (
               <Card
-                frontContent={cards[currentCardIndex]?.frontContent}
-                backContent={cards[currentCardIndex]?.backContent}
+                frontContent={cards[currentCardIndex]?.question}
+                backContent={cards[currentCardIndex]?.answer}
                 flipped={flipped}
                 setFlipped={setFlipped}
                 animateFlip={animateFlip}
                 onUpdateCard={handleUpdateCard} // Pass updated content to save
+                cardId={cards[currentCardIndex]?.id} // Pass the card ID for deletion
+                onDeleteCard={handleDeleteCard} // Pass the delete handler to remove the card
               />
             ) : (
-              <p>Loading cards...</p>
+              <p>No flashcards available</p>
             )}
             <CardControls
               currentCardIndex={currentCardIndex + 1}

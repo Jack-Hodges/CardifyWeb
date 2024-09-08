@@ -20,11 +20,11 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
 
   return (
     <div className="w-full h-[87%] overflow-y-scroll px-4">
-      <div class="flex">
-        <h2 className="font-bold text-2xl mb-4 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">All Flashcards</h2>
+      <div className="flex items-center mb-4">
+        <h2 className="font-bold text-2xl bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">All Flashcards</h2>
         <button
           onClick={handleAddClick}
-          className="text-white bg-blue-500 hover:bg-blue-600 rounded-full p-2"
+          className="ml-auto text-white bg-blue-500 hover:bg-blue-600 rounded-full p-2"
         >
           +
         </button>
@@ -37,7 +37,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
             onClick={() => onCardClick(index)} // Handle card click
           >
             <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-500 dark:text-gray-200">
-              {card.frontContent}
+              {card.question} {/* Use 'question' instead of 'frontContent' */}
             </p>
           </li>
         ))}
@@ -53,7 +53,6 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
         setFrontContent={setNewFrontContent}
         setBackContent={setNewBackContent}
       />
-
     </div>
   );
 }
