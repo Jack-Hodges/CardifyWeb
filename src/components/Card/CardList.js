@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import EditModal from './EditModal';
+import BackgroundButton from '../Elements/BackgroundButton';
 
 function CardList({ cards, onCardClick, onAddNewCard }) {
 
@@ -18,16 +19,28 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
     setIsModalOpen(false); // Close the modal after saving
   };
 
+  const plusIcon = (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>
+  )
+
+  const leftArrow = (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+    </svg>
+)
+
   return (
     <div className="w-full h-[87%] overflow-y-scroll px-4">
-      <div className="flex items-center mb-4">
+      <div className="flex items-center mb-4 justify-between">
         <h2 className="font-bold text-2xl bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">All Flashcards</h2>
-        <button
-          onClick={handleAddClick}
-          className="ml-auto text-white bg-blue-500 hover:bg-blue-600 rounded-full p-2"
-        >
-          +
-        </button>
+        <BackgroundButton 
+          onClick={handleAddClick} 
+          image={plusIcon} 
+          text="Add" // This will display both the SVG and the text
+          bgColor="bg-yellow-500"
+        />
       </div>
       <ul className="flex flex-col space-y-4">
         {cards.map((card, index) => (

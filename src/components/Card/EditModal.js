@@ -1,5 +1,6 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
+import BackgroundButton from '../Elements/BackgroundButton';
 
 function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent, text }) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
@@ -85,18 +86,8 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
-                    <button
-                        onClick={handleClose}
-                        className="px-5 py-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-red-600 transition duration-300"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        className="px-5 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
-                    >
-                        Save
-                    </button>
+                    <BackgroundButton text="Cancel" bgColor="bg-red-500" onClick={handleClose}/>
+                    <BackgroundButton text="Save" bgColor="bg-blue-500" onClick={handleSave}/>
                 </div>
             </div>
         </div>,
