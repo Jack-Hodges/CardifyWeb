@@ -52,7 +52,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
-                <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">
+                <h2 className="text-2xl font-semibold mb-6 text-green-500">
                     {text}
                 </h2>
 
@@ -86,8 +86,8 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="bg-red-500" onClick={handleClose}/>
-                    <BackgroundButton text="Save" bgColor="bg-blue-500" onClick={handleSave}/>
+                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose}/>
+                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave}/>
                 </div>
             </div>
         </div>,

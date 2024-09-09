@@ -4,6 +4,7 @@ import Card from './Card';
 import CardControls from './CardControls';
 import CardList from './CardList';
 import EditModal from './EditModal'; // Import the EditModal component
+import BackgroundButton from '../Elements/BackgroundButton';
 
 function CardMain() {
   const [cards, setCards] = useState([]);
@@ -88,13 +89,16 @@ function CardMain() {
     setCurrentCardIndex(index); // Set the clicked card as the active card
   };
 
+  const backArrow = (
+    <svg xmlns="http://www.w3.org/2000/svg" stroke-width="3" viewBox="0 0 24 24" fill="currentColor" className="size-10">
+      <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
+    </svg>
+  )
+
   return (
     <div className="w-screen h-screen">
       <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 pt-5 items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-10 mr-4">
-          <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
-        </svg>
-        <p>Create Flashcards</p>
+        <BackgroundButton image={backArrow} text={"Create Flashcards"} bgColor="green" flip/>
       </div>
 
       <div className="flex w-full h-full">

@@ -39,7 +39,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
           onClick={handleAddClick} 
           image={plusIcon} 
           text="Add" // This will display both the SVG and the text
-          bgColor="bg-yellow-500"
+          bgColor={"yellow"}
         />
       </div>
       <ul className="flex flex-col space-y-4">

@@ -21,7 +21,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }
         <div className="w-full h-12 flex items-center justify-center sm:justify-end mt-2">
 
             <div class="mt-[0%]">
-                <BackgroundButton image={leftArrow} onClick={onPrevClick}/>
+                <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={"red"}/>
             </div>
             
             <p className="text-2xl text-gray-500 dark:text-gray-200 font-bold text-center w-16">
@@ -29,7 +29,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }
             </p>
 
             <div class="mt-[0%]">
-                <BackgroundButton image={rightArrow} onClick={onNextClick}/>
+                <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={"red"}/>
             </div>
             
 
