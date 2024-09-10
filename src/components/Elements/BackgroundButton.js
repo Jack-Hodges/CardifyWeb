@@ -7,7 +7,7 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wSizing = "w-1
     if (image && text) {
       if (flip) {
         return (
-          <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow transition-all duration-300 transform hover:shadow-none hover:translate-x-1 hover:translate-y-1`}>
+          <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
             <div className="flex items-center p-2">
               {image} {/* Show the image */}
               <span className="ml-2">{text}</span> {/* Show the text */}
@@ -16,7 +16,7 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wSizing = "w-1
         );
       } else {
         return (
-          <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow transition-all duration-300 transform hover:shadow-none hover:translate-x-1 hover:translate-y-1`}>
+          <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
             <div className="flex items-center p-2">
               <span className="ml-2">{text}</span> {/* Show the text */}
               {image} {/* Show the image */}
@@ -26,19 +26,19 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wSizing = "w-1
       }
     } else if (image) {
         return (
-            <button onClick={onClick} className={`relative inline-flex items-center justify-center ${wSizing} ${hSizing} ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow transition-all duration-300 transform hover:shadow-none hover:translate-x-1 hover:translate-y-1`}>
+            <button onClick={onClick} className={`relative inline-flex items-center justify-center ${wSizing} ${hSizing} ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
                 {image} {/* Show the image */}
             </button>
         );
     } else if (text) {
         return (
-            <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow transition-all duration-300 transform hover:shadow-none hover:translate-x-1 hover:translate-y-1`}>
+            <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
                 <span className="px-4">{text}</span> {/* Show the text */}
             </button>
         );
     } else {
         return (
-            <button onClick={onClick} className={`relative inline-flex items-center justify-center w-10 h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full border-4 border-[rgba(3,15,64,1)] shadow-[3px_3px_0px_0px_rgba(3,15,64,1)] transition-all duration-300 transform hover:shadow-none hover:translate-x-1 hover:translate-y-1`}>
+            <button onClick={onClick} className={`relative inline-flex items-center justify-center ${wSizing} ${hSizing} ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
                 <span>➔</span> {/* Default icon */}
             </button>
         );

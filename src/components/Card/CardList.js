@@ -46,10 +46,11 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
         {cards.map((card, index) => (
           <li 
             key={index} 
-            className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer"
+            className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow
+              hover:scale-95 transition duration-300"
             onClick={() => onCardClick(index)} // Handle card click
           >
-            <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-500 dark:text-gray-200">
+            <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-700 dark:text-gray-200">
               {card.question} {/* Use 'question' instead of 'frontContent' */}
             </p>
           </li>

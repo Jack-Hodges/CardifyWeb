@@ -6,7 +6,7 @@ function IconButtons({ onEditClick, isEditing }) {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className={`w-8 ${isEditing ? 'text-blue-500' : 'text-gray-400'}`} // Make the edit icon blue if editing
+                    className={`w-8 ${isEditing ? 'text-blue-500' : 'text-gray-700'}`} // Make the edit icon blue if editing
                     onClick={(e) => {
                         e.stopPropagation();
                         onEditClick();
@@ -21,7 +21,7 @@ function IconButtons({ onEditClick, isEditing }) {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-8 text-gray-400"
+                    className="w-8 text-gray-700"
                 >
                     <path
                         fillRule="evenodd"

@@ -97,12 +97,12 @@ function CardMain() {
 
   return (
     <div className="w-screen h-screen">
-      <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 pt-5 items-center">
-        <BackgroundButton image={backArrow} text={"Create Flashcards"} bgColor="green" flip/>
-      </div>
 
       <div className="flex w-full h-full">
         <div className="w-[70%] h-full flex flex-col mt-5">
+        <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 items-center">
+          <BackgroundButton image={backArrow} text={"Create Flashcards"} bgColor="green" flip/>
+        </div>
           <div className="w-full h-[80%] sm:h-1/2 mt-7 px-5">
             {cards.length > 0 ? (
               <Card

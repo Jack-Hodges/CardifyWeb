@@ -82,13 +82,13 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
             >
                 {/* Front card */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 shadow-xl rounded-2xl select-none"
+                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
                     style={{
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(0deg)',
                     }}
                 >
-                    <p className="text-4xl text-gray-500 dark:text-gray-200">{newFrontContent}</p> {/* Display the card's current content */}
+                    <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold">{newFrontContent}</p> {/* Display the card's current content */}
                     <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={handleDeleteClick}>
                         {/* Red bin icon for delete */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
@@ -100,14 +100,14 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
 
                 {/* Back card */}
                 <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 shadow-xl rounded-2xl select-none"
+                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
                     style={{
                         backfaceVisibility: 'hidden',
                         transform: 'rotateY(180deg)',
                     }}
                 >
-                    <p className="absolute top-0 font-bold text-2xl mt-2 bg-gradient-to-br from-blue-500 to-green-300 bg-clip-text text-transparent">Answer</p>
-                    <p className="text-4xl text-gray-500 dark:text-gray-200">{newBackContent}</p> {/* Display the card's current content */}
+                    <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>
+                    <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold">{newBackContent}</p> {/* Display the card's current content */}
                     <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={handleDeleteClick}>
                         {/* Red bin icon for delete */}
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
