@@ -1,15 +1,24 @@
-import CardMain from './components/Card/CardMain';
+import CreateCards from './Pages/CreateCards';
 import MenuBar from './components/Navigation/MenuBar';
 import Welcome from './Pages/Welcome';
+import FlashcardQuiz from './Pages/FlashcardQuiz';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
-    <div class="w-screen h-screen overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900">
-      <MenuBar />
-      <CardMain />
-      {/* <Welcome /> */}
+    <div className="w-screen h-screen overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900">
+      <Router>
+        {/* MenuBar will be rendered on all pages */}
+        <MenuBar />
+
+        {/* Define routes for different pages */}
+        <Routes>
+          <Route path="/" element={<Welcome />} /> {/* Default route */}
+          <Route path="/create" element={<CreateCards />} />
+          <Route path="/practice" element={<FlashcardQuiz />} />
+        </Routes>
+      </Router>
     </div>
-    
   );
 }
 

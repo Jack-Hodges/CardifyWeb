@@ -1,6 +1,3 @@
-import Left from '../../images/icons/leftArrow.png';
-import Right from '../../images/icons/rightArrow.png';
-
 import BackgroundButton from '../Elements/BackgroundButton';
 
 function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }) {

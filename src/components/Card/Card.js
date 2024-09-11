@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import IconButtons from './IconButtons'; // Import the IconButtons component
 import EditModal from './EditModal'; // Import the EditModal component
 import supabase from '../../supabaseClient'; // Import Supabase client
+import DeleteModal from './DeleteModal'; // Import the DeleteModal component
 
-function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard }) {
+function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit }) {
     const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
     const [newBackContent, setNewBackContent] = useState(backContent); // Card content state
     const [modalFrontContent, setModalFrontContent] = useState(frontContent); // Modal content state
@@ -51,7 +52,11 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
     };
 
     const confirmDeleteCard = async (event) => {
-        event.stopPropagation(); // Stop propagation when confirming deletion
+        // Guard for undefined event
+        if (event) {
+            event.stopPropagation(); // Stop propagation when confirming deletion
+        }
+
         const { error } = await supabase
             .from('flashcards')
             .delete()
@@ -67,7 +72,11 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
     };
 
     const cancelDelete = (event) => {
-        event.stopPropagation(); // Stop propagation when cancelling deletion
+        // Guard for undefined event
+        if (event) {
+            event.stopPropagation(); // Stop propagation when cancelling deletion
+        }
+
         setIsDeleteModalOpen(false); // Close the delete confirmation modal without deleting
     };
 
@@ -80,42 +89,11 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
-                {/* Front card */}
-                <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
-                    style={{
-                        backfaceVisibility: 'hidden',
-                        transform: 'rotateY(0deg)',
-                    }}
-                >
-                    <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold">{newFrontContent}</p> {/* Display the card's current content */}
-                    <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={handleDeleteClick}>
-                        {/* Red bin icon for delete */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
-                    </div>
-                    <IconButtons onEditClick={handleEditClick} />
-                </div>
+                <CardContent rotate={"rotateY(0deg)"} content={newFrontContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} edit={edit}/>
 
                 {/* Back card */}
-                <div
-                    className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
-                    style={{
-                        backfaceVisibility: 'hidden',
-                        transform: 'rotateY(180deg)',
-                    }}
-                >
-                    <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>
-                    <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold">{newBackContent}</p> {/* Display the card's current content */}
-                    <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={handleDeleteClick}>
-                        {/* Red bin icon for delete */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                        </svg>
-                    </div>
-                    <IconButtons onEditClick={handleEditClick} />
-                </div>
+                <CardContent rotate={"rotateY(180deg)"} content={newBackContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} back edit={edit}/>
+                
             </div>
 
             {/* Edit Modal */}
@@ -131,29 +109,36 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
             />
 
             {/* Delete Confirmation Modal */}
-            {isDeleteModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={(event) => event.stopPropagation()}>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg">
-                        <p className="text-lg text-gray-900 dark:text-gray-200 mb-4">Are you sure you want to delete this card?</p>
-                        <div className="flex justify-end">
-                            <button
-                                onClick={confirmDeleteCard}
-                                className="text-white bg-red-500 hover:bg-red-600 rounded-full px-4 py-2 mr-2"
-                            >
-                                Delete
-                            </button>
-                            <button
-                                onClick={cancelDelete}
-                                className="text-gray-500 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full px-4 py-2"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={cancelDelete}
+                onDelete={confirmDeleteCard}
+                text="Delete Flashcard"
+            />
         </div>
     );
 }
 
 export default Card;
+
+function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back }) {
+    return (
+        <div
+            className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
+            style={{ backfaceVisibility: 'hidden', transform: rotate }}
+        >
+            {back && <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>}
+            <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold">{content}</p>
+            {edit && (
+                <div>
+                    <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={onClickDelete}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9M9.26 9l-.346 9M18.16 5.79L17.84 19.67a2.25 2.25 0 0 1-2.244 2.08H8.084A2.25 2.25 0 0 1 5.84 19.67L5.772 5.79M5.772 5.79a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916C16.75 3.794 15.84 2.81 14.66 2.774a51.96 51.96 0 0 0-3.32 0C10.16 2.81 9.25 3.794 9.25 4.874v.916m7.5 0a48.11 48.11 0 0 0-7.5 0" />
+                        </svg>
+                    </div>
+                    <IconButtons onEditClick={onClickEdit} />
+                </div>
+            )}
+        </div>
+    );
+}
