@@ -54,7 +54,7 @@ function CardMain() {
 
       <div className="flex w-full h-full">
         <div className="w-[70%] h-full flex flex-col mt-10">
-          <div className="w-full h-4/5 sm:h-1/2 mt-4 px-5">
+          <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
             {cards.length > 0 ? (
               <Card
                 frontContent={cards[currentCardIndex]?.question}

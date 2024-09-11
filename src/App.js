@@ -2,6 +2,7 @@ import CreateCards from './Pages/CreateCards';
 import MenuBar from './components/Navigation/MenuBar';
 import Welcome from './Pages/Welcome';
 import FlashcardQuiz from './Pages/FlashcardQuiz';
+import Dashboard from './Pages/Dashboard';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<Welcome />} /> {/* Default route */}
           <Route path="/create" element={<CreateCards />} />
           <Route path="/practice" element={<FlashcardQuiz />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Router>
     </div>
