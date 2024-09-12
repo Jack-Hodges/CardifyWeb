@@ -2,61 +2,54 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function AddSubject({ isOpen, onClose, onSave, subjectName, subjectColor, setSubjectName, setSubjectColor, text }) {
-    const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
-    const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
+function AddSubject({ isOpen, onClose, onSave, subject, setSubjectName, setSubjectColor, text }) {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
+    const [subjectColor, setLocalSubjectColor] = useState(subject?.bgCol || 'red');
 
-    // Handle the modal appearing (fade in) when isOpen changes
     useEffect(() => {
         if (isOpen) {
-            setIsVisible(true); // Show modal and trigger the fade-in
+            setIsVisible(true);
         } else if (!isClosing) {
-            setIsVisible(false); // Hide modal after animation if not closing
+            setIsVisible(false);
         }
     }, [isOpen, isClosing]);
 
-    // Handle close animation
+    useEffect(() => {
+        if (subject) {
+            setLocalSubjectName(subject.name);
+            setLocalSubjectColor(subject.bgCol);
+        } else {
+            setLocalSubjectName('');
+            setLocalSubjectColor('red');
+        }
+    }, [subject]);
+
     const handleClose = () => {
-        setIsClosing(true); // Start the closing animation
+        setIsClosing(true);
         setTimeout(() => {
-            setIsClosing(false); // Reset closing state after animation
-            onClose(); // Trigger the actual onClose callback
-            setIsVisible(false); // Hide the modal after it fades out
-        }, 300); // 300ms to match the duration of the closing animation
+            setIsClosing(false);
+            onClose();
+            setIsVisible(false);
+        }, 300);
     };
 
     const handleSave = () => {
-        onSave(subjectName, subjectColor); // Pass the updated content back to the parent
-        handleClose(); // Close the modal after saving
+        onSave(subject?.id, subjectName, subjectColor);
+        handleClose();
     };
 
-    if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
+    if (!isVisible && !isClosing) return null;
 
     return ReactDOM.createPortal(
-        <div
-            className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
-                isClosing ? 'opacity-0' : 'opacity-100'
-            }`}
-            onClick={(e) => e.stopPropagation()} // Prevent modal clicks from triggering the card click
-        >
-            {/* Black Background */}
-            <div
-                className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
-                onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
-            ></div>
-
-            {/* Modal Content */}
-            <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
-                    isClosing ? 'animate-pop-down' : 'animate-pop-up'
-                }`}
-                onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
-            >
+        <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
+            <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
                 <h2 className="text-2xl font-semibold mb-6 text-green-500">
-                    {text}
+                    {subject ? "Edit Subject" : text}
                 </h2>
 
-                {/* Subject Name Input */}
                 <div className="mb-6">
                     <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Name
@@ -65,13 +58,12 @@ function AddSubject({ isOpen, onClose, onSave, subjectName, subjectColor, setSub
                         id="subjectName"
                         type="text"
                         value={subjectName}
-                        onChange={(e) => setSubjectName(e.target.value)} // Update the subject name
+                        onChange={(e) => setLocalSubjectName(e.target.value)}
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
                         placeholder="Enter the subject name here"
                     />
                 </div>
 
-                {/* Subject Color Dropdown */}
                 <div className="mb-6">
                     <label htmlFor="subjectColor" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Color
@@ -79,7 +71,7 @@ function AddSubject({ isOpen, onClose, onSave, subjectName, subjectColor, setSub
                     <select
                         id="subjectColor"
                         value={subjectColor}
-                        onChange={(e) => setSubjectColor(e.target.value)} // Update the subject color
+                        onChange={(e) => setLocalSubjectColor(e.target.value)}
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
                     >
                         <option value="red">Red</option>
@@ -94,14 +86,13 @@ function AddSubject({ isOpen, onClose, onSave, subjectName, subjectColor, setSub
                     </select>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose}/>
-                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave}/>
+                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
+                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />
                 </div>
             </div>
         </div>,
-        document.body // Render the modal into the body of the document
+        document.body
     );
 }
 
