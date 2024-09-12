@@ -19,6 +19,10 @@ module.exports = {
         'pop-up': 'pop-up 0.3s ease-in-out forwards',
         'pop-down': 'pop-down 0.3s ease-in-out forwards',
       },
+
+      fontFamily: {
+        montagu: ['"Montserrat"', 'sans serif'],  // Add Montagu Slab
+      },
     },
   },
   plugins: [],

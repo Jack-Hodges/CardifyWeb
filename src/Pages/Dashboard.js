@@ -196,7 +196,7 @@ function SubjectBlock({ bgCol, subject, activeSubject, setActiveSubject, onRemov
         className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}
       >
         <div className="absolute bottom-0 left-0 ml-1 mb-1">
-          <h1 className="text-3xl font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+          <h1 className="text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
             {subject.name}
           </h1>
           <p className="text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
