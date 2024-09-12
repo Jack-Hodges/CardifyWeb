@@ -45,9 +45,9 @@ function FlashcardQuiz() {
             ) : (
               <div>
                 { subject ? (
-                  <p className="text-gray-500 text-4xl font-bold">{subject.name} has no flashcards</p>
+                  <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 ) : (
-                  <p className="text-gray-500 text-4xl font-bold">No flashcards</p>
+                  <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 )}
             </div>
             )}

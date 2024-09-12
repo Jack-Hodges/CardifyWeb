@@ -19,7 +19,7 @@ function TitleBar( { text }) {
 
     return (
         <div className="relative">
-            <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 items-center gap-2 mt-3">
+            <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 items-center gap-2">
               <BackgroundButton image={backArrow} bgColor="green" flip/>
               {/* Practice button that toggles the overlay */}
               <BackgroundButton text={text} bgColor="green" flip onClick={toggleOverlay} />

@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
-import { useLocation } from 'react-router-dom'; // Import useLocation
-
-// Import card manipulation to interact with Supabase
-import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation'; 
+import { useLocation } from 'react-router-dom';
+import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
+import EditModal from '../components/Card/EditModal';
 
 function CardMain() {
   const [cards, setCards] = useState([]);
@@ -15,49 +14,55 @@ function CardMain() {
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
 
-  // Get subjectId from state
-  const location = useLocation(); // Access location object
-  const { subject } = location.state || {}; // Get subjectId from location state
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to track if modal is open
+  const [newFrontContent, setNewFrontContent] = useState(''); // State for new card front content
+  const [newBackContent, setNewBackContent] = useState(''); // State for new card back content
 
-  // Fetch cards from the Supabase database
+  const location = useLocation();
+  const { subject } = location.state || {};
+
   useEffect(() => {
     if (subject) {
       const loadCards = async () => {
-        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
+        const data = await fetchCards(subject.id);
         setCards(data);
       };
-
-      loadCards(); 
+      loadCards();
     }
   }, [subject]);
 
-  // Update card content
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
     updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subject.id);
   };
 
-  // Add new card
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
     await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id);
-    
-    // Refetch cards to ensure the latest state
-    const updatedCards = await fetchCards(subject.id); 
+    const updatedCards = await fetchCards(subject.id);
     setCards(updatedCards);
   };
 
-  // Delete a card
   const handleDeleteCard = (cardId) => {
     deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
   };
 
   const handleCardClick = (index) => {
     setFlipped(false);
-    setCurrentCardIndex(index); // Set the clicked card as the active card
+    setCurrentCardIndex(index);
+  };
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true); // Open modal when button is clicked
+  };
+
+  const handleSaveNewCard = () => {
+    handleAddNewCard(newFrontContent, newBackContent);
+    setIsModalOpen(false); // Close modal after saving
+    setNewFrontContent(''); // Clear the input fields
+    setNewBackContent(''); // Clear the input fields
   };
 
   return (
     <div className="w-screen h-screen">
-
       <TitleBar text="Create" />
 
       <div className="flex w-full h-full">
@@ -71,9 +76,9 @@ function CardMain() {
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
-                  onUpdateCard={handleUpdateCard} // Pass updated content to save
-                  cardId={cards[currentCardIndex]?.id} // Pass the card ID for deletion
-                  onDeleteCard={handleDeleteCard} // Pass the delete handler to remove the card
+                  onUpdateCard={handleUpdateCard}
+                  cardId={cards[currentCardIndex]?.id}
+                  onDeleteCard={handleDeleteCard}
                   edit={true}
                 />
                 <CardControls
@@ -85,26 +90,44 @@ function CardMain() {
               </div>
             </div>
 
-            {/* List of all cards with add new card functionality */}
             <div className="w-[30%] h-full">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} />
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} />
             </div>
           </>
         ) : (
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             { subject ? (
-              <p className="text-gray-500 text-4xl font-bold">{subject.name} has no flashcards</p>
+              <div>
+                <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
+                <div className="flex gap-4 mt-5">
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} />
+                 <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal} /> {/* Open modal */}
+                </div>
+              </div>
             ) : (
-              <p className="text-gray-500 text-4xl font-bold">No flashcards</p>
+              <div>
+                <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
+                <div className="flex gap-4 mt-5">
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} />
+                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} />
+                </div>
+              </div>
             )}
-            
-            <div class="flex gap-4 mt-5">
-              <BackgroundButton text="Create New Subject" bgColor={"purple"}/>
-              <BackgroundButton text="Add Cards to Subject" bgColor={"orange"}/>
-            </div>
           </div>
         )}
       </div>
+
+      {/* EditModal for adding new cards */}
+      <EditModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveNewCard}
+        frontContent={newFrontContent}
+        backContent={newBackContent}
+        setFrontContent={setNewFrontContent}
+        setBackContent={setNewBackContent}
+        text="Add New Flashcard"
+      />
     </div>
   );
 }

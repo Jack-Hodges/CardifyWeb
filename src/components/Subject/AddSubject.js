@@ -82,12 +82,15 @@ function AddSubject({ isOpen, onClose, onSave, subjectName, subjectColor, setSub
                         onChange={(e) => setSubjectColor(e.target.value)} // Update the subject color
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
                     >
-                        <option value="blue">Blue</option>
                         <option value="red">Red</option>
+                        <option value="orange">Orange</option>
                         <option value="yellow">Yellow</option>
                         <option value="green">Green</option>
+                        <option value="emerald">Emerald</option>
+                        <option value="blue">Blue</option>
                         <option value="purple">Purple</option>
-                        <option value="orange">Orange</option>
+                        <option value="violet">Violet</option>
+                        <option value="pink">Pink</option>
                     </select>
                 </div>
 

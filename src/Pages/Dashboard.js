@@ -84,7 +84,7 @@ function Dashboard() {
   );
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-[100dvh]">
 
       <div className="flex w-full justify-between pr-5">
         <TitleBar text="Dashboard" />
@@ -96,7 +96,7 @@ function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-4 p-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 p-4 gap-4">
         {subjects.map((subject, index) => (
           <SubjectBlock
             key={index}
@@ -128,59 +128,73 @@ export default Dashboard;
 
 // Subject Block component with remove functionality
 function SubjectBlock({ bgCol, subject, activeSubject, setActiveSubject, onRemoveSubject }) {
-  const navigate = useNavigate(); // Use useNavigate hook for navigation
+    const navigate = useNavigate();
+  
+    const handleClick = () => {
+      if (activeSubject === subject.id) {
+        setActiveSubject(null);
+      } else {
+        setActiveSubject(subject.id);
+      }
+    };
+  
+    const handlePracticeClick = () => {
+      navigate('/practice', { state: { subject } });
+    };
+  
+    const handleCreateClick = () => {
+      navigate('/create', { state: { subject } });
+    };
 
-  const handleClick = () => {
-    if (activeSubject === subject.id) {
-      setActiveSubject(null); // Close popup if clicking the same subject
-    } else {
-      setActiveSubject(subject.id); // Set the active subject to show popup
-    }
-  };
+    // Images
+    const addIcon = (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 sm:size-10">
+            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+        </svg>
+    );
 
-  const handlePracticeClick = () => {
-    navigate('/practice', { state: { subject } });
-  };
+    const playIcon = (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 sm:size-10">
+            <path fill-rule="evenodd" d="M4.5 5.653c0-1.427 1.529-2.33 2.779-1.643l11.54 6.347c1.295.712 1.295 2.573 0 3.286L7.28 19.99c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
+        </svg>
 
-  const handleCreateClick = () => {
-    navigate('/create', { state: { subject } });
-  };
+    );
 
-  const colors = getColor(bgCol);
-
-  return (
-    <div
-      onClick={handleClick}
-      className={`relative w-56 h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer`}
-    >
-      <div className="absolute bottom-0 left-0 ml-1 mb-1">
-        <h1 className="text-3xl font-bold text-white">{subject.name}</h1>
-        <p className="text-lg text-white font-bold">{subject.flashcard_count} cards</p>
-      </div>
-
-      {/* Popup appears below when subject is clicked */}
-      {activeSubject === subject.id && (
-        <div className="absolute bottom-[-80px] left-0 bg-white rounded-lg shadow-lg w-full p-2 z-10">
-          <button
-            className="w-full py-2 mb-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-            onClick={handlePracticeClick}
-          >
-            Practice
-          </button>
-          <button
-            className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-            onClick={handleCreateClick}
-          >
-            Create
-          </button>
-          <button
-            className="w-full py-2 mt-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-            onClick={onRemoveSubject}
-          >
-            Remove Subject
-          </button>
+    const deleteIcon = (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 sm:size-10">
+            <path fill-rule="evenodd" d="M16.5 4.478v.227a48.816 48.816 0 0 1 3.878.512.75.75 0 1 1-.256 1.478l-.209-.035-1.005 13.07a3 3 0 0 1-2.991 2.77H8.084a3 3 0 0 1-2.991-2.77L4.087 6.66l-.209.035a.75.75 0 0 1-.256-1.478A48.567 48.567 0 0 1 7.5 4.705v-.227c0-1.564 1.213-2.9 2.816-2.951a52.662 52.662 0 0 1 3.369 0c1.603.051 2.815 1.387 2.815 2.951Zm-6.136-1.452a51.196 51.196 0 0 1 3.273 0C14.39 3.05 15 3.684 15 4.478v.113a49.488 49.488 0 0 0-6 0v-.113c0-.794.609-1.428 1.364-1.452Zm-.355 5.945a.75.75 0 1 0-1.5.058l.347 9a.75.75 0 1 0 1.499-.058l-.346-9Zm5.48.058a.75.75 0 1 0-1.498-.058l-.347 9a.75.75 0 0 0 1.5.058l.345-9Z" clip-rule="evenodd" />
+        </svg>
+    );
+  
+    const colors = getColor(bgCol);
+  
+    return (
+      <div
+        onClick={handleClick}
+        className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}
+      >
+        <div className="absolute bottom-0 left-0 ml-1 mb-1">
+          {/* Subject name and card count sit lower initially and move up on hover */}
+          <h1 className="text-3xl font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+            {subject.name}
+          </h1>
+          <p className="text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+            {subject.flashcard_count} {subject.flashcard_count === 1 ? 'card' : 'cards'}
+          </p>
+  
+          {/* Add, Play, Delete text is initially hidden and animates up on hover */}
+          <div className="flex gap-4 opacity-1 sm:opacity-0 transform sm:translate-y-8 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
+            <div class="text-white" onClick={handleCreateClick}>
+                {addIcon}
+            </div>
+            <div class="text-white" onClick={handlePracticeClick}>
+                {playIcon}
+            </div>
+            <div class="text-white">
+                {deleteIcon}
+            </div>
+          </div>
         </div>
-      )}
-    </div>
-  );
-}
+      </div>
+    );
+  }

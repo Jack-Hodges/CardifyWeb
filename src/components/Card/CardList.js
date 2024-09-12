@@ -2,7 +2,7 @@ import { useState } from 'react';
 import EditModal from './EditModal';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function CardList({ cards, onCardClick, onAddNewCard }) {
+function CardList({ cards, onCardClick, onAddNewCard, subject }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
@@ -65,7 +65,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
         backContent={newBackContent}
         setFrontContent={setNewFrontContent}
         setBackContent={setNewBackContent}
-        text="Add New Flashcard"
+        text={`Add New Flashcard to ${subject.name}`}
       />
     </div>
   );
