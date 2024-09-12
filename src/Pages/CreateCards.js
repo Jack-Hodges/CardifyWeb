@@ -85,7 +85,7 @@ function CardMain() {
         </div>
 
         {/* List of all cards with add new card functionality */}
-        <div className="w-[30%] h-full overflow-y-auto">
+        <div className="w-[30%] h-full">
           <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} />
         </div>
       </div>

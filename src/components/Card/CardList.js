@@ -6,7 +6,7 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
-  const [newBackContent, setNewBackContent] = useState(''); // State for new flashcard's back content
+  const [newBackContent, setNewBackContent] = useState('');  // State for new flashcard's back content
 
   const handleAddClick = () => {
     setNewFrontContent(''); // Clear the front content for a new flashcard
@@ -20,14 +20,15 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
   };
 
   const plusIcon = (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="size-6">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" className="size-6">
       <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
     </svg>
-  )
+  );
 
   return (
-    <div className="w-full h-[87%] overflow-y-scroll px-4">
-      <div className="flex items-center mb-4 justify-between">
+    <div className="w-full h-full px-4">
+      {/* Header Section: Fixed */}
+      <div className="flex items-center mb-4 justify-between sticky top-0 z-10">
         <h2 className="font-bold text-2xl text-yellow-500">All Flashcards</h2>
         <BackgroundButton 
           onClick={handleAddClick} 
@@ -36,20 +37,24 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
           bgColor={"yellow"}
         />
       </div>
-      <ul className="flex flex-col space-y-4">
-        {cards.map((card, index) => (
-          <li 
-            key={index} 
-            className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow
-              hover:scale-95 transition duration-300"
-            onClick={() => onCardClick(index)} // Handle card click
-          >
-            <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-700 dark:text-gray-200">
-              {card.question} {/* Use 'question' instead of 'frontContent' */}
-            </p>
-          </li>
-        ))}
-      </ul>
+
+      {/* Scrollable Card List */}
+      <div className="h-[calc(100vh-160px)] overflow-y-auto"> 
+        <ul className="flex flex-col space-y-4">
+          {cards.map((card, index) => (
+            <li 
+              key={index} 
+              className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow
+                hover:scale-95 transition duration-300 w-[95%]"
+              onClick={() => onCardClick(index)} // Handle card click
+            >
+              <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-700 dark:text-gray-200">
+                {card.question} {/* Use 'question' instead of 'frontContent' */}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {/* Edit Modal for Adding New Flashcard */}
       <EditModal
@@ -65,5 +70,5 @@ function CardList({ cards, onCardClick, onAddNewCard }) {
     </div>
   );
 }
-  
+
 export default CardList;
