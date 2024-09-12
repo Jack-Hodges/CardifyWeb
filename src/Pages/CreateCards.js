@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 // Import card manipulation to interact with Supabase
 import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation'; 
@@ -13,27 +14,31 @@ function CardMain() {
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
 
+  // get subjectId from state
+  const location = useLocation(); // Access location object
+  const { subjectId } = location.state || {}; // Get subjectId from location state
+
   // Fetch cards from the Supabase database
   useEffect(() => {
     const loadCards = async () => {
-      const data = await fetchCards(1); // Fetch flashcards with subject_id 1
+      const data = await fetchCards(subjectId); // Fetch flashcards with subject_id 1
       setCards(data);
     };
 
     loadCards(); 
-  }, []);
+  }, subjectId);
 
   // Update card content
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
-    updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards);
+    updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subjectId);
   };
 
   // Add new card
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
-    await addNewCard(cards, newFrontContent, newBackContent, setCards);
+    await addNewCard(cards, newFrontContent, newBackContent, setCards, subjectId);
     
     // Refetch cards to ensure the latest state
-    const updatedCards = await fetchCards(1); 
+    const updatedCards = await fetchCards(subjectId); 
     setCards(updatedCards);
   };
 

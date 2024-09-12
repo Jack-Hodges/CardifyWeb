@@ -48,11 +48,11 @@ export const updateCard = async (cards, currentCardIndex, updatedFrontContent, u
 };
 
 // Function to add a new card
-export const addNewCard = async (cards, newFrontContent, newBackContent, setCards) => {
+export const addNewCard = async (cards, newFrontContent, newBackContent, setCards, subjectId) => {
   const newCard = {
     question: newFrontContent,
     answer: newBackContent,
-    subject_id: 1 // Include subject_id of 1 for the new card
+    subject_id: subjectId
   };
 
   const { data, error } = await supabase

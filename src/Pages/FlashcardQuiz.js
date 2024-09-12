@@ -3,6 +3,7 @@ import { fetchCards } from "../components/Card/CardManipulation";
 import Card from "../components/Card/Card";
 import CardControls from "../components/Card/CardControls";
 import TitleBar from '../components/Navigation/TitleBar';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -10,14 +11,18 @@ function FlashcardQuiz() {
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
 
+  // get subjectId from state
+  const location = useLocation(); // Access location object
+  const { subjectId } = location.state || {}; // Get subjectId from location state
+
   useEffect(() => {
     const loadCards = async () => {
-      const data = await fetchCards(1);
+      const data = await fetchCards(subjectId);
       setCards(data);
     }
 
     loadCards();
-  }, []);
+  }, subjectId);
 
   return (
     <div className="w-screen h-screen relative">
