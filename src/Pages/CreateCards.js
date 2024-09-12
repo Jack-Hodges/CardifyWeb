@@ -26,7 +26,7 @@ function CardMain() {
     };
 
     loadCards(); 
-  }, subjectId);
+  }, [subjectId]);
 
   // Update card content
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {

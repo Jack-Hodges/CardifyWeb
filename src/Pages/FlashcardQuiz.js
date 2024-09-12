@@ -22,7 +22,7 @@ function FlashcardQuiz() {
     }
 
     loadCards();
-  }, subjectId);
+  }, [subjectId]);
 
   return (
     <div className="w-screen h-screen relative">
