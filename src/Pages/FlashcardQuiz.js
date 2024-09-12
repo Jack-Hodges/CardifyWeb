@@ -13,16 +13,18 @@ function FlashcardQuiz() {
 
   // get subjectId from state
   const location = useLocation(); // Access location object
-  const { subjectId } = location.state || {}; // Get subjectId from location state
+  const { subject } = location.state || {}; // Get subjectId from location state
 
   useEffect(() => {
-    const loadCards = async () => {
-      const data = await fetchCards(subjectId);
-      setCards(data);
-    }
+    if (subject) {
+      const loadCards = async () => {
+        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
+        setCards(data);
+      };
 
-    loadCards();
-  }, [subjectId]);
+      loadCards(); 
+    }
+  }, [subject]);
 
   return (
     <div className="w-screen h-screen relative">
@@ -41,7 +43,13 @@ function FlashcardQuiz() {
                 animateFlip={animateFlip}
               />
             ) : (
-              <p>No flashcards available</p>
+              <div>
+                { subject ? (
+                  <p className="text-gray-500 text-4xl font-bold">{subject.name} has no flashcards</p>
+                ) : (
+                  <p className="text-gray-500 text-4xl font-bold">No flashcards</p>
+                )}
+            </div>
             )}
             <CardControls
               currentCardIndex={currentCardIndex + 1}

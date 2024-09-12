@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom'; // Import useLocation
 // Import card manipulation to interact with Supabase
 import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation'; 
 import TitleBar from '../components/Navigation/TitleBar';
+import BackgroundButton from '../components/Elements/BackgroundButton';
 
 function CardMain() {
   const [cards, setCards] = useState([]);
@@ -14,31 +15,33 @@ function CardMain() {
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
 
-  // get subjectId from state
+  // Get subjectId from state
   const location = useLocation(); // Access location object
-  const { subjectId } = location.state || {}; // Get subjectId from location state
+  const { subject } = location.state || {}; // Get subjectId from location state
 
   // Fetch cards from the Supabase database
   useEffect(() => {
-    const loadCards = async () => {
-      const data = await fetchCards(subjectId); // Fetch flashcards with subject_id 1
-      setCards(data);
-    };
+    if (subject) {
+      const loadCards = async () => {
+        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
+        setCards(data);
+      };
 
-    loadCards(); 
-  }, [subjectId]);
+      loadCards(); 
+    }
+  }, [subject]);
 
   // Update card content
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
-    updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subjectId);
+    updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subject.id);
   };
 
   // Add new card
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
-    await addNewCard(cards, newFrontContent, newBackContent, setCards, subjectId);
+    await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id);
     
     // Refetch cards to ensure the latest state
-    const updatedCards = await fetchCards(subjectId); 
+    const updatedCards = await fetchCards(subject.id); 
     setCards(updatedCards);
   };
 
@@ -58,36 +61,49 @@ function CardMain() {
       <TitleBar text="Create" />
 
       <div className="flex w-full h-full">
-        <div className="w-[70%] h-full flex flex-col mt-10">
-          <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
-            {cards.length > 0 ? (
-              <Card
-                frontContent={cards[currentCardIndex]?.question}
-                backContent={cards[currentCardIndex]?.answer}
-                flipped={flipped}
-                setFlipped={setFlipped}
-                animateFlip={animateFlip}
-                onUpdateCard={handleUpdateCard} // Pass updated content to save
-                cardId={cards[currentCardIndex]?.id} // Pass the card ID for deletion
-                onDeleteCard={handleDeleteCard} // Pass the delete handler to remove the card
-                edit={true}
-              />
-            ) : (
-              <p>No flashcards available</p>
-            )}
-            <CardControls
-              currentCardIndex={currentCardIndex + 1}
-              totalCards={cards.length}
-              onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
-              onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
-            />
-          </div>
-        </div>
+        {cards.length > 0 ? (
+          <>
+            <div className="w-[70%] h-full flex flex-col mt-10">
+              <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
+                <Card
+                  frontContent={cards[currentCardIndex]?.question}
+                  backContent={cards[currentCardIndex]?.answer}
+                  flipped={flipped}
+                  setFlipped={setFlipped}
+                  animateFlip={animateFlip}
+                  onUpdateCard={handleUpdateCard} // Pass updated content to save
+                  cardId={cards[currentCardIndex]?.id} // Pass the card ID for deletion
+                  onDeleteCard={handleDeleteCard} // Pass the delete handler to remove the card
+                  edit={true}
+                />
+                <CardControls
+                  currentCardIndex={currentCardIndex + 1}
+                  totalCards={cards.length}
+                  onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
+                  onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
+                />
+              </div>
+            </div>
 
-        {/* List of all cards with add new card functionality */}
-        <div className="w-[30%] h-full">
-          <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} />
-        </div>
+            {/* List of all cards with add new card functionality */}
+            <div className="w-[30%] h-full">
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} />
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
+            { subject ? (
+              <p className="text-gray-500 text-4xl font-bold">{subject.name} has no flashcards</p>
+            ) : (
+              <p className="text-gray-500 text-4xl font-bold">No flashcards</p>
+            )}
+            
+            <div class="flex gap-4 mt-5">
+              <BackgroundButton text="Create New Subject" bgColor={"purple"}/>
+              <BackgroundButton text="Add Cards to Subject" bgColor={"orange"}/>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

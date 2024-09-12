@@ -33,6 +33,9 @@ function TitleBar( { text }) {
                   <li><Link to="/" className="text-blue-500 hover:underline">
                     <BackgroundButton text="Home" bgColor="green"/>
                   </Link></li>
+                  <li><Link to="/dashboard" className="text-blue-500 hover:underline">
+                    <BackgroundButton text="Dashboard" bgColor="green"/>
+                  </Link></li>
                   <li><Link to="/create" className="text-blue-500 hover:underline">
                     <BackgroundButton text="Create" bgColor="green"/>
                   </Link></li>
