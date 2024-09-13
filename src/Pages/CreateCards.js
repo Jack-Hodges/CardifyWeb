@@ -8,15 +8,15 @@ import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
 
-function CardMain() {
+function CreateCards() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
-
   const [isModalOpen, setIsModalOpen] = useState(false); // State to track if modal is open
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new card front content
   const [newBackContent, setNewBackContent] = useState(''); // State for new card back content
+  const [loading, setLoading] = useState(true); // Loading state
 
   const location = useLocation();
   const { subject } = location.state || {};
@@ -24,8 +24,10 @@ function CardMain() {
   useEffect(() => {
     if (subject) {
       const loadCards = async () => {
+        setLoading(true); // Start loading
         const data = await fetchCards(subject.id);
         setCards(data);
+        setLoading(false); // Stop loading
       };
       loadCards();
     }
@@ -66,7 +68,16 @@ function CardMain() {
       <TitleBar text="Create" />
 
       <div className="flex w-full h-full">
-        {cards.length > 0 ? (
+        {loading ? (
+          // Skeleton loader while loading cards
+          <div className="flex w-full h-full justify-center items-center">
+            <div className="animate-pulse space-y-4 w-[70%] h-full">
+              <div className="bg-gray-300 h-48 w-full rounded-lg"></div>
+              <div className="bg-gray-300 h-12 w-3/4 rounded"></div>
+              <div className="bg-gray-300 h-12 w-1/2 rounded"></div>
+            </div>
+          </div>
+        ) : cards.length > 0 ? (
           <>
             <div className="w-[70%] h-full flex flex-col mt-10">
               <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
@@ -132,4 +143,4 @@ function CardMain() {
   );
 }
 
-export default CardMain;
+export default CreateCards;

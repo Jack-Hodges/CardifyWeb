@@ -9,32 +9,40 @@ function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [loading, setLoading] = useState(true); // Loading state
   const [animateFlip] = useState(true);
 
-  // get subjectId from state
   const location = useLocation(); // Access location object
-  const { subject } = location.state || {}; // Get subjectId from location state
+  const { subject } = location.state || {}; // Get subject from location state
 
   useEffect(() => {
     if (subject) {
       const loadCards = async () => {
+        setLoading(true); // Start loading
         const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
         setCards(data);
+        setLoading(false); // Stop loading
       };
 
-      loadCards(); 
+      loadCards();
     }
   }, [subject]);
 
   return (
     <div className="w-screen h-screen relative">
-
       <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
         <div className="w-4/5 h-full flex flex-col mt-5 mx-auto">
           <div className="w-full h-4/5 sm:h-[70%] mt-4 px-5">
-            {cards.length > 0 ? (
+            {loading ? (
+              // Skeleton loader while loading
+              <div className="animate-pulse flex flex-col space-y-4">
+                <div className="bg-gray-300 h-48 w-full rounded-lg"></div>
+                <div className="bg-gray-300 h-8 w-3/4 rounded"></div>
+                <div className="bg-gray-300 h-8 w-1/2 rounded"></div>
+              </div>
+            ) : cards.length > 0 ? (
               <Card
                 frontContent={cards[currentCardIndex]?.question}
                 backContent={cards[currentCardIndex]?.answer}
@@ -44,12 +52,12 @@ function FlashcardQuiz() {
               />
             ) : (
               <div>
-                { subject ? (
+                {subject ? (
                   <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 ) : (
                   <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 )}
-            </div>
+              </div>
             )}
             <CardControls
               currentCardIndex={currentCardIndex + 1}

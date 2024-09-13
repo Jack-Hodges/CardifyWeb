@@ -11,9 +11,9 @@ function Dashboard() {
   const [subjects, setSubjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [editingSubject, setEditingSubject] = useState(null); // Track subject being edited
-
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control DeleteModal visibility
   const [subjectToDelete, setSubjectToDelete] = useState(null); // Track subject being deleted
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     fetchSubjects();
@@ -21,6 +21,7 @@ function Dashboard() {
 
   const fetchSubjects = async () => {
     try {
+      setLoading(true); // Start loading
       const { data, error } = await supabase
         .from('subjects') // Table name in Supabase
         .select('*');
@@ -29,8 +30,10 @@ function Dashboard() {
         return [];
       }
       setSubjects(data);
+      setLoading(false); // Stop loading
     } catch (error) {
       console.error('Unexpected error fetching subjects:', error);
+      setLoading(false); // Stop loading even on error
     }
   };
 
@@ -54,7 +57,6 @@ function Dashboard() {
           return;
         }
   
-        // Handle if Supabase returns a single object or an array
         if (Array.isArray(data)) {
           setSubjects([...subjects, ...data]); // Append new subject(s)
         } else if (data) {
@@ -116,18 +118,27 @@ function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 p-4 gap-4">
-        {subjects.map((subject, index) => (
-          <SubjectBlock
-            key={index}
-            bgCol={subject.bgCol}
-            subject={subject}
-            onEdit={() => handleEditSubject(subject)} // Pass subject to edit
-            onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
-          />
-        ))}
+        {loading ? (
+          // Skeleton loader while loading subjects
+          <>
+            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+          </>
+        ) : (
+          subjects.map((subject, index) => (
+            <SubjectBlock
+              key={index}
+              bgCol={subject.bgCol}
+              subject={subject}
+              onEdit={() => handleEditSubject(subject)} // Pass subject to edit
+              onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
+            />
+          ))
+        )}
       </div>
 
-      {/* Modal for adding or editing a subject */}
       <AddSubject
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
