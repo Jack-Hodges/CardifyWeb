@@ -4,12 +4,16 @@ import TitleBar from '../components/Navigation/TitleBar';
 import supabase from '../supabaseClient';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
+import DeleteModal from '../components/Card/DeleteModal';
 import { getColor } from '../components/Functions/getColor';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [editingSubject, setEditingSubject] = useState(null); // Track subject being edited
+
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control DeleteModal visibility
+  const [subjectToDelete, setSubjectToDelete] = useState(null); // Track subject being deleted
 
   useEffect(() => {
     fetchSubjects();
@@ -74,6 +78,11 @@ function Dashboard() {
     setIsModalOpen(true); // Open modal for editing
   };
 
+  const confirmDeleteSubject = (subject) => {
+    setSubjectToDelete(subject); // Set the subject to delete
+    setIsDeleteModalOpen(true); // Open the DeleteModal
+  };
+
   const handleRemoveSubject = async (subjectId) => {
     try {
       const { error } = await supabase
@@ -113,7 +122,7 @@ function Dashboard() {
             bgCol={subject.bgCol}
             subject={subject}
             onEdit={() => handleEditSubject(subject)} // Pass subject to edit
-            onRemoveSubject={() => handleRemoveSubject(subject.id)} // Pass remove function
+            onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
           />
         ))}
       </div>
@@ -126,11 +135,19 @@ function Dashboard() {
         subject={editingSubject} // Pass subject if editing, otherwise null
         text={editingSubject ? "Edit Subject" : "Add New Subject"} // Dynamic modal title
       />
+
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={() => handleRemoveSubject(subjectToDelete.id)} // Perform delete on confirmation
+        text={`Delete Subject`}
+      />
     </div>
   );
 }
 
 export default Dashboard;
+
 
 // Subject Block component with play, practice, edit, and delete functionality
 function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
@@ -149,7 +166,7 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
 
   return (
     <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
-      <div className="absolute bottom-0 left-0 ml-1 mb-1">
+      <div className="absolute bottom-0 left-0 ml-3 mb-1">
         <h1 className="text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
           {subject.name}
         </h1>
