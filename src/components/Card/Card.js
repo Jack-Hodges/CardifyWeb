@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import IconButtons from './IconButtons'; // Import the IconButtons component
 import EditModal from './EditModal'; // Import the EditModal component
-import supabase from '../../supabaseClient'; // Import Supabase client
 import DeleteModal from './DeleteModal'; // Import the DeleteModal component
 
 function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit }) {
@@ -51,23 +50,13 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
         setIsDeleteModalOpen(true); // Open the delete confirmation modal
     };
 
-    const confirmDeleteCard = async (event) => {
-        // Guard for undefined event
+    const confirmDeleteCard = (event) => {
         if (event) {
             event.stopPropagation(); // Stop propagation when confirming deletion
         }
-
-        const { error } = await supabase
-            .from('flashcards')
-            .delete()
-            .eq('id', cardId); // Use the card's id to delete from Supabase
-
-        if (error) {
-            console.error('Error deleting card:', error);
-        } else {
-            onDeleteCard(cardId); // Call the parent function to remove the card from the UI
-        }
-
+    
+        onDeleteCard(cardId); // Pass the cardId back to CreateCards.js to handle the deletion
+    
         setIsDeleteModalOpen(false); // Close the delete confirmation modal
     };
 
