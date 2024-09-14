@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
+import AddSubject from '../components/Subject/AddSubject';
+import { saveSubject } from '../components/Subject/SubjectManipulation';
 
 function CreateCards() {
   const [cards, setCards] = useState([]);
@@ -14,8 +16,11 @@ function CreateCards() {
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false); // State to track if modal is open
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false); // For adding new subject
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new card front content
   const [newBackContent, setNewBackContent] = useState(''); // State for new card back content
+  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(true); // Loading state
 
   const location = useLocation();
@@ -66,6 +71,18 @@ function CreateCards() {
     setNewBackContent(''); // Clear the input fields
   };
 
+  const handleCreateNewSubject = () => {
+    setIsAddSubjectModalOpen(true); // Open AddSubject modal
+  };
+
+  const handleSaveSubject = async (id, subjectName, subjectColor) => {
+    const data = await saveSubject(id, subjectName, subjectColor, "7e4017eb-268c-4d49-8936-077274a07c39"); // Save subject
+    if (data) {
+      setIsAddSubjectModalOpen(false); // Close AddSubject modal
+      navigate('/create', { state: { subject: data[0] } }); // Navigate to CreateCards with new subject
+    }
+  };
+
   return (
     <div className="w-screen h-screen">
       <TitleBar text="Create" />
@@ -114,7 +131,7 @@ function CreateCards() {
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 <div className="flex gap-4 mt-5">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} />
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject}/>
                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal} /> {/* Open modal */}
                 </div>
               </div>
@@ -122,7 +139,7 @@ function CreateCards() {
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 <div className="flex gap-4 mt-5">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} />
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject}/>
                  <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} />
                 </div>
               </div>
@@ -141,6 +158,13 @@ function CreateCards() {
         setFrontContent={setNewFrontContent}
         setBackContent={setNewBackContent}
         text="Add New Flashcard"
+      />
+
+      <AddSubject
+        isOpen={isAddSubjectModalOpen}
+        onClose={() => setIsAddSubjectModalOpen(false)}
+        onSave={handleSaveSubject}
+        text="Create New Subject"
       />
     </div>
   );

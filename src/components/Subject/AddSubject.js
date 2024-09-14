@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function AddSubject({ isOpen, onClose, onSave, subject, setSubjectName, setSubjectColor, text }) {
+function AddSubject({ isOpen, onClose, onSave, subject, text }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
