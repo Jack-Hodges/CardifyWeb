@@ -12,8 +12,6 @@ export const fetchCards = async (subjectId) => {
       console.error('Error fetching flashcards:', error);
       return [];
     }
-
-    console.log('Flashcards fetched from Supabase:', data);
     return data;
   } catch (error) {
     console.error('Unexpected error fetching flashcards:', error);
@@ -35,7 +33,7 @@ export const updateCard = async (cards, currentCardIndex, updatedFrontContent, u
   setCards(updatedCards);
 
   // Update the card in Supabase
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('flashcards') // Table name in Supabase
     .update({ question: updatedFrontContent, answer: updatedBackContent })
     .eq('id', cardId); // Only update the card with the current card's ID
@@ -43,7 +41,6 @@ export const updateCard = async (cards, currentCardIndex, updatedFrontContent, u
   if (error) {
     console.error('Error updating card:', error);
   } else {
-    console.log('Card updated successfully:', data);
   }
 };
 
@@ -84,7 +81,7 @@ export const deleteCard = async (cards, cardId, currentCardIndex, setCards, setC
   setCurrentCardIndex(Math.max(newCurrentIndex, 0)); // Ensure index is not negative
 
   // Delete the card from Supabase
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('flashcards')
     .delete()
     .eq('id', cardId); // Only delete the card with the specified ID
@@ -92,6 +89,5 @@ export const deleteCard = async (cards, cardId, currentCardIndex, setCards, setC
   if (error) {
     console.error('Error deleting card:', error);
   } else {
-    console.log('Card deleted successfully:', data);
   }
 };
