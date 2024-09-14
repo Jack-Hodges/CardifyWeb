@@ -25,11 +25,14 @@ function CreateCards() {
     if (subject) {
       const loadCards = async () => {
         setLoading(true); // Start loading
-        const data = await fetchCards(subject.id);
+        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
         setCards(data);
         setLoading(false); // Stop loading
       };
+
       loadCards();
+    } else {
+      setLoading(false); // Stop loading if no subject
     }
   }, [subject]);
 
@@ -72,9 +75,9 @@ function CreateCards() {
           // Skeleton loader while loading cards
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">
-              <div className="bg-gray-300 h-48 w-full rounded-lg"></div>
-              <div className="bg-gray-300 h-12 w-3/4 rounded"></div>
-              <div className="bg-gray-300 h-12 w-1/2 rounded"></div>
+              <div className="bg-[#d9d6d1] h-48 w-full rounded-lg"></div>
+              <div className="bg-[#d9d6d1] h-12 w-3/4 rounded"></div>
+              <div className="bg-[#d9d6d1] h-12 w-1/2 rounded"></div>
             </div>
           </div>
         ) : cards.length > 0 ? (

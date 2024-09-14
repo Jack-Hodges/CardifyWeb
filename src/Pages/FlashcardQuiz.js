@@ -25,6 +25,8 @@ function FlashcardQuiz() {
       };
 
       loadCards();
+    } else {
+      setLoading(false); // Stop loading if no subject
     }
   }, [subject]);
 
@@ -38,9 +40,9 @@ function FlashcardQuiz() {
             {loading ? (
               // Skeleton loader while loading
               <div className="animate-pulse flex flex-col space-y-4">
-                <div className="bg-gray-300 h-48 w-full rounded-lg"></div>
-                <div className="bg-gray-300 h-8 w-3/4 rounded"></div>
-                <div className="bg-gray-300 h-8 w-1/2 rounded"></div>
+                <div className="bg-[#d9d6d1] h-48 w-full rounded-lg"></div>
+                <div className="bg-[#d9d6d1] h-8 w-3/4 rounded"></div>
+                <div className="bg-[#d9d6d1] h-8 w-1/2 rounded"></div>
               </div>
             ) : cards.length > 0 ? (
               <Card

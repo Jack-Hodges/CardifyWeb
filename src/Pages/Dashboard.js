@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
 import TitleBar from '../components/Navigation/TitleBar';
-import supabase from '../supabaseClient';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
 import DeleteModal from '../components/Card/DeleteModal';
 import { getColor } from '../components/Functions/getColor';
+import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation'; // Import the service functions
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -14,60 +14,29 @@ function Dashboard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control DeleteModal visibility
   const [subjectToDelete, setSubjectToDelete] = useState(null); // Track subject being deleted
   const [loading, setLoading] = useState(true); // Loading state
+  const userId = "7e4017eb-268c-4d49-8936-077274a07c39"; // Example user ID
 
   useEffect(() => {
-    fetchSubjects();
-  }, []);
-
-  const fetchSubjects = async () => {
-    try {
+    const loadSubjects = async () => {
       setLoading(true); // Start loading
-      const { data, error } = await supabase
-        .from('subjects') // Table name in Supabase
-        .select('*');
-      if (error) {
-        console.error('Error fetching subjects:', error);
-        return [];
-      }
+      const data = await fetchSubjects(); // Use the fetchSubjects service
       setSubjects(data);
       setLoading(false); // Stop loading
-    } catch (error) {
-      console.error('Unexpected error fetching subjects:', error);
-      setLoading(false); // Stop loading even on error
-    }
-  };
+    };
+    loadSubjects();
+  }, []);
 
   const handleSaveSubject = async (id, subjectName, subjectColor) => {
-    try {
-      if (id) {
-        // Update existing subject
-        await supabase
-          .from('subjects')
-          .update({ name: subjectName, bgCol: subjectColor })
-          .eq('id', id);
-      } else {
-        // Insert new subject
-        const { data, error } = await supabase
-          .from('subjects')
-          .insert([{ user_id: "7e4017eb-268c-4d49-8936-077274a07c39", name: subjectName, bgCol: subjectColor, flashcard_count: 0 }])
-          .select();
-        
-        if (error) {
-          console.error('Error adding new subject:', error);
-          return;
-        }
-  
-        if (Array.isArray(data)) {
-          setSubjects([...subjects, ...data]); // Append new subject(s)
-        } else if (data) {
-          setSubjects([...subjects, data]); // Append single subject object
-        }
-      }
-      setIsModalOpen(false);
-      fetchSubjects(); // Refresh subjects list
-    } catch (error) {
-      console.error('Error saving subject:', error);
+    const data = await saveSubject(id, subjectName, subjectColor, userId); // Use the saveSubject service
+    if (data && !id) {
+      setSubjects([...subjects, ...data]); // Append new subject(s)
+    } else {
+      const updatedSubjects = subjects.map(subject =>
+        subject.id === id ? { ...subject, name: subjectName, bgCol: subjectColor } : subject
+      );
+      setSubjects(updatedSubjects); // Update the list with the edited subject
     }
+    setIsModalOpen(false); // Close modal
   };
 
   const handleAddSubject = () => {
@@ -86,19 +55,11 @@ function Dashboard() {
   };
 
   const handleRemoveSubject = async (subjectId) => {
-    try {
-      const { error } = await supabase
-        .from('subjects')
-        .delete()
-        .eq('id', subjectId);
-      if (error) {
-        console.error('Error deleting subject:', error);
-        return;
-      }
+    const success = await removeSubject(subjectId); // Use the removeSubject service
+    if (success) {
       setSubjects(subjects.filter(subject => subject.id !== subjectId)); // Update subject list
-    } catch (error) {
-      console.error('Unexpected error deleting subject:', error);
     }
+    setIsDeleteModalOpen(false); // Close the delete modal
   };
 
   return (
@@ -121,10 +82,14 @@ function Dashboard() {
         {loading ? (
           // Skeleton loader while loading subjects
           <>
-            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
           </>
         ) : (
           subjects.map((subject, index) => (
@@ -178,14 +143,14 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
   return (
     <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
       <div className="absolute bottom-0 left-0 ml-3 mb-1">
-        <h1 className="text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+        <h1 className="text-xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
           {subject.name}
         </h1>
-        <p className="text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+        <p className="text-base sm:text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
           {subject.flashcard_count} {subject.flashcard_count === 1 ? 'card' : 'cards'}
         </p>
 
-        <div className="flex gap-4 opacity-1 sm:opacity-0 transform sm:translate-y-8 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
+        <div className="grid grid-cols-4 gap-4 w-full opacity-1 sm:opacity-0 transform sm:translate-y-8 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
           {/* Play button */}
           <div
             className="relative text-white flex items-center"
@@ -194,7 +159,7 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
             onClick={handlePracticeClick} // Trigger practice
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-8 sm:size-10">
-              <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+              <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clipRule="evenodd" />
             </svg>
             {hoveredIcon === 'play' && (
               <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
