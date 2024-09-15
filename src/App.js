@@ -14,7 +14,7 @@ function App() {
 
         {/* Define routes for different pages */}
         <Routes>
-          <Route path="/" element={<Dashboard />} /> {/* Default route */}
+          <Route path="/" element={<Welcome />} /> {/* Default route */}
           <Route path="/create" element={<CreateCards />} />
           <Route path="/practice" element={<FlashcardQuiz />} />
           <Route path="/dashboard" element={<Dashboard />} />
