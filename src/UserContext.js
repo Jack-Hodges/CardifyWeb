@@ -26,6 +26,16 @@ export const UserProvider = ({ children }) => {
     setLoading(false); // Mark loading as complete
   };
 
+  // Define a function to handle user logout
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error);
+    } else {
+      setUser(null); // Clear the user state on logout
+    }
+  };
+
   useEffect(() => {
     // Fetch the session when the component mounts
     getUser();
@@ -42,7 +52,7 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading, getUser }}>
+    <UserContext.Provider value={{ user, setUser, loading, getUser, logout }}>
       {children}
     </UserContext.Provider>
   );

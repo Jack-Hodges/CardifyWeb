@@ -1,14 +1,14 @@
 import React from 'react';
 import { getColor } from '../Functions/getColor';
 
-const BackgroundButton = ({ text, image = null, bgColor, onClick, wSizing = "w-10", hSizing = "h-10", flip = false}) => {
+const BackgroundButton = ({ text, image = null, bgColor, onClick, wWidth = "w-auto", wSizing = "w-10", hSizing = "h-10", flip = false}) => {
     // Get the background color and hover color based on the color name passed in
     const { bgClass, hoverClass } = getColor(bgColor);
 
     if (image && text) {
       if (flip) {
         return (
-          <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
+          <button onClick={onClick} className={`relative inline-flex items-center justify-center ${wWidth} h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
             <div className="flex items-center p-2">
               {image} {/* Show the image */}
               <span className="ml-2">{text}</span> {/* Show the text */}
@@ -33,7 +33,7 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wSizing = "w-1
         );
     } else if (text) {
         return (
-            <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
+            <button onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${wWidth} ${bgClass} ${hoverClass} text-white text-lg font-semibold rounded-full background-shadow background-hover`}>
                 <span className="px-4">{text}</span> {/* Show the text */}
             </button>
         );

@@ -100,7 +100,7 @@ function Dashboard() {
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 p-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
         {loading ? (
           // Skeleton loader while loading subjects
           <>
@@ -165,15 +165,15 @@ function SubjectBlock({ bgCol, subject, user, onEdit, onRemoveSubject }) {
 
   return (
     <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
-      <div className="absolute bottom-0 left-0 ml-3 mb-1">
-        <h1 className="text-xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+      <div className="absolute bottom-0 left-0 mb-1 w-full">
+        <h1 className="ml-3 mr-2 text-xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
           {subject.name}
         </h1>
-        <p className="text-base sm:text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+        <p className="ml-3 text-base sm:text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
           {subject.flashcard_count} {subject.flashcard_count === 1 ? 'card' : 'cards'}
         </p>
 
-        <div className="grid grid-cols-4 gap-4 w-full opacity-1 sm:opacity-0 transform sm:translate-y-8 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
+        <div className="grid grid-cols-4 gap-4 w-full opacity-1 sm:opacity-0 justify-items-center sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
           {/* Play button */}
           <div
             className="relative text-white flex items-center"
