@@ -21,7 +21,7 @@ module.exports = {
       },
 
       fontFamily: {
-        montagu: ['"Montserrat"', 'sans serif'],  // Add Montagu Slab
+        inter: ['Inter', 'sans-serif'],
       },
     },
   },
