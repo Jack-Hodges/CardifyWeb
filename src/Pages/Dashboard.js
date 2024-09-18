@@ -6,6 +6,7 @@ import AddSubject from '../components/Subject/AddSubject';
 import DeleteModal from '../components/Card/DeleteModal';
 import { getColor } from '../components/Functions/getColor';
 import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation'; // Import the service functions
+import { useUser } from '../UserContext';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -14,20 +15,41 @@ function Dashboard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control DeleteModal visibility
   const [subjectToDelete, setSubjectToDelete] = useState(null); // Track subject being deleted
   const [loading, setLoading] = useState(true); // Loading state
-  const userId = "7e4017eb-268c-4d49-8936-077274a07c39"; // Example user ID
+
+  const navigate = useNavigate();
+  const { user, loading: userLoading, getUser } = useUser(); // Get user, loading, and getUser from context
 
   useEffect(() => {
+
+    // Wait until userLoading is false before performing any actions
+    if (userLoading) {
+      return; // Do nothing while session is still loading
+    }
+
+    // If there's no user after session is loaded, redirect to login
+    if (!user) {
+      navigate('/');
+      return;
+    }
+
+    // Fetch subjects if the user is available
     const loadSubjects = async () => {
-      setLoading(true); // Start loading
-      const data = await fetchSubjects(); // Use the fetchSubjects service
-      setSubjects(data);
+      setLoading(true); // Start loading subjects
+      const data = await fetchSubjects(user?.id); // Fetch subjects using the user's ID
+      setSubjects(data); // Set the subjects in state
       setLoading(false); // Stop loading
     };
+
     loadSubjects();
-  }, []);
+  }, [user, userLoading, navigate, getUser]); // Dependency array includes user and userLoading
+
+  // Render loading spinner while fetching the user session
+  if (userLoading) {
+    return <div>Loading...</div>;
+  }
 
   const handleSaveSubject = async (id, subjectName, subjectColor) => {
-    const data = await saveSubject(id, subjectName, subjectColor, userId); // Use the saveSubject service
+    const data = await saveSubject(id, subjectName, subjectColor, user.id); // Use the saveSubject service
     if (data && !id) {
       setSubjects([...subjects, ...data]); // Append new subject(s)
     } else {
@@ -97,6 +119,7 @@ function Dashboard() {
               key={index}
               bgCol={subject.bgCol}
               subject={subject}
+              user={user}
               onEdit={() => handleEditSubject(subject)} // Pass subject to edit
               onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
             />
@@ -126,16 +149,16 @@ export default Dashboard;
 
 
 // Subject Block component with play, practice, edit, and delete functionality
-function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
+function SubjectBlock({ bgCol, subject, user, onEdit, onRemoveSubject }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
   const navigate = useNavigate();
 
   const handlePracticeClick = () => {
-    navigate('/practice', { state: { subject } });
+    navigate('/practice', { state: { subject } }); // Navigate to practice with subject and user
   };
 
   const handleCreateClick = () => {
-    navigate('/create', { state: { subject } });
+    navigate('/create', { state: { subject } }); // Navigate to CreateCards with subject and user
   };
 
   const colors = getColor(bgCol);

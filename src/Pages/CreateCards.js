@@ -9,6 +9,7 @@ import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
 import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
+import { useUser } from '../UserContext';
 
 function CreateCards() {
   const [cards, setCards] = useState([]);
@@ -25,8 +26,15 @@ function CreateCards() {
 
   const location = useLocation();
   const { subject } = location.state || {};
+  const { user, getUser } = useUser();
 
   useEffect(() => {
+
+    if (!user) {
+      getUser();
+      return;
+    }
+
     if (subject) {
       const loadCards = async () => {
         setLoading(true); // Start loading
@@ -39,7 +47,7 @@ function CreateCards() {
     } else {
       setLoading(false); // Stop loading if no subject
     }
-  }, [subject]);
+  }, [subject, user, getUser]);
 
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
     updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subject.id);
@@ -76,7 +84,7 @@ function CreateCards() {
   };
 
   const handleSaveSubject = async (id, subjectName, subjectColor) => {
-    const data = await saveSubject(id, subjectName, subjectColor, "7e4017eb-268c-4d49-8936-077274a07c39"); // Save subject
+    const data = await saveSubject(id, subjectName, subjectColor, user.id); // Save subject
     if (data) {
       setIsAddSubjectModalOpen(false); // Close AddSubject modal
       navigate('/create', { state: { subject: data[0] } }); // Navigate to CreateCards with new subject
@@ -84,7 +92,7 @@ function CreateCards() {
   };
 
   return (
-    <div className="w-screen h-screen">
+    <div className="w-screen h-[100dvh]">
       <TitleBar text="Create" />
 
       <div className="flex w-full h-full">

@@ -1,11 +1,12 @@
 import supabase from '../../supabaseClient';
 
 // Fetch subjects
-export const fetchSubjects = async () => {
+export const fetchSubjects = async (userId) => {
   try {
     const { data, error } = await supabase
       .from('subjects') // Table name in Supabase
-      .select('*');
+      .select('*')
+      .eq('user_id', userId);
     if (error) {
       console.error('Error fetching subjects:', error);
       return [];

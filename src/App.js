@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
   return (
-    <div className="w-screen h-[100dvh] overflow-y-scroll bg-[#f1ebe0] dark:bg-gray-900">
+    <div className="w-screen h-[100dvh] overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900">
       <Router>
         {/* MenuBar will be rendered on all pages */}
         <MenuBar />

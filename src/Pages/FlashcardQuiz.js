@@ -4,6 +4,7 @@ import Card from "../components/Card/Card";
 import CardControls from "../components/Card/CardControls";
 import TitleBar from '../components/Navigation/TitleBar';
 import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useUser } from '../UserContext';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -13,9 +14,16 @@ function FlashcardQuiz() {
   const [animateFlip] = useState(true);
 
   const location = useLocation(); // Access location object
-  const { subject } = location.state || {}; // Get subject from location state
+  const { subject } = location.state || {};
+  const { user, getUser } = useUser();
 
   useEffect(() => {
+
+    if (!user) {
+      getUser();
+      return;
+    }
+
     if (subject) {
       const loadCards = async () => {
         setLoading(true); // Start loading
@@ -28,7 +36,7 @@ function FlashcardQuiz() {
     } else {
       setLoading(false); // Stop loading if no subject
     }
-  }, [subject]);
+  }, [subject, user, getUser]);
 
   return (
     <div className="w-screen h-screen relative">
