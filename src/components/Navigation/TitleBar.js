@@ -1,22 +1,8 @@
 import { Link } from "react-router-dom";
-import BackgroundButton from "../Elements/BackgroundButton";
 import { useState } from "react";
-import MultipleBackgroundButton from "../Elements/MultipleBackgroundButton";
+import BackgroundButton from "../Elements/BackgroundButton";
 
 function TitleBar( { text }) {
-
-  const backArrow = (
-      <svg xmlns="http://www.w3.org/2000/svg" strokeWidth="3" viewBox="0 0 24 24" fill="currentColor" className="size-10">
-        <path fillRule="evenodd" d="M11.03 3.97a.75.75 0 0 1 0 1.06l-6.22 6.22H21a.75.75 0 0 1 0 1.5H4.81l6.22 6.22a.75.75 0 1 1-1.06 1.06l-7.5-7.5a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
-      </svg>
-  );
-
-  const [isOverlayVisible, setIsOverlayVisible] = useState(false); // State to manage overlay visibility
-
-  // Toggle the visibility of the overlay
-  const toggleOverlay = () => {
-      setIsOverlayVisible(!isOverlayVisible);
-  };
 
   // images
 
@@ -45,63 +31,70 @@ function TitleBar( { text }) {
     </svg>
   )
 
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Function to toggle the height between 10 and 40
-  const toggleHeight = () => {
-    setIsExpanded(!isExpanded);
-  };
+  var firstImg = null;
+
+  switch (text) {
+    case "Dashboard":
+      firstImg = dashBoard;
+      break;
+    case "Create":
+      firstImg = create;
+      break;
+    case "Practice":
+      firstImg = practice;
+      break;
+    default:
+      firstImg = null;
+      break;
+  }
 
     return (
-      <div className="relative">
-        <div className="flex w-full text-left text-5xl font-bold text-gray-500 dark:text-gray-200 pl-5 items-center gap-2">
+      <div className="pl-4 relative inline-block text-left z-50">
+      {/* Use BackgroundButton as the main button */}
+      <BackgroundButton
+        text={text}
+        bgColor="green"
+        wWidth="w-44"
+        image={firstImg}
+        flip
+        onClick={() => setIsOpen(!isOpen)}
+      />
 
-          <div
-            className={`inline-flex flex-col items-center justify-center ${
-              isExpanded ? 'h-44' : 'h-10'
-            } px-4 bg-green-500 text-white text-lg w-40 font-semibold rounded-3xl background-shadow background-hover transition duration-300 cursor-pointer`}
-            onClick={toggleHeight}
-          >
-            <ul>
-              {!isExpanded && (
-                <li>
-                <p>Dashboard</p>
-              </li>
-              )}
-              {/* Conditionally show other menu items when expanded */}
-              {isExpanded && (
-                <>
-                  <Link to="/">
-                    <div className="flex items-center justify-start hover:bg-green-400 p-1 w-32 rounded-3xl">
-                      {home} {/* Show the image */}
-                      <span className="ml-2">Home</span> {/* Show the text */}
-                    </div>
-                  </Link>
-                  <Link to="/dashboard">
-                    <div className="flex items-center justify-start hover:bg-green-400 p-1 w-32 rounded-3xl">
-                      {dashBoard} {/* Show the image */}
-                      <span className="ml-2">Dashboard</span> {/* Show the text */}
-                    </div>
-                  </Link>
-                  <Link to="/create">
-                    <div className="flex items-center justify-start hover:bg-green-400 p-1 w-32 rounded-3xl">
-                      {create} {/* Show the image */}
-                      <span className="ml-2">Create</span> {/* Show the text */}
-                    </div>
-                  </Link>
-                  <Link to="/practice">
-                    <div className="flex items-center justify-start hover:bg-green-400 p-1 w-32 rounded-3xl">
-                      {practice} {/* Show the image */}
-                      <span className="ml-2">Practice</span> {/* Show the text */}
-                    </div>
-                  </Link>
-                </>
-              )}
-            </ul>
-          </div>
-        </div>
+      {/* Dropdown options with animation */}
+      <div
+        className={`p-1 ml-4 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
+          isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+        }`}
+        style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
+      >
+        <Link to="/">
+            <div className="flex items-center justify-start hover:bg-green-400 w-full p-1 rounded-3xl">
+            {home} {/* Show the image */}
+            <span className="ml-2">Home</span> {/* Show the text */}
+            </div>
+        </Link>
+        <LinkButton text="Dashboard" img={dashBoard} />
+        <LinkButton text="Create" img={create} />
+        <LinkButton text="Practice" img={practice} />
       </div>
+    </div>
     )
 }
 
 export default TitleBar;
+
+function LinkButton( { text, img } ) {
+
+  const textLower = text.toLowerCase();
+
+  return (
+    <Link to={`/${textLower}`}>
+        <div className="flex items-center justify-start hover:bg-green-400 p-1 w-full rounded-3xl">
+        {img} {/* Show the image */}
+        <span className="ml-2">{text}</span> {/* Show the text */}
+        </div>
+    </Link>
+  );
+}
