@@ -3,6 +3,7 @@ import supabase from "../supabaseClient"; // Import the Supabase client
 import { useNavigate } from "react-router-dom"; // For redirection after login
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { useUser } from '../UserContext'; // Import the useUser hook
+import WelcomeImage from '../images/Logos/WelcomeImage.png';
 
 function Welcome() {
   const [email, setEmail] = useState("");
@@ -65,11 +66,11 @@ function Welcome() {
   return (
     <div className="min-h-screen flex">
       {/* Left Section with Image */}
-      <div className="w-1/2 bg-gray-100 flex items-center justify-center">
+      <div className="w-1/2 flex items-center justify-center">
         <img
-          src="/path-to-your-image.png"
+          src={WelcomeImage}
           alt="Illustration"
-          className="object-contain w-3/4"
+          className="object-contain w-full mt-[-20%]"
         />
       </div>
 

@@ -114,7 +114,7 @@ function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back }
     return (
         <div
             className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
-            style={{ backfaceVisibility: 'hidden', transform: rotate }}
+            style={{ backfaceVisibility: 'hidden', transform: rotate, whiteSpace: 'pre-wrap' }} // Add whiteSpace styling
         >
             {back && <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>}
             <p className="text-4xl text-gray-700 dark:text-gray-200 font-bold text-center">{content}</p>
