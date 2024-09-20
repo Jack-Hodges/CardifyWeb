@@ -26,8 +26,46 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
     };
 
     const handleSave = () => {
-        onSave(frontContent, backContent); // Pass the updated content back to CardMain
+        onSave(frontContent, backContent); // Pass the updated content back to parent component
         handleClose(); // Close the modal after saving
+    };
+
+    const handleKeyDown = (e, setContent, content) => {
+        const textArea = e.target;
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        const value = content;
+    
+        // Check if the pressed key is ' ' (space) and the previous character was '-'
+        if (e.key === ' ' && value.substring(start - 1, start) === '-') {
+            e.preventDefault(); // Prevent the default action of the space
+    
+            const newValue = value.substring(0, start - 1) + '• ' + value.substring(end); // Replace '- ' with '• '
+    
+            setContent(newValue); // Update the content state
+    
+            setTimeout(() => {
+                textArea.setSelectionRange(start + 1, start + 1); // Move the cursor after the bullet point
+            }, 0);
+    
+        } else if (e.key === 'Enter') {
+            // Check if the line starts with a bullet point (•) and Enter is pressed
+            const lineStart = value.lastIndexOf('\n', start - 1) + 1; // Find the start of the current line
+            const currentLine = value.substring(lineStart, start); // Extract the current line's text
+    
+            if (currentLine.startsWith('• ')) {
+                e.preventDefault();
+    
+                // Insert a new bullet point at the start of the new line
+                const newValue = value.substring(0, start) + '\n• ' + value.substring(end);
+    
+                setContent(newValue);
+    
+                setTimeout(() => {
+                    textArea.setSelectionRange(start + 3, start + 3); // Move the cursor to the new bullet point line
+                }, 0);
+            }
+        }
     };
 
     if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
@@ -52,9 +90,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
-                <h2 className="text-2xl font-semibold mb-6 text-green-500">
-                    {text}
-                </h2>
+                <h2 className="text-2xl font-semibold mb-6 text-green-500">{text}</h2>
 
                 {/* Question Input */}
                 <div className="mb-6">
@@ -65,6 +101,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                         id="question"
                         value={frontContent}
                         onChange={(e) => setFrontContent(e.target.value)} // Update the front content
+                        onKeyDown={(e) => handleKeyDown(e, setFrontContent, frontContent)} // Handle key press events for front content
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the question here"
                     />
@@ -79,6 +116,7 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                         id="answer"
                         value={backContent}
                         onChange={(e) => setBackContent(e.target.value)} // Update the back content
+                        onKeyDown={(e) => handleKeyDown(e, setBackContent, backContent)} // Handle key press events for back content
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
                         placeholder="Enter the answer here"
                     />
@@ -86,8 +124,8 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose}/>
-                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave}/>
+                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
+                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />
                 </div>
             </div>
         </div>,
