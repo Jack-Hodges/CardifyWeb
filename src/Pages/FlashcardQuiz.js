@@ -43,7 +43,7 @@ function FlashcardQuiz() {
       <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
-        <div className="w-4/5 h-full flex flex-col mt-5 mx-auto">
+        <div className="w-full sm:w-4/5 h-4/5 sm:h-full flex flex-col mt-5 mx-auto">
           <div className="w-full h-4/5 sm:h-[70%] mt-4 px-5">
             {loading ? (
               // Skeleton loader while loading

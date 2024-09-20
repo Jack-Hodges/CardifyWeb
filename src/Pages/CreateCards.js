@@ -138,17 +138,17 @@ function CreateCards() {
             { subject ? (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
-                <div className="flex gap-4 mt-5">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject}/>
-                 <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal} /> {/* Open modal */}
+                <div className="block sm:flex gap-4 mt-5">
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                 <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto'/> {/* Open modal */}
                 </div>
               </div>
             ) : (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
-                <div className="flex gap-4 mt-5">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject}/>
-                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} />
+                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
+                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             )}
