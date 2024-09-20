@@ -2,9 +2,10 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent, text }) {
+function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent, text, alignment }) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
+    const [selectedAlignment, setSelectedAlignment] = useState(alignment);
 
     // Handle the modal appearing (fade in) when isOpen changes
     useEffect(() => {
@@ -29,6 +30,13 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
         onSave(frontContent, backContent); // Pass the updated content back to parent component
         handleClose(); // Close the modal after saving
     };
+
+    const handleAlignmentChange = (newAlignment) => {
+        setSelectedAlignment(newAlignment);
+    };
+
+    const alignmentButtonStyle = (currentAlignment) =>
+        selectedAlignment === currentAlignment ? 'bg-gray-300' : 'bg-white';
 
     const handleKeyDown = (e, setContent, content) => {
         const textArea = e.target;
@@ -68,6 +76,24 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
         }
     };
 
+    const leftBars = (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+        </svg>
+    );
+
+    const rightBars = (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
+        </svg>
+    );
+
+    const centreBars = (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+    );
+
     if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
 
     return ReactDOM.createPortal(
@@ -90,7 +116,42 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
-                <h2 className="text-2xl font-semibold mb-6 text-green-500">{text}</h2>
+                <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
+
+                <div className="flex gap-2 mb-6">
+                    {/* Left Align */}
+                    <button
+                        className={`flex w-10 h-10 ${alignmentButtonStyle('left')} rounded-lg justify-center items-center`}
+                        onClick={() => handleAlignmentChange('left')}
+                    >
+                        {/* Icon for Left */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+                        </svg>
+                    </button>
+
+                    {/* Center Align */}
+                    <button
+                        className={`flex w-10 h-10 ${alignmentButtonStyle('center')} rounded-lg justify-center items-center`}
+                        onClick={() => handleAlignmentChange('center')}
+                    >
+                        {/* Icon for Center */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+
+                    {/* Right Align */}
+                    <button
+                        className={`flex w-10 h-10 ${alignmentButtonStyle('right')} rounded-lg justify-center items-center`}
+                        onClick={() => handleAlignmentChange('right')}
+                    >
+                        {/* Icon for Right */}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
+                        </svg>
+                    </button>
+                </div>
 
                 {/* Question Input */}
                 <div className="mb-6">
@@ -134,3 +195,9 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 }
 
 export default EditModal;
+
+function TextAlignBox( { img }) {
+    <div className="w-10 bg-gray-200 rounded-xl">
+        {img}
+    </div>
+}

@@ -10,6 +10,7 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
     const [modalBackContent, setModalBackContent] = useState(backContent); // Modal content state
     const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State to control delete modal visibility
+    const [alignment, setAlignment] = useState('center'); // Default alignment is 'center'
 
     // Update the modal content state when the card changes (e.g., new card is selected)
     useEffect(() => {
@@ -69,6 +70,8 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
         setIsDeleteModalOpen(false); // Close the delete confirmation modal without deleting
     };
 
+    const textAlignClass = alignment === 'left' ? 'text-left' : alignment === 'right' ? 'text-right' : 'text-center';
+
     return (
         <div className="relative h-full w-full" onClick={handleCardClick} style={{ perspective: '1000px' }}>
             <div
@@ -95,6 +98,7 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                 setFrontContent={setModalFrontContent} // Update modal state for question
                 setBackContent={setModalBackContent}   // Update modal state for answer
                 text="Edit Question and Answer"
+                alignment={alignment}
             />
 
             {/* Delete Confirmation Modal */}
@@ -103,6 +107,7 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                 onClose={cancelDelete}
                 onDelete={confirmDeleteCard}
                 text="Delete Flashcard"
+                alignment={alignment}
             />
         </div>
     );
@@ -110,10 +115,10 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
 
 export default Card;
 
-function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back }) {
+function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back, alignment }) {
     return (
         <div
-            className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow"
+            className={`absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow ${alignment}`}
             style={{ backfaceVisibility: 'hidden', transform: rotate, whiteSpace: 'pre-wrap' }} // Add whiteSpace styling
         >
             {back && <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>}
