@@ -76,24 +76,6 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
         }
     };
 
-    const leftBars = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-        </svg>
-    );
-
-    const rightBars = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
-        </svg>
-    );
-
-    const centreBars = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-    );
-
     if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
 
     return ReactDOM.createPortal(
@@ -195,9 +177,3 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 }
 
 export default EditModal;
-
-function TextAlignBox( { img }) {
-    <div className="w-10 bg-gray-200 rounded-xl">
-        {img}
-    </div>
-}
