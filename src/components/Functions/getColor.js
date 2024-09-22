@@ -18,6 +18,8 @@ export const getColor = (color) => {
             return { bgClass: 'bg-violet-400', hoverClass: 'hover:bg-violet-300'};
         case 'pink':
                 return { bgClass: 'bg-pink-500', hoverClass: 'hover:bg-pink-400'};
+        case 'sky':
+            return { bgClass: 'bg-sky-300', hoverClass: 'hover:bg-sky-200'};
         default:
             return { bgClass: 'bg-gray-500', hoverClass: 'hover:bg-gray-400' }; // Default color
     }

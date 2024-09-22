@@ -1,12 +1,15 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
+import { getColor } from '../Functions/getColor';
 
 function AddSubject({ isOpen, onClose, onSave, subject, text }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
     const [subjectColor, setLocalSubjectColor] = useState(subject?.bgCol || 'red');
+
+    const colorOptions = ['red', 'orange', 'yellow', 'green', 'emerald', 'sky', 'blue', 'purple', 'violet', 'pink'];
 
     useEffect(() => {
         if (isOpen) {
@@ -36,8 +39,10 @@ function AddSubject({ isOpen, onClose, onSave, subject, text }) {
     };
 
     const handleSave = () => {
-        onSave(subject?.id, subjectName, subjectColor);
-        handleClose();
+        if (subjectName !== '') {
+            onSave(subject?.id, subjectName, subjectColor);
+            handleClose();
+        }
     };
 
     if (!isVisible && !isClosing) return null;
@@ -61,29 +66,26 @@ function AddSubject({ isOpen, onClose, onSave, subject, text }) {
                         onChange={(e) => setLocalSubjectName(e.target.value)}
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
                         placeholder="Enter the subject name here"
+                        required
                     />
                 </div>
 
                 <div className="mb-6">
-                    <label htmlFor="subjectColor" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                    <label className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Color
                     </label>
-                    <select
-                        id="subjectColor"
-                        value={subjectColor}
-                        onChange={(e) => setLocalSubjectColor(e.target.value)}
-                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
-                    >
-                        <option value="red">Red</option>
-                        <option value="orange">Orange</option>
-                        <option value="yellow">Yellow</option>
-                        <option value="green">Green</option>
-                        <option value="emerald">Emerald</option>
-                        <option value="blue">Blue</option>
-                        <option value="purple">Purple</option>
-                        <option value="violet">Violet</option>
-                        <option value="pink">Pink</option>
-                    </select>
+                    <div className="grid grid-cols-10 gap-4">
+                        {colorOptions.map((color) => {
+                            const { bgClass } = getColor(color);
+                            return (
+                                <button
+                                    key={color}
+                                    onClick={() => setLocalSubjectColor(color)}
+                                    className={`w-12 h-12 rounded-full ${subjectColor === color ? 'ring-4 ring-gray-500' : ''} ${bgClass}`}
+                                />
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <div className="flex justify-end space-x-4">

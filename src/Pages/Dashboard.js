@@ -85,7 +85,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen h-[100dvh]">
+    <div className="w-screen h-full">
       <div className="flex w-full justify-between pr-5">
         <TitleBar text="Dashboard" />
         <BackgroundButton 
@@ -99,22 +99,23 @@ function Dashboard() {
           onClick={handleAddSubject} // Open modal to add a new subject
         />
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
-        {loading ? (
-          // Skeleton loader while loading subjects
-          <>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-            <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          </>
-        ) : (
-          subjects.map((subject, index) => (
+  
+      {loading ? (
+        // Skeleton loader while loading subjects
+        <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+        </div>
+      ) : subjects.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
+          {/* Render subjects in the grid */}
+          {subjects.map((subject, index) => (
             <SubjectBlock
               key={index}
               bgCol={subject.bgCol}
@@ -123,10 +124,20 @@ function Dashboard() {
               onEdit={() => handleEditSubject(subject)} // Pass subject to edit
               onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
             />
-          ))
-        )}
-      </div>
-
+          ))}
+        </div>
+      ) : (
+        // Render "No subjects" message outside of the grid layout
+        <div className="flex flex-col justify-center items-center w-full h-4/5">
+          <div>
+            <p className="text-gray-500 text-4xl font-bold text-center">You have no subjects</p>
+            <div className="block sm:flex gap-4 mt-5 items-center justify-center">
+              <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleAddSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+            </div>
+          </div>
+        </div>
+      )}
+  
       <AddSubject
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -134,7 +145,7 @@ function Dashboard() {
         subject={editingSubject} // Pass subject if editing, otherwise null
         text={editingSubject ? "Edit Subject" : "Add New Subject"} // Dynamic modal title
       />
-
+  
       <DeleteModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
