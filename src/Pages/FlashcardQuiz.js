@@ -75,7 +75,7 @@ function FlashcardQuiz() {
                   <div>
                     <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                     <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                      <BackgroundButton text="Select a subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                      <BackgroundButton text="Select a subject to practice" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
                     </div>
                   </div>
                 )}

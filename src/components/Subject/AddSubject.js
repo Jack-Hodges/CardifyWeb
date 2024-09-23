@@ -81,7 +81,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text }) {
                                 <button
                                     key={color}
                                     onClick={() => setLocalSubjectColor(color)}
-                                    className={`w-12 h-12 rounded-full ${subjectColor === color ? 'ring-4 ring-gray-300 dark:ring-gray-500' : 'ring-0'} ${bgClass} transition duration-300`}
+                                    className={`w-12 h-12 rounded-full ${subjectColor === color ? 'ring-4 ring-gray-300 dark:ring-gray-500' : 'ring-0'} ${bgClass} transition duration-100`}
                                 />
                             );
                         })}
