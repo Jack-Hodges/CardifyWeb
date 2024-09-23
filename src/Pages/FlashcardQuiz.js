@@ -5,6 +5,8 @@ import CardControls from "../components/Card/CardControls";
 import TitleBar from '../components/Navigation/TitleBar';
 import { useLocation } from 'react-router-dom'; // Import useLocation
 import { useUser } from '../UserContext';
+import BackgroundButton from '../components/Elements/BackgroundButton';
+import SubjectList from '../components/Subject/SubjectList';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -12,10 +14,15 @@ function FlashcardQuiz() {
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true); // Loading state
   const [animateFlip] = useState(true);
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
 
   const location = useLocation(); // Access location object
   const { subject } = location.state || {};
   const { user, getUser } = useUser();
+
+  const handleOpenSubjectListModal = () => {
+    setIsSubjectListModalOpen(true); // Open SubjectList modal
+  };
 
   useEffect(() => {
 
@@ -65,16 +72,31 @@ function FlashcardQuiz() {
                 {subject ? (
                   <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 ) : (
-                  <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
+                  <div>
+                    <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
+                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                      <BackgroundButton text="Select a subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
-            <CardControls
-              currentCardIndex={currentCardIndex + 1}
-              totalCards={cards.length}
-              onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
-              onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
+
+            { subject && (
+              <CardControls
+                currentCardIndex={currentCardIndex + 1}
+                totalCards={cards.length}
+                onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
+                onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
+              />
+            )}
+
+            <SubjectList 
+              isOpen={isSubjectListModalOpen} 
+              onClose={() => setIsSubjectListModalOpen(false)}
+              user={user}
             />
+            
           </div>
         </div>
       </div>

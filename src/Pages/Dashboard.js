@@ -160,7 +160,7 @@ export default Dashboard;
 
 
 // Subject Block component with play, practice, edit, and delete functionality
-function SubjectBlock({ bgCol, subject, user, onEdit, onRemoveSubject }) {
+function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
   const navigate = useNavigate();
 

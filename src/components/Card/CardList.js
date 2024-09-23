@@ -65,7 +65,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
         backContent={newBackContent}
         setFrontContent={setNewFrontContent}
         setBackContent={setNewBackContent}
-        text={`Add New Flashcard to ${subject.name}`}
+        text={`Add New Flashcard to ${subject ? subject.name : ""}`}
       />
     </div>
   );

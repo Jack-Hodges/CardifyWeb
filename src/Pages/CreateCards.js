@@ -10,26 +10,25 @@ import EditModal from '../components/Card/EditModal';
 import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
+import SubjectList from '../components/Subject/SubjectList';
 
 function CreateCards() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to track if modal is open
-  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false); // For adding new subject
-  const [newFrontContent, setNewFrontContent] = useState(''); // State for new card front content
-  const [newBackContent, setNewBackContent] = useState(''); // State for new card back content
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
+  const [newFrontContent, setNewFrontContent] = useState('');
+  const [newBackContent, setNewBackContent] = useState('');
   const navigate = useNavigate();
-  
-  const [loading, setLoading] = useState(true); // Loading state
-
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser } = useUser();
 
   useEffect(() => {
-
     if (!user) {
       getUser();
       return;
@@ -37,15 +36,14 @@ function CreateCards() {
 
     if (subject) {
       const loadCards = async () => {
-        setLoading(true); // Start loading
-        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
+        setLoading(true);
+        const data = await fetchCards(subject.id);
         setCards(data);
-        setLoading(false); // Stop loading
+        setLoading(false);
       };
-
       loadCards();
     } else {
-      setLoading(false); // Stop loading if no subject
+      setLoading(false);
     }
   }, [subject, user, getUser]);
 
@@ -69,25 +67,29 @@ function CreateCards() {
   };
 
   const handleOpenModal = () => {
-    setIsModalOpen(true); // Open modal when button is clicked
+    setIsModalOpen(true);
+  };
+
+  const handleOpenSubjectListModal = () => {
+    setIsSubjectListModalOpen(true); // Open SubjectList modal
   };
 
   const handleSaveNewCard = () => {
     handleAddNewCard(newFrontContent, newBackContent);
-    setIsModalOpen(false); // Close modal after saving
-    setNewFrontContent(''); // Clear the input fields
-    setNewBackContent(''); // Clear the input fields
+    setIsModalOpen(false);
+    setNewFrontContent('');
+    setNewBackContent('');
   };
 
   const handleCreateNewSubject = () => {
-    setIsAddSubjectModalOpen(true); // Open AddSubject modal
+    setIsAddSubjectModalOpen(true);
   };
 
   const handleSaveSubject = async (id, subjectName, subjectColor) => {
-    const data = await saveSubject(id, subjectName, subjectColor, user.id); // Save subject
+    const data = await saveSubject(id, subjectName, subjectColor, user.id);
     if (data) {
-      setIsAddSubjectModalOpen(false); // Close AddSubject modal
-      navigate('/create', { state: { subject: data[0] } }); // Navigate to CreateCards with new subject
+      setIsAddSubjectModalOpen(false);
+      navigate('/create', { state: { subject: data[0] } });
     }
   };
 
@@ -97,7 +99,6 @@ function CreateCards() {
 
       <div className="flex w-full h-full">
         {loading ? (
-          // Skeleton loader while loading cards
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">
               <div className="bg-[#d9d6d1] h-48 w-full rounded-lg"></div>
@@ -135,7 +136,7 @@ function CreateCards() {
           </>
         ) : (
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
-            { subject ? (
+            {subject ? (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5">
@@ -148,7 +149,7 @@ function CreateCards() {
                 <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} wWidth='w-full sm:w-auto'/>
+                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             )}
@@ -168,12 +169,22 @@ function CreateCards() {
         text="Add New Flashcard"
       />
 
+      {/* AddSubject Modal */}
       <AddSubject
         isOpen={isAddSubjectModalOpen}
         onClose={() => setIsAddSubjectModalOpen(false)}
         onSave={handleSaveSubject}
         text="Create New Subject"
       />
+
+      {/* SubjectList Modal */}
+      <SubjectList 
+        isOpen={isSubjectListModalOpen} 
+        onClose={() => setIsSubjectListModalOpen(false)}
+        user={user}
+        page="create"
+      />
+
     </div>
   );
 }
