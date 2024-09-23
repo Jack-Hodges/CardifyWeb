@@ -68,7 +68,7 @@ function FlashcardQuiz() {
                 animateFlip={animateFlip}
               />
             ) : (
-              <div>
+              <div className="flex flex-col justify-center items-center w-full h-full">
                 {subject ? (
                   <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 ) : (
