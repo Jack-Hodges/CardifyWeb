@@ -101,18 +101,24 @@ function Dashboard() {
 
   return (
     <div className="w-screen h-full">
-      <div className="flex w-full justify-between pr-5">
+      <div className="flex w-full justify-between pr-5 mt-2">
         <TitleBar text="Dashboard" />
-        <BackgroundButton 
-          text="Add Subject" 
-          image={
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-          } 
-          bgColor={"purple"} 
-          onClick={handleAddSubject} // Open modal to add a new subject
-        />
+        <div className="flex gap-2">
+          <BackgroundButton 
+            text="Add Subject" 
+            image={
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            } 
+            bgColor={"purple"} 
+            onClick={handleAddSubject} // Open modal to add a new subject
+          />
+          <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow background-hover cursor-pointer">
+            <p className="text-white font-bold text-xl">J</p>
+          </div>
+        </div>
+        
       </div>
       <div className="flex mx-5 mt-3 items-center justify-between">
         <div className="flex gap-2">

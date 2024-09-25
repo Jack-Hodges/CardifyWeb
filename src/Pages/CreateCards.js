@@ -95,7 +95,10 @@ function CreateCards() {
 
   return (
     <div className="w-screen h-[100dvh]">
-      <TitleBar text="Create" />
+      <div className='mt-2'>
+        <TitleBar text="Create" />
+      </div>
+      
 
       <div className="flex w-full h-full">
         {loading ? (

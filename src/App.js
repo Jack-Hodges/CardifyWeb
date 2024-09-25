@@ -10,7 +10,6 @@ function App() {
     <div className="w-screen h-[100dvh] overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900">
       <Router>
         {/* MenuBar will be rendered on all pages */}
-        <MenuBar />
 
         {/* Define routes for different pages */}
         <Routes>
