@@ -1,5 +1,4 @@
 import CreateCards from './Pages/CreateCards';
-import MenuBar from './components/Navigation/MenuBar';
 import Welcome from './Pages/Welcome';
 import FlashcardQuiz from './Pages/FlashcardQuiz';
 import Dashboard from './Pages/Dashboard';

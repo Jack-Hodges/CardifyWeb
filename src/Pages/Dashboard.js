@@ -100,7 +100,7 @@ function Dashboard() {
   });
 
   return (
-    <div className="w-screen h-full">
+    <div className="w-screen h-full overflow-auto">
       <div className="flex w-full justify-between pr-5 mt-2">
         <TitleBar text="Dashboard" />
         <div className="flex gap-2">
@@ -122,17 +122,16 @@ function Dashboard() {
       </div>
       <div className="flex mx-5 mt-3 items-center justify-between">
         <div className="flex gap-2">
-          <p className="font-bold text-lg text-gray-700">Sort by:</p>
           <select
             value={selectedSort}
             onChange={(e) => setSelectedSort(e.target.value)} // Update state when dropdown value changes
-            className="border-2 bg-[#f1ebe0] border-[rgba(3,15,64,1)] rounded-full p-1"
+            className="border-2 border-[rgba(3,15,64,1)] rounded-full p-1 background-shadow sm:background-hover bg-gray-500 text-white font-bold focus:outline-none h-10"
           >
             <option value="Most Cards">Most Cards</option>
             <option value="Alphabetical">Alphabetical</option>
           </select>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
           <input
             type="text"
             value={searchTerm}
@@ -220,10 +219,10 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject }) {
   return (
     <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
       <div className="absolute bottom-0 left-0 mb-1 w-full">
-        <h1 className="ml-3 mr-2 text-3xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+        <h1 className="ml-3 mr-2 text-3xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
           {subject.name}
         </h1>
-        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3">
+        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
           {subject.flashcard_count} {subject.flashcard_count === 1 ? 'card' : 'cards'}
         </p>
 
