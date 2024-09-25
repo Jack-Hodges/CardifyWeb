@@ -15,6 +15,8 @@ function Dashboard() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Control DeleteModal visibility
   const [subjectToDelete, setSubjectToDelete] = useState(null); // Track subject being deleted
   const [loading, setLoading] = useState(true); // Loading state
+  const [selectedSort, setSelectedSort] = useState('Most Cards'); // Track selected sort option
+  const [searchTerm, setSearchTerm] = useState(''); // State to track search input
 
   const navigate = useNavigate();
   const { user, loading: userLoading, getUser } = useUser(); // Get user, loading, and getUser from context
@@ -84,6 +86,19 @@ function Dashboard() {
     setIsDeleteModalOpen(false); // Close the delete modal
   };
 
+  const sortedSubjects = [...subjects]
+  .filter((subject) =>
+    subject.name.toLowerCase().includes(searchTerm.toLowerCase()) // Filter by search term
+  )
+  .sort((a, b) => {
+    if (selectedSort === 'Alphabetical') {
+      return a.name.localeCompare(b.name); // Sort alphabetically
+    } else if (selectedSort === 'Most Cards') {
+      return b.flashcard_count - a.flashcard_count; // Sort by flashcard count
+    }
+    return 0;
+  });
+
   return (
     <div className="w-screen h-full">
       <div className="flex w-full justify-between pr-5">
@@ -98,6 +113,28 @@ function Dashboard() {
           bgColor={"purple"} 
           onClick={handleAddSubject} // Open modal to add a new subject
         />
+      </div>
+      <div className="flex mx-5 mt-3 items-center justify-between">
+        <div className="flex gap-2">
+          <p className="font-bold text-lg text-gray-700">Sort by:</p>
+          <select
+            value={selectedSort}
+            onChange={(e) => setSelectedSort(e.target.value)} // Update state when dropdown value changes
+            className="border-2 bg-[#f1ebe0] border-[rgba(3,15,64,1)] rounded-full p-1"
+          >
+            <option value="Most Cards">Most Cards</option>
+            <option value="Alphabetical">Alphabetical</option>
+          </select>
+        </div>
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update searchTerm on input change
+            className="w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white background-shadow background-focus focus:outline-none"
+            placeholder="Search subjects..."
+          />
+        </div>
       </div>
   
       {loading ? (
@@ -115,7 +152,7 @@ function Dashboard() {
       ) : subjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
           {/* Render subjects in the grid */}
-          {subjects.map((subject, index) => (
+          {sortedSubjects.map((subject, index) => (
             <SubjectBlock
               key={index}
               bgCol={subject.bgCol}

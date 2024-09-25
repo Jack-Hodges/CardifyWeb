@@ -29,9 +29,9 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     }
 
     return (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             {/* Modal Content */}
-            <div className="bg-white rounded-lg p-6 w-[80%] max-w-lg h-[70%] overflow-y-scroll">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[80%] max-w-lg h-[70%] overflow-y-scroll">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-semibold mb-0 text-green-500">Subject List</h2>
                 </div>
