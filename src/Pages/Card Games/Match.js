@@ -104,7 +104,7 @@ function Match() {
                 <TitleBar text="Practice" />
             </div>
             
-            <div className="grid grid-cols-6 grid-rows-3 gap-4 w-auto h-[90%] mx-4">
+            <div className="grid grid-cols-5 gap-4 w-auto h-auto mx-4">
                 {shuffledCards.map((card, index) => (
                     <MatchCard
                         key={index}
@@ -126,12 +126,12 @@ function MatchCard({ content, onClick, isFlipped, isMatched }) {
 
     return (
         <div
-            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer background-shadow background-hover bg-white`}
+            className={`rounded-3xl w-full h-[385px] p-4 flex items-center justify-center cursor-pointer background-shadow background-hover bg-white`}
             onClick={onClick}
             style={{ userSelect: 'none' }} // Prevent text from being highlighted
         >
             {isFlipped ? (
-                <p className="text-center text-lg font-bold" style={{ userSelect: 'none' }}>{content}</p> // Apply no highlighting here too
+                <p className="text-center text-2xl font-bold" style={{ userSelect: 'none' }}>{content}</p> // Apply no highlighting here too
             ) : (
                 <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" />
             )}
