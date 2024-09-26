@@ -120,16 +120,23 @@ function Dashboard() {
         </div>
         
       </div>
-      <div className="flex mx-5 mt-3 items-center justify-between">
+      <div className="flex mx-4 mt-3 items-center justify-between">
         <div className="flex gap-2">
-          <select
-            value={selectedSort}
-            onChange={(e) => setSelectedSort(e.target.value)} // Update state when dropdown value changes
-            className="border-2 border-[rgba(3,15,64,1)] rounded-full p-1 background-shadow sm:background-hover bg-gray-500 text-white font-bold focus:outline-none h-10"
-          >
-            <option value="Most Cards">Most Cards</option>
-            <option value="Alphabetical">Alphabetical</option>
-          </select>
+          <div className="relative group">
+            <select
+              value={selectedSort}
+              onChange={(e) => setSelectedSort(e.target.value)}
+              className="border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300"
+            >
+              <option value="Most Cards">Most Cards</option>
+              <option value="Alphabetical">Alphabetical</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
         </div>
         <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
           <input
