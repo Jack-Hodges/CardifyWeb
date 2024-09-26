@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { fetchCards } from "../../components/Card/CardManipulation";
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
+import TitleBar from '../../components/Navigation/TitleBar';
 
 // Helper function to shuffle an array
 const shuffleArray = (array) => {
@@ -98,16 +99,23 @@ function Match() {
     }
 
     return (
-        <div className="grid grid-cols-6 grid-rows-3 gap-4 w-screen h-screen"> {/* Grid layout */}
-            {shuffledCards.map((card, index) => (
-                <MatchCard
-                    key={index}
-                    content={card.content}
-                    onClick={() => handleCardClick(card)}
-                    isFlipped={flippedCards.some(flipped => flipped.id === card.id && flipped.isFront === card.isFront) || matchedCards.includes(card.id)}
-                    isMatched={matchedCards.includes(card.id)}
-                />
-            ))}
+        <div className=" w-screen h-screen"> {/* Grid layout */}
+            <div className="mt-2 mb-4">
+                <TitleBar text="Practice" />
+            </div>
+            
+            <div className="grid grid-cols-6 grid-rows-3 gap-4 w-auto h-[90%] mx-4">
+                {shuffledCards.map((card, index) => (
+                    <MatchCard
+                        key={index}
+                        content={card.content}
+                        onClick={() => handleCardClick(card)}
+                        isFlipped={flippedCards.some(flipped => flipped.id === card.id && flipped.isFront === card.isFront) || matchedCards.includes(card.id)}
+                        isMatched={matchedCards.includes(card.id)}
+                    />
+                ))}
+            </div>
+            
         </div>
     );
 }
