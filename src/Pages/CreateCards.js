@@ -123,6 +123,7 @@ function CreateCards() {
                   cardId={cards[currentCardIndex]?.id}
                   onDeleteCard={handleDeleteCard}
                   edit={true}
+                  user={user}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
@@ -143,16 +144,16 @@ function CreateCards() {
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                 <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto'/> {/* Open modal */}
+                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto'/> {/* Open modal */}
+                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
                 </div>
               </div>
             ) : (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                 <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                 <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
                 </div>
               </div>
             )}

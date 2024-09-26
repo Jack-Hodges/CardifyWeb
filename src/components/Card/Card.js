@@ -3,7 +3,7 @@ import IconButtons from './IconButtons'; // Import the IconButtons component
 import EditModal from './EditModal'; // Import the EditModal component
 import DeleteModal from './DeleteModal'; // Import the DeleteModal component
 
-function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit }) {
+function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit, user }) {
     const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
     const [newBackContent, setNewBackContent] = useState(backContent); // Card content state
     const [modalFrontContent, setModalFrontContent] = useState(frontContent); // Modal content state
@@ -70,6 +70,14 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
         setIsDeleteModalOpen(false); // Close the delete confirmation modal without deleting
     };
 
+    var frontAlign = 'text-center'
+    var backAlign = 'text-center'
+
+    if (user) {
+        frontAlign = user.frontAlign;
+        backAlign = user.backAlign;
+    }
+
     return (
         <div className="relative h-full w-full" onClick={handleCardClick} style={{ perspective: '1000px' }}>
             <div
@@ -79,10 +87,10 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
-                <CardContent rotate={"rotateY(0deg)"} content={newFrontContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} edit={edit}/>
+                <CardContent rotate={"rotateY(0deg)"} content={newFrontContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} edit={edit} align={frontAlign}/>
 
                 {/* Back card */}
-                <CardContent rotate={"rotateY(180deg)"} content={newBackContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} back edit={edit}/>
+                <CardContent rotate={"rotateY(180deg)"} content={newBackContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} back edit={edit} align={backAlign}/>
                 
             </div>
 
@@ -113,14 +121,15 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
 
 export default Card;
 
-function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back, alignment }) {
+function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back, alignment, align }) {
+
     return (
         <div
             className={`absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none background-shadow ${alignment}`}
             style={{ backfaceVisibility: 'hidden', transform: rotate, whiteSpace: 'pre-wrap' }} // Add whiteSpace styling
         >
             {back && <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</p>}
-            <p className="text-xl sm:text-4xl text-gray-700 dark:text-gray-200 font-bold text-center">{content}</p>
+            <p className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 font-bold ${align}`}>{content}</p>
             {edit && (
                 <div>
                     <div className="absolute top-2 right-2 cursor-pointer text-red-500" onClick={onClickDelete}>

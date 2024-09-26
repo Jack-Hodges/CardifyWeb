@@ -7,6 +7,7 @@ import { useLocation } from 'react-router-dom'; // Import useLocation
 import { useUser } from '../UserContext';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import SubjectList from '../components/Subject/SubjectList';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -20,9 +21,15 @@ function FlashcardQuiz() {
   const { subject } = location.state || {};
   const { user, getUser } = useUser();
 
+  const navigate = useNavigate();
+
   const handleOpenSubjectListModal = () => {
     setIsSubjectListModalOpen(true); // Open SubjectList modal
   };
+
+  const handleSwitchToCreate = () => {
+    navigate('/create', { state: { subject } });
+  }
 
   useEffect(() => {
 
@@ -72,7 +79,12 @@ function FlashcardQuiz() {
             ) : (
               <div className="flex flex-col justify-center items-center w-full h-full">
                 {subject ? (
-                  <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
+                  <div>
+                    <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
+                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                      <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={"orange"} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                    </div>
+                  </div>
                 ) : (
                   <div>
                     <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
