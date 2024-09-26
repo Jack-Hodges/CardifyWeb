@@ -1,7 +1,8 @@
 import CreateCards from './Pages/CreateCards';
 import Welcome from './Pages/Welcome';
-import FlashcardQuiz from './Pages/FlashcardQuiz';
+import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
+import Match from './Pages/Card Games/Match';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -14,8 +15,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Welcome />} /> {/* Default route */}
           <Route path="/create" element={<CreateCards />} />
-          <Route path="/practice" element={<FlashcardQuiz />} />
+          <Route path="/practice" element={<Practice />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/match" element={<Match />} />
         </Routes>
       </Router>
     </div>
