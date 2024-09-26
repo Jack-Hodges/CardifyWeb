@@ -64,28 +64,32 @@ function Match() {
         // If the card is already flipped or matched, do nothing
         if (flippedCards.some(flipped => flipped.id === card.id && flipped.isFront === card.isFront)) return;
         if (matchedCards.includes(card.id)) return;
-
+    
+        // If two cards are already flipped, prevent any more flips until they are reset
+        if (selectedCards.length === 2) return;
+    
         // Flip the clicked card
         setFlippedCards([...flippedCards, card]);
-
-        // If another card is already selected, check if the two match
+    
+        // Add the clicked card to the selected cards
+        setSelectedCards([...selectedCards, card]);
+    
+        // If two cards are selected, check if they match
         if (selectedCards.length === 1) {
             const firstCard = selectedCards[0];
             const secondCard = card;
-
+    
             // Check if the two cards match (same id, one front and one back)
             if (firstCard.id === secondCard.id && firstCard.isFront !== secondCard.isFront) {
                 // It's a match, mark both sides as matched
                 setMatchedCards([...matchedCards, firstCard.id]);
             }
-
-            // Reset the selected cards after a short delay
+    
+            // Reset the selected cards after a short delay (to allow the user to see the second card)
             setTimeout(() => {
                 setSelectedCards([]);
                 setFlippedCards([]);
             }, 1000);
-        } else {
-            setSelectedCards([card]); // Add the first card to selected cards
         }
     };
 
@@ -116,11 +120,12 @@ function MatchCard({ content, onClick, isFlipped, isMatched }) {
         <div
             className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer background-shadow background-hover bg-white`}
             onClick={onClick}
+            style={{ userSelect: 'none' }} // Prevent text from being highlighted
         >
             {isFlipped ? (
-                <p className="text-center text-lg font-bold">{content}</p>
+                <p className="text-center text-lg font-bold" style={{ userSelect: 'none' }}>{content}</p> // Apply no highlighting here too
             ) : (
-                <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" /> // Display the logo when not flipped
+                <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" />
             )}
         </div>
     );
