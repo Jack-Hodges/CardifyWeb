@@ -126,12 +126,13 @@ function Welcome() {
   );
 
   if (user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-4xl">Welcome, {user.email}!</h1>
-        <button onClick={logout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
-      </div>
-    );
+    navigate('/Home');
+    // return (
+    //   <div className="min-h-screen flex flex-col items-center justify-center">
+    //     <h1 className="text-4xl">Welcome, {user.email}!</h1>
+    //     <button onClick={logout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
+    //   </div>
+    // );
   }
 
   return (

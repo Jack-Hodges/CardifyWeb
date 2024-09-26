@@ -69,12 +69,7 @@ function TitleBar( { text }) {
         }`}
         style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
       >
-        <Link to="/">
-            <div className="flex items-center justify-start hover:bg-green-400 w-full p-1 rounded-3xl">
-            {home} {/* Show the image */}
-            <span className="ml-2">Home</span> {/* Show the text */}
-            </div>
-        </Link>
+        <LinkButton text="Home" img={home} />
         <LinkButton text="Dashboard" img={dashBoard} />
         <LinkButton text="Create" img={create} />
         <LinkButton text="Practice" img={practice} />

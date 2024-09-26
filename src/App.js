@@ -3,6 +3,7 @@ import Welcome from './Pages/Welcome';
 import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
 import Match from './Pages/Card Games/Match';
+import Home from './Pages/Home';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         {/* Define routes for different pages */}
         <Routes>
           <Route path="/" element={<Welcome />} /> {/* Default route */}
+          <Route path="/home" element={<Home />} />
           <Route path="/create" element={<CreateCards />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/dashboard" element={<Dashboard />} />
