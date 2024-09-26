@@ -95,6 +95,8 @@ function Dashboard() {
       return a.name.localeCompare(b.name); // Sort alphabetically
     } else if (selectedSort === 'Most Cards') {
       return b.flashcard_count - a.flashcard_count; // Sort by flashcard count
+    } else if (selectedSort === 'Date Created') {
+      return b.created_at - a.created_at; // Sort by date created
     }
     return 0;
   });
@@ -130,6 +132,7 @@ function Dashboard() {
             >
               <option value="Most Cards">Most Cards</option>
               <option value="Alphabetical">Alphabetical</option>
+              <option value="Date Created">Date Created</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
