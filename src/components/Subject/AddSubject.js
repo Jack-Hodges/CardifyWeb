@@ -50,7 +50,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text }) {
     return ReactDOM.createPortal(
         <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
-            <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
+            <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
                 <h2 className="text-2xl font-semibold mb-6 text-green-500">
                     {subject ? "Edit Subject" : text}
                 </h2>
@@ -74,7 +74,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text }) {
                     <label className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Color
                     </label>
-                    <div className="grid grid-cols-10 gap-4">
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
                         {colorOptions.map((color) => {
                             const { bgClass, hoverClass } = getColor(color);
                             return (

@@ -100,7 +100,7 @@ function CreateCards() {
       </div>
       
 
-      <div className="flex w-full h-full">
+      <div className="block sm:flex w-full h-full">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">
@@ -111,7 +111,7 @@ function CreateCards() {
           </div>
         ) : cards.length > 0 ? (
           <>
-            <div className="w-[70%] h-full flex flex-col mt-10">
+            <div className="w-full sm:w-[70%] h-[90%] sm:h-full flex flex-col sm:mt-10">
               <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
                 <Card
                   frontContent={cards[currentCardIndex]?.question}
@@ -134,7 +134,7 @@ function CreateCards() {
               </div>
             </div>
 
-            <div className="w-[30%] h-full">
+            <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
               <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} />
             </div>
           </>
@@ -143,17 +143,17 @@ function CreateCards() {
             {subject ? (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
-                <div className="block sm:flex gap-4 mt-5">
-                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto'/> {/* Open modal */}
-                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
+                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
+                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             ) : (
               <div>
                 <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
-                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                  <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             )}

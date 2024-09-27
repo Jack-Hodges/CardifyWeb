@@ -45,7 +45,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
             <li 
               key={index} 
               className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow
-                hover:scale-95 transition duration-300 w-[95%]"
+                hover:scale-95 transition duration-300 w-[99%] sm:w-[95%]"
               onClick={() => onCardClick(index)} // Handle card click
             >
               <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-700 dark:text-gray-200">

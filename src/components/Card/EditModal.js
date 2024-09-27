@@ -93,47 +93,12 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
                 <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
-
-                <div className="flex gap-2 mb-6">
-                    {/* Left Align */}
-                    <button
-                        className={`flex w-10 h-10 ${alignmentButtonStyle('left')} rounded-lg justify-center items-center`}
-                        onClick={() => handleAlignmentChange('left')}
-                    >
-                        {/* Icon for Left */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
-                        </svg>
-                    </button>
-
-                    {/* Center Align */}
-                    <button
-                        className={`flex w-10 h-10 ${alignmentButtonStyle('center')} rounded-lg justify-center items-center`}
-                        onClick={() => handleAlignmentChange('center')}
-                    >
-                        {/* Icon for Center */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                    </button>
-
-                    {/* Right Align */}
-                    <button
-                        className={`flex w-10 h-10 ${alignmentButtonStyle('right')} rounded-lg justify-center items-center`}
-                        onClick={() => handleAlignmentChange('right')}
-                    >
-                        {/* Icon for Right */}
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M12 17.25h8.25" />
-                        </svg>
-                    </button>
-                </div>
 
                 {/* Question Input */}
                 <div className="mb-6">

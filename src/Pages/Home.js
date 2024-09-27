@@ -8,7 +8,7 @@ import TitleBar from "../components/Navigation/TitleBar";
 function Home() {
 
     const navigate = useNavigate();
-    const { user, getUser } = useUser();
+    const { user, getUser, logout } = useUser();
     const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [profile, setProfile] = useState(null);
@@ -49,7 +49,10 @@ function Home() {
             </div>
             <div className="text-3xl font-bold text-gray-300 dark:text-gray-200 ml-5">
                 {user && profile ? (
-                    <p>Hello, {profile.first_name}!</p>
+                    <div>
+                        <p>Hello, {profile.first_name}!</p>
+                        <button onClick={logout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
+                    </div>
                 ) : (
                     <p>Loading...</p>
                 )}

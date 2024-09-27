@@ -53,14 +53,14 @@ function FlashcardQuiz() {
   }, [subject, user, getUser]);
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-[100dvh] relative">
       <div className="mt-2">
        <TitleBar text="Practice" />
       </div>
 
       <div className="flex w-full h-full">
-        <div className="w-full sm:w-4/5 h-4/5 sm:h-full flex flex-col mt-5 mx-auto">
-          <div className="w-full h-4/5 sm:h-[70%] mt-4 px-5">
+        <div className="w-full sm:w-4/5 h-[90%] sm:h-full flex flex-col mt-5 mx-auto">
+          <div className="w-full h-[85%] sm:h-[70%] mt-4 px-5">
             {loading ? (
               // Skeleton loader while loading
               <div className="animate-pulse flex flex-col space-y-4">

@@ -24,7 +24,7 @@ function Welcome() {
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setFirstName(""); // Reset the first name field
+    setFirstName(""); // Reset the first name field 
   };
 
   // Function to display the error popup
@@ -127,26 +127,11 @@ function Welcome() {
 
   if (user) {
     navigate('/Home');
-    // return (
-    //   <div className="min-h-screen flex flex-col items-center justify-center">
-    //     <h1 className="text-4xl">Welcome, {user.email}!</h1>
-    //     <button onClick={logout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
-    //   </div>
-    // );
   }
 
   return (
-    <div className="min-h-screen flex">
-      {showPopup && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 text-black dark:text-white px-4 py-2 rounded z-50">
-          {popupMessage}
-        </div>
-      )}
-      <div className="w-1/2 flex items-center justify-center">
-        <img src={WelcomeImage} alt="Illustration" className="object-contain w-full mt-[-20%]" />
-      </div>
+    <div className="min-h-screen block sm:flex">
 
-      <div className="w-1/2 flex flex-col justify-center relative">
         <div className="absolute top-4 right-4">
           <BackgroundButton
             text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
@@ -155,7 +140,18 @@ function Welcome() {
           />
         </div>
 
-        <div className="w-4/5 mx-auto p-8">
+      {showPopup && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 text-black dark:text-white px-4 py-2 rounded z-50">
+          {popupMessage}
+        </div>
+      )}
+      <div className="w-full sm:w-1/2 flex items-center justify-center">
+        <img src={WelcomeImage} alt="Illustration" className="object-contain w-full sm:mt-[-20%]" />
+      </div>
+
+      <div className="w-full sm:w-1/2 flex flex-col justify-center relative">
+
+        <div className="w-[90%] sm:w-4/5 mx-auto sm:p-8">
           <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-300">
             {isSignUp ? "Sign Up" : "Sign In"}
           </h2>
