@@ -16,7 +16,7 @@ function Welcome() {
   const [popupMessage, setPopupMessage] = useState(""); // Store error message
 
   const navigate = useNavigate();
-  const { user, setUser, logout } = useUser(); // Access user and logout from context
+  const { user, setUser } = useUser(); // Access user and logout from context
 
   // Toggle between login and sign up
   const toggleSignUp = () => {

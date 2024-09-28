@@ -5,7 +5,6 @@ import BackgroundButton from '../Elements/BackgroundButton';
 function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFrontContent, setBackContent, text, alignment }) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
-    const [selectedAlignment, setSelectedAlignment] = useState(alignment);
 
     // Handle the modal appearing (fade in) when isOpen changes
     useEffect(() => {
@@ -30,13 +29,6 @@ function EditModal({ isOpen, onClose, onSave, frontContent, backContent, setFron
         onSave(frontContent, backContent); // Pass the updated content back to parent component
         handleClose(); // Close the modal after saving
     };
-
-    const handleAlignmentChange = (newAlignment) => {
-        setSelectedAlignment(newAlignment);
-    };
-
-    const alignmentButtonStyle = (currentAlignment) =>
-        selectedAlignment === currentAlignment ? 'bg-gray-300' : 'bg-white';
 
     const handleKeyDown = (e, setContent, content) => {
         const textArea = e.target;
