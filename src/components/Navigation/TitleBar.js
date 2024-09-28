@@ -45,6 +45,9 @@ function TitleBar( { text }) {
     case "Practice":
       firstImg = practice;
       break;
+    case "Home":
+      firstImg = home;
+      break;
     default:
       firstImg = null;
       break;

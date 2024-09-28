@@ -29,3 +29,11 @@ code {
 .background-focus {
   @apply sm:focus:shadow-none sm:focus:translate-x-1 sm:focus:translate-y-1 transition-all duration-300 transform
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

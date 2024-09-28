@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
 import { fetchProfile } from "../components/Profile/ProfileManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
+import SubjectBlock from "../components/Subject/SubjectBlock";
+
 
 function Home() {
 
@@ -52,11 +54,32 @@ function Home() {
             <div className="mt-2 mb-2">
                 <TitleBar text="Home" />
             </div>
-            <div className="text-3xl font-bold text-gray-300 dark:text-gray-200 ml-5">
+            <div className="text-3xl font-bold text-gray-300 dark:text-gray-200">
                 {user && profile ? (
                     <div>
-                        <p>Hello, {profile.first_name}!</p>
-                        <button onClick={logoutUser} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
+                        <p className="ml-5">Hello, {profile.first_name}!</p>
+                        <button onClick={logoutUser} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full ml-5">Logout</button>
+
+                        {/* Full-width scrollable subject div */}
+                        <div>
+                            <p className="ml-5">Jump in</p>
+                            <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
+                                {subjects.map((subject, index) => (
+                                    <div 
+                                        key={index} 
+                                        className={`flex-shrink-0 w-1/4 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
+                                    >
+                                        <SubjectBlock
+                                            bgCol={subject.bgCol}
+                                            subject={subject}
+                                            user={user}
+                                            home
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
                     </div>
                 ) : (
                     <p>Loading...</p>
