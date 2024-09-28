@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
 import { useState } from "react";
 import BackgroundButton from "../Elements/BackgroundButton";
+import { useNavigate } from "react-router-dom";
 
 function TitleBar( { text }) {
 
@@ -80,16 +80,19 @@ function TitleBar( { text }) {
 
 export default TitleBar;
 
-function LinkButton( { text, img } ) {
-
+function LinkButton({ text, img }) {
+  const navigate = useNavigate();
   const textLower = text.toLowerCase();
 
+  const handleClick = () => {
+    // Pass null subject to force refresh
+    navigate(`/${textLower}`, { state: { subject: null } });
+  };
+
   return (
-    <Link to={`/${textLower}`}>
-        <div className="flex items-center justify-start hover:bg-green-400 p-1 w-full rounded-3xl">
-        {img} {/* Show the image */}
-        <span className="ml-2">{text}</span> {/* Show the text */}
-        </div>
-    </Link>
+    <div onClick={handleClick} className="flex items-center justify-start hover:bg-green-400 p-1 w-full rounded-3xl cursor-pointer">
+      {img}
+      <span className="ml-2">{text}</span>
+    </div>
   );
 }

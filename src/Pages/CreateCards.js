@@ -34,6 +34,12 @@ function CreateCards() {
       return;
     }
 
+    if (subject === null) {
+      setCards([]);
+      setLoading(false);
+      return;
+    }
+
     if (subject) {
       const loadCards = async () => {
         setLoading(true);

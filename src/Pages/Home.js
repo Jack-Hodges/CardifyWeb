@@ -42,6 +42,11 @@ function Home() {
         
     }, [user, navigate, getUser, setProfile]);
 
+    const logoutUser = () => {
+        logout()
+        navigate('/');
+    }
+
     return (
         <div className="w-screen h-full overflow-auto">
             <div className="mt-2 mb-2">
@@ -51,7 +56,7 @@ function Home() {
                 {user && profile ? (
                     <div>
                         <p>Hello, {profile.first_name}!</p>
-                        <button onClick={logout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
+                        <button onClick={logoutUser} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full">Logout</button>
                     </div>
                 ) : (
                     <p>Loading...</p>

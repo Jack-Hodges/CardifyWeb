@@ -38,6 +38,12 @@ function FlashcardQuiz() {
       return;
     }
 
+    if (subject === null) {
+      setCards([]);
+      setLoading(false);
+      return;
+    }
+
     if (subject) {
       const loadCards = async () => {
         setLoading(true); // Start loading
@@ -75,6 +81,7 @@ function FlashcardQuiz() {
                 flipped={flipped}
                 setFlipped={setFlipped}
                 animateFlip={animateFlip}
+                practice
               />
             ) : (
               <div className="flex flex-col justify-center items-center w-full h-full">

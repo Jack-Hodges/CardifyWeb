@@ -3,7 +3,7 @@ import IconButtons from './IconButtons'; // Import the IconButtons component
 import EditModal from './EditModal'; // Import the EditModal component
 import DeleteModal from './DeleteModal'; // Import the DeleteModal component
 
-function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit, user }) {
+function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit, practice, user }) {
     const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
     const [newBackContent, setNewBackContent] = useState(backContent); // Card content state
     const [modalFrontContent, setModalFrontContent] = useState(frontContent); // Modal content state
@@ -87,10 +87,10 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
                 }}
             >
-                <CardContent rotate={"rotateY(0deg)"} content={newFrontContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} edit={edit} align={frontAlign}/>
+                <CardContent rotate={"rotateY(0deg)"} content={newFrontContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} edit={edit} align={frontAlign} practice={practice}/>
 
                 {/* Back card */}
-                <CardContent rotate={"rotateY(180deg)"} content={newBackContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} back edit={edit} align={backAlign}/>
+                <CardContent rotate={"rotateY(180deg)"} content={newBackContent} onClickDelete={handleDeleteClick} onClickEdit={handleEditClick} back edit={edit} align={backAlign} practice={practice}/>
                 
             </div>
 
@@ -121,7 +121,7 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
 
 export default Card;
 
-function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back, alignment, align }) {
+function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, practice, back, alignment, align }) {
 
     return (
         <div
@@ -138,6 +138,22 @@ function CardContent({ rotate, content, onClickDelete, onClickEdit, edit, back, 
                         </svg>
                     </div>
                     <IconButtons onEditClick={onClickEdit} />
+                </div>
+            )}
+            {practice && (
+                <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-8 text-gray-700 dark:text-gray-500"
+                    >
+                        <path
+                            fillRule="evenodd"
+                            d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
                 </div>
             )}
         </div>
