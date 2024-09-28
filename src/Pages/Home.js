@@ -5,6 +5,7 @@ import { fetchSubjects } from "../components/Subject/SubjectManipulation";
 import { fetchProfile } from "../components/Profile/ProfileManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
+import BackgroundButton from "../components/Elements/BackgroundButton";
 
 
 function Home() {
@@ -49,12 +50,16 @@ function Home() {
         navigate('/');
     }
 
+    const goToDashboard = () => {
+        navigate('/dashboard');
+    }
+
     return (
         <div className="w-screen h-full overflow-auto">
             <div className="mt-2 mb-2">
                 <TitleBar text="Home" />
             </div>
-            <div className="text-3xl font-bold text-gray-300 dark:text-gray-200">
+            <div className="text-3xl font-bold text-gray-600 dark:text-gray-200">
                 {user && profile ? (
                     <div>
                         <p className="ml-5">Hello, {profile.first_name}!</p>
@@ -62,7 +67,11 @@ function Home() {
 
                         {/* Full-width scrollable subject div */}
                         <div>
-                            <p className="ml-5">Jump in</p>
+                            <div className="flex justify-between ml-5 mr-2">
+                                <p>Jump in</p>
+                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={'purple'}/>
+                            </div>
+                            
                             <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
                                 {subjects.map((subject, index) => (
                                     <div 
