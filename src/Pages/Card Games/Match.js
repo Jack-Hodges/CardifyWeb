@@ -99,39 +99,42 @@ function Match() {
     }
 
     return (
-        <div className=" w-screen h-screen"> {/* Grid layout */}
+        <div className="w-screen h-screen flex flex-col"> {/* Full screen layout */}
             <div className="mt-2 mb-4">
                 <TitleBar text="Practice" />
             </div>
-            
-            <div className="grid grid-cols-5 gap-4 w-auto h-auto mx-4">
-                {shuffledCards.map((card, index) => (
+    
+            <div className="grid grid-cols-5 grid-rows-2 gap-4 w-full h-full p-4">
+                {shuffledCards.slice(0,10).map((card, index) => (
                     <MatchCard
                         key={index}
                         content={card.content}
                         onClick={() => handleCardClick(card)}
-                        isFlipped={flippedCards.some(flipped => flipped.id === card.id && flipped.isFront === card.isFront) || matchedCards.includes(card.id)}
+                        isFlipped={flippedCards.some(
+                            (flipped) =>
+                                flipped.id === card.id && flipped.isFront === card.isFront
+                        ) || matchedCards.includes(card.id)}
                         isMatched={matchedCards.includes(card.id)}
                     />
                 ))}
             </div>
-            
         </div>
     );
 }
 
 export default Match;
-
+    
 function MatchCard({ content, onClick, isFlipped, isMatched }) {
-
     return (
         <div
-            className={`rounded-3xl w-full h-[385px] p-4 flex items-center justify-center cursor-pointer background-shadow background-hover bg-white`}
+            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer background-shadow background-hover bg-white`}
             onClick={onClick}
-            style={{ userSelect: 'none' }} // Prevent text from being highlighted
+            style={{ userSelect: "none" }} // Prevent text from being highlighted
         >
             {isFlipped ? (
-                <p className="text-center text-2xl font-bold" style={{ userSelect: 'none' }}>{content}</p> // Apply no highlighting here too
+                <p className="text-center text-2xl font-bold" style={{ userSelect: "none" }}>
+                    {content}
+                </p>
             ) : (
                 <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" />
             )}

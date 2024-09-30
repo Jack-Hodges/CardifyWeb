@@ -91,3 +91,7 @@ export const deleteCard = async (cards, cardId, currentCardIndex, setCards, setC
   } else {
   }
 };
+
+export const sortCardsById = (cards) => {
+  return cards.sort((a, b) => a.id - b.id); // Sort numerically by id
+};

@@ -3,7 +3,7 @@ import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchCards, updateCard, addNewCard, deleteCard } from '../components/Card/CardManipulation';
+import { fetchCards, updateCard, addNewCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
@@ -44,6 +44,7 @@ function CreateCards() {
       const loadCards = async () => {
         setLoading(true);
         const data = await fetchCards(subject.id);
+        sortCardsById(data);
         setCards(data);
         setLoading(false);
       };
@@ -60,6 +61,7 @@ function CreateCards() {
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
     await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id);
     const updatedCards = await fetchCards(subject.id);
+    sortCardsById(updatedCards);
     setCards(updatedCards);
   };
 

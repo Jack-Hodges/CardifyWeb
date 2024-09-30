@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchCards } from "../components/Card/CardManipulation";
+import { fetchCards, sortCardsById } from "../components/Card/CardManipulation";
 import Card from "../components/Card/Card";
 import CardControls from "../components/Card/CardControls";
 import TitleBar from '../components/Navigation/TitleBar';
@@ -48,6 +48,7 @@ function FlashcardQuiz() {
       const loadCards = async () => {
         setLoading(true); // Start loading
         const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
+        sortCardsById(data);
         setCards(data);
         setLoading(false); // Stop loading
       };

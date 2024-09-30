@@ -83,12 +83,39 @@ function Home() {
             <div className="text-3xl font-bold text-gray-600 dark:text-gray-200">
                 {user && profile ? (
                     <div>
-                        <p className="ml-5">Hello, {profile.first_name}!</p>
-                        <button onClick={logoutUser} className="mt-4 px-4 py-2 bg-red-500 text-white rounded-full ml-5">Logout</button>
+                        {/* Welcome top section */}
+                        <div className="mx-5">
+                            <div className="flex justify-between">
+                                <p className="text-5xl font-bold">Welcome back, {profile.first_name}!</p>
+                                <button onClick={logoutUser} className="px-4 py-2 bg-red-500 text-white rounded-full ml-5">Logout</button>
+                            </div>
+                            
+                            <p className="font-normal">🔥 30 days</p>
+                            
+                        </div>
+                        
+                        <div>
+                            <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                                <p>In Progress</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                                <p>Continue Learning</p>
+                            </div>
+
+                            {/* Learning buttons flex */}
+                            <div className="flex ml-5 gap-4">
+                                <JumpButton text="Create" img={Plus} color="text-red-400"/>
+                                <JumpButton text="Practice" img={Play} color="text-orange-400"/>
+                                <JumpButton text="Match" img={Cards} color="text-yellow-400"/>
+                            </div>
+                        </div>
 
                         {/* Full-width scrollable subject div */}
                         <div>
-                            <div className="flex justify-between ml-5 mr-2">
+                            <div className="flex justify-between ml-5 mr-2 mt-6">
                                 <p>Jump in</p>
                                 <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={'purple'}/>
                             </div>
@@ -97,7 +124,7 @@ function Home() {
                                 {subjects.map((subject, index) => (
                                     <div 
                                         key={index} 
-                                        className={`flex-shrink-0 w-1/2 sm:w-1/4 xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
+                                        className={`flex-shrink-0 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
                                     >
                                         <SubjectBlock
                                             bgCol={subject.bgCol}
@@ -107,19 +134,6 @@ function Home() {
                                         />
                                     </div>
                                 ))}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between ml-5 mr-2">
-                                <p>Continue Learning</p>
-                            </div>
-
-                            {/* Learning buttons flex */}
-                            <div className="flex ml-5 gap-4">
-                                <JumpButton text="Create" img={Plus} color="text-red-400"/>
-                                <JumpButton text="Practice" img={Play} color="text-orange-400"/>
-                                <JumpButton text="Match" img={Cards} color="text-yellow-400"/>
                             </div>
                         </div>
                         
@@ -140,6 +154,14 @@ function JumpButton( { text, img, color }) {
         <div className={`flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}>
             {img}
             <p>{text}</p>
+        </div>
+    );
+}
+
+function InProgress( { subject }) {
+    return (
+        <div className="">
+
         </div>
     );
 }
