@@ -6,6 +6,7 @@ import { fetchProfile } from "../components/Profile/ProfileManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
+import { getColor } from "../components/Functions/getColor";
 
 
 function Home() {
@@ -21,6 +22,9 @@ function Home() {
         // If there's no user after session is loaded, redirect to login
         if (!user) {
             getUser();
+            if (!user) {
+                navigate('/');
+            }
             return;
         }
     
@@ -73,7 +77,7 @@ function Home() {
             <path d="M13.208 15.312C13.1091 15.1636 12.8909 15.1636 12.792 15.312L12.0924 16.3613C12.0365 16.4453 12.0365 16.5547 12.0924 16.6387L12.792 17.688C12.8909 17.8364 13.1091 17.8364 13.208 17.688L13.9075 16.6387C13.9635 16.5547 13.9635 16.4453 13.9075 16.3613L13.208 15.312Z"/>
             <path fill-rule="evenodd" clip-rule="evenodd" d="M1 4C1 2.34315 2.34315 1 4 1H14C15.1323 1 16.1181 1.62732 16.6288 2.55337L20.839 3.68148C22.4394 4.11031 23.3891 5.75532 22.9603 7.35572L19.3368 20.8787C18.908 22.4791 17.263 23.4288 15.6626 23L8.19849 21H4C2.34315 21 1 19.6569 1 18V4ZM17 18V4.72339L20.3213 5.61334C20.8548 5.75628 21.1714 6.30461 21.0284 6.83808L17.405 20.361C17.262 20.8945 16.7137 21.2111 16.1802 21.0681L15.1198 20.784C16.222 20.3403 17 19.261 17 18ZM4 3C3.44772 3 3 3.44772 3 4V18C3 18.5523 3.44772 19 4 19H14C14.5523 19 15 18.5523 15 18V4C15 3.44772 14.5523 3 14 3H4Z"/>
         </svg>
-    )
+    );
 
     return (
         <div className="w-screen h-full overflow-auto">
@@ -97,6 +101,16 @@ function Home() {
                         <div>
                             <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
                                 <p>In Progress</p>
+                            </div>
+                            <div className="grid grid-cols-4 px-5 gap-4">
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
+                                <InProgress />
                             </div>
                         </div>
 
@@ -158,10 +172,62 @@ function JumpButton( { text, img, color }) {
     );
 }
 
-function InProgress( { subject }) {
-    return (
-        <div className="">
+function InProgress({ subject }) {
+    const colors = getColor(subject ? subject.bgCol : 'red');
 
+    const navigate = useNavigate();
+
+    const navigateClick = () => {
+        navigate('/practice', { state: { subject } });
+    }
+  
+    var percentage = 50;
+    // Calculate the percentage
+    // if (!subject.up_to_index === null) {
+    //     percentage = (subject.up_to_index / subject.flashcard_count) * 100;
+    // } else {
+    //     percentage = 50;
+    // }
+    
+  
+    // Define circle properties
+    const strokeWidth = 6; // Adjusted stroke width
+    const svgSize = 62;    // SVG width and height
+    const center = svgSize / 2;
+    const radius = center - strokeWidth / 2; // Calculate radius to fit within SVG
+
+    const circumference = 2 * Math.PI * radius;
+
+    // Calculate stroke offset based on percentage
+    const strokeDashoffset =
+        circumference - (percentage / 100) * circumference;
+  
+    return (
+      <div
+        className={`flex items-center justify-between p-2 h-20 rounded-lg text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+        onClick={navigateClick}
+      >
+        {/* <p>{subject.name}</p> */}
+        <p>Biology</p> 
+        <svg width={svgSize} height={svgSize}>
+            <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke="white"
+            strokeWidth={strokeWidth}
+            fill="none"
+            style={{
+                strokeDasharray: circumference,
+                strokeDashoffset: strokeDashoffset,
+                transform: 'rotate(-90deg)',
+                transformOrigin: '50% 50%',
+            }}
+            />
+        </svg>
+        <div className="absolute right-5 text-sm">
+            <p>{percentage}%</p>
         </div>
+      </div>
     );
-}
+  }

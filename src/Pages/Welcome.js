@@ -77,7 +77,7 @@ function Welcome() {
         } else {
           console.log("Profile created successfully");
           setUser(user);
-          navigate('/dashboard'); // Redirect to dashboard after successful sign-up and profile creation
+          navigate('/home'); // Redirect to dashboard after successful sign-up and profile creation
         }
       }
     } else {
@@ -92,7 +92,7 @@ function Welcome() {
       } else {
         console.log("Logged in!", data);
         setUser(data.user); // Set the user globally in context
-        navigate('/dashboard'); // Redirect to dashboard
+        navigate('/home'); // Redirect to dashboard
       }
     }
   };
