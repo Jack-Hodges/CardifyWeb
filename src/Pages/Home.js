@@ -59,23 +59,23 @@ function Home() {
     }
 
     const Plus = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-32">
-            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clip-rule="evenodd" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">
+            <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" />
         </svg>
     );
 
     const Play = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-32">
-            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">
+            <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clipRule="evenodd" />
         </svg>
     );
     
     const Cards = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-32">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">
             <path d="M9.4 7.53333C9.2 7.26667 8.8 7.26667 8.6 7.53333L6.225 10.7C6.09167 10.8778 6.09167 11.1222 6.225 11.3L8.6 14.4667C8.8 14.7333 9.2 14.7333 9.4 14.4667L11.775 11.3C11.9083 11.1222 11.9083 10.8778 11.775 10.7L9.4 7.53333Z"/>
             <path d="M4.09245 5.63868C4.03647 5.5547 4.03647 5.4453 4.09245 5.36133L4.79199 4.31202C4.89094 4.16359 5.10906 4.16359 5.20801 4.31202L5.90755 5.36132C5.96353 5.4453 5.96353 5.5547 5.90755 5.63867L5.20801 6.68798C5.10906 6.83641 4.89094 6.83641 4.79199 6.68798L4.09245 5.63868Z"/>
             <path d="M13.208 15.312C13.1091 15.1636 12.8909 15.1636 12.792 15.312L12.0924 16.3613C12.0365 16.4453 12.0365 16.5547 12.0924 16.6387L12.792 17.688C12.8909 17.8364 13.1091 17.8364 13.208 17.688L13.9075 16.6387C13.9635 16.5547 13.9635 16.4453 13.9075 16.3613L13.208 15.312Z"/>
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M1 4C1 2.34315 2.34315 1 4 1H14C15.1323 1 16.1181 1.62732 16.6288 2.55337L20.839 3.68148C22.4394 4.11031 23.3891 5.75532 22.9603 7.35572L19.3368 20.8787C18.908 22.4791 17.263 23.4288 15.6626 23L8.19849 21H4C2.34315 21 1 19.6569 1 18V4ZM17 18V4.72339L20.3213 5.61334C20.8548 5.75628 21.1714 6.30461 21.0284 6.83808L17.405 20.361C17.262 20.8945 16.7137 21.2111 16.1802 21.0681L15.1198 20.784C16.222 20.3403 17 19.261 17 18ZM4 3C3.44772 3 3 3.44772 3 4V18C3 18.5523 3.44772 19 4 19H14C14.5523 19 15 18.5523 15 18V4C15 3.44772 14.5523 3 14 3H4Z"/>
+            <path fillRule="evenodd" clipRule="evenodd" d="M1 4C1 2.34315 2.34315 1 4 1H14C15.1323 1 16.1181 1.62732 16.6288 2.55337L20.839 3.68148C22.4394 4.11031 23.3891 5.75532 22.9603 7.35572L19.3368 20.8787C18.908 22.4791 17.263 23.4288 15.6626 23L8.19849 21H4C2.34315 21 1 19.6569 1 18V4ZM17 18V4.72339L20.3213 5.61334C20.8548 5.75628 21.1714 6.30461 21.0284 6.83808L17.405 20.361C17.262 20.8945 16.7137 21.2111 16.1802 21.0681L15.1198 20.784C16.222 20.3403 17 19.261 17 18ZM4 3C3.44772 3 3 3.44772 3 4V18C3 18.5523 3.44772 19 4 19H14C14.5523 19 15 18.5523 15 18V4C15 3.44772 14.5523 3 14 3H4Z"/>
         </svg>
     );
 
@@ -103,14 +103,10 @@ function Home() {
                                 <p>In Progress</p>
                             </div>
                             <div className="grid grid-cols-4 px-5 gap-4">
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
-                                <InProgress />
+                                <InProgress name="Biology" bgCol="red" cards={3}/>
+                                <InProgress name="Algorithms" bgCol="purple" cards={7}/>
+                                <InProgress name="Chemistry" bgCol="emerald" cards={5}/>
+                                <InProgress name="Physics" bgCol="orange" cards={11}/>
                             </div>
                         </div>
 
@@ -172,27 +168,33 @@ function JumpButton( { text, img, color }) {
     );
 }
 
-function InProgress({ subject }) {
-    const colors = getColor(subject ? subject.bgCol : 'red');
+// function InProgress({ subject }) {
+function InProgress({ name, bgCol, cards }) {
+    // const colors = getColor(subject ? subject.bgCol : 'red');
+    const colors = getColor(bgCol);
 
     const navigate = useNavigate();
 
     const navigateClick = () => {
-        navigate('/practice', { state: { subject } });
+        // navigate('/practice', { state: { subject } });
     }
   
-    var percentage = 50;
+    var percentage = Math.round((cards / 12) * 100, 0);
     // Calculate the percentage
     // if (!subject.up_to_index === null) {
     //     percentage = (subject.up_to_index / subject.flashcard_count) * 100;
     // } else {
     //     percentage = 50;
     // }
+
+    var cardsRemaining = cards;
+
+    // cardsRemaining = subject.flashcard_count - subject.up_to_index;
     
   
     // Define circle properties
     const strokeWidth = 6; // Adjusted stroke width
-    const svgSize = 62;    // SVG width and height
+    const svgSize = 80;    // SVG width and height
     const center = svgSize / 2;
     const radius = center - strokeWidth / 2; // Calculate radius to fit within SVG
 
@@ -204,12 +206,26 @@ function InProgress({ subject }) {
   
     return (
       <div
-        className={`flex items-center justify-between p-2 h-20 rounded-lg text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+        className={`flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
         onClick={navigateClick}
       >
         {/* <p>{subject.name}</p> */}
-        <p>Biology</p> 
+        <div>
+            <p>{name}</p> 
+            <p className="text-sm">{cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining</p>
+        </div>
+        
         <svg width={svgSize} height={svgSize}>
+            {/* Background Circle */}
+            <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke="rgba(255, 255, 255, 0.2)"
+            strokeWidth={strokeWidth}
+            fill="none"
+            />
+            {/* Progress Circle with Rounded Stroke Ends */}
             <circle
             cx={center}
             cy={center}
@@ -217,6 +233,7 @@ function InProgress({ subject }) {
             stroke="white"
             strokeWidth={strokeWidth}
             fill="none"
+            strokeLinecap="round" // Added this line
             style={{
                 strokeDasharray: circumference,
                 strokeDashoffset: strokeDashoffset,
@@ -225,7 +242,7 @@ function InProgress({ subject }) {
             }}
             />
         </svg>
-        <div className="absolute right-5 text-sm">
+        <div className="absolute right-6 text-lg">
             <p>{percentage}%</p>
         </div>
       </div>

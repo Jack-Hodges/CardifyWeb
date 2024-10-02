@@ -1,62 +1,85 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchCards, sortCardsById } from "../components/Card/CardManipulation";
 import Card from "../components/Card/Card";
 import CardControls from "../components/Card/CardControls";
 import TitleBar from '../components/Navigation/TitleBar';
-import { useLocation } from 'react-router-dom'; // Import useLocation
+import { useLocation } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import SubjectList from '../components/Subject/SubjectList';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from React Router
+import { useNavigate } from 'react-router-dom';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
   const [animateFlip] = useState(true);
-  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
-  const location = useLocation(); // Access location object
+  const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser } = useUser();
-
   const navigate = useNavigate();
 
+  const currentCardIndexRef = useRef(currentCardIndex);
+  const cardsLengthRef = useRef(cards.length);
+
   const handleOpenSubjectListModal = () => {
-    setIsSubjectListModalOpen(true); // Open SubjectList modal
+    setIsSubjectListModalOpen(true);
   };
 
   const handleSwitchToCreate = () => {
     navigate('/create', { state: { subject } });
-  }
+  };
+
+  const handleExitBeforeCompletion = () => {
+    console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
+    console.log(`Practice exited before completing all cards. Current card length: ${cardsLengthRef.current}`); // Correctly accessing .current
+    if (currentCardIndexRef.current < cardsLengthRef.current - 1) {
+      console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
+      // Add additional logic here, such as saving progress or an API call
+    }
+  };
 
   useEffect(() => {
+    // Keep currentCardIndexRef in sync with currentCardIndex
+    currentCardIndexRef.current = currentCardIndex;
+  }, [currentCardIndex]);
 
+  useEffect(() => {
+    // Keep cardsLengthRef in sync with cards length
+    cardsLengthRef.current = cards.length;
+  }, [cards]);
+
+  useEffect(() => {
     if (!user) {
       getUser();
       return;
     }
 
-    if (subject === null) {
-      setCards([]);
-      setLoading(false);
-      return;
-    }
-
-    if (subject) {
+    // Only fetch cards if there is a valid subject and cards are not already loaded
+    if (subject && cards.length === 0) {
       const loadCards = async () => {
-        setLoading(true); // Start loading
-        const data = await fetchCards(subject.id); // Fetch flashcards with subject_id
-        sortCardsById(data);
-        setCards(data);
-        setLoading(false); // Stop loading
+        setLoading(true);
+        const data = await fetchCards(subject.id);
+        if (data.length > 0) {
+          sortCardsById(data);
+          setCards(data);
+        }
+        setLoading(false);
       };
 
       loadCards();
-    } else {
-      setLoading(false); // Stop loading if no subject
+    } else if (!subject) {
+      setCards([]); // Clear cards if there's no subject
+      setLoading(false);
     }
+
+    // The return function is the cleanup function that runs when the component is unmounted
+    return () => {
+      handleExitBeforeCompletion();
+    };
   }, [subject, user, getUser]);
 
   return (

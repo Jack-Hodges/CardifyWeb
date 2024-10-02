@@ -67,7 +67,7 @@ function SubjectRow( { subject, onClose, page }) {
     return (
         <div 
             key={subject.id} 
-            class={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-shadow background-hover`}
+            className={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-shadow background-hover`}
             onClick={handleCreateClick}>
             <p>{subject.name}</p>
             <p>{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
