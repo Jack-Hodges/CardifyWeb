@@ -102,12 +102,6 @@ function Home() {
                             <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
                                 <p>In Progress</p>
                             </div>
-                            {/* <div className="grid grid-cols-4 px-5 gap-4">
-                                <InProgress name="Biology" bgCol="red" cards={3}/>
-                                <InProgress name="Algorithms" bgCol="purple" cards={7}/>
-                                <InProgress name="Chemistry" bgCol="emerald" cards={5}/>
-                                <InProgress name="Physics" bgCol="orange" cards={11}/>
-                            </div> */}
 
                             <div className="grid grid-cols-4 px-5 gap-4">
                                 {subjects
