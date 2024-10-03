@@ -127,6 +127,7 @@ function FlashcardQuiz() {
               secondActionText="Yes, continue"
               firstActionCol="gray"
               secondActionCol="green"
+              titleCol='text-green-500'
             />
 
             {loading ? (

@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate from React
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import DeleteModal from '../components/Card/DeleteModal';
 import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation'; // Import the service functions
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
+import Modal from '../components/Modal/Modal';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -214,12 +214,15 @@ function Dashboard() {
         subject={editingSubject} // Pass subject if editing, otherwise null
         text={editingSubject ? "Edit Subject" : "Add New Subject"} // Dynamic modal title
       />
-  
-      <DeleteModal
+
+      <Modal
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onDelete={() => handleRemoveSubject(subjectToDelete.id)} // Perform delete on confirmation
-        text={`Delete Subject`}
+        onFirstAction={() => setIsDeleteModalOpen(false)}
+        onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
+        text="Delete Subject"
+        mainText="This cannot be undone."
+        firstActionText={"Cancel"}
+        secondActionText={"Delete"}
       />
     </div>
   );

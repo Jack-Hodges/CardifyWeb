@@ -2,9 +2,9 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'gray', secondActionCol = 'red'}) {
+function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'gray', secondActionCol = 'red', titleCol = 'text-red-500'}) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
-    const [isClosing] = useState(false); // State to track if the modal is closing
+    const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
 
     // Handle the modal appearing (fade in) when isOpen changes
     useEffect(() => {
@@ -14,6 +14,27 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
             setIsVisible(false); // Hide modal after animation if not closing
         }
     }, [isOpen, isClosing]);
+
+    const handleClose = (event) => {
+        if (event) {
+            event.stopPropagation(); // Only stop propagation if event exists
+        }
+        setIsClosing(true); // Start the closing animation
+        setTimeout(() => {
+            setIsClosing(false); // Reset closing state after animation
+            setIsVisible(false); // Hide the modal after it fades out
+        }, 300); // 300ms to match the duration of the closing animation
+    };
+
+    const handleFirstAction = () => {
+        onFirstAction();
+        handleClose();
+    }
+
+    const handleSecondAction = () => {
+        onSecondAction();
+        handleClose();
+    }
 
     if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
 
@@ -37,7 +58,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
             >
-                <h2 className="text-2xl font-semibold mb-6 text-blue-500">
+                <h2 className={`text-2xl font-semibold mb-6 ${titleCol}`}>
                     {text}
                 </h2>
 
@@ -47,8 +68,8 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
-                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} onClick={(e) => onFirstAction(e)} />
-                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} onClick={(e) => onSecondAction(e)} />
+                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} onClick={(e) => handleFirstAction(e)} />
+                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} onClick={(e) => handleSecondAction(e)} />
                 </div>
             </div>
         </div>,

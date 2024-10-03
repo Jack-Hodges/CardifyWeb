@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import IconButtons from './IconButtons'; // Import the IconButtons component
 import EditModal from './EditModal'; // Import the EditModal component
-import DeleteModal from './DeleteModal'; // Import the DeleteModal component
+import Modal from '../Modal/Modal';
 
 function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onUpdateCard, cardId, onDeleteCard, edit, practice, user }) {
     const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
@@ -107,13 +107,14 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
                 alignment={alignment}
             />
 
-            {/* Delete Confirmation Modal */}
-            <DeleteModal
+            <Modal
                 isOpen={isDeleteModalOpen}
-                onClose={cancelDelete}
-                onDelete={confirmDeleteCard}
-                text="Delete Flashcard"
-                alignment={alignment}
+                onFirstAction={cancelDelete}
+                onSecondAction={confirmDeleteCard}
+                text={"Delete Flashcard"}
+                mainText={"Are you sure you want to delete this item? This action cannot be undone."}
+                firstActionText={"Cancel"}
+                secondActionText={"Delete"}
             />
         </div>
     );
