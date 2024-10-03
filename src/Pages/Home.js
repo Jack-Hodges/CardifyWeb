@@ -112,6 +112,7 @@ function Home() {
                             <div className="grid grid-cols-4 px-5 gap-4">
                                 {subjects
                                     .filter(subject => subject.up_to_index !== null)
+                                    .slice(0, 4)
                                     .map((subject, index) => (
                                         <InProgress key={index} subject={subject} />
                                     ))

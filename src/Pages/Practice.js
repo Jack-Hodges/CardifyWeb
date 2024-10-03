@@ -9,6 +9,7 @@ import BackgroundButton from '../components/Elements/BackgroundButton';
 import SubjectList from '../components/Subject/SubjectList';
 import { useNavigate } from 'react-router-dom';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
+import Modal from '../components/Modal/Modal';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -34,8 +35,17 @@ function FlashcardQuiz() {
     navigate('/create', { state: { subject } });
   };
 
+  const [isModalOpen, setIsModalOpen] = useState(false); // To control the modal
+
+  // Function to handle closing the modal with animation
+  const handleClose = () => {
+    setTimeout(() => {
+      setIsModalOpen(false);
+    }, 100); // Match this duration with your transition timing (300ms in this case)
+  };
+
   const handleExitBeforeCompletion = useCallback(() => {
-    if (currentCardIndexRef.current < cardsLengthRef.current - 1) {
+    if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
       console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
       saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current);
       // Add additional logic here, such as saving progress or an API call
@@ -53,6 +63,12 @@ function FlashcardQuiz() {
     // Keep cardsLengthRef in sync with cards length
     cardsLengthRef.current = cards.length;
   }, [cards]);
+
+  useEffect(() => {
+    if (subject?.up_to_index !== null) {
+      setIsModalOpen(true);
+    }
+  }, [subject?.up_to_index]);
 
   useEffect(() => {
     if (!user) {
@@ -93,6 +109,26 @@ function FlashcardQuiz() {
       <div className="flex w-full h-full">
         <div className="w-full sm:w-4/5 h-[90%] sm:h-full flex flex-col mt-5 mx-auto">
           <div className="w-full h-[85%] sm:h-[70%] mt-4 px-5">
+
+            {/* Use the Modal component here */}
+            <Modal 
+              isOpen={isModalOpen}
+              onFirstAction={() => {
+                setCurrentCardIndex(0); // Start from the beginning
+                handleClose();
+              }}
+              onSecondAction={() => {
+                setCurrentCardIndex(subject.up_to_index); // Continue from last saved progress
+                handleClose();
+              }}
+              text="Continue where you left off?"
+              mainText={`You were up to card ${subject.up_to_index + 1}. Would you like to continue from there?`}
+              firstActionText="No, start over"
+              secondActionText="Yes, continue"
+              firstActionCol="gray"
+              secondActionCol="green"
+            />
+
             {loading ? (
               // Skeleton loader while loading
               <div className="animate-pulse flex flex-col space-y-4">
