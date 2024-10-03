@@ -68,7 +68,7 @@ function FlashcardQuiz() {
     if (subject && subject.up_to_index !== null) {
       setIsModalOpen(true);
     }
-  }, [subject?.up_to_index]);
+  }, [subject, subject?.up_to_index]);
 
   useEffect(() => {
     if (!user) {
