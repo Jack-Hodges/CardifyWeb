@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { fetchCards, sortCardsById } from "../components/Card/CardManipulation";
 import Card from "../components/Card/Card";
 import CardControls from "../components/Card/CardControls";
@@ -34,15 +34,15 @@ function FlashcardQuiz() {
     navigate('/create', { state: { subject } });
   };
 
-  const handleExitBeforeCompletion = () => {
+  const handleExitBeforeCompletion = useCallback(() => {
     if (currentCardIndexRef.current < cardsLengthRef.current - 1) {
       console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
-      saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current)
+      saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current);
       // Add additional logic here, such as saving progress or an API call
     } else if (subject) {
-      saveSubject(subject.id, subject.name, subject.bgCol, user.id)
+      saveSubject(subject.id, subject.name, subject.bgCol, user.id);
     }
-  };
+  }, [currentCardIndexRef, cardsLengthRef, subject, user]);
 
   useEffect(() => {
     // Keep currentCardIndexRef in sync with currentCardIndex
@@ -82,7 +82,7 @@ function FlashcardQuiz() {
     return () => {
       handleExitBeforeCompletion();
     };
-  }, [subject, user, getUser, cards.length]);
+  }, [subject, user, getUser, cards.length, handleExitBeforeCompletion]);
 
   return (
     <div className="w-screen h-[100dvh] relative">
