@@ -65,7 +65,7 @@ function FlashcardQuiz() {
   }, [cards]);
 
   useEffect(() => {
-    if (subject?.up_to_index !== null) {
+    if (subject && subject.up_to_index !== null) {
       setIsModalOpen(true);
     }
   }, [subject?.up_to_index]);
@@ -118,11 +118,11 @@ function FlashcardQuiz() {
                 handleClose();
               }}
               onSecondAction={() => {
-                setCurrentCardIndex(subject.up_to_index); // Continue from last saved progress
+                setCurrentCardIndex(subject?.up_to_index); // Continue from last saved progress
                 handleClose();
               }}
               text="Continue where you left off?"
-              mainText={`You were up to card ${subject.up_to_index + 1}. Would you like to continue from there?`}
+              mainText={`You were up to card ${subject?.up_to_index + 1}. Would you like to continue from there?`}
               firstActionText="No, start over"
               secondActionText="Yes, continue"
               firstActionCol="gray"

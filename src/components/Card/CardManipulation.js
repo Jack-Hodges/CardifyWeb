@@ -45,8 +45,9 @@ export const updateCard = async (cards, currentCardIndex, updatedFrontContent, u
 };
 
 // Function to add a new card
-export const addNewCard = async (cards, newFrontContent, newBackContent, setCards, subjectId) => {
+export const addNewCard = async (cards, newFrontContent, newBackContent, setCards, subjectId, userId) => {
   const newCard = {
+    user_id: userId,
     question: newFrontContent,
     answer: newBackContent,
     subject_id: subjectId

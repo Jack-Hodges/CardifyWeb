@@ -59,7 +59,7 @@ function CreateCards() {
   };
 
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
-    await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id);
+    await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id, user.id);
     const updatedCards = await fetchCards(subject.id);
     sortCardsById(updatedCards);
     setCards(updatedCards);
