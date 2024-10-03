@@ -8,6 +8,7 @@ import { useUser } from '../UserContext';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import SubjectList from '../components/Subject/SubjectList';
 import { useNavigate } from 'react-router-dom';
+import { saveSubject } from '../components/Subject/SubjectManipulation';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -34,11 +35,12 @@ function FlashcardQuiz() {
   };
 
   const handleExitBeforeCompletion = () => {
-    console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
-    console.log(`Practice exited before completing all cards. Current card length: ${cardsLengthRef.current}`); // Correctly accessing .current
     if (currentCardIndexRef.current < cardsLengthRef.current - 1) {
       console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
+      saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current)
       // Add additional logic here, such as saving progress or an API call
+    } else if (subject) {
+      saveSubject(subject.id, subject.name, subject.bgCol, user.id)
     }
   };
 

@@ -19,19 +19,19 @@ export const fetchSubjects = async (userId) => {
 };
 
 // Add or update subject
-export const saveSubject = async (id, subjectName, subjectColor, userId) => {
+export const saveSubject = async (id, subjectName, subjectColor, userId, upToIndex = null) => {
   try {
     if (id) {
       // Update existing subject
       await supabase
         .from('subjects')
-        .update({ name: subjectName, bgCol: subjectColor })
+        .update({ name: subjectName, bgCol: subjectColor, up_to_index: upToIndex})
         .eq('id', id);
     } else {
       // Insert new subject
       const { data, error } = await supabase
         .from('subjects')
-        .insert([{ user_id: userId, name: subjectName, bgCol: subjectColor, flashcard_count: 0 }])
+        .insert([{ user_id: userId, name: subjectName, bgCol: subjectColor, flashcard_count: 0, up_to_index: upToIndex }])
         .select();
       if (error) {
         console.error('Error adding new subject:', error);
