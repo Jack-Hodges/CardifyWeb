@@ -102,11 +102,20 @@ function Home() {
                             <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
                                 <p>In Progress</p>
                             </div>
-                            <div className="grid grid-cols-4 px-5 gap-4">
+                            {/* <div className="grid grid-cols-4 px-5 gap-4">
                                 <InProgress name="Biology" bgCol="red" cards={3}/>
                                 <InProgress name="Algorithms" bgCol="purple" cards={7}/>
                                 <InProgress name="Chemistry" bgCol="emerald" cards={5}/>
                                 <InProgress name="Physics" bgCol="orange" cards={11}/>
+                            </div> */}
+
+                            <div className="grid grid-cols-4 px-5 gap-4">
+                                {subjects
+                                    .filter(subject => subject.up_to_index !== null)
+                                    .map((subject, index) => (
+                                        <InProgress key={index} subject={subject} />
+                                    ))
+                                }
                             </div>
                         </div>
 
@@ -168,83 +177,84 @@ function JumpButton( { text, img, color }) {
     );
 }
 
-// function InProgress({ subject }) {
-function InProgress({ name, bgCol, cards }) {
-    // const colors = getColor(subject ? subject.bgCol : 'red');
-    const colors = getColor(bgCol);
-
+function InProgress({ subject }) {
+    const colors = getColor(subject ? subject.bgCol : 'red');
     const navigate = useNavigate();
+    const [cardsRemaining, setCardsRemaining] = useState(0);
+    const [percentage, setPercentage] = useState(0);
+    const [strokeDashoffset, setStrokeDashoffset] = useState(0);
+
+    const indexToCount = subject.up_to_index + 1;
 
     const navigateClick = () => {
-        // navigate('/practice', { state: { subject } });
-    }
-  
-    var percentage = Math.round((cards / 12) * 100, 0);
-    // Calculate the percentage
-    // if (!subject.up_to_index === null) {
-    //     percentage = (subject.up_to_index / subject.flashcard_count) * 100;
-    // } else {
-    //     percentage = 50;
-    // }
+        navigate('/practice', { state: { subject } });
+    };
 
-    var cardsRemaining = cards;
-
-    // cardsRemaining = subject.flashcard_count - subject.up_to_index;
-    
-  
-    // Define circle properties
+    // Define responsive circle properties
     const strokeWidth = 6; // Adjusted stroke width
-    const svgSize = 80;    // SVG width and height
-    const center = svgSize / 2;
-    const radius = center - strokeWidth / 2; // Calculate radius to fit within SVG
-
+    const radius = 40; // Radius of the circle
     const circumference = 2 * Math.PI * radius;
 
-    // Calculate stroke offset based on percentage
-    const strokeDashoffset =
-        circumference - (percentage / 100) * circumference;
-  
+    useEffect(() => {
+        // Calculate remaining cards and percentage
+        const calculatedRemainingCards = subject.flashcard_count - indexToCount;
+        const calculatedPercentage = Math.round((indexToCount / subject.flashcard_count) * 100, 0);
+
+        // Calculate stroke offset based on percentage
+        const calculatedStrokeDashoffset = circumference - (calculatedPercentage / 100) * circumference;
+
+        // Set the calculated values into state
+        setCardsRemaining(calculatedRemainingCards);
+        setPercentage(calculatedPercentage);
+        setStrokeDashoffset(calculatedStrokeDashoffset);
+
+        console.log(`Flashcard count = ${subject.flashcard_count}`);
+        console.log(`Up to count = ${indexToCount}`);
+    }, [subject, circumference, indexToCount]);
+
     return (
-      <div
-        className={`flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
-        onClick={navigateClick}
-      >
-        {/* <p>{subject.name}</p> */}
-        <div>
-            <p>{name}</p> 
-            <p className="text-sm">{cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining</p>
+        <div
+            className={`flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+            onClick={navigateClick}
+        >
+            <div className="w-3/4">
+                <p>{subject.name}</p>
+                <p className="text-sm">{cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining</p>
+            </div>
+
+            {/* Circle SVG takes 25% of the width */}
+            <div className="w-1/4 flex justify-center items-center">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                    {/* Background Circle */}
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        stroke="rgba(255, 255, 255, 0.2)"
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                    />
+                    {/* Progress Circle */}
+                    <circle
+                        cx="50"
+                        cy="50"
+                        r={radius}
+                        stroke="white"
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                        strokeLinecap="round"
+                        style={{
+                            strokeDasharray: circumference,
+                            strokeDashoffset: strokeDashoffset,
+                            transform: 'rotate(-90deg)',
+                            transformOrigin: '50% 50%',
+                        }}
+                    />
+                </svg>
+                <div className="absolute text-lg">
+                    <p>{percentage}%</p>
+                </div>
+            </div>
         </div>
-        
-        <svg width={svgSize} height={svgSize}>
-            {/* Background Circle */}
-            <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            stroke="rgba(255, 255, 255, 0.2)"
-            strokeWidth={strokeWidth}
-            fill="none"
-            />
-            {/* Progress Circle with Rounded Stroke Ends */}
-            <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            stroke="white"
-            strokeWidth={strokeWidth}
-            fill="none"
-            strokeLinecap="round" // Added this line
-            style={{
-                strokeDasharray: circumference,
-                strokeDashoffset: strokeDashoffset,
-                transform: 'rotate(-90deg)',
-                transformOrigin: '50% 50%',
-            }}
-            />
-        </svg>
-        <div className="absolute right-6 text-lg">
-            <p>{percentage}%</p>
-        </div>
-      </div>
     );
-  }
+}

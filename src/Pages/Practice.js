@@ -82,7 +82,7 @@ function FlashcardQuiz() {
     return () => {
       handleExitBeforeCompletion();
     };
-  }, [subject, user, getUser]);
+  }, [subject, user, getUser, cards.length]);
 
   return (
     <div className="w-screen h-[100dvh] relative">
