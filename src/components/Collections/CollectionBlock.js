@@ -17,8 +17,8 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
             <div className={`${isExpanded ? 'w-4/5 h-4/5' : 'w-full h-56 group background-hover'} relative bg-red-100 dark:bg-gray-700 rounded-xl background-shadow transition duration-300`}>
                 {/* Six squares in the background */}
                 {!isExpanded && (
-                    <div className="absolute inset-0 grid grid-cols-3 grid-rows-2 gap-2 p-5">
-                        {subjects.slice(0, 6).map((subject, index) => {
+                    <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
+                        {subjects.slice(0, 8).map((subject, index) => {
                             const { bgClass } = getColor(subject.bgCol); // Destructure to get bgClass
 
                             return (
