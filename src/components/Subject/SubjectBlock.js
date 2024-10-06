@@ -2,7 +2,7 @@ import { getColor } from "../Functions/getColor";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject, home }) {
+function SubjectBlock({ subject, onEdit, onRemoveSubject, home, collection }) {
     const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
     const navigate = useNavigate();
 
@@ -14,7 +14,7 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject, home }) {
         navigate('/create', { state: { subject } }); // Navigate to CreateCards with subject and user
     };
 
-    const colors = getColor(bgCol);
+    const colors = getColor(subject.bgCol);
 
     return (
         <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
@@ -57,7 +57,7 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject, home }) {
             )}
             
 
-            {!home && (
+            {!home && !collection && (
                 // Edit button
                 <SubjectButton
                     img={
@@ -73,7 +73,7 @@ function SubjectBlock({ bgCol, subject, onEdit, onRemoveSubject, home }) {
                 />
             )}
             
-            {!home && (
+            {!home && !collection && (
                 // Delete button
                 <SubjectButton
                     img={

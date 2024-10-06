@@ -7,6 +7,7 @@ import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
 import Modal from '../components/Modal/Modal';
+import CollectionBlock from '../components/Collections/CollectionBlock';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -17,6 +18,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true); // Loading state
   const [selectedSort, setSelectedSort] = useState('Most Cards'); // Track selected sort option
   const [searchTerm, setSearchTerm] = useState(''); // State to track search input
+  const [selectedCollection, setSelectedCollection] = useState(null); // Track selected collection for overlay
 
   const navigate = useNavigate();
   const { user, loading: userLoading, getUser } = useUser(); // Get user, loading, and getUser from context
@@ -101,6 +103,37 @@ function Dashboard() {
     return 0;
   });
 
+  const handleCollectionClick = (collectionId) => {
+    setSelectedCollection(prev => prev === collectionId ? null : collectionId); // Toggle based on ID
+  };
+
+  const closeOverlay = () => {
+    setSelectedCollection(null); // Close the overlay
+  };
+
+  const collections = [
+    {
+      id: 1,
+      name: "Biology Collection",
+      subjects: sortedSubjects, // Attach all subjects to this collection
+    },
+    {
+      id: 2,
+      name: "Collection 2",
+      subjects: sortedSubjects, // Attach all subjects to this collection
+    },
+    {
+      id: 3,
+      name: "Collection 3",
+      subjects: sortedSubjects, // Attach all subjects to this collection
+    },
+    {
+      id: 4,
+      name: "Collection 4",
+      subjects: sortedSubjects, // Attach all subjects to this collection
+    }
+  ];
+
   return (
     <div className="w-screen h-full overflow-auto">
       <div className="flex w-full justify-between pr-5 mt-2">
@@ -171,27 +204,28 @@ function Dashboard() {
   
       {loading ? (
         // Skeleton loader while loading subjects
-        <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-          <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
-        </div>
+        <DashboardLoading />
       ) : subjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
           {/* Render subjects in the grid */}
           {sortedSubjects.map((subject, index) => (
             <SubjectBlock
               key={index}
-              bgCol={subject.bgCol}
               subject={subject}
               user={user}
               onEdit={() => handleEditSubject(subject)} // Pass subject to edit
               onRemoveSubject={() => confirmDeleteSubject(subject)} // Trigger confirmation modal
+            />
+          ))}
+          {/* Render your CollectionBlock */}
+          {collections.map((collection, index) => (
+            <CollectionBlock
+              key={collection.id}  // Use collection ID as the key
+              user={user}
+              collection={collection}  // Pass the collection object
+              subjects={collection.subjects} // Attach the subjects specific to this collection
+              onClick={() => handleCollectionClick(collection.id)} // Pass the collection ID to the onClick handler
+              isExpanded={selectedCollection === collection.id} // Compare selectedCollection with collection ID
             />
           ))}
         </div>
@@ -229,3 +263,18 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+function DashboardLoading() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+      <div className="animate-pulse bg-[#d9d6d1] h-56 w-full rounded-lg"></div>
+    </div>
+  );
+}
