@@ -247,6 +247,7 @@ function Dashboard() {
         onSave={handleSaveSubject} // Pass save function
         subject={editingSubject} // Pass subject if editing, otherwise null
         text={editingSubject ? "Edit Subject" : "Add New Subject"} // Dynamic modal title
+        user={user}
       />
 
       <Modal

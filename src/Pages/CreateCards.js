@@ -187,6 +187,7 @@ function CreateCards() {
         onClose={() => setIsAddSubjectModalOpen(false)}
         onSave={handleSaveSubject}
         text="Create New Subject"
+        user={user}
       />
 
       {/* SubjectList Modal */}
