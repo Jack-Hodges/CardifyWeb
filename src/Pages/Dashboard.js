@@ -51,8 +51,8 @@ function Dashboard() {
     loadData();
   }, [user, userLoading, navigate]);
 
-  const handleSaveSubject = async (id, subjectName, subjectColor, collectionId) => {
-    const data = await saveSubject(id, subjectName, subjectColor, user.id, null, collectionId);
+  const handleSaveSubject = async (id, subjectName, subjectColor, up_to_index, collectionId) => {
+    const data = await saveSubject(id, subjectName, subjectColor, user.id, up_to_index, collectionId);
     if (data && !id) {
       setSubjects([...subjects, ...data]);
     } else {
@@ -221,8 +221,10 @@ function Dashboard() {
               user={user}
               collection={collection}
               subjects={collection.subjects}
-              onClick={() => handleCollectionClick(collection.id)}
               isExpanded={selectedCollection === collection.id}
+              onClick={() => handleCollectionClick(collection.id)}
+              onEditSubject={handleEditSubject}  // Pass the edit function as a prop
+              onRemoveSubject={handleRemoveSubject}  // Pass the delete function as a prop
             />
           ))}
 

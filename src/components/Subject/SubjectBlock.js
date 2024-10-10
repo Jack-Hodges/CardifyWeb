@@ -57,7 +57,7 @@ function SubjectBlock({ subject, onEdit, onRemoveSubject, home, collection }) {
             )}
             
 
-            {!home && !collection && (
+            {!home && (
                 // Edit button
                 <SubjectButton
                     img={
@@ -73,7 +73,7 @@ function SubjectBlock({ subject, onEdit, onRemoveSubject, home, collection }) {
                 />
             )}
             
-            {!home && !collection && (
+            {!home && (
                 // Delete button
                 <SubjectButton
                     img={

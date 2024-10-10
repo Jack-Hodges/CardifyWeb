@@ -2,12 +2,12 @@ import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
 
-function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick }) {
+function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject }) {
     const subject_count = subjects.length;
 
     return (
         <>
-            {/* This is the closed collection box for the grid */}
+            {/* Closed collection box for the grid */}
             <div 
                 onClick={onClick} 
                 className="relative w-full h-56 cursor-pointer group background-hover bg-[#f2ebdf] dark:bg-gray-700 rounded-xl background-shadow transition duration-300"
@@ -15,11 +15,11 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
                     {subjects.slice(0, 8).map((subject, index) => {
-                        const { bgClass } = getColor(subject.bgCol); // Destructure to get bgClass
+                        const { bgClass } = getColor(subject.bgCol); // Get background color class
                         return (
                             <div 
                                 key={index} 
-                                className={`rounded-lg ${bgClass}`} // Use only bgClass
+                                className={`rounded-lg ${bgClass}`} // Apply background color
                             ></div>
                         );
                     })}
@@ -39,31 +39,31 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 </div>
             </div>
 
-            {/* This is the fixed overlay for the expanded view */}
+            {/* Expanded view overlay */}
             {isExpanded && (
                 <div 
                     className="fixed inset-0 flex items-center justify-center z-50 p-10 bg-black bg-opacity-50"
-                    onClick={onClick} // Collapse when clicking on the background
+                    onClick={onClick} // Collapse the overlay when clicking on the background
                 >
                     <div 
-                        className="relative w-4/5 h-4/5 bg-white rounded-lg p-4"
-                        onClick={(e) => e.stopPropagation()} // Prevent click event from reaching the background when clicking inside the box
+                        className="relative w-[90%] h-4/5 bg-white rounded-lg p-4"
+                        onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
                     >
-
                         {/* Title and close button */}
                         <div className="flex w-full justify-between px-4">
                             <p>{collection.name}</p>
                             <BackgroundButton text="Close" bgColor={'red'} onClick={onClick}/>
                         </div>
 
+                        {/* Grid for subjects */}
                         <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
-                            {/* Render subjects in the expanded view */}
                             {subjects.map((subject, index) => (
                                 <SubjectBlock
                                     key={index}
                                     subject={subject}
                                     user={user}
-                                    collection
+                                    onEdit={() => onEditSubject(subject)}  // Pass edit handler
+                                    onRemoveSubject={() => onRemoveSubject(subject.id)}  // Pass delete handler
                                 />
                             ))}
                         </div>

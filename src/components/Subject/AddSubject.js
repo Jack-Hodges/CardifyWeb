@@ -29,11 +29,19 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         if (subject) {
             setLocalSubjectName(subject.name);
             setLocalSubjectColor(subject.bgCol);
-        } else {
-            setLocalSubjectName('');
-            setLocalSubjectColor('red');
+            
+            if (subject.collection_id) {
+                const selected = collections.find((collection) => collection.id === subject.collection_id);
+                if (selected) {
+                    setSelectedCollection(selected.name); // Prefill the collection name
+                    setSelectedCollectionId(selected.id); // Prefill the collection ID
+                }
+            } else {
+                setSelectedCollection('None');
+                setSelectedCollectionId(null);
+            }
         }
-    }, [subject]);
+    }, [subject, collections]);
 
     // Fetch collections when the component mounts or when the user changes
     useEffect(() => {
@@ -58,9 +66,10 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     };
 
     const handleSave = () => {
+        console.log("Collection ID = ", selectedCollectionId);
         if (subjectName !== '') {
             // Pass null for collectionId if "None" is selected, otherwise pass the selected collection ID
-            onSave(subject?.id, subjectName, subjectColor, selectedCollectionId);
+            onSave(subject?.id, subjectName, subjectColor, subject.up_to_index, selectedCollectionId);
             handleClose();
         }
     };

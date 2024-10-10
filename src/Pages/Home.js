@@ -203,8 +203,6 @@ function InProgress({ subject }) {
         setPercentage(calculatedPercentage);
         setStrokeDashoffset(calculatedStrokeDashoffset);
 
-        console.log(`Flashcard count = ${subject.flashcard_count}`);
-        console.log(`Up to count = ${indexToCount}`);
     }, [subject, circumference, indexToCount]);
 
     return (
