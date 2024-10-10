@@ -1,3 +1,4 @@
+import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
 
@@ -25,7 +26,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 </div>
 
                 {/* Blur effect behind the text */}
-                <div className="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-black/50 via-black/25 to-transparent backdrop-blur-sm rounded-bl-lg rounded-br-lg"></div>
+                <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/50 via-black/25 to-transparent backdrop-blur-sm rounded-bl-lg rounded-br-lg"></div>
 
                 {/* Text on top */}
                 <div className="absolute bottom-0 left-0 mb-1 w-full">
@@ -48,6 +49,13 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         className="relative w-4/5 h-4/5 bg-white rounded-lg p-4"
                         onClick={(e) => e.stopPropagation()} // Prevent click event from reaching the background when clicking inside the box
                     >
+
+                        {/* Title and close button */}
+                        <div className="flex w-full justify-between px-4">
+                            <p>{collection.name}</p>
+                            <BackgroundButton text="Close" bgColor={'red'} onClick={onClick}/>
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
                             {/* Render subjects in the expanded view */}
                             {subjects.map((subject, index) => (
@@ -59,13 +67,6 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                 />
                             ))}
                         </div>
-                        {/* Close button or onClick action to collapse */}
-                        <button 
-                            onClick={onClick}
-                            className="absolute top-4 right-4 text-white bg-red-500 rounded-full p-2"
-                        >
-                            Close
-                        </button>
                     </div>
                 </div>
             )}
