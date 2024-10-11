@@ -224,7 +224,7 @@ function Dashboard() {
               isExpanded={selectedCollection === collection.id}
               onClick={() => handleCollectionClick(collection.id)}
               onEditSubject={handleEditSubject}  // Pass the edit function as a prop
-              onRemoveSubject={handleRemoveSubject}  // Pass the delete function as a prop
+              onRemoveSubject={confirmDeleteSubject}  // Pass the delete function as a prop
             />
           ))}
 

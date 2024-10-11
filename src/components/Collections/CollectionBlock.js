@@ -1,18 +1,9 @@
 import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
-import { useState } from "react";
-import Modal from "../Modal/Modal";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject }) {
     const subject_count = subjects.length;
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [subjectToDelete, setSubjectToDelete] = useState(null);
-
-    const confirmDeleteSubject = (subject) => {
-        setSubjectToDelete(subject);
-        setIsDeleteModalOpen(true);
-    };
 
     return (
         <>
@@ -65,31 +56,19 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         </div>
 
                         {/* Grid for subjects */}
-                        <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
-                            {subjects.map((subject, index) => (
-                                <SubjectBlock
-                                    key={index}
-                                    subject={subject}
-                                    user={user}
-                                    onEdit={() => onEditSubject(subject)}  // Pass edit handler
-                                    onRemoveSubject={() => confirmDeleteSubject(subject)}  // Pass delete handler
-                                />
+                        <div className="flex flex-col overflow-y-scroll sm:grid sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
+                        {subjects.map((subject) => (
+                            <SubjectBlock
+                                key={subject.id}
+                                subject={subject}
+                                user={user}
+                                onRemoveSubject={() => onRemoveSubject(subject)} // Pass delete function here
+                            />
                             ))}
                         </div>
                     </div>
                 </div>
             )}
-
-            {/* Delete Confirmation Modal */}
-            <Modal
-                isOpen={isDeleteModalOpen}
-                onFirstAction={() => setIsDeleteModalOpen(false)}
-                onSecondAction={() => onRemoveSubject(subjectToDelete.id)}
-                text="Delete Subject"
-                mainText="This will also delete all cards associated with the subject."
-                firstActionText="Cancel"
-                secondActionText="Delete"
-            />
         </>
     );
 }
