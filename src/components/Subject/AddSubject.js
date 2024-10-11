@@ -66,7 +66,6 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     };
 
     const handleSave = () => {
-        console.log("Collection ID = ", selectedCollectionId);
         if (subjectName !== '') {
             // Pass null for collectionId if "None" is selected, otherwise pass the selected collection ID
             onSave(subject?.id, subjectName, subjectColor, subject?.up_to_index, selectedCollectionId);
