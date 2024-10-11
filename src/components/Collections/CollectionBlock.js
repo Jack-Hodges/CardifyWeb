@@ -1,9 +1,18 @@
 import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
+import { useState } from "react";
+import Modal from "../Modal/Modal";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject }) {
     const subject_count = subjects.length;
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [subjectToDelete, setSubjectToDelete] = useState(null);
+
+    const confirmDeleteSubject = (subject) => {
+        setSubjectToDelete(subject);
+        setIsDeleteModalOpen(true);
+    };
 
     return (
         <>
@@ -46,12 +55,12 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                     onClick={onClick} // Collapse the overlay when clicking on the background
                 >
                     <div 
-                        className="relative w-[95%] h-[90%] bg-white rounded-lg p-4"
+                        className="relative w-[95%] h-[90%] bg-[#f1ebe0] dark:bg-gray-900 rounded-lg p-4 background-shadow"
                         onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
                     >
                         {/* Title and close button */}
                         <div className="flex w-full justify-between px-2">
-                            <p className="font-bold text-gray-700 text-4xl">{collection.name}</p>
+                            <p className="font-bold text-gray-700 dark:text-gray-200 text-4xl">{collection.name}</p>
                             <BackgroundButton text="Close" bgColor={'red'} onClick={onClick}/>
                         </div>
 
@@ -63,13 +72,24 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                     subject={subject}
                                     user={user}
                                     onEdit={() => onEditSubject(subject)}  // Pass edit handler
-                                    onRemoveSubject={() => onRemoveSubject(subject.id)}  // Pass delete handler
+                                    onRemoveSubject={() => confirmDeleteSubject(subject)}  // Pass delete handler
                                 />
                             ))}
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onFirstAction={() => setIsDeleteModalOpen(false)}
+                onSecondAction={() => onRemoveSubject(subjectToDelete.id)}
+                text="Delete Subject"
+                mainText="This will also delete all cards associated with the subject."
+                firstActionText="Cancel"
+                secondActionText="Delete"
+            />
         </>
     );
 }
