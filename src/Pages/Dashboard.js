@@ -12,12 +12,15 @@ import SubjectBlock from '../components/Subject/SubjectBlock';
 import Modal from '../components/Modal/Modal';
 import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
+import AddCollection from '../components/Collections/AddCollection';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
   const [collections, setCollections] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
+  const [editingCollection, setEditingCollection] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [subjectToDelete, setSubjectToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -72,9 +75,19 @@ function Dashboard() {
     setIsModalOpen(true);
   };
 
+  const handleAddCollection = () => {
+    setEditingCollection(null);
+    setIsCollectionModalOpen(true);
+  };
+
   const handleEditSubject = (subject) => {
     setEditingSubject(subject);
     setIsModalOpen(true);
+  };
+
+  const handleEditCollection = (collection) => {
+    setEditingCollection(collection);
+    setIsCollectionModalOpen(true);
   };
 
   const confirmDeleteSubject = (subject) => {
@@ -125,7 +138,7 @@ function Dashboard() {
         <div className="flex gap-2">
           {/* Add Subject Button */}
           <div className="hidden sm:block">
-            <AddBar text="Add" addSub={handleAddSubject}/>
+            <AddBar text="Add" addSub={handleAddSubject} addCol={handleAddCollection}/>
           </div>
 
           <div className="block sm:hidden">
@@ -210,6 +223,7 @@ function Dashboard() {
               onClick={() => handleCollectionClick(collection.id)}
               onEditSubject={handleEditSubject}  // Pass the edit function as a prop
               onRemoveSubject={confirmDeleteSubject}  // Pass the delete function as a prop
+              onEditCollection={handleEditCollection}
             />
           ))}
 
@@ -260,6 +274,13 @@ function Dashboard() {
         mainText="This will also delete all cards associated with the subject."
         firstActionText="Cancel"
         secondActionText="Delete"
+      />
+
+      <AddCollection 
+        isOpen={isCollectionModalOpen}
+        collection={editingCollection}
+        onClose={() => setIsCollectionModalOpen(false)}
+        text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
       />
     </div>
   );

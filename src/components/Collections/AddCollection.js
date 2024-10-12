@@ -169,24 +169,6 @@ function AddCollection({ isOpen, onClose, onSave, subject, text, user }) {
                     )}
                 </div>
 
-                <div className="mb-6">
-                    <label className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
-                        Subject Color
-                    </label>
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
-                        {colorOptions.map((color) => {
-                            const { bgClass, hoverClass } = getColor(color);
-                            return (
-                                <button
-                                    key={color}
-                                    onClick={() => setLocalSubjectColor(color)}
-                                    className={`w-12 h-12 rounded-full ${subjectColor === color ? 'ring-4 ring-gray-300 dark:ring-gray-500' : 'ring-0'} ${bgClass} ${hoverClass} transition duration-100`}
-                                />
-                            );
-                        })}
-                    </div>
-                </div>
-
                 <div className="flex justify-end space-x-4">
                     <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
                     <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />

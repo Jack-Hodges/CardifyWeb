@@ -1,7 +1,7 @@
 import { useState } from "react";
 import BackgroundButton from "../Elements/BackgroundButton";
 
-function AddBar( { text, addSub }) {
+function AddBar( { text, addSub, addCol }) {
 
   // images
 
@@ -46,7 +46,13 @@ function AddBar( { text, addSub }) {
                 setIsOpen(false);  // Set isOpen to false
             }}
         />
-        <LinkButton text="Add Collection" />
+        <LinkButton 
+            text="Add Collection" 
+            onClick={() => {
+                addCol();
+                setIsOpen(false);
+            }}
+        />
       </div>
     </div>
     )

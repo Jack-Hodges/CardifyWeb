@@ -2,7 +2,7 @@ import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
 
-function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject }) {
+function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection }) {
     const subject_count = subjects.length;
 
     return (
@@ -52,7 +52,11 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         {/* Title and close button */}
                         <div className="flex w-full justify-between px-2">
                             <p className="font-bold text-gray-700 dark:text-gray-200 text-4xl">{collection.name}</p>
-                            <BackgroundButton text="Close" bgColor={'red'} onClick={onClick}/>
+                            <div className="flex gap-2">
+                                <BackgroundButton text="Edit" bgColor={'blue'} onClick={() => onEditCollection(collection)}/>
+                                <BackgroundButton text="Close" bgColor={'red'} onClick={onClick}/>
+                            </div>
+                            
                         </div>
 
                         {/* Grid for subjects */}
