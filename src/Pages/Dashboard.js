@@ -246,7 +246,7 @@ function Dashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveSubject}
-        subject={editingSubject}
+        subject={editingSubject}    // Passes editingSubject to the modal
         text={editingSubject ? 'Edit Subject' : 'Add New Subject'}
         user={user}
       />

@@ -57,13 +57,14 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
 
                         {/* Grid for subjects */}
                         <div className="flex flex-col overflow-y-scroll sm:grid sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
-                        {subjects.map((subject) => (
-                            <SubjectBlock
-                                key={subject.id}
-                                subject={subject}
-                                user={user}
-                                onRemoveSubject={() => onRemoveSubject(subject)} // Pass delete function here
-                            />
+                            {subjects.map((subject) => (
+                                <SubjectBlock
+                                    key={subject.id}
+                                    subject={subject}
+                                    user={user}
+                                    onEdit={() => onEditSubject(subject)}  // Pass the onEditSubject function here
+                                    onRemoveSubject={() => onRemoveSubject(subject)}  // Handle removal
+                                />
                             ))}
                         </div>
                     </div>
