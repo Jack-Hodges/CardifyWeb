@@ -11,6 +11,7 @@ import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
 import Modal from '../components/Modal/Modal';
 import CollectionBlock from '../components/Collections/CollectionBlock';
+import AddBar from '../components/Navigation/AddBar';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -124,23 +125,7 @@ function Dashboard() {
         <div className="flex gap-2">
           {/* Add Subject Button */}
           <div className="hidden sm:block">
-            <BackgroundButton
-              text="Add Subject"
-              image={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="3"
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
-              }
-              bgColor="purple"
-              onClick={handleAddSubject}
-            />
+            <AddBar text="Add" addSub={handleAddSubject}/>
           </div>
 
           <div className="block sm:hidden">
