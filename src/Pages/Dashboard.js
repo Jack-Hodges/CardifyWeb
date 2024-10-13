@@ -13,6 +13,7 @@ import Modal from '../components/Modal/Modal';
 import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
+import { saveCollection } from '../components/Collections/CollectionManipulation';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -55,6 +56,7 @@ function Dashboard() {
     loadData();
   }, [user, userLoading, navigate]);
 
+  // Subject
   const handleSaveSubject = async (id, subjectName, subjectColor, up_to_index, collectionId) => {
     const data = await saveSubject(id, subjectName, subjectColor, user.id, up_to_index, collectionId);
     if (data && !id) {
@@ -75,19 +77,9 @@ function Dashboard() {
     setIsModalOpen(true);
   };
 
-  const handleAddCollection = () => {
-    setEditingCollection(null);
-    setIsCollectionModalOpen(true);
-  };
-
   const handleEditSubject = (subject) => {
     setEditingSubject(subject);
     setIsModalOpen(true);
-  };
-
-  const handleEditCollection = (collection) => {
-    setEditingCollection(collection);
-    setIsCollectionModalOpen(true);
   };
 
   const confirmDeleteSubject = (subject) => {
@@ -101,6 +93,32 @@ function Dashboard() {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
     }
     setIsDeleteModalOpen(false);
+  };
+
+  // Collections
+  const handleAddCollection = () => {
+    setEditingCollection(null);
+    setIsCollectionModalOpen(true);
+  };
+
+  const handleEditCollection = (collection) => {
+    setEditingCollection(collection);
+    setIsCollectionModalOpen(true);
+  };
+
+  const handleSaveCollection = async (id, userId, collectionName) => {
+    const data = await saveCollection(id, userId, collectionName);
+    if (data && !id) {
+      // Add new collection to the collections array
+      setCollections([...collections, ...data]);
+    } else {
+      // Update the existing collection in the collections array
+      const updatedCollections = collections.map((collection) =>
+        collection.id === id ? { ...collection, name: collectionName } : collection
+      );
+      setCollections(updatedCollections);
+    }
+    setIsCollectionModalOpen(false);
   };
 
   // Apply search and sorting to subjects
@@ -278,7 +296,9 @@ function Dashboard() {
 
       <AddCollection 
         isOpen={isCollectionModalOpen}
+        user={user}
         collection={editingCollection}
+        onSave={handleSaveCollection}
         onClose={() => setIsCollectionModalOpen(false)}
         text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
       />
