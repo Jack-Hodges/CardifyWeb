@@ -202,42 +202,7 @@ function Dashboard() {
       </div>
 
       {/* Controls Section */}
-      <div className="flex mx-4 mt-3 items-center justify-between">
-        <div className="flex gap-2">
-          {/* Sorting Dropdown */}
-          <div className="relative group">
-            <select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value)}
-              className="border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300"
-            >
-              <option value="Most Cards">Most Cards</option>
-              <option value="Alphabetical">Alphabetical</option>
-              <option value="Date Created">Date Created</option>
-            </select>
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        {/* Search Input */}
-        <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white background-shadow background-focus focus:outline-none"
-            placeholder="Search subjects..."
-          />
-        </div>
-      </div>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} />
 
       {/* Main Content Section */}
       {loading ? (
@@ -343,6 +308,47 @@ function DashboardLoading() {
       {Array.from({ length: 8 }).map((_, index) => (
         <div key={index} className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
       ))}
+    </div>
+  );
+}
+
+function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm }) {
+  return (
+    <div className="flex mx-4 mt-3 items-center justify-between">
+      <div className="flex gap-2">
+        {/* Sorting Dropdown */}
+        <div className="relative group">
+          <select
+            value={selectedSort}
+            onChange={(e) => setSelectedSort(e.target.value)}
+            className="border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300"
+          >
+            <option value="Most Cards">Most Cards</option>
+            <option value="Alphabetical">Alphabetical</option>
+            <option value="Date Created">Date Created</option>
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
+            <svg
+              className="w-5 h-5 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      {/* Search Input */}
+      <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white background-shadow background-focus focus:outline-none"
+          placeholder="Search subjects..."
+        />
+      </div>
     </div>
   );
 }
