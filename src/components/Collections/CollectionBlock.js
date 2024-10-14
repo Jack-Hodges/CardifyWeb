@@ -3,14 +3,15 @@ import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
 import { useState } from "react";
 
-function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection }) {
+function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection }) {
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
 
     return (
         <>
             {/* Closed collection box for the grid */}
-            <div className="group relative w-full h-56 cursor-pointer background-hover bg-[#f2ebdf] dark:bg-gray-700 rounded-xl background-shadow transition duration-300">
+            <div className="group relative w-full h-56 cursor-pointer background-hover bg-[#f2ebdf] dark:bg-gray-700 rounded-xl background-shadow transition duration-300"
+            onClick={onClick}>
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
                     {subjects.slice(0, 8).map((subject, index) => {
@@ -31,55 +32,33 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 <div className="absolute bottom-0 left-0 mb-1 w-full">
                     {/* Collection name and subject count */}
                     <div className="text-left">
-                        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
+                        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {collection ? collection.name : 'name'}
                         </h1>
-                        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
+                        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {subject_count} {subject_count === 1 ? 'subject' : 'subjects'}
                         </p>
                     </div>
 
                     {/* Icons below the text */}
                     <div className="grid grid-cols-4 gap-4 w-full opacity-1 sm:opacity-0 justify-items-center sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
-                        {/* Play button */}
-                        <CollectionButton
-                            img={
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10">
-                                    <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clipRule="evenodd" />
-                                </svg>
-                            }
-                            setHoveredIcon={setHoveredIcon}
-                            hoveredIcon={hoveredIcon}
-                            tooltipText="Practice"
-                            onClick={onClick}
-                        />
-
-                        {/* Add button */}
-                        <CollectionButton
-                            img={
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10">
-                                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z" clipRule="evenodd" />
-                                </svg>
-                            }
-                            setHoveredIcon={setHoveredIcon}
-                            hoveredIcon={hoveredIcon}
-                            tooltipText="Add"
-                            onClick={onEditCollection}
-                        />
 
                         {/* Edit button */}
-                        <CollectionButton
-                            img={
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10">
-                                    <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-                                    <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-                                </svg>
-                            }
-                            setHoveredIcon={setHoveredIcon}
-                            hoveredIcon={hoveredIcon}
-                            tooltipText="Edit"
-                            onClick={() => onEditCollection(collection)}
-                        />
+                        <div className="col-start-3">
+                            <CollectionButton
+                                img={
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10">
+                                        <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+                                        <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
+                                    </svg>
+                                }
+                                setHoveredIcon={setHoveredIcon}
+                                hoveredIcon={hoveredIcon}
+                                tooltipText="Edit"
+                                onClick={() => onEditCollection(collection)}
+                            />
+                        </div>
+                        
 
                         {/* Delete button */}
                         <CollectionButton
@@ -91,7 +70,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                             setHoveredIcon={setHoveredIcon}
                             hoveredIcon={hoveredIcon}
                             tooltipText="Delete"
-                            onClick={onEditCollection}
+                            onClick={() => onRemoveCollection(collection)} // Pass the function reference instead of invoking it
                         />
                     </div>
                 </div>
@@ -139,22 +118,24 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
 export default CollectionBlock;
 
 function CollectionButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onClick }) {
+    const lowerCase = tooltipText.toLowerCase();
 
-    const lowerCase = tooltipText.toLowerCase()
-    
-        return (
-            <div
+    return (
+        <div
             className="relative text-white block items-center"
-            onMouseEnter={() => setHoveredIcon(lowerCase)} // Set hovered icon based on iconType
-            onMouseLeave={() => setHoveredIcon(null)} // Reset on mouse leave
-            onClick={onClick} // Execute the onClick passed in
-            >
+            onMouseEnter={() => setHoveredIcon(lowerCase)}
+            onMouseLeave={() => setHoveredIcon(null)}
+            onClick={(e) => {
+                e.stopPropagation(); // Prevents the click from bubbling to the parent
+                onClick(); // Call the button-specific onClick function
+            }}
+        >
             {img}
             {hoveredIcon === lowerCase && (
                 <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
-                {tooltipText}
+                    {tooltipText}
                 </div>
             )}
-            </div>
-        );
-    }
+        </div>
+    );
+}

@@ -6,7 +6,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
 import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation';
-import { fetchCollections } from '../components/Collections/CollectionManipulation';
+import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
 import Modal from '../components/Modal/Modal';
@@ -23,7 +23,9 @@ function Dashboard() {
   const [editingSubject, setEditingSubject] = useState(null);
   const [editingCollection, setEditingCollection] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isCollectionDeleteModalOpen, setIsCollectionDeleteModalOpen] = useState(false);
   const [subjectToDelete, setSubjectToDelete] = useState(null);
+  const [collectionToDelete, setCollectionToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSort, setSelectedSort] = useState('Most Cards');
   const [searchTerm, setSearchTerm] = useState('');
@@ -119,6 +121,19 @@ function Dashboard() {
       setCollections(updatedCollections);
     }
     setIsCollectionModalOpen(false);
+  };
+
+  const confirmDeleteCollection = (collection) => {
+    setCollectionToDelete(collection);
+    setIsCollectionDeleteModalOpen(true);
+  };
+
+  const handleRemoveCollection = async (collectionId) => {
+    const success = await removeCollection(collectionId);
+    if (success) {
+      setCollections(collections.filter((collection) => collection.id !== collectionId));
+    }
+    setIsCollectionDeleteModalOpen(false);
   };
 
   // Apply search and sorting to subjects
@@ -242,6 +257,7 @@ function Dashboard() {
               onEditSubject={handleEditSubject}  // Pass the edit function as a prop
               onRemoveSubject={confirmDeleteSubject}  // Pass the delete function as a prop
               onEditCollection={handleEditCollection}
+              onRemoveCollection={confirmDeleteCollection}
             />
           ))}
 
@@ -283,13 +299,24 @@ function Dashboard() {
         user={user}
       />
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Subject */}
       <Modal
         isOpen={isDeleteModalOpen}
         onFirstAction={() => setIsDeleteModalOpen(false)}
         onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
         text="Delete Subject"
         mainText="This will also delete all cards associated with the subject."
+        firstActionText="Cancel"
+        secondActionText="Delete"
+      />
+
+      {/* Delete Confirmation Modal - Collection */}
+      <Modal
+        isOpen={isCollectionDeleteModalOpen}
+        onFirstAction={() => setIsCollectionDeleteModalOpen(false)}
+        onSecondAction={() => handleRemoveCollection(collectionToDelete.id)}
+        text="Delete Collection"
+        mainText="This will NOT delete the subjects associated with the collection."
         firstActionText="Cancel"
         secondActionText="Delete"
       />
