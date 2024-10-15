@@ -49,6 +49,12 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     // Sort the combined list alphabetically by name
     const sortedCombinedList = combinedList.sort((a, b) => a.name.localeCompare(b.name));
 
+    const cross = (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+    );
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll">
@@ -64,6 +70,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                     <>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold mb-0 text-green-500">Subjects & Collections</h2>
+                            <BackgroundButton image={cross} bgColor={'red'} onClick={onClose}/>
                         </div>
 
                         {/* Render the sorted combined list */}
@@ -96,8 +103,10 @@ function SubjectRow({ subject, page, onClose }) {
     const handleClick = () => {
         if (page === "create") {
             navigate('/create', { state: { subject } }); // Navigate to the create page with subject
-        } else {
+        } else if (page === "practice") {
             navigate('/practice', { state: { subject } }); // Navigate to the practice page with subject
+        } else {
+            navigate('/match', { state: { subject }}); // Navigate to the match page with subject
         }
         onClose();
     };

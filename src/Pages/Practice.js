@@ -50,7 +50,7 @@ function FlashcardQuiz() {
     if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
       saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current, subject.collection_id);
     } else if (subject) {
-      saveSubject(subject.id, subject.name, subject.bgCol, user.id, subject.collection_id);
+      saveSubject(subject.id, subject.name, subject.bgCol, user.id, null, subject.collection_id);
     }
   }, [currentCardIndexRef, cardsLengthRef, subject, user]);
 

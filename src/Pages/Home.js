@@ -7,7 +7,7 @@ import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { getColor } from "../components/Functions/getColor";
-
+import SubjectList from "../components/Subject/SubjectList";
 
 function Home() {
 
@@ -16,6 +16,8 @@ function Home() {
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [profile, setProfile] = useState(null);
+    const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
+    const [subjectPage, setSubjectPage] = useState('create');
 
     useEffect(() => {
 
@@ -48,6 +50,11 @@ function Home() {
         loadData();
         
     }, [user, navigate, getUser, setProfile]);
+
+    const handleOpenSubjectListModal = (navigateTo) => {
+        setSubjectPage(navigateTo);
+        setIsSubjectListModalOpen(true);
+    }
 
     const logoutUser = () => {
         logout()
@@ -121,9 +128,9 @@ function Home() {
 
                             {/* Learning buttons flex */}
                             <div className="flex ml-5 gap-4">
-                                <JumpButton text="Create" img={Plus} color="text-red-400"/>
-                                <JumpButton text="Practice" img={Play} color="text-orange-400"/>
-                                <JumpButton text="Match" img={Cards} color="text-yellow-400"/>
+                                <JumpButton text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton text="Match" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
                             </div>
                         </div>
 
@@ -150,6 +157,13 @@ function Home() {
                                 ))}
                             </div>
                         </div>
+
+                        <SubjectList 
+                            isOpen={isSubjectListModalOpen} 
+                            onClose={() => setIsSubjectListModalOpen(false)}
+                            user={user}
+                            page={subjectPage}
+                        />
                         
                     </div>
                 ) : (
@@ -163,9 +177,10 @@ function Home() {
 
 export default Home;
 
-function JumpButton( { text, img, color }) {
+function JumpButton( { text, img, color, onClick }) {
     return (
-        <div className={`flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}>
+        <div className={`flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}
+            onClick={() => onClick(text.toLowerCase())}>
             {img}
             <p>{text}</p>
         </div>
