@@ -93,11 +93,11 @@ function CreateCards() {
     setIsAddSubjectModalOpen(true);
   };
 
-  const handleSaveSubject = async (id, subjectName, subjectColor) => {
-    const data = await saveSubject(id, subjectName, subjectColor, user.id);
+  const handleSaveSubject = async (id, subjectName, subjectColor, collectionId) => {
+    const data = await saveSubject(id, subjectName, subjectColor, user.id, null, collectionId); // Ensure collectionId is passed
     if (data) {
-      setIsAddSubjectModalOpen(false);
-      navigate('/create', { state: { subject: data[0] } });
+        setIsAddSubjectModalOpen(false);
+        navigate('/create', { state: { subject: data[0] } });
     }
   };
 

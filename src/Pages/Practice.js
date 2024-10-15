@@ -48,13 +48,14 @@ function FlashcardQuiz() {
 
   const handleExitBeforeCompletion = useCallback(() => {
     if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
-      console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
-      saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current);
-      // Add additional logic here, such as saving progress or an API call
+        console.log(`Practice exited before completing all cards. Current index: ${currentCardIndexRef.current}`);
+        // Ensure collection_id is passed
+        saveSubject(subject.id, subject.name, subject.bgCol, user.id, currentCardIndexRef.current, subject.collection_id);
     } else if (subject) {
-      saveSubject(subject.id, subject.name, subject.bgCol, user.id);
+        // Ensure collection_id is passed
+        saveSubject(subject.id, subject.name, subject.bgCol, user.id, null, subject.collection_id);
     }
-  }, [currentCardIndexRef, cardsLengthRef, subject, user]);
+}, [currentCardIndexRef, cardsLengthRef, subject, user]);
 
   useEffect(() => {
     // Keep currentCardIndexRef in sync with currentCardIndex
