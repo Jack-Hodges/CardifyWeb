@@ -152,9 +152,9 @@ function FlashcardQuiz() {
               {loading ? (
                 // Skeleton loader while loading
                 <div className="animate-pulse flex flex-col space-y-4">
-                  <div className="bg-[#d9d6d1] h-48 w-full rounded-lg"></div>
-                  <div className="bg-[#d9d6d1] h-8 w-3/4 rounded"></div>
-                  <div className="bg-[#d9d6d1] h-8 w-1/2 rounded"></div>
+                  <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg"></div>
+                  <div className="bg-gray-300 dark:bg-gray-600 h-8 w-3/4 rounded"></div>
+                  <div className="bg-gray-300 dark:bg-gray-600 h-8 w-1/2 rounded"></div>
                 </div>
               ) : cards.length > 0 ? (
                 <Card

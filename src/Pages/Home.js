@@ -105,25 +105,27 @@ function Home() {
                             
                         </div>
                         
+                        {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
+                            <div>
+                                <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                                    <p>In Progress</p>
+                                </div>
+
+                                <div className="grid grid-cols-4 px-5 gap-4">
+                                    {subjects
+                                        .filter(subject => subject.up_to_index !== null)
+                                        .slice(0, 4)
+                                        .map((subject, index) => (
+                                            <InProgress key={index} subject={subject} />
+                                        ))
+                                    }
+                                </div>
+                            </div>
+                        )}
+
                         <div>
                             <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
-                                <p>In Progress</p>
-                            </div>
-
-                            <div className="grid grid-cols-4 px-5 gap-4">
-                                {subjects
-                                    .filter(subject => subject.up_to_index !== null)
-                                    .slice(0, 4)
-                                    .map((subject, index) => (
-                                        <InProgress key={index} subject={subject} />
-                                    ))
-                                }
-                            </div>
-                        </div>
-
-                        <div>
-                            <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
-                                <p>Continue Learning</p>
+                                <p>Jump In</p>
                             </div>
 
                             {/* Learning buttons flex */}
@@ -131,13 +133,14 @@ function Home() {
                                 <JumpButton text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Match" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton text="Quiz" img={Cards} color="text-green-400" onClick={handleOpenSubjectListModal}/>
                             </div>
                         </div>
 
                         {/* Full-width scrollable subject div */}
                         <div>
                             <div className="flex justify-between ml-5 mr-2 mt-6">
-                                <p>Jump in</p>
+                                <p>Continue Learning</p>
                                 <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={'purple'}/>
                             </div>
                             

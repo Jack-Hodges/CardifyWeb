@@ -112,9 +112,9 @@ function CreateCards() {
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">
-              <div className="bg-[#d9d6d1] h-48 w-full rounded-lg"></div>
-              <div className="bg-[#d9d6d1] h-12 w-3/4 rounded"></div>
-              <div className="bg-[#d9d6d1] h-12 w-1/2 rounded"></div>
+              <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg"></div>
+              <div className="bg-gray-300 dark:bg-gray-600 h-12 w-3/4 rounded"></div>
+              <div className="bg-gray-300 dark:bg-gray-600 h-12 w-1/2 rounded"></div>
             </div>
           </div>
         ) : cards.length > 0 ? (
