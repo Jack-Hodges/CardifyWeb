@@ -23,7 +23,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
     return (
         <>
             {/* Closed collection box for the grid */}
-            <div className="group relative w-full h-56 cursor-pointer background-hover bg-white dark:bg-gray-700 rounded-xl background-shadow transition duration-300"
+            <div className="group relative w-full h-56 cursor-pointer background-hover bg-[#f2f1ed] dark:bg-gray-700 rounded-xl background-shadow transition duration-300"
             onClick={onClick}>
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">

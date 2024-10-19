@@ -8,6 +8,7 @@
     "@supabase/supabase-js": "^2.45.3",
     "@testing-library/user-event": "^13.5.0",
     "better-react-mathjax": "^2.0.3",
+    "canvas-confetti": "^1.9.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "fs": "^0.0.1-security",

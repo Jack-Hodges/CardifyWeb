@@ -143,12 +143,16 @@ function Dashboard() {
       if (selectedSort === 'Alphabetical') {
         return a.name.localeCompare(b.name);
       } else if (selectedSort === 'Most Cards') {
-        return b.flashcard_count - a.flashcard_count;
+        const cardDifference = b.flashcard_count - a.flashcard_count;
+        if (cardDifference === 0) {
+          return a.name.localeCompare(b.name);
+        }
+        return cardDifference;
       } else if (selectedSort === 'Date Created') {
         return new Date(b.created_at) - new Date(a.created_at);
       }
       return 0;
-    });
+  });
 
   // Separate subjects without a collection
   const subjectsWithoutCollection = sortedSubjects.filter((subject) => !subject.collection_id);
@@ -306,7 +310,7 @@ function DashboardLoading() {
     <div className="grid grid-cols-1 sm:grid-cols-4 2xl:grid-cols-6 p-4 gap-4">
       {/* Loading Skeletons */}
       {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="animate-pulse bg-gray-300 h-56 w-full rounded-lg"></div>
+        <div key={index} className="animate-pulse bg-gray-300 dark:bg-gray-600 h-56 w-full rounded-lg"></div>
       ))}
     </div>
   );

@@ -10,6 +10,7 @@ import SubjectList from '../components/Subject/SubjectList';
 import { useNavigate } from 'react-router-dom';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import Modal from '../components/Modal/Modal';
+import confetti from "canvas-confetti"; // Import the confetti library
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -100,6 +101,18 @@ function FlashcardQuiz() {
     };
   }, [subject, user, getUser, cards.length, handleExitBeforeCompletion]);
 
+  // Trigger confetti when finished becomes true
+  useEffect(() => {
+    if (finished) {
+      confetti({
+        particleCount: 300,
+        spread: 100,
+        origin: { y: 0.6 },
+        gravity: 0.9
+      });
+    }
+  }, [finished]);
+
   return (
     <div className="w-screen h-[100dvh] relative">
       <div className="mt-2">
@@ -177,7 +190,7 @@ function FlashcardQuiz() {
                     if (currentCardIndex < cards.length - 1) {
                       setCurrentCardIndex(currentCardIndex + 1);
                     } else {
-                      setFinished(true);
+                      setFinished(true); // Set finished to true when reaching the last card
                     }
                   }}
                 />
