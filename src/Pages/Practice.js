@@ -36,6 +36,10 @@ function FlashcardQuiz() {
     navigate('/create', { state: { subject } });
   };
 
+  const handleSwitchToHome = () => {
+    navigate('/home');
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false); // To control the modal
 
   const [finished, setFinished] = useState(false);
@@ -107,7 +111,7 @@ function FlashcardQuiz() {
       confetti({
         particleCount: 300,
         spread: 100,
-        origin: { y: 0.6 },
+        origin: { y: 0.5 },
         gravity: 0.9
       });
     }
@@ -206,9 +210,12 @@ function FlashcardQuiz() {
           </div>
         ) : (
           <div className="flex flex-col justify-center items-center h-full w-full">
-            <h1 className="text-4xl font-bold text-green-500">Congratulations!</h1>
-            <p className="text-gray-500 text-2xl">You have completed all the cards.</p>
-            <BackgroundButton text="Review Again" bgColor="blue" onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
+            <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
+            <p className="text-gray-500 text-2xl mb-10">You have completed all the cards.</p>
+            <div className="flex gap-4">
+              <BackgroundButton text="Back to Home" bgColor="green" onClick={handleSwitchToHome} />
+              <BackgroundButton text={`Review ${subject.name} Again`} bgColor="blue" onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
+            </div>
           </div>
         )}
       </div>
