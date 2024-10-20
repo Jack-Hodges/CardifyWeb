@@ -1,10 +1,13 @@
-import { useState } from "react";
-import BackgroundButton from "../Elements/BackgroundButton";
+import { useState } from "react";import BackgroundButton from "../Elements/BackgroundButton";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../UserContext";
 
 function TitleBar( { text, content, user }) {
 
   // images
+
+  const navigate = useNavigate();
+  const { profile, logout } = useUser()
 
   const dashBoard = (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
@@ -39,6 +42,11 @@ function TitleBar( { text, content, user }) {
 
   )
 
+  const logoutUser = () => {
+    logout()
+    navigate('/');
+  } 
+
   const [isOpen, setIsOpen] = useState(false);
 
   var firstImg = null;
@@ -64,45 +72,46 @@ function TitleBar( { text, content, user }) {
       break;
   }
 
-    return (
-      <div className="flex justify-between px-4 mt-2">
-        {/* Drop Down Navigation */}
-        <div className="relative inline-block text-left z-50">
-          {/* Use BackgroundButton as the main button */}
-          <BackgroundButton
-            text={text}
-            bgColor="green"
-            wWidth="w-44"
-            image={firstImg}
-            flip
-            onClick={() => setIsOpen(!isOpen)}
-          />
+  return (
+    <div className="flex justify-between px-4 mt-2">
+      {/* Drop Down Navigation */}
+      <div className="relative inline-block text-left z-50">
+        {/* Use BackgroundButton as the main button */}
+        <BackgroundButton
+          text={text}
+          bgColor="green"
+          wWidth="w-44"
+          image={firstImg}
+          flip
+          onClick={() => setIsOpen(!isOpen)}
+        />
 
-          {/* Dropdown options with animation */}
-          <div
-            className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
-              isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
-            }`}
-            style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
-          >
-            <LinkButton text="Home" img={home} />
-            <LinkButton text="Dashboard" img={dashBoard} />
-            <LinkButton text="Create" img={create} />
-            <LinkButton text="Practice" img={practice} />
-            <LinkButton text="Quiz" img={quiz} />
-          </div>
-        </div>
-
-        {/* User Profile and Additional Content */}
-        <div className="flex gap-2">
-          {content}
-          <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow background-hover cursor-pointer">
-            <p className="text-white font-bold text-xl">{user?.name?.charAt(0) || 'U'}</p>
-          </div>
+        {/* Dropdown options with animation */}
+        <div
+          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
+            isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+          }`}
+          style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
+        >
+          <LinkButton text="Home" img={home} />
+          <LinkButton text="Dashboard" img={dashBoard} />
+          <LinkButton text="Create" img={create} />
+          <LinkButton text="Practice" img={practice} />
+          <LinkButton text="Quiz" img={quiz} />
         </div>
       </div>
+
+      {/* User Profile and Additional Content */}
+      <div className="flex gap-2">
+        {content}
+        <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow background-hover cursor-pointer"
+          onClick={logoutUser}>
+          <p className="text-white font-bold text-xl">{profile?.first_name?.charAt(0) || 'U'}</p>
+        </div>
+      </div>
+    </div>
       
-    )
+  )
 }
 
 export default TitleBar;

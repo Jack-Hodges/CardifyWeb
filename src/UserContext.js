@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import supabase from './supabaseClient';
+import { fetchProfile } from './components/Profile/ProfileManipulation';
 
 // Create UserContext
 const UserContext = createContext();
@@ -7,6 +8,7 @@ const UserContext = createContext();
 // Create a UserProvider component to manage user state globally
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null); // Add profile state
   const [loading, setLoading] = useState(true); // Loading state to indicate session fetching
 
   // Define a function to get the user session
@@ -19,8 +21,11 @@ export const UserProvider = ({ children }) => {
 
     if (session?.user) {
       setUser(session.user); // Set user if session exists
+      const userProfile = await fetchProfile(session.user.id); // Fetch the profile
+      setProfile(userProfile); // Set the profile in state
     } else {
       setUser(null); // Clear the user if no session exists
+      setProfile(null); // Clear profile if no user
     }
 
     setLoading(false); // Mark loading as complete
@@ -33,6 +38,7 @@ export const UserProvider = ({ children }) => {
       console.error('Error logging out:', error);
     } else {
       setUser(null); // Clear the user state on logout
+      setProfile(null); // Clear profile on logout
     }
   };
 
@@ -43,6 +49,11 @@ export const UserProvider = ({ children }) => {
     // Subscribe to auth state changes (e.g., login, logout)
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
+      if (session?.user) {
+        fetchProfile(session.user.id).then(setProfile); // Fetch profile on auth state change
+      } else {
+        setProfile(null); // Clear profile if no session
+      }
     });
 
     // Cleanup listener when the component unmounts
@@ -52,7 +63,7 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, loading, getUser, logout }}>
+    <UserContext.Provider value={{ user, profile, setUser, loading, getUser, logout }}>
       {children}
     </UserContext.Provider>
   );

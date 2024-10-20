@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import { useEffect, useState } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
-import { fetchProfile } from "../components/Profile/ProfileManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
@@ -12,10 +11,9 @@ import SubjectList from "../components/Subject/SubjectList";
 function Home() {
 
     const navigate = useNavigate();
-    const { user, getUser, logout } = useUser();
+    const { user, getUser, profile } = useUser();
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
-    const [profile, setProfile] = useState(null);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
     const [subjectPage, setSubjectPage] = useState('create');
 
@@ -34,12 +32,6 @@ function Home() {
         const loadData = async () => {
             // setLoading(true); // Start loading state
     
-            // Fetch the user profile
-            const userProfile = await fetchProfile(user.id);
-            if (userProfile) {
-                setProfile(userProfile); // Set the profile in state
-            }
-    
             // Fetch the subjects
             const subjectsData = await fetchSubjects(user.id);
             setSubjects(subjectsData); // Set the subjects in state
@@ -49,16 +41,11 @@ function Home() {
     
         loadData();
         
-    }, [user, navigate, getUser, setProfile]);
+    }, [user, navigate, getUser]);
 
     const handleOpenSubjectListModal = (navigateTo) => {
         setSubjectPage(navigateTo);
         setIsSubjectListModalOpen(true);
-    }
-
-    const logoutUser = () => {
-        logout()
-        navigate('/');
     }
 
     const goToDashboard = () => {
@@ -98,7 +85,6 @@ function Home() {
                         <div className="mx-5">
                             <div className="flex justify-between">
                                 <p className="text-5xl font-bold">Welcome back, {profile.first_name}!</p>
-                                <button onClick={logoutUser} className="px-4 py-2 bg-red-500 text-white rounded-full ml-5 hidden sm:block">Logout</button>
                             </div>
                             
                             <p className="font-normal">🔥 30 days</p>
