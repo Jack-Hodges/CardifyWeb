@@ -138,6 +138,7 @@ function CreateCards() {
                   totalCards={cards.length}
                   onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
                   onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
+                  create
                 />
               </div>
             </div>

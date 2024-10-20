@@ -7,7 +7,7 @@ import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
 
-function CreateCards() {
+function Quiz() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [randomizedOptions, setRandomizedOptions] = useState([]); // To store randomized options for all cards
@@ -164,7 +164,7 @@ function CreateCards() {
   );
 }
 
-export default CreateCards;
+export default Quiz;
 
 function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
   let boxColor = 'bg-white'; // Default color if no answer is selected

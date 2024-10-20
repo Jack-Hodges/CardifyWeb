@@ -1,6 +1,6 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }) {
+function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false }) {
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -15,7 +15,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick }
     );
 
     // Conditional button for the next action
-    const nextButton = currentCardIndex === totalCards ? (
+    const nextButton = currentCardIndex === totalCards && !create ? (
         <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"green"} />
     ) : (
         <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={"red"} />
