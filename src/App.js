@@ -4,6 +4,7 @@ import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
 import Match from './Pages/Card Games/Match';
 import Home from './Pages/Home';
+import Quiz from './Pages/Card Games/Quiz';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/practice" element={<Practice />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/match" element={<Match />} />
+          <Route path="/quiz" element={<Quiz />} />
         </Routes>
       </Router>
     </div>

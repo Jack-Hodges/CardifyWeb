@@ -105,8 +105,10 @@ function SubjectRow({ subject, page, onClose }) {
             navigate('/create', { state: { subject } }); // Navigate to the create page with subject
         } else if (page === "practice") {
             navigate('/practice', { state: { subject } }); // Navigate to the practice page with subject
-        } else {
+        } else if (page === "match") {
             navigate('/match', { state: { subject }}); // Navigate to the match page with subject
+        } else if (page === "quiz") {
+            navigate('/quiz', { state: { subject }}); // Navigate to the quiz page with subject
         }
         onClose();
     };

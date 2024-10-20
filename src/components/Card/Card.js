@@ -40,8 +40,10 @@ function Card({ frontContent, backContent, flipped, setFlipped, animateFlip, onU
     };
 
     const handleCardClick = () => {
-        if (!isDeleteModalOpen) {
-            setFlipped(!flipped); // Flip the card only when delete modal is not open
+        if (setFlipped) {
+            if (!isDeleteModalOpen) {
+                setFlipped(!flipped); // Flip the card only when delete modal is not open
+            }
         }
     };
 
