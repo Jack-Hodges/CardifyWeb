@@ -73,7 +73,7 @@ function TitleBar( { text, content, user }) {
   }
 
   return (
-    <div className="flex justify-between px-4 mt-2">
+    <div className="flex justify-between px-4 my-2">
       {/* Drop Down Navigation */}
       <div className="relative inline-block text-left z-50">
         {/* Use BackgroundButton as the main button */}

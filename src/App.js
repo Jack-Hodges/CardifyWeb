@@ -2,7 +2,7 @@ import CreateCards from './Pages/CreateCards';
 import Welcome from './Pages/Welcome';
 import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
-import Match from './Pages/Card Games/Match';
+import Memory from './Pages/Card Games/Memory';
 import Home from './Pages/Home';
 import Quiz from './Pages/Card Games/Quiz';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -20,7 +20,7 @@ function App() {
           <Route path="/create" element={<CreateCards />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/match" element={<Match />} />
+          <Route path="/memory" element={<Memory />} />
           <Route path="/quiz" element={<Quiz />} />
         </Routes>
       </Router>

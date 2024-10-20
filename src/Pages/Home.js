@@ -118,7 +118,7 @@ function Home() {
                             <div className="flex ml-5 gap-4">
                                 <JumpButton text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Match" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Quiz" img={Cards} color="text-green-400" onClick={handleOpenSubjectListModal}/>
                             </div>
                         </div>

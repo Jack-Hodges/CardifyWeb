@@ -11,7 +11,7 @@ const shuffleArray = (array) => {
     return array.sort(() => Math.random() - 0.5);
 };
 
-function Match() {
+function Memory() {
 
     const location = useLocation(); // Access location object
     const { subject } = location.state || {};
@@ -100,7 +100,7 @@ function Match() {
 
     return (
         <div className="w-screen h-screen flex flex-col"> {/* Full screen layout */}
-            <TitleBar text="Match" />
+            <TitleBar text="Memory" />
     
             <div className="grid grid-cols-5 grid-rows-2 gap-4 w-full h-full p-4">
                 {shuffledCards.slice(0,10).map((card, index) => (
@@ -120,7 +120,7 @@ function Match() {
     );
 }
 
-export default Match;
+export default Memory;
     
 function MatchCard({ content, onClick, isFlipped, isMatched }) {
     return (
