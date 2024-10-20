@@ -100,9 +100,7 @@ function Match() {
 
     return (
         <div className="w-screen h-screen flex flex-col"> {/* Full screen layout */}
-            <div className="mt-2 mb-4">
-                <TitleBar text="Practice" />
-            </div>
+            <TitleBar text="Match" />
     
             <div className="grid grid-cols-5 grid-rows-2 gap-4 w-full h-full p-4">
                 {shuffledCards.slice(0,10).map((card, index) => (

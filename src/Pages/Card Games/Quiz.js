@@ -89,10 +89,8 @@ function Quiz() {
   };
 
   return (
-    <div className="w-screen h-[100dvh]">
-      <div className='mt-2'>
-        <TitleBar text="Quiz" />
-      </div>
+    <div className="w-screen h-[100dvh] overflow-y-auto">
+      <TitleBar text="Quiz" />
       
       <div className="block sm:flex w-full h-full">
         {loading ? (
@@ -167,7 +165,7 @@ function Quiz() {
 export default Quiz;
 
 function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
-  let boxColor = 'bg-white'; // Default color if no answer is selected
+  let boxColor = 'bg-white dark:bg-gray-600'; // Default color if no answer is selected
 
   if (selectedAnswer) {
     if (selectedAnswer === text) {
@@ -175,12 +173,15 @@ function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
       boxColor = text === correctAnswer ? 'bg-green-400' : 'bg-red-400';
     } else if (text === correctAnswer) {
       // Highlight the correct answer even if it's not the selected one
-      boxColor = 'bg-green-200';
+      boxColor = 'bg-green-200 dark:text-gray-500';
     }
   }
 
   return (
-    <div className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2`} onClick={onClick}>
+    <div 
+      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl text-gray-700 dark:text-gray-200`} 
+      onClick={onClick}
+    >
       {text}
     </div>
   );

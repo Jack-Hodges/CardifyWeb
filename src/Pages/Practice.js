@@ -119,9 +119,7 @@ function FlashcardQuiz() {
 
   return (
     <div className="w-screen h-[100dvh] relative">
-      <div className="mt-2">
-       <TitleBar text="Practice" />
-      </div>
+      <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import BackgroundButton from "../Elements/BackgroundButton";
 import { useNavigate } from "react-router-dom";
 
-function TitleBar( { text }) {
+function TitleBar( { text, content, user }) {
 
   // images
 
@@ -65,31 +65,43 @@ function TitleBar( { text }) {
   }
 
     return (
-      <div className="pl-4 relative inline-block text-left z-50">
-      {/* Use BackgroundButton as the main button */}
-      <BackgroundButton
-        text={text}
-        bgColor="green"
-        wWidth="w-44"
-        image={firstImg}
-        flip
-        onClick={() => setIsOpen(!isOpen)}
-      />
+      <div className="flex justify-between px-4 mt-2">
+        {/* Drop Down Navigation */}
+        <div className="relative inline-block text-left z-50">
+          {/* Use BackgroundButton as the main button */}
+          <BackgroundButton
+            text={text}
+            bgColor="green"
+            wWidth="w-44"
+            image={firstImg}
+            flip
+            onClick={() => setIsOpen(!isOpen)}
+          />
 
-      {/* Dropdown options with animation */}
-      <div
-        className={`p-1 ml-4 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
-          isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
-        }`}
-        style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
-      >
-        <LinkButton text="Home" img={home} />
-        <LinkButton text="Dashboard" img={dashBoard} />
-        <LinkButton text="Create" img={create} />
-        <LinkButton text="Practice" img={practice} />
-        <LinkButton text="Quiz" img={quiz} />
+          {/* Dropdown options with animation */}
+          <div
+            className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
+              isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+            }`}
+            style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
+          >
+            <LinkButton text="Home" img={home} />
+            <LinkButton text="Dashboard" img={dashBoard} />
+            <LinkButton text="Create" img={create} />
+            <LinkButton text="Practice" img={practice} />
+            <LinkButton text="Quiz" img={quiz} />
+          </div>
+        </div>
+
+        {/* User Profile and Additional Content */}
+        <div className="flex gap-2">
+          {content}
+          <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow background-hover cursor-pointer">
+            <p className="text-white font-bold text-xl">{user?.name?.charAt(0) || 'U'}</p>
+          </div>
+        </div>
       </div>
-    </div>
+      
     )
 }
 

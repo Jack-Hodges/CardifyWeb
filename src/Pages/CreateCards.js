@@ -103,9 +103,7 @@ function CreateCards() {
 
   return (
     <div className="w-screen h-[100dvh]">
-      <div className='mt-2'>
-        <TitleBar text="Create" />
-      </div>
+      <TitleBar text="Create" user={user}/>
       
 
       <div className="block sm:flex w-full h-full">

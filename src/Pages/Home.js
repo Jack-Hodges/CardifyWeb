@@ -89,7 +89,7 @@ function Home() {
     return (
         <div className="w-screen h-full overflow-auto">
             <div className="mt-2 mb-2">
-                <TitleBar text="Home" />
+                <TitleBar text="Home" user={user}/>
             </div>
             <div className="text-3xl font-bold text-gray-600 dark:text-gray-200">
                 {user && profile ? (
