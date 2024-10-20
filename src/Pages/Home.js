@@ -98,7 +98,7 @@ function Home() {
                         <div className="mx-5">
                             <div className="flex justify-between">
                                 <p className="text-5xl font-bold">Welcome back, {profile.first_name}!</p>
-                                <button onClick={logoutUser} className="px-4 py-2 bg-red-500 text-white rounded-full ml-5">Logout</button>
+                                <button onClick={logoutUser} className="px-4 py-2 bg-red-500 text-white rounded-full ml-5 hidden sm:block">Logout</button>
                             </div>
                             
                             <p className="font-normal">🔥 30 days</p>
@@ -111,7 +111,7 @@ function Home() {
                                     <p>In Progress</p>
                                 </div>
 
-                                <div className="grid grid-cols-4 px-5 gap-4">
+                                <div className="flex sm:grid sm:grid-cols-4 px-5 gap-4">
                                     {subjects
                                         .filter(subject => subject.up_to_index !== null)
                                         .slice(0, 4)
@@ -124,7 +124,7 @@ function Home() {
                         )}
 
                         <div>
-                            <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                            <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3">
                                 <p>Jump In</p>
                             </div>
 

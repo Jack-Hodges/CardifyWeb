@@ -212,7 +212,7 @@ function FlashcardQuiz() {
           <div className="flex flex-col justify-center items-center h-full w-full">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
             <p className="text-gray-500 text-2xl mb-10">You have completed all the cards.</p>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <BackgroundButton text="Back to Home" bgColor="green" onClick={handleSwitchToHome} />
               <BackgroundButton text={`Review ${subject.name} Again`} bgColor="blue" onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
             </div>
