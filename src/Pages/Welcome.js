@@ -132,7 +132,7 @@ function Welcome() {
   return (
     <div className="min-h-screen block sm:flex">
 
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 z-50">
           <BackgroundButton
             text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
             bgColor={"green"}
