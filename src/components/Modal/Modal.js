@@ -67,9 +67,9 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
                 </p>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-4">
-                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} onClick={(e) => handleFirstAction(e)} />
-                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} onClick={(e) => handleSecondAction(e)} />
+                <div className="block sm:flex sm:justify-end sm:space-x-4 items-center mx-auto w-full">
+                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} wWidth='w-full' onClick={(e) => handleFirstAction(e)} />
+                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
                 </div>
             </div>
         </div>,
