@@ -84,7 +84,7 @@ function Home() {
                         {/* Welcome top section */}
                         <div className="mx-5">
                             <div className="flex justify-between">
-                                <p className="text-5xl font-bold">Welcome back, {profile.first_name}!</p>
+                                <p className="text-4xl sm:text-5xl font-bold">Welcome back, {profile.first_name}!</p>
                             </div>
                             
                             <p className="font-normal">🔥 100 days</p>
@@ -97,7 +97,7 @@ function Home() {
                                     <p>In Progress</p>
                                 </div>
 
-                                <div className="flex sm:grid sm:grid-cols-4 px-5 gap-4">
+                                <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
                                     {subjects
                                         .filter(subject => subject.up_to_index !== null)
                                         .slice(0, 4)
@@ -115,7 +115,7 @@ function Home() {
                             </div>
 
                             {/* Learning buttons flex */}
-                            <div className="flex ml-5 gap-4">
+                            <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
                                 <JumpButton text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
                                 <JumpButton text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
@@ -134,7 +134,7 @@ function Home() {
                                 {subjects.map((subject, index) => (
                                     <div 
                                         key={index} 
-                                        className={`flex-shrink-0 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
+                                        className={`flex-shrink-0 min-w-72 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
                                     >
                                         <SubjectBlock
                                             bgCol={subject.bgCol}
@@ -177,81 +177,83 @@ function JumpButton( { text, img, color, onClick }) {
 }
 
 function InProgress({ subject }) {
-    const colors = getColor(subject ? subject.bgCol : 'red');
-    const navigate = useNavigate();
-    const [cardsRemaining, setCardsRemaining] = useState(0);
-    const [percentage, setPercentage] = useState(0);
-    const [strokeDashoffset, setStrokeDashoffset] = useState(0);
+  const colors = getColor(subject ? subject.bgCol : 'red');
+  const navigate = useNavigate();
+  const [cardsRemaining, setCardsRemaining] = useState(0);
+  const [percentage, setPercentage] = useState(0);
+  const [strokeDashoffset, setStrokeDashoffset] = useState(0);
 
-    const indexToCount = subject.up_to_index + 1;
+  const indexToCount = subject.up_to_index + 1;
 
-    const navigateClick = () => {
-        navigate('/practice', { state: { subject } });
-    };
+  const navigateClick = () => {
+    navigate('/practice', { state: { subject } });
+  };
 
-    // Define responsive circle properties
-    const strokeWidth = 6; // Adjusted stroke width
-    const radius = 40; // Radius of the circle
-    const circumference = 2 * Math.PI * radius;
+  // Circle properties
+  const strokeWidth = 6;
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
 
-    useEffect(() => {
-        // Calculate remaining cards and percentage
-        const calculatedRemainingCards = subject.flashcard_count - indexToCount;
-        const calculatedPercentage = Math.round((indexToCount / subject.flashcard_count) * 100, 0);
+  useEffect(() => {
+    // Calculate remaining cards and percentage
+    const calculatedRemainingCards = subject.flashcard_count - indexToCount;
+    const calculatedPercentage = Math.round((indexToCount / subject.flashcard_count) * 100);
 
-        // Calculate stroke offset based on percentage
-        const calculatedStrokeDashoffset = circumference - (calculatedPercentage / 100) * circumference;
+    // Calculate stroke offset based on percentage
+    const calculatedStrokeDashoffset = circumference - (calculatedPercentage / 100) * circumference;
 
-        // Set the calculated values into state
-        setCardsRemaining(calculatedRemainingCards);
-        setPercentage(calculatedPercentage);
-        setStrokeDashoffset(calculatedStrokeDashoffset);
+    // Update state
+    setCardsRemaining(calculatedRemainingCards);
+    setPercentage(calculatedPercentage);
+    setStrokeDashoffset(calculatedStrokeDashoffset);
+  }, [subject, circumference, indexToCount]);
 
-    }, [subject, circumference, indexToCount]);
+  return (
+    <div
+      className={`w-1/4 min-w-72 flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+      onClick={navigateClick}
+    >
+      <div className="w-3/4">
+        <p>{subject.name}</p>
+        <p className="text-sm">
+          {cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining
+        </p>
+      </div>
 
-    return (
-        <div
-            className={`flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
-            onClick={navigateClick}
-        >
-            <div className="w-3/4">
-                <p>{subject.name}</p>
-                <p className="text-sm">{cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining</p>
-            </div>
-
-            {/* Circle SVG takes 25% of the width */}
-            <div className="w-1/4 flex justify-center items-center">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                    {/* Background Circle */}
-                    <circle
-                        cx="50"
-                        cy="50"
-                        r={radius}
-                        stroke="rgba(255, 255, 255, 0.2)"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                    />
-                    {/* Progress Circle */}
-                    <circle
-                        cx="50"
-                        cy="50"
-                        r={radius}
-                        stroke="white"
-                        strokeWidth={strokeWidth}
-                        fill="none"
-                        strokeLinecap="round"
-                        style={{
-                            strokeDasharray: circumference,
-                            strokeDashoffset: strokeDashoffset,
-                            transform: 'rotate(-90deg)',
-                            transformOrigin: '50% 50%',
-                        }}
-                    />
-                </svg>
-                <div className="absolute text-lg">
-                    <p>{percentage}%</p>
-                </div>
-            </div>
+      {/* Adjusted circle and percentage text positioning */}
+      <div className="w-1/4 relative flex justify-center items-center h-full">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          {/* Background Circle */}
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke="rgba(255, 255, 255, 0.2)"
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          {/* Progress Circle */}
+          <circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke="white"
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeLinecap="round"
+            style={{
+              strokeDasharray: circumference,
+              strokeDashoffset: strokeDashoffset,
+              transform: 'rotate(-90deg)',
+              transformOrigin: '50% 50%',
+            }}
+          />
+        </svg>
+        {/* Centered percentage text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-lg">{percentage}%</p>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
