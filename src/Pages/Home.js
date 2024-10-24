@@ -87,7 +87,7 @@ function Home() {
                                 <p className="text-5xl font-bold">Welcome back, {profile.first_name}!</p>
                             </div>
                             
-                            <p className="font-normal">🔥 30 days</p>
+                            <p className="font-normal">🔥 100 days</p>
                             
                         </div>
                         
