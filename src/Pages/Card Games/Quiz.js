@@ -96,16 +96,13 @@ function Quiz() {
   // Compute quiz results
   let correctCount = 0;
   let incorrectCount = 0;
-  let unansweredCount = 0;
   let percentage = 0;
   let message = '';
 
   if (finished) {
     cards.forEach((card, index) => {
       const selectedAnswer = selectedAnswers[index];
-      if (selectedAnswer === undefined) {
-        unansweredCount += 1;
-      } else if (selectedAnswer === card.answer) {
+      if (selectedAnswer === card.answer) {
         correctCount += 1;
       } else {
         incorrectCount += 1;
