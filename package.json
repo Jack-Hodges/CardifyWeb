@@ -16,9 +16,12 @@
     "jspdf": "^2.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-transition-group": "^4.4.5",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

@@ -139,7 +139,10 @@ function Quiz() {
               <div className="flex flex-col justify-center items-center gap-4">
                 <p className="font-bold text-2xl text-gray-700 dark:text-gray-200">{subject.name} does not have enough cards.</p>
                 <p>At least 4 cards are required to start a quiz</p>
-                <BackgroundButton text={`Add cards to ${subject.name}`} bgColor={'purple'} onClick={navToCreate}/>
+                <div className="flex gap-4">
+                  <BackgroundButton text={`Choose a different subject`} bgColor={'orange'} onClick={() => setIsSubjectListModalOpen(true)}/>
+                  <BackgroundButton text={`Add cards to ${subject.name}`} bgColor={'purple'} onClick={navToCreate}/>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center">
