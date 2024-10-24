@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import EditModal from './EditModal';
 import BackgroundButton from '../Elements/BackgroundButton';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 function CardList({ cards, onCardClick, onAddNewCard, subject }) {
 
@@ -33,7 +35,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
         <BackgroundButton 
           onClick={handleAddClick} 
           image={plusIcon} 
-          text="Add" // This will display both the SVG and the text
+          text="Add"
           bgColor={"yellow"}
         />
       </div>
@@ -48,9 +50,17 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
                 hover:scale-95 transition duration-300 w-[99%] sm:w-[95%]"
               onClick={() => onCardClick(index)} // Handle card click
             >
-              <p className="text-ellipsis overflow-hidden whitespace-nowrap w-full text-gray-700 dark:text-gray-200">
-                {card.question} {/* Use 'question' instead of 'frontContent' */}
-              </p>
+              <div className="text-gray-700 dark:text-gray-200 w-full overflow-hidden whitespace-nowrap text-ellipsis">
+                <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    u: ({ node, ...props }) => <u {...props} />,
+                  }}
+                  className="text-lg font-bold inline" // Add 'inline' class
+                >
+                  {card.question}
+                </ReactMarkdown>
+              </div>
             </li>
           ))}
         </ul>

@@ -94,7 +94,7 @@ function EditModal({
   };
 
   const handleItalicClick = (field) => {
-    applyFormatting(field, '_');
+    applyFormatting(field, '*');
   };
 
   const handleUnderlineClick = (field) => {
@@ -175,21 +175,21 @@ function EditModal({
 
           {/* Formatting Buttons for Question */}
           <div className="mb-2 flex space-x-2">
-          <button
-              onClick={() => handleBoldClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+            <button
+              onClick={() => handleBoldClick('front')}
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <b>B</b>
             </button>
             <button
-              onClick={() => handleItalicClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+              onClick={() => handleItalicClick('front')}
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <i>I</i>
             </button>
             <button
-              onClick={() => handleUnderlineClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+              onClick={() => handleUnderlineClick('front')}
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <u>U</u>
             </button>
@@ -219,19 +219,19 @@ function EditModal({
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <b>B</b>
             </button>
             <button
               onClick={() => handleItalicClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <i>I</i>
             </button>
             <button
               onClick={() => handleUnderlineClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md"
+              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
             >
               <u>U</u>
             </button>

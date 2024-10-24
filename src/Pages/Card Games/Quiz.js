@@ -6,6 +6,8 @@ import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 function Quiz() {
   const [cards, setCards] = useState([]);
@@ -129,7 +131,7 @@ function Quiz() {
 
               <div className="flex justify-around mt-4 mx-auto gap-4">
                 <BackgroundButton text="Previous Card" bgColor={'orange'} wWidth='w-40' onClick={goToPreviousCard} />
-                <BackgroundButton text={currentCardIndex === cards.length-1 ? `Finish Quiz` : `Next Card`} bgColor={'purple'} wWidth='w-40' onClick={goToNextCard} />
+                <BackgroundButton text={currentCardIndex === cards.length-1 ? `Finish Quiz` : `Next Card`} bgColor={currentCardIndex === cards.length-1 ? 'green' : 'purple'} wWidth='w-40' onClick={goToNextCard} />
               </div>
             </div>
           </>
@@ -181,11 +183,21 @@ function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
   }
 
   return (
-    <div 
-      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl text-gray-700 dark:text-gray-200`} 
+    <div
+      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl text-gray-700 dark:text-gray-200`}
       onClick={onClick}
     >
-      {text}
+      <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+        <ReactMarkdown
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            u: ({ node, ...props }) => <u {...props} />,
+          }}
+          className="inline"
+        >
+          {text}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }
