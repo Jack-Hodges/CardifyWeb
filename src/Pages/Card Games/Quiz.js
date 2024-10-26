@@ -233,7 +233,7 @@ function Quiz() {
                 <p className="font-bold text-2xl text-gray-700 dark:text-gray-200">
                   {subject.name} does not have enough cards.
                 </p>
-                <p>At least 4 cards are required to start a quiz</p>
+                <p className="text-gray-700 dark:text-gray-200">At least 4 cards are required to start a quiz</p>
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
