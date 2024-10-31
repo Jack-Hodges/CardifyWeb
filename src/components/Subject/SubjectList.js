@@ -109,6 +109,8 @@ function SubjectRow({ subject, page, onClose }) {
             navigate('/match', { state: { subject }}); // Navigate to the match page with subject
         } else if (page === "quiz") {
             navigate('/quiz', { state: { subject }}); // Navigate to the quiz page with subject
+        } else if (page === "scramble") {
+            navigate('/scramble', { state: { subject }}); // Navigate to the scramble page with subject
         }
         onClose();
     };

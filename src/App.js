@@ -5,6 +5,7 @@ import Dashboard from './Pages/Dashboard';
 import Memory from './Pages/Card Games/Memory';
 import Home from './Pages/Home';
 import Quiz from './Pages/Card Games/Quiz';
+import Scramble from './Pages/Card Games/Scramble';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/memory" element={<Memory />} />
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/scramble" element={<Scramble />} />
         </Routes>
       </Router>
     </div>
