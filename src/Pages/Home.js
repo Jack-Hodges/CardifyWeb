@@ -188,7 +188,7 @@ export default Home;
 
 function JumpButton( { text, img, color, onClick }) {
     return (
-        <div className={`flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}
+        <div className={`group flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}
             onClick={() => onClick(text.toLowerCase())}>
             {img}
             <p>{text}</p>

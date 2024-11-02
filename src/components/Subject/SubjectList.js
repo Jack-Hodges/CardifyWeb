@@ -65,6 +65,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                         onBack={() => setSelectedCollection(null)}
                         onClose={onClose}
                         page={page}
+                        cross={cross}
                     />
                 ) : (
                     <>
@@ -101,17 +102,7 @@ function SubjectRow({ subject, page, onClose }) {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        if (page === "create") {
-            navigate('/create', { state: { subject } }); // Navigate to the create page with subject
-        } else if (page === "practice") {
-            navigate('/practice', { state: { subject } }); // Navigate to the practice page with subject
-        } else if (page === "match") {
-            navigate('/match', { state: { subject }}); // Navigate to the match page with subject
-        } else if (page === "quiz") {
-            navigate('/quiz', { state: { subject }}); // Navigate to the quiz page with subject
-        } else if (page === "scramble") {
-            navigate('/scramble', { state: { subject }}); // Navigate to the scramble page with subject
-        }
+        navigate(`/${page}`, { state: { subject } });
         onClose();
     };
 
@@ -149,7 +140,7 @@ function CollectionRow({ collection, subjects, onClick }) {
     );
 }
 
-function CollectionView({ collection, subjects, onBack, onClose, page }) {
+function CollectionView({ collection, subjects, onBack, onClose, page, cross }) {
 
     const chev = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -161,8 +152,8 @@ function CollectionView({ collection, subjects, onBack, onClose, page }) {
     return (
         <div className="w-full h-full">
             <div className="flex justify-between items-center mb-4">
-                <BackgroundButton text="Back" image={chev} flip onClick={onBack} />
-                <h2 className="text-2xl font-semibold text-green-500">{collection.name}</h2>
+                <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'green'}/>
+                <BackgroundButton image={cross} bgColor={'red'} onClick={onClose}/>
             </div>
             {subjects.length > 0 ? (
                 subjects.map((subject) => (

@@ -1,6 +1,7 @@
 import { useState } from "react";import BackgroundButton from "../Elements/BackgroundButton";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
+import ProfileModal from "../Profile/ProfileModal";
 
 function TitleBar( { text, content, user }) {
 
@@ -8,6 +9,7 @@ function TitleBar( { text, content, user }) {
 
   const navigate = useNavigate();
   const { profile, logout } = useUser()
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dashBoard = (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
@@ -113,12 +115,18 @@ function TitleBar( { text, content, user }) {
       <div className="flex gap-2">
         {content}
         <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow background-hover cursor-pointer"
-          onClick={logoutUser}>
+          onClick={() => setIsProfileOpen(true)}>
           <p className="text-white font-bold text-xl">{profile?.first_name?.charAt(0) || 'U'}</p>
         </div>
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        logout={logoutUser}
+        profile={profile}
+      />
     </div>
-      
   )
 }
 
