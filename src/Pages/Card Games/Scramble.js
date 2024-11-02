@@ -188,7 +188,7 @@ function Scramble() {
           </div>
 
           {/* Available Chunks */}
-          <h2 className="text-lg font-bold mb-2 mt-4">Available Chunks</h2>
+          <h2 className="text-lg font-bold mb-2 mt-4">Drag the blocks</h2>
           <AvailableChunks
             availableChunks={availableChunks}
             setAvailableChunks={setAvailableChunks}
@@ -293,7 +293,7 @@ function DropZone({
   return (
     <div
       ref={drop}
-      className={`w-full min-h-[50px] border border-dashed border-gray-400 p-2 flex flex-wrap ${
+      className={`w-full h-16 border border-dashed border-gray-400 p-2 flex flex-wrap rounded-xl ${
         isOver ? 'bg-blue-100' : ''
       }`}
     >
