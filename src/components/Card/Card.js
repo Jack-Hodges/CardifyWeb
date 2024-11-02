@@ -191,6 +191,8 @@ function CardContent({
 
       <ReactMarkdown
         rehypePlugins={[rehypeRaw]}
+        allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+        unwrapDisallowed={true}
         components={{
           u: ({ node, ...props }) => <u {...props} />,
         }}
