@@ -96,7 +96,7 @@ function Home() {
             <div className="mt-2 mb-2">
                 <TitleBar text="Home" user={user}/>
             </div>
-            <div className="text-3xl font-bold text-gray-600 dark:text-gray-200">
+            <div className="text-3xl font-bold textColor">
                 {user && profile ? (
                     <div>
                         {/* Welcome top section */}

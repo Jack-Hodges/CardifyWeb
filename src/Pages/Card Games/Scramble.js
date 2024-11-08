@@ -1,33 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { fetchCards, sortCardsById } from '../../components/Card/CardManipulation';
 import { useUser } from '../../UserContext';
-import TitleBar from '../../components/Navigation/TitleBar';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import ReactMarkdown from 'react-markdown';
+import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 
-function Scramble() {
-  // State variables
-  const [cards, setCards] = useState([]);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [availableChunks, setAvailableChunks] = useState([]);
-  const [userQuestionChunks, setUserQuestionChunks] = useState([]);
-  const [userAnswerChunks, setUserAnswerChunks] = useState([]);
-  const [correctQuestionChunks, setCorrectQuestionChunks] = useState([]);
-  const [correctAnswerChunks, setCorrectAnswerChunks] = useState([]);
-  const [questionFeedback, setQuestionFeedback] = useState([]);
-  const [answerFeedback, setAnswerFeedback] = useState([]);
-  const [loading, setLoading] = useState(true);
+const splitIntoChunks = (text, maxChunks = 5) => {
+  if (!text || typeof text !== 'string') return [];
+  
+  const words = text.split(' ');
+  const chunks = [];
+  const wordsPerChunk = Math.max(1, Math.ceil(words.length / maxChunks));
+  
+  for (let i = 0; i < words.length; i += wordsPerChunk) {
+    const chunk = words.slice(i, i + wordsPerChunk).join(' ');
+    chunks.push(chunk);
+  }
+  
+  return chunks.slice(0, maxChunks);
+};
 
-  // Hooks
-  const navigate = useNavigate();
+const DragDropGame = () => {
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [questionArea, setQuestionArea] = useState([]);
+  const [answerArea, setAnswerArea] = useState([]);
+  const [availableChunks, setAvailableChunks] = useState([]);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedItemOrigin, setDraggedItemOrigin] = useState(null);
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const [activeDropArea, setActiveDropArea] = useState(null);
+  const [dropPosition, setDropPosition] = useState(null);
+
+  const dragItemRef = useRef(null);
+
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser } = useUser();
 
-  // Load cards and randomize options
   useEffect(() => {
     if (!user) {
       getUser();
@@ -51,418 +64,273 @@ function Scramble() {
     loadCards();
   }, [subject, user, getUser]);
 
-  // Initialize chunks when currentCardIndex changes
   useEffect(() => {
-    if (cards.length > 0 && currentCardIndex < cards.length) {
-      const card = cards[currentCardIndex];
-      const questionChunksArray = splitTextIntoChunks(card.question);
-      const answerChunksArray = splitTextIntoChunks(card.answer);
+    if (!cards.length || loading) return;
 
-      // Store correct chunks
-      setCorrectQuestionChunks(questionChunksArray);
-      setCorrectAnswerChunks(answerChunksArray);
+    const currentCard = cards[currentCardIndex];
+    if (!currentCard) return;
 
-      // Combine and shuffle chunks
-      const combinedChunks = [
-        ...questionChunksArray.map((chunk) => ({ ...chunk, type: 'question' })),
-        ...answerChunksArray.map((chunk) => ({ ...chunk, type: 'answer' })),
-      ];
-      const shuffledChunks = shuffleArray(combinedChunks);
+    const questionChunks = splitIntoChunks(currentCard.question);
+    const answerChunks = splitIntoChunks(currentCard.answer);
+    
+    const allChunks = [...questionChunks, ...answerChunks]
+      .map((text, index) => ({
+        id: `chunk-${index}`,
+        content: text,
+        originalArea: index < questionChunks.length ? 'question' : 'answer'
+      }))
+      .sort(() => Math.random() - 0.5);
+      
+    setAvailableChunks(allChunks);
+    setQuestionArea([]);
+    setAnswerArea([]);
+  }, [currentCardIndex, cards, loading]);
 
-      setAvailableChunks(shuffledChunks);
-      setUserQuestionChunks([]);
-      setUserAnswerChunks([]);
-      setQuestionFeedback([]);
-      setAnswerFeedback([]);
+  const getItemsByArea = (area) => {
+    if (area === 'question') return questionArea;
+    if (area === 'answer') return answerArea;
+    if (area === 'available') return availableChunks;
+    return [];
+  };
+
+  const handleMouseDown = (event, area, chunk) => {
+    event.preventDefault();
+    setDraggedItem(chunk);
+    setDraggedItemOrigin(area);
+    setMouseOffset({
+      x: event.clientX - event.target.getBoundingClientRect().left,
+      y: event.clientY - event.target.getBoundingClientRect().top,
+    });
+    setDragging(true);
+  };
+
+  const handleMouseMove = (event) => {
+    if (!dragging) return;
+    const dragItem = dragItemRef.current;
+    if (dragItem) {
+      dragItem.style.left = `${event.clientX - mouseOffset.x}px`;
+      dragItem.style.top = `${event.clientY - mouseOffset.y}px`;
     }
-  }, [cards, currentCardIndex]);
 
-  function splitTextIntoChunks(text, maxChunks = 5) {
-    const words = text.trim().split(/\s+/);
-    const numWords = words.length;
-    let chunks = [];
+    // Determine which drop area the mouse is over
+    const dropAreas = ['question', 'answer', 'available'];
+    let overArea = null;
+    for (let area of dropAreas) {
+      const dropAreaElement = document.getElementById(`drop-area-${area}`);
+      const rect = dropAreaElement.getBoundingClientRect();
+      if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      ) {
+        overArea = area;
+        break;
+      }
+    }
+    setActiveDropArea(overArea);
 
-    if (numWords <= maxChunks) {
-      chunks = words.map((word, idx) => ({
-        id: `chunk-${idx}-${word}-${Math.random()}`,
-        chunk: word,
-      }));
+    if (overArea) {
+      // Find drop position within the area
+      const items = getItemsByArea(overArea);
+      let dropIndex = items.length;
+
+      let minDistance = Infinity;
+      for (let i = 0; i < items.length; i++) {
+        const itemElement = document.getElementById(items[i].id);
+        if (itemElement) {
+          const itemRect = itemElement.getBoundingClientRect();
+
+          // Calculate distance from mouse to item's center
+          const itemCenterX = itemRect.left + itemRect.width / 2;
+          const itemCenterY = itemRect.top + itemRect.height / 2;
+          const deltaX = event.clientX - itemCenterX;
+          const deltaY = event.clientY - itemCenterY;
+          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+          if (distance < minDistance) {
+            minDistance = distance;
+            // Check if mouse is to the left of the item
+            if (event.clientX < itemCenterX) {
+              dropIndex = i;
+            } else {
+              dropIndex = i + 1;
+            }
+          }
+        }
+      }
+      setDropPosition(dropIndex);
     } else {
-      const chunkSize = Math.ceil(numWords / maxChunks);
-      for (let i = 0; i < numWords; i += chunkSize) {
-        const chunkWords = words.slice(i, i + chunkSize).join(' ');
-        chunks.push({
-          id: `chunk-${i}-${chunkWords}-${Math.random()}`,
-          chunk: chunkWords,
-        });
-      }
+      setDropPosition(null);
     }
-    return chunks;
-  }
+  };
 
-  function shuffleArray(array) {
-    const newArray = array.slice();
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  const handleMouseUp = (event) => {
+    if (!dragging || !draggedItem) return;
+    let droppedInArea = activeDropArea;
+
+    if (droppedInArea) {
+      moveItemToArea(draggedItem, draggedItemOrigin, droppedInArea, dropPosition);
+    } else {
+      // Return item to original area if not dropped in any area
+      moveItemToArea(draggedItem, draggedItemOrigin, draggedItemOrigin);
     }
-    return newArray;
-  }
 
-  function handleCheckAnswer() {
-    const questionFeedbackArray = userQuestionChunks.map((item, index) => {
-      if (
-        correctQuestionChunks[index] &&
-        item.chunk.trim() === correctQuestionChunks[index].chunk.trim()
-      ) {
-        return true;
+    // Cleanup
+    setDragging(false);
+    setDraggedItem(null);
+    setDraggedItemOrigin(null);
+    setMouseOffset({ x: 0, y: 0 });
+    setActiveDropArea(null);
+    setDropPosition(null);
+  };
+
+  const moveItemToArea = (item, fromArea, toArea, position = null) => {
+    // Remove from source area
+    if (fromArea === 'question') {
+      setQuestionArea((prev) => prev.filter((c) => c.id !== item.id));
+    } else if (fromArea === 'answer') {
+      setAnswerArea((prev) => prev.filter((c) => c.id !== item.id));
+    } else if (fromArea === 'available') {
+      setAvailableChunks((prev) => prev.filter((c) => c.id !== item.id));
+    }
+
+    // Add to target area at the correct position
+    const insertAtPosition = (array, item, position) => {
+      const newArray = [...array];
+      if (position === null || position >= newArray.length) {
+        newArray.push(item);
       } else {
-        return false;
+        newArray.splice(position, 0, item);
       }
-    });
-    setQuestionFeedback(questionFeedbackArray);
+      return newArray;
+    };
 
-    const answerFeedbackArray = userAnswerChunks.map((item, index) => {
-      if (
-        correctAnswerChunks[index] &&
-        item.chunk.trim() === correctAnswerChunks[index].chunk.trim()
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    });
-    setAnswerFeedback(answerFeedbackArray);
-  }
-
-  function handleNextCard() {
-    if (currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-    } 
-  }
-
-  function handlePrevCard() {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
+    if (toArea === 'question') {
+      setQuestionArea((prev) => insertAtPosition(prev, item, position));
+    } else if (toArea === 'answer') {
+      setAnswerArea((prev) => insertAtPosition(prev, item, position));
+    } else if (toArea === 'available') {
+      setAvailableChunks((prev) => insertAtPosition(prev, item, position));
     }
-  }
+  };
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const ChunkItem = ({ chunk, area }) => (
+    <div
+      id={chunk.id}
+      onMouseDown={(e) => handleMouseDown(e, area, chunk)}
+      className="px-2 py-1 rounded bg-white shadow-sm border border-gray-200 text-gray-700 cursor-pointer inline-block"
+    >
+      <ReactMarkdown>{chunk.content}</ReactMarkdown>
+    </div>
+  );
 
-  if (cards.length === 0) {
-    return <div>No cards available.</div>;
-  }
+  const DropArea = ({ id, items, title }) => (
+    <div
+      id={`drop-area-${id}`}
+      className="w-full"
+    >
+      <h3 className="text-lg font-semibold py-2">{title}</h3>
+      <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
+        {items.map((item, index) => (
+          <React.Fragment key={item.id}>
+            {activeDropArea === id && dropPosition === index && draggedItem && (
+              <div className="px-2 py-1 rounded border-2 border-blue-500 bg-blue-50 text-gray-700">
+                <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+              </div>
+            )}
+            <ChunkItem chunk={item} area={id} />
+          </React.Fragment>
+        ))}
+        {activeDropArea === id && dropPosition === items.length && draggedItem && (
+          <div className="px-2 py-1 rounded border-2 border-blue-500 bg-blue-50 text-gray-700">
+            <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="w-screen h-[100dvh] overflow-y-auto">
-        <TitleBar text="Scramble" />
-
-        <div className="block sm:flex w-full h-full p-4 flex-col">
-          {/* Question Assembly */}
-          <div className="w-full">
-            <h2 className="text-lg font-bold mb-2">Question</h2>
-            <DropZone
-              acceptedType="question"
-              items={userQuestionChunks}
-              setItems={setUserQuestionChunks}
-              feedback={questionFeedback}
-              setAvailableChunks={setAvailableChunks}
-              availableChunks={availableChunks}
-            />
-          </div>
-
-          {/* Answer Assembly */}
-          <div className="w-full mt-4">
-            <h2 className="text-lg font-bold mb-2">Answer</h2>
-            <DropZone
-              acceptedType="answer"
-              items={userAnswerChunks}
-              setItems={setUserAnswerChunks}
-              feedback={answerFeedback}
-              setAvailableChunks={setAvailableChunks}
-              availableChunks={availableChunks}
-            />
-          </div>
-
-          {/* Available Chunks */}
-          <h2 className="text-lg font-bold mb-2 mt-4">Drag the blocks</h2>
-          <AvailableChunks
-            availableChunks={availableChunks}
-            setAvailableChunks={setAvailableChunks}
-            setUserQuestionChunks={setUserQuestionChunks}
-            setUserAnswerChunks={setUserAnswerChunks}
-          />
-
-          {/* Buttons */}
-          <div className="flex space-x-4 mt-4">
-            <BackgroundButton text="Check Answer" onClick={handleCheckAnswer} bgColor={'blue'} wWidth='w-44'/>
-            <BackgroundButton text="Previous Card" onClick={handlePrevCard} bgColor={'orange'} wWidth='w-44'/>
-            <BackgroundButton text="Next Card" onClick={handleNextCard} bgColor={'purple'} wWidth='w-44'/>
+    <div
+      className="w-screen h-[100dvh] overflow-y-auto textColor"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
+      <TitleBar text="Scramble" />
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">Loading cards...</div>
+        </div>
+      ) : !cards.length ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-gray-600">
+            No cards available for this subject
           </div>
         </div>
-      </div>
-    </DndProvider>
-  );
-}
+      ) : (
+        <div className="p-4">
+          <div className="mb-4 flex justify-between items-center">
+            <h2 className="text-xl font-bold">
+              Card {currentCardIndex + 1} of {cards.length}
+            </h2>
+            <div className="space-x-2">
+              <BackgroundButton text="Previous" bgColor="orange" disabled={currentCardIndex === 0 } wWidth="w-24" onClick={
+                () => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}/>
 
-export default Scramble;
+              <BackgroundButton text="Next" bgColor="purple" disabled={currentCardIndex === cards.length - 1 } wWidth="w-24" onClick={
+                () => setCurrentCardIndex((prev) =>
+                  Math.min(cards.length - 1, prev + 1)
+                )}/>
+            </div>
+          </div>
 
-// AvailableChunks Component
-function AvailableChunks({
-  availableChunks,
-  setAvailableChunks,
-  setUserQuestionChunks,
-  setUserAnswerChunks,
-}) {
-  const [, drop] = useDrop({
-    accept: 'CHUNK',
-    drop: (draggedItem) => {
-      if (draggedItem.from === 'dropZone') {
-        // Remove from the appropriate dropZone
-        if (draggedItem.acceptedType === 'question') {
-          draggedItem.setItems((prevItems) =>
-            prevItems.filter((item) => item.id !== draggedItem.id)
-          );
-        } else if (draggedItem.acceptedType === 'answer') {
-          draggedItem.setItems((prevItems) =>
-            prevItems.filter((item) => item.id !== draggedItem.id)
-          );
-        }
+          <div className="flex flex-col space-y-4">
+            <DropArea id="question" items={questionArea} title="Question" />
+            <DropArea id="answer" items={answerArea} title="Answer" />
 
-        // Add back to availableChunks
-        setAvailableChunks((prev) => [
-          ...prev,
-          { ...draggedItem, from: 'availableChunks' },
-        ]);
-      }
-    },
-  });
+            <div
+              id="drop-area-available"
+            >
+              <h3 className="text-lg font-semibold py-2">
+                Available Chunks
+              </h3>
+              <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
+                {availableChunks.map((chunk, index) => (
+                  <React.Fragment key={chunk.id}>
+                    {activeDropArea === 'available' && dropPosition === index && draggedItem && (
+                      <div className="px-2 py-1 rounded border-2 border-blue-500 bg-blue-50">
+                        <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+                      </div>
+                    )}
+                    <ChunkItem chunk={chunk} area="available" />
+                  </React.Fragment>
+                ))}
+                {activeDropArea === 'available' && dropPosition === availableChunks.length && draggedItem && (
+                  <div className="px-2 py-1 rounded border-2 border-blue-500 bg-blue-50">
+                    <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-  return (
-    <div ref={drop} className="flex flex-wrap">
-      {availableChunks.map((item) => (
-        <DraggableChunk key={item.id} item={item} />
-      ))}
+          {dragging && draggedItem && (
+            <div
+              ref={dragItemRef}
+              className="fixed pointer-events-none px-2 py-1 rounded bg-white shadow-lg border border-gray-300"
+              style={{
+                left: '-9999px',
+                top: '-9999px',
+              }}
+            >
+              <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
-}
+};
 
-// DropZone Component
-function DropZone({
-  acceptedType,
-  items,
-  setItems,
-  feedback,
-  setAvailableChunks,
-  availableChunks,
-}) {
-  const [{ isOver }, drop] = useDrop({
-    accept: 'CHUNK',
-    drop: (draggedItem) => {
-      if (draggedItem.type !== acceptedType) return;
-
-      if (draggedItem.from === 'availableChunks') {
-        setAvailableChunks((prev) =>
-          prev.filter((chunk) => chunk.id !== draggedItem.id)
-        );
-      } else if (draggedItem.from === 'dropZone') {
-        // Do nothing, already handled in hover
-        return;
-      }
-
-      setItems((prevItems) => {
-        if (prevItems.find((prevItem) => prevItem.id === draggedItem.id)) {
-          return prevItems;
-        }
-        return [...prevItems, draggedItem];
-      });
-
-      draggedItem.from = 'dropZone';
-      draggedItem.index = items.length;
-      draggedItem.acceptedType = acceptedType;
-      draggedItem.setItems = setItems;
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  });
-
-  return (
-    <div
-      ref={drop}
-      className={`w-full h-16 border border-dashed border-gray-400 p-2 flex flex-wrap rounded-xl ${
-        isOver ? 'bg-blue-100' : ''
-      }`}
-    >
-      {items.map((item, index) => {
-        const isCorrect = feedback[index];
-        return (
-          <ChunkInDropZone
-            key={item.id}
-            item={item}
-            items={items}
-            setItems={setItems}
-            index={index}
-            isCorrect={isCorrect}
-            setAvailableChunks={setAvailableChunks}
-            availableChunks={availableChunks}
-            acceptedType={acceptedType}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-// DraggableChunk Component
-function DraggableChunk({ item }) {
-  const [{ isDragging }, drag] = useDrag({
-    type: 'CHUNK',
-    item: { ...item, from: 'availableChunks' },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  });
-
-  const style = {
-    opacity: isDragging ? 0.5 : 1,
-    cursor: 'move',
-  };
-
-  return (
-    <div
-      ref={drag}
-      style={style}
-      className="p-2 m-1 bg-gray-200 rounded text-center"
-    >
-      <ReactMarkdown>{item.chunk}</ReactMarkdown>
-    </div>
-  );
-}
-
-// ChunkInDropZone Component
-function ChunkInDropZone({
-  item,
-  items,
-  setItems,
-  index,
-  isCorrect,
-  setAvailableChunks,
-  availableChunks,
-  acceptedType,
-}) {
-  const ref = React.useRef(null);
-
-  const [{ handlerId }, drop] = useDrop({
-    accept: 'CHUNK',
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId(),
-      };
-    },
-    hover(draggedItem, monitor) {
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex = draggedItem.index;
-      const hoverIndex = index;
-
-      // Don't replace items with themselves
-      if (draggedItem.id === item.id) {
-        return;
-      }
-
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current.getBoundingClientRect();
-
-      // Get horizontal middle
-      const hoverMiddleX = (hoverBoundingRect.right - hoverBoundingRect.left) / 2;
-
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
-
-      // Get pixels to the left
-      const hoverClientX = clientOffset.x - hoverBoundingRect.left;
-
-      // Only perform the move when the mouse has crossed half of the item's width
-      // Dragging right
-      if (draggedItem.index < hoverIndex && hoverClientX < hoverMiddleX) {
-        return;
-      }
-      // Dragging left
-      if (draggedItem.index > hoverIndex && hoverClientX > hoverMiddleX) {
-        return;
-      }
-
-      // Time to actually perform the action
-      const updatedItems = [...items];
-
-      // Remove dragged item from its original position
-      if (draggedItem.from === 'dropZone') {
-        updatedItems.splice(dragIndex, 1);
-      } else if (draggedItem.from === 'availableChunks') {
-        // Remove from availableChunks
-        setAvailableChunks((prev) =>
-          prev.filter((chunk) => chunk.id !== draggedItem.id)
-        );
-      }
-
-      // Insert the dragged item at hover index
-      updatedItems.splice(hoverIndex, 0, draggedItem);
-
-      setItems(updatedItems);
-
-      // Update the index for dragged item
-      draggedItem.index = hoverIndex;
-      draggedItem.from = 'dropZone';
-      draggedItem.acceptedType = acceptedType;
-      draggedItem.setItems = setItems;
-    },
-  });
-
-  const [{ isDragging }, drag] = useDrag({
-    type: 'CHUNK',
-    item: { ...item, index, from: 'dropZone', acceptedType, setItems },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-    end: (draggedItem, monitor) => {
-      const didDrop = monitor.didDrop();
-      if (!didDrop) {
-        // If the item was dropped outside, remove it from DropZone and add back to availableChunks
-        setItems((prevItems) =>
-          prevItems.filter((prevItem) => prevItem.id !== draggedItem.id)
-        );
-        setAvailableChunks((prev) => [
-          ...prev,
-          { ...draggedItem, from: 'availableChunks' },
-        ]);
-      }
-    },
-  });
-
-  drag(drop(ref));
-
-  const style = {
-    opacity: isDragging ? 0.5 : 1,
-    cursor: 'move',
-  };
-
-  let bgColor = 'bg-gray-200';
-  if (isCorrect === true) bgColor = 'bg-green-300';
-  else if (isCorrect === false) bgColor = 'bg-red-300';
-
-  return (
-    <div
-      ref={ref}
-      style={style}
-      className={`p-2 m-1 rounded text-center ${bgColor}`}
-      data-handler-id={handlerId}
-    >
-      <ReactMarkdown>{item.chunk}</ReactMarkdown>
-    </div>
-  );
-}
+export default DragDropGame;

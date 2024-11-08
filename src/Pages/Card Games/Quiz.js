@@ -205,8 +205,8 @@ function Quiz() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <h2 className="text-3xl font-bold mb-4 text-gray-700 dark:text-gray-200">{message}</h2>
-              <p className="text-7xl text-gray-600 dark:text-gray-300">{percentage.toFixed(0)}%</p>
+              <h2 className="text-3xl font-bold mb-4 textColor">{message}</h2>
+              <p className="text-7xl secondaryTextColor">{percentage.toFixed(0)}%</p>
               <div className="flex gap-4 mt-4">
                 <BackgroundButton
                   text="Retry Quiz"
@@ -230,10 +230,10 @@ function Quiz() {
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div className="flex flex-col justify-center items-center gap-4">
-                <p className="font-bold text-2xl text-gray-700 dark:text-gray-200">
+                <p className="font-bold text-2xl textColor">
                   {subject.name} does not have enough cards.
                 </p>
-                <p className="text-gray-700 dark:text-gray-200">At least 4 cards are required to start a quiz</p>
+                <p className="textColor">At least 4 cards are required to start a quiz</p>
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
@@ -286,7 +286,7 @@ function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
 
   return (
     <div
-      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl text-gray-700 dark:text-gray-200`}
+      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
       onClick={onClick}
     >
       <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
