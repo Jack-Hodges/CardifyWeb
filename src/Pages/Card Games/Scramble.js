@@ -275,10 +275,10 @@ const DragDropGame = () => {
               Card {currentCardIndex + 1} of {cards.length}
             </h2>
             <div className="space-x-2">
-              <BackgroundButton text="Previous" bgColor="orange" disabled={currentCardIndex === 0 } wWidth="w-24" onClick={
+              <BackgroundButton text="Previous Card" bgColor="orange" disabled={currentCardIndex === 0 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}/>
 
-              <BackgroundButton text="Next" bgColor="purple" disabled={currentCardIndex === cards.length - 1 } wWidth="w-24" onClick={
+              <BackgroundButton text="Next Card" bgColor="purple" disabled={currentCardIndex === cards.length - 1 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) =>
                   Math.min(cards.length - 1, prev + 1)
                 )}/>
@@ -293,7 +293,7 @@ const DragDropGame = () => {
               id="drop-area-available"
             >
               <h3 className="text-lg font-semibold py-2">
-                Available Chunks
+                Drag the blocks
               </h3>
               <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
                 {availableChunks.map((chunk, index) => (
