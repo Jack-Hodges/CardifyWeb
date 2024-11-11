@@ -22,7 +22,7 @@ function FlashcardQuiz() {
 
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser } = useUser();
+  const { user, getUser, theme } = useUser();
   const navigate = useNavigate();
 
   const currentCardIndexRef = useRef(currentCardIndex);
@@ -118,7 +118,7 @@ function FlashcardQuiz() {
   }, [finished]);
 
   return (
-    <div className="w-screen h-[100dvh] relative">
+    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
@@ -169,14 +169,14 @@ function FlashcardQuiz() {
                     <div>
                       <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={"orange"} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? theme.secondary : 'orange'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
+                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text="Select a subject to practice" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? theme.secondary : 'orange'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   )}

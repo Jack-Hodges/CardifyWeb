@@ -120,7 +120,7 @@ function Home() {
                                         .filter(subject => subject.up_to_index !== null)
                                         .slice(0, 4)
                                         .map((subject, index) => (
-                                            <InProgress theme={theme.shadowClass} key={index} subject={subject} />
+                                            <InProgress theme={theme ? theme.shadowClass : 'background-shadow'} key={index} subject={subject} />
                                         ))
                                     }
                                 </div>
@@ -134,12 +134,12 @@ function Home() {
 
                             {/* Learning buttons flex */}
                             <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
-                                <JumpButton theme={theme.shadowClass} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme.shadowClass} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme.shadowClass} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme.shadowClass} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme.shadowClass} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme.shadowClass} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
                             </div>
                         </div>
 

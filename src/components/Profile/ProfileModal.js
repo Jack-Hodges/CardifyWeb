@@ -1,8 +1,12 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
+import { useUser } from '../../UserContext';
 
 function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', userName, logout, profile }) {
+
+    const { theme } = useUser(); // Get the theme from the UserContext
+
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
 

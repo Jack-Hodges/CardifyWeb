@@ -4,12 +4,14 @@ import { getColor } from '../Functions/getColor';
 import { useNavigate } from 'react-router-dom';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 import BackgroundButton from '../Elements/BackgroundButton';
+import { useUser } from '../../UserContext';
 
 function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const [subjects, setSubjects] = useState([]);
     const [collections, setCollections] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState(null);
+    const { theme } = useUser();
 
     useEffect(() => {
         const loadData = async () => {
@@ -77,13 +79,14 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                         {/* Render the sorted combined list */}
                         {sortedCombinedList.map((item) => {
                             if (item.type === 'subject') {
-                                return <SubjectRow key={`subject-${item.id}`} subject={item} page={page} onClose={onClose} />;
+                                return <SubjectRow key={`subject-${item.id}`} subject={item} page={page} onClose={onClose} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>;
                             } else if (item.type === 'collection') {
                                 return <CollectionRow 
                                     key={`collection-${item.id}`} 
                                     collection={item} 
                                     subjects={item.subjects} 
                                     onClick={() => setSelectedCollection(item)} 
+                                    themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                                 />;
                             }
                             return null;
@@ -97,7 +100,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
 export default SubjectList;
 
-function SubjectRow({ subject, page, onClose }) {
+function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow' }) {
     const subjectCol = getColor(subject.bgCol);
     const navigate = useNavigate();
 
@@ -109,7 +112,7 @@ function SubjectRow({ subject, page, onClose }) {
     return (
         <div 
             key={subject.id} 
-            className={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-shadow background-hover`}
+            className={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={handleClick}>
             <p>{subject.name}</p>
             <p>{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
@@ -117,7 +120,7 @@ function SubjectRow({ subject, page, onClose }) {
     );
 }
 
-function CollectionRow({ collection, subjects, onClick }) {
+function CollectionRow({ collection, subjects, onClick, themeShadow = 'background-shadow' }) {
 
     const chev = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -128,7 +131,7 @@ function CollectionRow({ collection, subjects, onClick }) {
     return (
         <div 
             key={collection.id} 
-            className="bg-gray-400 w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer background-shadow background-hover"
+            className={`bg-gray-400 w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={onClick}>
             <p>{collection.name}</p>
             <div className="flex items-center">

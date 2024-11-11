@@ -23,7 +23,7 @@ function Quiz() {
   const navigate = useNavigate();
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser } = useUser();
+  const { user, getUser, theme } = useUser();
 
   // Navigation function
   const navToCreate = () => {
@@ -145,7 +145,7 @@ function Quiz() {
   }
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-auto">
+    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Quiz" />
 
       <div className="block sm:flex w-full h-full">
@@ -167,6 +167,7 @@ function Quiz() {
                   cardId={cards[currentCardIndex]?.id}
                   edit={false}
                   user={user}
+                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                 />
               </div>
 
@@ -178,6 +179,7 @@ function Quiz() {
                     correctAnswer={cards[currentCardIndex].answer}
                     selectedAnswer={selectedAnswers[currentCardIndex]}
                     onClick={() => handleAnswerClick(option)}
+                    themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                   />
                 ))}
               </div>
@@ -249,10 +251,10 @@ function Quiz() {
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <p>No Subject Selected</p>
+                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                 <BackgroundButton
                   text="Select a subject"
-                  bgColor="purple"
+                  bgColor={theme ? theme.primary : 'purple'}
                   onClick={() => setIsSubjectListModalOpen(true)}
                 />
               </div>
@@ -273,7 +275,7 @@ function Quiz() {
 
 export default Quiz;
 
-function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
+function SelectionBox({ text, onClick, selectedAnswer, correctAnswer, themeShadow }) {
   let boxColor = 'bg-white dark:bg-gray-600';
 
   if (selectedAnswer !== undefined) {
@@ -286,7 +288,7 @@ function SelectionBox({ text, onClick, selectedAnswer, correctAnswer }) {
 
   return (
     <div
-      className={`w-full h-20 ${boxColor} background-shadow background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
+      className={`w-full h-20 ${boxColor} ${themeShadow ? themeShadow : 'background-shadow'} background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
       onClick={onClick}
     >
       <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">

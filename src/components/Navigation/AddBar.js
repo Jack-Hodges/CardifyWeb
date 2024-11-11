@@ -1,7 +1,12 @@
 import { useState } from "react";
 import BackgroundButton from "../Elements/BackgroundButton";
+import { useUser } from "../../UserContext";
+import { getColor } from "../Functions/getColor";
 
 function AddBar( { text, addSub, addCol }) {
+
+  const { theme } = useUser();  // Get the theme from
+  const bgCols = getColor(theme ? theme.secondary : 'purple');  // Get the background color
 
   // images
 
@@ -25,7 +30,7 @@ function AddBar( { text, addSub, addCol }) {
       {/* Use BackgroundButton as the main button */}
       <BackgroundButton
         text={text}
-        bgColor="purple"
+        bgColor={theme ? theme.secondary : 'purple'}
         wWidth="w-44"
         image={plus}
         flip
@@ -34,7 +39,7 @@ function AddBar( { text, addSub, addCol }) {
 
       {/* Dropdown options with animation */}
       <div
-        className={`p-1 ml-4 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-purple-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
+        className={`p-1 ml-4 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${bgCols.bgClass} ${theme ? theme.shadowClass : 'background-shadow'} rounded-3xl transform transition-all duration-300 origin-top ${
           isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
         }`}
         style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
@@ -45,6 +50,7 @@ function AddBar( { text, addSub, addCol }) {
                 addSub();  // Call the addSub function
                 setIsOpen(false);  // Set isOpen to false
             }}
+            themeHover={bgCols ? bgCols.hoverClass : 'hover:bg-purple-400'}
         />
         <LinkButton 
             text="Add Collection" 
@@ -52,6 +58,7 @@ function AddBar( { text, addSub, addCol }) {
                 addCol();
                 setIsOpen(false);
             }}
+            themeHover={bgCols ? bgCols.hoverClass : 'hover:bg-purple-400'}
         />
       </div>
     </div>
@@ -60,10 +67,10 @@ function AddBar( { text, addSub, addCol }) {
 
 export default AddBar;
 
-function LinkButton({ text, onClick }) {
+function LinkButton({ text, onClick, themeHover }) {
 
   return (
-    <div onClick={onClick} className="flex items-center justify-start hover:bg-purple-400 p-1 w-full rounded-3xl cursor-pointer">
+    <div onClick={onClick} className={`flex items-center justify-start ${themeHover} p-1 w-full rounded-3xl cursor-pointer`}>
       <span className="ml-2">{text}</span>
     </div>
   );

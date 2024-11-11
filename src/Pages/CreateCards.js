@@ -102,9 +102,8 @@ function CreateCards() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] bg-cover bg-screen" style={{ backgroundImage: theme.image}}>
+    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Create" user={user}/>
-      
 
       <div className="block sm:flex w-full h-full">
         {loading ? (
@@ -130,7 +129,7 @@ function CreateCards() {
                   onDeleteCard={handleDeleteCard}
                   edit={true}
                   user={user}
-                  themeShadow={theme.shadowClass}
+                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
@@ -145,7 +144,7 @@ function CreateCards() {
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme.shadowClass}/>
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>
             </div>
           </>
         ) : (
@@ -154,16 +153,16 @@ function CreateCards() {
               <div>
                 <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center`}>{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
-                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
-                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={theme ? theme.secondary : "orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
+                  <BackgroundButton text="Create New Subject" bgColor={theme ? theme.tertiary : "purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             ) : (
               <div>
-                <p className="text-gray-500 text-4xl font-bold text-center">No flashcards</p>
+                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton text="Add Cards to Subject" bgColor={"orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                  <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text="Add Cards to Subject" bgColor={theme ? theme.secondary : "orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                  <BackgroundButton text="Create New Subject" bgColor={theme ? theme.tertiary : "purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             )}

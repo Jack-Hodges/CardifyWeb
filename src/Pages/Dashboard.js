@@ -14,6 +14,7 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
+import { getColor } from '../components/Functions/getColor';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -33,7 +34,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme } = useUser();
-
+  const bgCols = getColor(theme ? theme.secondary : 'gray');
 
   useEffect(() => {
     if (userLoading) {
@@ -169,7 +170,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme.image}}>
+    <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       {/* Header Section */}
       <TitleBar text="Dashboard" user={user}
         content={
@@ -180,7 +181,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} theme={theme.shadowClass}/>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={theme ? theme.shadowClass : 'background-shadow'} themeCol={bgCols ? bgCols : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
 
       {/* Main Content Section */}
       {loading ? (
@@ -223,7 +224,7 @@ function Dashboard() {
             <div className="block sm:flex gap-4 mt-5 items-center justify-center">
               <BackgroundButton
                 text="Create New Subject"
-                bgColor="purple"
+                bgColor={theme ? theme.secondary : 'orange'}
                 onClick={handleAddSubject}
                 wWidth="w-full sm:w-auto mb-3 sm:mb-0"
               />
@@ -290,7 +291,7 @@ function DashboardLoading() {
   );
 }
 
-function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, theme }) {
+function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, themeShadow, themeCol, themeText = 'text-white' } ) {
   return (
     <div className="flex mx-4 mt-3 items-center justify-between">
       <div className="flex gap-2">
@@ -299,7 +300,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           <select
             value={selectedSort}
             onChange={(e) => setSelectedSort(e.target.value)}
-            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 ${theme} background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300`}
+            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 ${themeShadow} background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
           >
             <option value="Most Cards">Most Cards</option>
             <option value="Alphabetical">Alphabetical</option>
@@ -323,7 +324,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white ${theme} background-focus focus:outline-none`}
+          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} ${themeShadow} background-focus focus:outline-none`}
           placeholder="Search subjects..."
         />
       </div>

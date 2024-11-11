@@ -20,18 +20,16 @@ export const getTheme = (theme) => {
                 shadowClass: `background-shadow-beach`,
                 textClass: 'text-[rgb(245,241,230)]',
                 primary: 'cyan',
-                secondary: 'sky',
+                secondary: 'blue',
                 tertiary: 'yellow',
             },
-            // Additional themes can be added here
-            // Example:
             forest: {
                 image: `url(${forest})`,
                 shadowClass: `background-shadow-forest`,
                 textClass: 'text-white',
-                primary: 'green',
-                secondary: 'orange',
-                tertiary: 'purple',
+                primary: 'darkGreen',
+                secondary: 'darkEmerald',
+                tertiary: 'lime',
             },
             // mountain: {
             //     image: `url(${mountain})`,

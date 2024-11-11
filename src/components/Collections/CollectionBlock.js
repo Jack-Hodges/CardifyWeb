@@ -1,15 +1,13 @@
 import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useUser } from "../../UserContext";
-import { getTheme } from "../Functions/getTheme";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection }) {
 
-    const { profile } = useUser();
+    const { theme } = useUser();
     // Memoize theme so it only recalculates if profile.theme changes
-    const theme = useMemo(() => getTheme(profile.theme), [profile.theme]);
 
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
