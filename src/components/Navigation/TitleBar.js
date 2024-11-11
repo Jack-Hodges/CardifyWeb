@@ -2,14 +2,14 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
-import { getTheme } from "../Functions/getTheme";
+import { getColor } from "../Functions/getColor";
 
 function TitleBar( { text, content }) {
 
   // images
 
   const navigate = useNavigate();
-  const { profile, logout } = useUser()
+  const { profile, logout, theme } = useUser()
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dashBoard = (
@@ -78,6 +78,8 @@ function TitleBar( { text, content }) {
   
   var firstImg = images[text] || null;
 
+  const bgCols = getColor(theme.primary);
+
   return (
     <div className="flex justify-between px-4 my-2">
       {/* Drop Down Navigation */}
@@ -85,7 +87,7 @@ function TitleBar( { text, content }) {
         {/* Use BackgroundButton as the main button */}
         <BackgroundButton
           text={text}
-          bgColor="green"
+          bgColor={theme.primary}
           wWidth="w-44"
           image={firstImg}
           flip
@@ -94,16 +96,16 @@ function TitleBar( { text, content }) {
 
         {/* Dropdown options with animation */}
         <div
-          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 bg-green-500 background-shadow rounded-3xl transform transition-all duration-300 origin-top ${
+          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${bgCols.bgClass} ${theme.shadowClass} rounded-3xl transform transition-all duration-300 origin-top ${
             isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
           }`}
           style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
         >
-          <LinkButton text="Home" img={home} />
-          <LinkButton text="Dashboard" img={dashBoard} />
-          <LinkButton text="Create" img={create} />
-          <LinkButton text="Practice" img={practice} />
-          <LinkButton text="Quiz" img={quiz} />
+          <LinkButton text="Home" img={home} hoverClass={bgCols.hoverClass}/>
+          <LinkButton text="Dashboard" img={dashBoard} hoverClass={bgCols.hoverClass}/>
+          <LinkButton text="Create" img={create} hoverClass={bgCols.hoverClass}/>
+          <LinkButton text="Practice" img={practice} hoverClass={bgCols.hoverClass}/>
+          <LinkButton text="Quiz" img={quiz} hoverClass={bgCols.hoverClass}/>
         </div>
       </div>
 
@@ -128,7 +130,7 @@ function TitleBar( { text, content }) {
 
 export default TitleBar;
 
-function LinkButton({ text, img }) {
+function LinkButton({ text, img, hoverClass }) {
   const navigate = useNavigate();
   const textLower = text.toLowerCase();
 
@@ -138,7 +140,7 @@ function LinkButton({ text, img }) {
   };
 
   return (
-    <div onClick={handleClick} className="flex items-center justify-start hover:bg-green-400 p-1 w-full rounded-3xl cursor-pointer">
+    <div onClick={handleClick} className={`flex items-center justify-start ${hoverClass} p-1 w-full rounded-3xl cursor-pointer`}>
       {img}
       <span className="ml-2">{text}</span>
     </div>
