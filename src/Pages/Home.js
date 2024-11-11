@@ -1,17 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { getColor } from "../components/Functions/getColor";
 import SubjectList from "../components/Subject/SubjectList";
+import { getTheme } from "../components/Functions/getTheme";
 
 function Home() {
 
     const navigate = useNavigate();
     const { user, getUser, profile } = useUser();
+    const theme = useMemo(() => profile ? getTheme(profile.theme) : null, [profile]);
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
@@ -92,11 +94,11 @@ function Home() {
     );
 
     return (
-        <div className="w-screen h-full overflow-auto">
+        <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : 'none' }}>
             <div className="mt-2 mb-2">
                 <TitleBar text="Home" user={user}/>
             </div>
-            <div className="text-3xl font-bold textColor">
+            <div className={`text-3xl font-bold ${theme ? theme.textClass : 'textColor'}`}>
                 {user && profile ? (
                     <div>
                         {/* Welcome top section */}
@@ -120,7 +122,7 @@ function Home() {
                                         .filter(subject => subject.up_to_index !== null)
                                         .slice(0, 4)
                                         .map((subject, index) => (
-                                            <InProgress key={index} subject={subject} />
+                                            <InProgress theme={theme.shadowClass} key={index} subject={subject} />
                                         ))
                                     }
                                 </div>
@@ -134,12 +136,12 @@ function Home() {
 
                             {/* Learning buttons flex */}
                             <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
-                                <JumpButton text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
+                                <JumpButton theme={theme.shadowClass} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
                             </div>
                         </div>
 
@@ -186,9 +188,9 @@ function Home() {
 
 export default Home;
 
-function JumpButton( { text, img, color, onClick }) {
+function JumpButton( { text, img, color, onClick, theme }) {
     return (
-        <div className={`group flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow background-hover cursor-pointer ${color}`}
+        <div className={`group flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl ${theme} background-hover cursor-pointer ${color}`}
             onClick={() => onClick(text.toLowerCase())}>
             {img}
             <p>{text}</p>
@@ -196,7 +198,7 @@ function JumpButton( { text, img, color, onClick }) {
     );
 }
 
-function InProgress({ subject }) {
+function InProgress({ subject, theme }) {
   const colors = getColor(subject ? subject.bgCol : 'red');
   const navigate = useNavigate();
   const [cardsRemaining, setCardsRemaining] = useState(0);
@@ -230,7 +232,7 @@ function InProgress({ subject }) {
 
   return (
     <div
-      className={`w-1/4 min-w-72 flex items-center justify-between p-2 h-28 rounded-xl text-white background-shadow background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+      className={`w-1/4 min-w-72 flex items-center justify-between p-2 h-28 rounded-xl text-white ${theme} background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
       onClick={navigateClick}
     >
       <div className="w-3/4">

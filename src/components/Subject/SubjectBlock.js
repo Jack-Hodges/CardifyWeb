@@ -1,8 +1,15 @@
 import { getColor } from "../Functions/getColor";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../UserContext";
+import { getTheme } from "../Functions/getTheme";
 
-function SubjectBlock({ subject, onEdit, onRemoveSubject, home, collection }) {
+function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
+
+    const { profile } = useUser();
+    // Memoize theme so it only recalculates if profile.theme changes
+    const theme = useMemo(() => getTheme(profile.theme), [profile.theme]);
+
     const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
     const navigate = useNavigate();
 
@@ -17,7 +24,7 @@ function SubjectBlock({ subject, onEdit, onRemoveSubject, home, collection }) {
     const colors = getColor(subject.bgCol);
 
     return (
-        <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow background-hover cursor-pointer transition duration-300`}>
+        <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl ${theme.shadowClass} background-hover cursor-pointer transition duration-300`}>
         <div className="absolute bottom-0 left-0 mb-1 w-full">
             <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
             {subject.name}

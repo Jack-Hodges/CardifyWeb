@@ -1,6 +1,6 @@
 // Dashboard.js
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
@@ -14,6 +14,7 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
+import { getTheme } from '../components/Functions/getTheme';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -32,7 +33,9 @@ function Dashboard() {
   const [selectedCollection, setSelectedCollection] = useState(null);
 
   const navigate = useNavigate();
-  const { user, loading: userLoading } = useUser();
+  const { user, loading: userLoading, profile } = useUser();
+  const theme = useMemo(() => getTheme(profile.theme), [profile.theme]);
+
 
   useEffect(() => {
     if (userLoading) {
@@ -168,7 +171,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen h-full overflow-auto">
+    <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme.image}}>
       {/* Header Section */}
       <TitleBar text="Dashboard" user={user}
         content={
@@ -179,7 +182,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} />
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} theme={theme.shadowClass}/>
 
       {/* Main Content Section */}
       {loading ? (
@@ -289,7 +292,7 @@ function DashboardLoading() {
   );
 }
 
-function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm }) {
+function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, theme }) {
   return (
     <div className="flex mx-4 mt-3 items-center justify-between">
       <div className="flex gap-2">
@@ -298,7 +301,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           <select
             value={selectedSort}
             onChange={(e) => setSelectedSort(e.target.value)}
-            className="border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300"
+            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 ${theme} background-hover bg-gray-500 text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full group-hover:bg-gray-600 transition-colors duration-300`}
           >
             <option value="Most Cards">Most Cards</option>
             <option value="Alphabetical">Alphabetical</option>
@@ -322,7 +325,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white background-shadow background-focus focus:outline-none"
+          className={`w-full h-10 px-4 py-2 text-left rounded-full bg-gray-500 text-white ${theme} background-focus focus:outline-none`}
           placeholder="Search subjects..."
         />
       </div>
