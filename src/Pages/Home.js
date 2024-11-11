@@ -92,96 +92,99 @@ function Home() {
     );
 
     return (
-        <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : 'none' }}>
-            <div className="mt-2 mb-2">
-                <TitleBar text="Home" user={user}/>
-            </div>
-            <div className={`text-3xl font-bold ${theme ? theme.textClass : 'textColor'}`}>
-                {user && profile ? (
-                    <div>
-                        {/* Welcome top section */}
-                        <div className="mx-5">
-                            <div className="flex justify-between">
-                                <p className="text-4xl sm:text-5xl font-bold">Welcome back, {profile.first_name}!</p>
-                            </div>
-                            
-                            <p className="font-normal">🔥 99 days</p>
-                            
-                        </div>
-                        
-                        {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
-                            <div>
-                                <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
-                                    <p>In Progress</p>
-                                </div>
-
-                                <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
-                                    {subjects
-                                        .filter(subject => subject.up_to_index !== null)
-                                        .slice(0, 4)
-                                        .map((subject, index) => (
-                                            <InProgress theme={theme ? theme.shadowClass : 'background-shadow'} key={index} subject={subject} />
-                                        ))
-                                    }
-                                </div>
-                            </div>
-                        )}
-
+        <div className="w-screen h-full overflow-auto bg-cover bg-screen relative" style={{ backgroundImage: theme ? theme.image : 'none' }}>
+            {/* Overlay gradient positioned at the top */}
+            <div className="absolute top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-0 pointer-events-none"></div>
+            
+            {/* Main content */}
+            <div className="relative z-10">
+                <div className="mt-2 mb-2">
+                    <TitleBar text="Home" user={user} />
+                </div>
+                
+                <div className={`text-3xl font-bold ${theme ? theme.textClass : 'textColor'}`}>
+                    {user && profile ? (
                         <div>
-                            <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3">
-                                <p>Jump In</p>
+                            {/* Welcome top section */}
+                            <div className="mx-5">
+                                <div className="flex justify-between">
+                                    <p className="text-4xl sm:text-5xl font-bold">Welcome back, {profile.first_name}!</p>
+                                </div>
+                                
+                                <p className="font-normal">🔥 99 days</p>
                             </div>
-
-                            {/* Learning buttons flex */}
-                            <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                                <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
-                            </div>
-                        </div>
-
-                        {/* Full-width scrollable subject div */}
-                        <div>
-                            <div className="flex justify-between ml-5 mr-2 mt-6">
-                                <p>Continue Learning</p>
-                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? theme.tertiary : 'purple'}/>
-                            </div>
-                            
-                            <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
-                                {subjects.map((subject, index) => (
-                                    <div 
-                                        key={index} 
-                                        className={`flex-shrink-0 min-w-72 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
-                                    >
-                                        <SubjectBlock
-                                            bgCol={subject.bgCol}
-                                            subject={subject}
-                                            user={user}
-                                            home
-                                        />
+    
+                            {/* In Progress Section */}
+                            {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
+                                <div>
+                                    <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                                        <p>In Progress</p>
                                     </div>
-                                ))}
+                                    <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
+                                        {subjects
+                                            .filter(subject => subject.up_to_index !== null)
+                                            .slice(0, 4)
+                                            .map((subject, index) => (
+                                                <InProgress theme={theme ? theme.shadowClass : 'background-shadow'} key={index} subject={subject} />
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            )}
+    
+                            {/* Jump In Section */}
+                            <div>
+                                <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3">
+                                    <p>Jump In</p>
+                                </div>
+                                <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                                </div>
                             </div>
+    
+                            {/* Continue Learning Section */}
+                            <div>
+                                <div className="flex justify-between ml-5 mr-2 mt-6">
+                                    <p>Continue Learning</p>
+                                    <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? theme.tertiary : 'purple'}/>
+                                </div>
+                                <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
+                                    {subjects.map((subject, index) => (
+                                        <div 
+                                            key={index} 
+                                            className={`flex-shrink-0 min-w-72 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${index === 0 ? 'pl-4' : ''} ${index === subjects.length - 1 ? 'pr-4' : ''}`}
+                                        >
+                                            <SubjectBlock
+                                                bgCol={subject.bgCol}
+                                                subject={subject}
+                                                user={user}
+                                                home
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+    
+                            <SubjectList 
+                                isOpen={isSubjectListModalOpen} 
+                                onClose={() => setIsSubjectListModalOpen(false)}
+                                user={user}
+                                page={subjectPage}
+                            />
+                            
                         </div>
-
-                        <SubjectList 
-                            isOpen={isSubjectListModalOpen} 
-                            onClose={() => setIsSubjectListModalOpen(false)}
-                            user={user}
-                            page={subjectPage}
-                        />
-                        
-                    </div>
-                ) : (
-                    <p>Loading...</p>
-                )}
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+                </div>
             </div>
         </div>
     );
-
 }
 
 export default Home;

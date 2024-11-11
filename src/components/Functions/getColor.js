@@ -15,6 +15,9 @@ const colorMap = {
     amber: { bgClass: 'bg-amber-500', hoverClass: 'hover:bg-amber-400' },
     darkGreen: { bgClass: 'bg-green-700', hoverClass: 'hover:bg-green-600' },
     darkEmerald: { bgClass: 'bg-emerald-600', hoverClass: 'hover:bg-emerald-500' },
+    zinc: { bgClass: 'bg-zinc-700', hoverClass: 'hover:bg-zinc-600' },
+    stone: { bgClass: 'bg-stone-400', hoverClass: 'hover:bg-stone-300' },
+    slate: { bgClass: 'bg-slate-400', hoverClass: 'hover:bg-slate-300' },
     default: { bgClass: 'bg-gray-500', hoverClass: 'hover:bg-gray-400' }
 };
 

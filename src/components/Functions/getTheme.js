@@ -1,5 +1,6 @@
 import beach from '../../images/backgrounds/Beach.jpg';
 import forest from '../../images/backgrounds/Forest.jpg';
+import mountain from '../../images/backgrounds/Mountain.jpg';
 
 export const getTheme = (theme) => {
     console.log("getting theme");
@@ -31,11 +32,14 @@ export const getTheme = (theme) => {
                 secondary: 'darkEmerald',
                 tertiary: 'lime',
             },
-            // mountain: {
-            //     image: `url(${mountain})`,
-            //     shadowClass: `background-shadow-mountain`,
-            //     textClass: 'text-[some color]'
-            // }
+            mountain: {
+                image: `url(${mountain})`,
+                shadowClass: `background-shadow-mountain`,
+                textClass: 'text-gray-100',
+                primary: 'zinc',
+                secondary: 'stone',
+                tertiary: 'slate',
+            }
         };
 
         return themes[theme] || { image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple' };

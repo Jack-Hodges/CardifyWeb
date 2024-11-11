@@ -324,7 +324,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} ${themeShadow} background-focus focus:outline-none`}
+          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} ${themeShadow} background-focus focus:outline-none placeholder-gray-200`}
           placeholder="Search subjects..."
         />
       </div>
