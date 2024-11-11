@@ -1,6 +1,6 @@
 // Dashboard.js
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
@@ -14,7 +14,6 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import { getTheme } from '../components/Functions/getTheme';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -33,8 +32,7 @@ function Dashboard() {
   const [selectedCollection, setSelectedCollection] = useState(null);
 
   const navigate = useNavigate();
-  const { user, loading: userLoading, profile } = useUser();
-  const theme = useMemo(() => getTheme(profile.theme), [profile.theme]);
+  const { user, loading: userLoading, theme } = useUser();
 
 
   useEffect(() => {

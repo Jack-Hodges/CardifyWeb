@@ -1,6 +1,6 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false }) {
+function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'orange' }) {
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -18,17 +18,17 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
     const nextButton = currentCardIndex === totalCards && !create ? (
         <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"green"} />
     ) : (
-        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={"red"} />
+        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={themeSecondary} />
     );
 
     return (
         <div className="w-full h-12 flex items-center justify-center sm:justify-end mt-2">
 
             <div className="mt-[0%]">
-                <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={"red"} />
+                <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={themeSecondary} />
             </div>
 
-            <p className="text-2xl text-gray-500 dark:text-gray-200 font-bold text-center w-16">
+            <p className={`text-2xl ${themeText} font-bold text-center w-16`}>
                 {currentCardIndex}/{totalCards}
             </p>
 

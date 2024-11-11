@@ -2,8 +2,9 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
+import { getTheme } from "../Functions/getTheme";
 
-function TitleBar( { text, content, user }) {
+function TitleBar( { text, content }) {
 
   // images
 

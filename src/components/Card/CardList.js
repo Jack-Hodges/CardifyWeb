@@ -4,7 +4,7 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 
-function CardList({ cards, onCardClick, onAddNewCard, subject }) {
+function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', themeShadow = 'background-shadow' }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
@@ -31,7 +31,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
     <div className="w-full h-full px-4">
       {/* Header Section: Fixed */}
       <div className="flex items-center mb-4 justify-between sticky top-0 z-10">
-        <h2 className="font-bold text-2xl text-yellow-500">All Flashcards</h2>
+        <h2 className={`font-bold text-2xl ${themeText}`}>All Flashcards</h2>
         <BackgroundButton 
           onClick={handleAddClick} 
           image={plusIcon} 
@@ -46,8 +46,8 @@ function CardList({ cards, onCardClick, onAddNewCard, subject }) {
           {cards.map((card, index) => (
             <li 
               key={index} 
-              className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow
-                hover:scale-95 transition duration-300 w-[99%] sm:w-[95%]"
+              className={`bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer ${themeShadow}
+                hover:scale-95 transition duration-300 w-[99%] sm:w-[95%]`}
               onClick={() => onCardClick(index)} // Handle card click
             >
               <div className="text-gray-700 dark:text-gray-200 w-full overflow-hidden whitespace-nowrap text-ellipsis">

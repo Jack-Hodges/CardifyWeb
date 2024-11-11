@@ -26,7 +26,7 @@ function CreateCards() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser } = useUser();
+  const { user, getUser, theme } = useUser();
 
   useEffect(() => {
     if (!user) {
@@ -102,7 +102,7 @@ function CreateCards() {
   };
 
   return (
-    <div className="w-screen h-[100dvh]">
+    <div className="w-screen h-[100dvh] bg-cover bg-screen" style={{ backgroundImage: theme.image}}>
       <TitleBar text="Create" user={user}/>
       
 
@@ -130,6 +130,7 @@ function CreateCards() {
                   onDeleteCard={handleDeleteCard}
                   edit={true}
                   user={user}
+                  themeShadow={theme.shadowClass}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
@@ -137,19 +138,21 @@ function CreateCards() {
                   onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
                   onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
                   create
+                  themeText={theme.textClass}
+                  themeSecondary={theme.secondary}
                 />
               </div>
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} />
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme.shadowClass}/>
             </div>
           </>
         ) : (
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div>
-                <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
+                <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center`}>{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
                   <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={"orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
                   <BackgroundButton text="Create New Subject" bgColor={"purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>

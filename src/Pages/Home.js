@@ -1,19 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { getColor } from "../components/Functions/getColor";
 import SubjectList from "../components/Subject/SubjectList";
-import { getTheme } from "../components/Functions/getTheme";
 
 function Home() {
 
     const navigate = useNavigate();
-    const { user, getUser, profile } = useUser();
-    const theme = useMemo(() => profile ? getTheme(profile.theme) : null, [profile]);
+    const { user, getUser, profile, theme } = useUser();
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
@@ -149,7 +147,7 @@ function Home() {
                         <div>
                             <div className="flex justify-between ml-5 mr-2 mt-6">
                                 <p>Continue Learning</p>
-                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={'purple'}/>
+                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme.tertiary}/>
                             </div>
                             
                             <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
