@@ -147,7 +147,7 @@ function Home() {
                         <div>
                             <div className="flex justify-between ml-5 mr-2 mt-6">
                                 <p>Continue Learning</p>
-                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme.tertiary}/>
+                                <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? theme.tertiary : 'purple'}/>
                             </div>
                             
                             <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
