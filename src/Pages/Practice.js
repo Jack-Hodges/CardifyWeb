@@ -195,6 +195,8 @@ function FlashcardQuiz() {
                       setFinished(true); // Set finished to true when reaching the last card
                     }
                   }}
+                  themeText={theme.textClass}
+                  themeSecondary={theme.secondary}
                 />
               )}
 

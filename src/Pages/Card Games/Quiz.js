@@ -187,13 +187,13 @@ function Quiz() {
               <div className="flex justify-around mt-4 mx-auto gap-4">
                 <BackgroundButton
                   text="Previous Card"
-                  bgColor="orange"
+                  bgColor={theme ? theme.secondary : "orange"}
                   wWidth="w-40"
                   onClick={goToPreviousCard}
                 />
                 <BackgroundButton
                   text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
-                  bgColor={currentCardIndex === cards.length - 1 ? 'green' : 'purple'}
+                  bgColor={currentCardIndex === cards.length - 1 ? 'green' : theme ? theme.tertiary : 'purple'}
                   wWidth="w-40"
                   onClick={() => {
                     if (currentCardIndex === cards.length - 1) {
@@ -212,7 +212,7 @@ function Quiz() {
               <div className="flex gap-4 mt-4">
                 <BackgroundButton
                   text="Retry Quiz"
-                  bgColor="green"
+                  bgColor={theme ? theme.secondary : "green"}
                   onClick={() => {
                     setFinished(false);
                     setCurrentCardIndex(0);
@@ -222,7 +222,7 @@ function Quiz() {
                 />
                 <BackgroundButton
                   text="Go to Home"
-                  bgColor="purple"
+                  bgColor={theme ? theme.tertiary : "purple"}
                   onClick={() => navigate('/home')}
                 />
               </div>
@@ -232,19 +232,19 @@ function Quiz() {
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div className="flex flex-col justify-center items-center gap-4">
-                <p className="font-bold text-2xl textColor">
+                <p className={`font-bold text-2xl ${theme ? theme.textClass : 'textColor'}`}>
                   {subject.name} does not have enough cards.
                 </p>
                 <p className="textColor">At least 4 cards are required to start a quiz</p>
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
-                    bgColor="orange"
+                    bgColor={theme ? theme.secondary : "orange"}
                     onClick={() => setIsSubjectListModalOpen(true)}
                   />
                   <BackgroundButton
                     text={`Add cards to ${subject.name}`}
-                    bgColor="purple"
+                    bgColor={theme ? theme.tertiary : "purple"}
                     onClick={navToCreate}
                   />
                 </div>
