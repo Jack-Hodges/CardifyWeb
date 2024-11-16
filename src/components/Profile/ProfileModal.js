@@ -2,13 +2,14 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
+import { getThemeAssets } from '../Functions/getTheme';
+import { saveProfile } from './ProfileManipulation';
 
 function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', userName, logout, profile }) {
-
-    const { theme } = useUser(); // Get the theme from the UserContext
-
-    const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
-    const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
+    const { theme, setTheme } = useUser();
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+    const themeAssets = getThemeAssets();
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -23,50 +24,69 @@ function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', use
         </svg>
     );
 
-    // Handle the modal appearing (fade in) when isOpen changes
+    const checkmark = (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
+            <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+        </svg>
+    );
+
     useEffect(() => {
         if (isOpen) {
-            setIsVisible(true); // Show modal and trigger the fade-in
+            setIsVisible(true);
         } else if (!isClosing) {
-            setIsVisible(false); // Hide modal after animation if not closing
+            setIsVisible(false);
         }
     }, [isOpen, isClosing]);
 
     const handleOnClose = (event) => {
         onClose();
         if (event) {
-            event.stopPropagation(); // Only stop propagation if event exists
+            event.stopPropagation();
         }
-        setIsClosing(true); // Start the closing animation
+        setIsClosing(true);
         setTimeout(() => {
-            setIsClosing(false); // Reset closing state after animation
-            setIsVisible(false); // Hide the modal after it fades out
-        }, 300); // 300ms to match the duration of the closing animation
+            setIsClosing(false);
+            setIsVisible(false);
+        }, 300);
     }
 
-    if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
+    const handleThemeSelect = async (themeName) => {
+        try {
+            const themeKey = themeName.toLowerCase();
+            const updatedProfile = await saveProfile(
+                profile.id,
+                profile.first_name,
+                themeKey
+            );
+
+            if (updatedProfile) {
+                setTheme(themeKey);
+            }
+        } catch (error) {
+            console.error('Error updating theme:', error);
+        }
+    };
+
+    if (!isVisible && !isClosing) return null;
 
     return ReactDOM.createPortal(
         <div
             className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
                 isClosing ? 'opacity-0' : 'opacity-100'
             }`}
-            onClick={handleOnClose} // Close modal if the background is clicked
+            onClick={handleOnClose}
         >
-            {/* Black Background */}
             <div
                 className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
-                onClick={handleOnClose} // Ensure clicking inside the modal also doesn't propagate
+                onClick={handleOnClose}
             ></div>
 
-            {/* Modal Content */}
             <div
                 className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-1/2 h-3/4 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
-                onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
+                onClick={(e) => e.stopPropagation()}
             >
-                {/* Top Left Buttons */}
                 <div className="flex justify-end items-center mb-6">
                     <div className="flex space-x-2">
                         <BackgroundButton image={edit} bgColor="blue" onClick={() => alert('Edit button clicked')} />
@@ -75,6 +95,38 @@ function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', use
                 </div>
 
                 <span className="text-lg font-semibold">Hey {profile.first_name}</span>
+
+                {/* Theme Assets Grid */}
+                <div className="mt-4 mb-6 overflow-x-auto">
+                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min">
+                        {themeAssets.map((asset) => {
+                            const isSelected = theme === asset.name.toLowerCase();
+                            return (
+                                <div 
+                                    key={asset.name}
+                                    className={`relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200 
+                                        ${isSelected 
+                                            ? 'border-blue-500 shadow-lg' 
+                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'}`}
+                                    onClick={() => handleThemeSelect(asset.name)}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                            {checkmark}
+                                        </div>
+                                    )}
+                                    <div 
+                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                        style={{ backgroundImage: `url(${asset.url})` }}
+                                    />
+                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                        {asset.name}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
 
                 <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
                     {mainText}
@@ -85,7 +137,7 @@ function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', use
                 </div>
             </div>
         </div>,
-        document.body // Render the modal into the body of the document
+        document.body
     );
 }
 
