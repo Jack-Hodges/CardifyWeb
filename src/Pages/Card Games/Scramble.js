@@ -39,7 +39,7 @@ const DragDropGame = () => {
 
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser } = useUser();
+  const { user, getUser, theme } = useUser();
 
   useEffect(() => {
     if (!user) {
@@ -275,10 +275,10 @@ const DragDropGame = () => {
               Card {currentCardIndex + 1} of {cards.length}
             </h2>
             <div className="space-x-2">
-              <BackgroundButton text="Previous Card" bgColor="orange" disabled={currentCardIndex === 0 } wWidth="w-40" onClick={
+              <BackgroundButton text="Previous Card" bgColor={theme ? theme.secondary : "orange"} disabled={currentCardIndex === 0 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}/>
 
-              <BackgroundButton text="Next Card" bgColor="purple" disabled={currentCardIndex === cards.length - 1 } wWidth="w-40" onClick={
+              <BackgroundButton text="Next Card" bgColor={theme ? theme.tertiary : "purple"} disabled={currentCardIndex === cards.length - 1 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) =>
                   Math.min(cards.length - 1, prev + 1)
                 )}/>
