@@ -8,7 +8,7 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wWidth = "w-au
     const { profile } = useUser();
     const theme = useMemo(() => {
       return profile ? getTheme(profile.theme) : { shadowClass: 'background-shadow' };
-  }, [profile?.theme]);
+  }, [profile]);
     // Get the background color and hover color based on the color name passed in
     const { bgClass, hoverClass } = getColor(bgColor);
 

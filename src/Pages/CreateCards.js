@@ -11,7 +11,6 @@ import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
-import FlashcardPDFExport from '../components/Functions/flashcardPDFExport';
 
 function CreateCards() {
   const [cards, setCards] = useState([]);
@@ -140,8 +139,8 @@ function CreateCards() {
                   create
                   themeText={theme.textClass}
                   themeSecondary={theme.secondary}
+                  cards={cards}
                 />
-                <FlashcardPDFExport flashcards={cards} />
               </div>
             </div>
 

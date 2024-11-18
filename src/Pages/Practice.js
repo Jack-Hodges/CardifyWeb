@@ -197,6 +197,7 @@ function FlashcardQuiz() {
                   }}
                   themeText={theme.textClass}
                   themeSecondary={theme.secondary}
+                  cards={cards}
                 />
               )}
 

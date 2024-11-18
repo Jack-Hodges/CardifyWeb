@@ -1,6 +1,7 @@
 import BackgroundButton from '../Elements/BackgroundButton';
+import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 
-function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'orange' }) {
+function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'orange', cards }) {
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -22,20 +23,27 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
     );
 
     return (
-        <div className="w-full h-12 flex items-center justify-center sm:justify-end mt-2">
-
-            <div className="mt-[0%]">
-                <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={themeSecondary} />
+        <div className="w-full h-12 flex items-center justify-between">
+            <div className="mt-[0.5%]">
+                <FlashcardPDFExport flashcards={cards} />
             </div>
+            
+             <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
 
-            <p className={`text-2xl ${themeText} font-bold text-center w-16`}>
-                {currentCardIndex}/{totalCards}
-            </p>
+                <div className="mt-[0%]">
+                    <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={themeSecondary} />
+                </div>
 
-            <div className="mt-[0%]">
-                {nextButton}
+                <p className={`text-2xl ${themeText} font-bold text-center w-16`}>
+                    {currentCardIndex}/{totalCards}
+                </p>
+
+                <div className="mt-[0%]">
+                    {nextButton}
+                </div>
             </div>
         </div>
+       
     );
 }
 
