@@ -4,12 +4,15 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { saveProfile } from './ProfileManipulation';
+import { getColor } from '../Functions/getColor';
 
-function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', userName, logout, profile }) {
-    const { theme, setTheme } = useUser();
+function Modal({ isOpen, onClose, mainText, logout }) {
+    const { theme, setTheme, profile } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const themeAssets = getThemeAssets();
+
+    const themeColors = getColor(theme ? theme.primary : 'gray');
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -87,27 +90,24 @@ function Modal({ isOpen, onClose, text, mainText, titleCol = 'text-red-500', use
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-end items-center mb-6">
+                <div className="flex justify-between items-center mb-6">
+                    <span className={`${themeColors.textClass} text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
                         <BackgroundButton image={edit} bgColor="blue" onClick={() => alert('Edit button clicked')} />
                         <BackgroundButton image={cross} bgColor="red" onClick={handleOnClose} />
                     </div>
                 </div>
 
-                <span className="text-lg font-semibold">Hey {profile.first_name}</span>
-
                 {/* Theme Assets Grid */}
                 <div className="mt-4 mb-6 overflow-x-auto">
-                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min">
+                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
                         {themeAssets.map((asset) => {
-                            const isSelected = theme === asset.name.toLowerCase();
+                            const isSelected = theme.name === asset.name.toLowerCase();
+                             
                             return (
                                 <div 
                                     key={asset.name}
-                                    className={`relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200 
-                                        ${isSelected 
-                                            ? 'border-blue-500 shadow-lg' 
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'}`}
+                                    className={`${theme.shadowClass} background-hover relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
                                     onClick={() => handleThemeSelect(asset.name)}
                                 >
                                     {isSelected && (

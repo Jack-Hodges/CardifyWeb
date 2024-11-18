@@ -1,13 +1,15 @@
 import Beach from '../../images/backgrounds/Beach.jpg';
 import Forest from '../../images/backgrounds/Forest.jpg';
 import Mountain from '../../images/backgrounds/Mountain.jpg';
+import NewYorkCity from '../../images/backgrounds/NewYorkCity.jpg';
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
   return [
     { name: 'Beach', url: Beach },
     { name: 'Forest', url: Forest },
-    { name: 'Mountain', url: Mountain }
+    { name: 'Mountain', url: Mountain },
+    { name: "New York City", url: NewYorkCity }
   ];
 };
 
@@ -25,6 +27,7 @@ export const getTheme = (theme) => {
   } else {
     const themes = {
       beach: {
+        name: "beach",
         image: `url(${Beach})`,
         shadowClass: `background-shadow-beach`,
         textClass: 'text-[rgb(245,241,230)]',
@@ -33,6 +36,7 @@ export const getTheme = (theme) => {
         tertiary: 'yellow',
       },
       forest: {
+        name: "forest",
         image: `url(${Forest})`,
         shadowClass: `background-shadow-forest`,
         textClass: 'text-white',
@@ -41,14 +45,24 @@ export const getTheme = (theme) => {
         tertiary: 'lime',
       },
       mountain: {
+        name: "mountain",
         image: `url(${Mountain})`,
         shadowClass: `background-shadow-mountain`,
         textClass: 'text-gray-100',
         primary: 'zinc',
         secondary: 'stone',
         tertiary: 'slate',
+      },
+      newyorkcity: {
+        name: "newyorkcity",
+        image: `url(${NewYorkCity})`,
+        shadowClass: `background-shadow-newyorkcity`,
+        textClass: 'text-gray-100',
+        primary: 'zinc',
+        secondary: 'stone',
+        tertiary: 'slate',
       }
     };
-    return themes[theme] || { image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple' };
+    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple' };
   }
 };
