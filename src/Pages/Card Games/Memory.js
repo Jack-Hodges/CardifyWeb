@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useUser } from '../../UserContext';
 import { useLocation } from 'react-router-dom';
 import { fetchCards } from "../../components/Card/CardManipulation";
+import ReactMarkdown from 'react-markdown';
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
@@ -21,7 +22,7 @@ const formatTime = (seconds) => {
 function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
-    const { user, getUser } = useUser();
+    const { user, getUser, theme } = useUser();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
     const [currentCardIndex, setCurrentCardIndex] = useState(0); // Track current page
@@ -46,7 +47,7 @@ function Memory() {
 
         const loadCards = async () => {
             setLoading(true);
-            const data = await fetchCards(1);
+            const data = await fetchCards(subject.id);
             setAllCards(data);
             loadNextBatch(data, 0);
             setLoading(false);
@@ -152,7 +153,7 @@ function Memory() {
     }
 
     return (
-        <div className="w-screen h-screen flex flex-col">
+        <div className="w-screen h-screen flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
             <TitleBar text="Memory" />
 
             <div className="relative flex-1">
@@ -175,6 +176,7 @@ function Memory() {
                                 matchedCards.includes(card.id)
                             }
                             isMatched={matchedCards.includes(card.id)}
+                            themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                         />
                     ))}
                 </div>
@@ -202,19 +204,33 @@ function Memory() {
     );
 }
 
-function MatchCard({ content, onClick, isFlipped, isMatched }) {
+function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow }) {
     return (
         <div
-            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer background-shadow background-hover 
+            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer ${themeShadow} background-hover 
                 ${isMatched ? 'border-4 border-green-500' : ''} 
                 ${isFlipped ? 'bg-white' : 'bg-gray-100'}`}
             onClick={onClick}
             style={{ userSelect: "none" }}
         >
             {isFlipped ? (
-                <p className="text-center text-2xl font-bold" style={{ userSelect: "none" }}>
-                    {content}
-                </p>
+                <div className="text-center prose prose-sm max-w-full overflow-auto" style={{ userSelect: "none" }}>
+                    <ReactMarkdown 
+                        components={{
+                            p: ({node, ...props}) => <p className="text-2xl font-bold m-0" {...props} />,
+                            // Add more component overrides as needed
+                            h1: ({node, ...props}) => <h1 className="text-2xl font-bold m-0" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-xl font-bold m-0" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-lg font-bold m-0" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc m-0 pl-4" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal m-0 pl-4" {...props} />,
+                            li: ({node, ...props}) => <li className="m-0" {...props} />,
+                            code: ({node, ...props}) => <code className="bg-gray-100 px-1 rounded" {...props} />
+                        }}
+                    >
+                        {content}
+                    </ReactMarkdown>
+                </div>
             ) : (
                 <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" />
             )}
