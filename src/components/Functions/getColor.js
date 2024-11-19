@@ -18,6 +18,8 @@ const colorMap = {
     zinc: { bgClass: 'bg-zinc-700', hoverClass: 'hover:bg-zinc-600', textClass: 'text-zinc-700' },
     stone: { bgClass: 'bg-stone-400', hoverClass: 'hover:bg-stone-300', textClass: 'text-stone-400' },
     slate: { bgClass: 'bg-slate-400', hoverClass: 'hover:bg-slate-300', textClass: 'text-slate-400' },
+    darkRed: { bgClass: 'bg-red-700', hoverClass: 'hover:bg-red-600', textClass: 'text-red-700' },
+    lightRed: { bgClass: 'bg-red-300', hoverClass: 'hover:bg-red-200', textClass: 'text-red-300' },
     default: { bgClass: 'bg-gray-500', hoverClass: 'hover:bg-gray-400', textClass: 'text-gray-500' },
 };
 

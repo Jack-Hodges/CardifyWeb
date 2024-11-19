@@ -55,7 +55,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
 
     const handleThemeSelect = async (themeName) => {
         try {
-            const themeKey = themeName.toLowerCase();
+            const themeKey = themeName.toLowerCase().replaceAll(' ', '');
             const updatedProfile = await saveProfile(
                 profile.id,
                 profile.first_name,

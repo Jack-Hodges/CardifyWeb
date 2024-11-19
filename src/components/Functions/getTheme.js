@@ -2,6 +2,7 @@ import Beach from '../../images/backgrounds/Beach.jpg';
 import Forest from '../../images/backgrounds/Forest.jpg';
 import Mountain from '../../images/backgrounds/Mountain.jpg';
 import NewYorkCity from '../../images/backgrounds/NewYorkCity.jpg';
+import Serenity from '../../images/backgrounds/Serenity.jpg';
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
@@ -9,7 +10,8 @@ export const getThemeAssets = () => {
     { name: 'Beach', url: Beach },
     { name: 'Forest', url: Forest },
     { name: 'Mountain', url: Mountain },
-    { name: "New York City", url: NewYorkCity }
+    { name: "New York City", url: NewYorkCity },
+    { name: 'Serenity', url: Serenity },
   ];
 };
 
@@ -61,6 +63,15 @@ export const getTheme = (theme) => {
         primary: 'zinc',
         secondary: 'stone',
         tertiary: 'slate',
+      },
+      serenity: {
+        name: "serenity",
+        image: `url(${Serenity})`,
+        shadowClass: 'background-shadow',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: 'darkRed',
+        secondary: 'orange',
+        tertiary: 'lightRed',
       }
     };
     return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple' };
