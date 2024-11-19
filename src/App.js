@@ -6,6 +6,7 @@ import Memory from './Pages/Card Games/Memory';
 import Home from './Pages/Home';
 import Quiz from './Pages/Card Games/Quiz';
 import Scramble from './Pages/Card Games/Scramble';
+import Dash from './Pages/Card Games/Dash';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useUser } from './UserContext';
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/memory" element={<Memory />} />
           <Route path="/quiz" element={<Quiz />} />
           <Route path="/scramble" element={<Scramble />} />
+          <Route path="/dash" element={<Dash />} />
         </Routes>
       </Router>
     </div>
