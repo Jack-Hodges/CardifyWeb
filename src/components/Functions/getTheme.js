@@ -25,6 +25,7 @@ export const getTheme = (theme) => {
       primary: 'green',
       secondary: 'orange',
       tertiary: 'purple',
+      border: 'green',
     };
   } else {
     const themes = {
@@ -36,6 +37,7 @@ export const getTheme = (theme) => {
         primary: 'cyan',
         secondary: 'blue',
         tertiary: 'yellow',
+        border: 'cyan',
       },
       forest: {
         name: "forest",
@@ -45,6 +47,7 @@ export const getTheme = (theme) => {
         primary: 'darkGreen',
         secondary: 'darkEmerald',
         tertiary: 'lime',
+        border: 'darkGreen',
       },
       mountain: {
         name: "mountain",
@@ -54,6 +57,7 @@ export const getTheme = (theme) => {
         primary: 'zinc',
         secondary: 'stone',
         tertiary: 'slate',
+        border: 'zinc',
       },
       newyorkcity: {
         name: "newyorkcity",
@@ -63,6 +67,7 @@ export const getTheme = (theme) => {
         primary: 'zinc',
         secondary: 'stone',
         tertiary: 'slate',
+        border: 'zinc',
       },
       serenity: {
         name: "serenity",
@@ -72,8 +77,9 @@ export const getTheme = (theme) => {
         primary: 'darkRed',
         secondary: 'orange',
         tertiary: 'lightRed',
+        boder: 'darkRed',
       }
     };
-    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple' };
+    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: 'green', secondary: 'orange', tertiary: 'purple', border: 'green' };
   }
 };

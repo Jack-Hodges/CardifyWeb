@@ -24,3 +24,7 @@ const colorMap = {
 };
 
 export const getColor = (color) => colorMap[color] || colorMap.default;
+
+export const getBorder = (color) => {
+    return `border-${color}-500`;
+};

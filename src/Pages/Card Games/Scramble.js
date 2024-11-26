@@ -5,6 +5,7 @@ import { useUser } from '../../UserContext';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
+import { getBorder } from '../../components/Functions/getColor';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
@@ -40,6 +41,7 @@ const DragDropGame = () => {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
+  const borderCol = theme ? getBorder(theme.border) : 'blue';
 
   useEffect(() => {
     if (!user) {
@@ -165,7 +167,7 @@ const DragDropGame = () => {
     }
   };
 
-  const handleMouseUp = (event) => {
+  const handleMouseUp = () => {
     if (!dragging || !draggedItem) return;
     let droppedInArea = activeDropArea;
 
@@ -299,7 +301,7 @@ const DragDropGame = () => {
                 {availableChunks.map((chunk, index) => (
                   <React.Fragment key={chunk.id}>
                     {activeDropArea === 'available' && dropPosition === index && draggedItem && (
-                      <div className="px-2 py-1 rounded border-2 border-blue-500 bg-blue-50">
+                      <div className={`px-2 py-1 rounded border-2 ${theme ? borderCol : 'border-blue-500'} bg-blue-50`}>
                         <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
                       </div>
                     )}
