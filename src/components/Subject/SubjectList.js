@@ -68,12 +68,13 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                         onClose={onClose}
                         page={page}
                         cross={cross}
+                        theme={theme}
                     />
                 ) : (
                     <>
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-semibold mb-0 text-green-500">Subjects & Collections</h2>
-                            <BackgroundButton image={cross} bgColor={'red'} onClick={onClose}/>
+                            <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                         </div>
 
                         {/* Render the sorted combined list */}
@@ -143,7 +144,7 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
     );
 }
 
-function CollectionView({ collection, subjects, onBack, onClose, page, cross }) {
+function CollectionView({ collection, subjects, onBack, onClose, page, cross, theme }) {
 
     const chev = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -155,12 +156,12 @@ function CollectionView({ collection, subjects, onBack, onClose, page, cross }) 
     return (
         <div className="w-full h-full">
             <div className="flex justify-between items-center mb-4">
-                <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'green'}/>
-                <BackgroundButton image={cross} bgColor={'red'} onClick={onClose}/>
+                <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'bg-green-500 hover:bg-green-400'}/>
+                <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
             </div>
             {subjects.length > 0 ? (
                 subjects.map((subject) => (
-                    <SubjectRow key={subject.id} subject={subject} onClose={onClose} page={page}/>
+                    <SubjectRow key={subject.id} subject={subject} onClose={onClose} page={page} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>
                 ))
             ) : (
                 <p>No subjects in this collection.</p>
