@@ -4,15 +4,12 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { saveProfile } from './ProfileManipulation';
-import { getColor } from '../Functions/getColor';
 
 function Modal({ isOpen, onClose, mainText, logout }) {
-    const { theme, setTheme, profile } = useUser();
+    const { theme, profile } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const themeAssets = getThemeAssets();
-
-    const themeColors = getColor(theme ? theme.primary : 'gray');
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -56,15 +53,11 @@ function Modal({ isOpen, onClose, mainText, logout }) {
     const handleThemeSelect = async (themeName) => {
         try {
             const themeKey = themeName.toLowerCase().replaceAll(' ', '');
-            const updatedProfile = await saveProfile(
+            await saveProfile(
                 profile.id,
                 profile.first_name,
                 themeKey
             );
-
-            if (updatedProfile) {
-                setTheme(themeKey);
-            }
         } catch (error) {
             console.error('Error updating theme:', error);
         }
@@ -91,10 +84,10 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <span className={`${themeColors.textClass} text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                    <span className={`textClass text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
-                        <BackgroundButton image={edit} bgColor="blue" onClick={() => alert('Edit button clicked')} />
-                        <BackgroundButton image={cross} bgColor="red" onClick={handleOnClose} />
+                        <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
+                        <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                     </div>
                 </div>
 
@@ -133,7 +126,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 </p>
 
                 <div>
-                    <BackgroundButton text="Logout" bgColor="red" onClick={logout} />
+                    <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
                 </div>
             </div>
         </div>,

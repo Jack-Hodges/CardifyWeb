@@ -24,6 +24,7 @@ function Quiz() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
+  const { primaryColor, secondaryColor, tertiaryColor } = theme;
 
   // Navigation function
   const navToCreate = () => {
@@ -187,13 +188,13 @@ function Quiz() {
               <div className="flex justify-around mt-4 mx-auto gap-4">
                 <BackgroundButton
                   text="Previous Card"
-                  bgColor={theme ? theme.secondary : "orange"}
+                  bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
                   wWidth="w-40"
                   onClick={goToPreviousCard}
                 />
                 <BackgroundButton
                   text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
-                  bgColor={currentCardIndex === cards.length - 1 ? 'green' : theme ? theme.tertiary : 'purple'}
+                  bgColor={currentCardIndex === cards.length - 1 ? 'bg-green-500 hover:bg-green-400' : theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
                   wWidth="w-40"
                   onClick={() => {
                     if (currentCardIndex === cards.length - 1) {
@@ -212,7 +213,7 @@ function Quiz() {
               <div className="flex gap-4 mt-4">
                 <BackgroundButton
                   text="Retry Quiz"
-                  bgColor={theme ? theme.secondary : "green"}
+                  bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
                   onClick={() => {
                     setFinished(false);
                     setCurrentCardIndex(0);
@@ -222,7 +223,7 @@ function Quiz() {
                 />
                 <BackgroundButton
                   text="Go to Home"
-                  bgColor={theme ? theme.tertiary : "purple"}
+                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
                   onClick={() => navigate('/home')}
                 />
               </div>
@@ -239,7 +240,7 @@ function Quiz() {
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
-                    bgColor={theme ? theme.secondary : "orange"}
+                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
                     onClick={() => setIsSubjectListModalOpen(true)}
                   />
                   <BackgroundButton
@@ -254,7 +255,7 @@ function Quiz() {
                 <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                 <BackgroundButton
                   text="Select a subject"
-                  bgColor={theme ? theme.primary : 'purple'}
+                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
                   onClick={() => setIsSubjectListModalOpen(true)}
                 />
               </div>

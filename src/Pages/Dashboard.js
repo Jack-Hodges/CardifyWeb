@@ -14,7 +14,6 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import { getColor } from '../components/Functions/getColor';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -34,7 +33,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme } = useUser();
-  const bgCols = getColor(theme ? theme.secondary : 'gray');
+  const { secondaryColor } = theme;  // Get the secondary color
 
   useEffect(() => {
     if (userLoading) {
@@ -181,7 +180,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={theme ? theme.shadowClass : 'background-shadow'} themeCol={bgCols ? bgCols : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={theme ? theme.shadowClass : 'background-shadow'} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
 
       {/* Main Content Section */}
       {loading ? (

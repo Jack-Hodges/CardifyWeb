@@ -23,6 +23,8 @@ function FlashcardQuiz() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
+  const { secondaryColor } = theme;
+
   const navigate = useNavigate();
 
   const currentCardIndexRef = useRef(currentCardIndex);
@@ -142,8 +144,8 @@ function FlashcardQuiz() {
                 mainText={`You were up to card ${subject?.up_to_index + 1}. Would you like to continue from there?`}
                 firstActionText="No, start over"
                 secondActionText="Yes, continue"
-                firstActionCol="gray"
-                secondActionCol="green"
+                firstActionCol={"bg-gray-500 hover:bg-gray-400"}
+                secondActionCol={"bg-green-500 hover:bg-green-400"}
                 titleCol='text-green-500'
               />
 
@@ -169,14 +171,14 @@ function FlashcardQuiz() {
                     <div>
                       <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? theme.secondary : 'orange'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   ) : (
                     <div>
                       <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? theme.secondary : 'orange'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   )}
@@ -196,7 +198,7 @@ function FlashcardQuiz() {
                     }
                   }}
                   themeText={theme.textClass}
-                  themeSecondary={theme.secondary}
+                  themeSecondary={secondaryColor}
                   cards={cards}
                 />
               )}
@@ -214,8 +216,8 @@ function FlashcardQuiz() {
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
             <p className="text-gray-500 text-2xl mb-10">You have completed all the cards.</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <BackgroundButton text="Back to Home" bgColor="green" onClick={handleSwitchToHome} />
-              <BackgroundButton text={`Review ${subject.name} Again`} bgColor="blue" onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
+              <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />
+              <BackgroundButton text={`Review ${subject.name} Again`} bgColor={"bg-blue-500 hover:bg-blue-400"} onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
             </div>
           </div>
         )}

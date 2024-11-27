@@ -41,6 +41,7 @@ const DragDropGame = () => {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
+  const { secondaryColor, tertiaryColor } = theme;
   const borderCol = theme ? getBorder(theme.border) : 'blue';
 
   useEffect(() => {
@@ -227,12 +228,12 @@ const DragDropGame = () => {
     </div>
   );
 
-  const DropArea = ({ id, items, title }) => (
+  const DropArea = ({ id, items, title, theme }) => (
     <div
       id={`drop-area-${id}`}
       className="w-full"
     >
-      <h3 className="text-lg font-semibold py-2">{title}</h3>
+      <h3 className={`text-lg font-semibold py-2 ${theme ? theme.textClass : 'textClass'}`}>{title}</h3>
       <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
         {items.map((item, index) => (
           <React.Fragment key={item.id}>
@@ -254,8 +255,7 @@ const DragDropGame = () => {
   );
 
   return (
-    <div
-      className="w-screen h-[100dvh] overflow-y-auto textColor"
+    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
@@ -273,14 +273,14 @@ const DragDropGame = () => {
       ) : (
         <div className="p-4">
           <div className="mb-4 flex justify-between items-center">
-            <h2 className="text-xl font-bold">
+            <h2 className={`text-xl font-bold ${theme ? theme.textClass : 'textClass'}`}>
               Card {currentCardIndex + 1} of {cards.length}
             </h2>
             <div className="space-x-2">
-              <BackgroundButton text="Previous Card" bgColor={theme ? theme.secondary : "orange"} disabled={currentCardIndex === 0 } wWidth="w-40" onClick={
+              <BackgroundButton text="Previous Card" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} disabled={currentCardIndex === 0 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}/>
 
-              <BackgroundButton text="Next Card" bgColor={theme ? theme.tertiary : "purple"} disabled={currentCardIndex === cards.length - 1 } wWidth="w-40" onClick={
+              <BackgroundButton text="Next Card" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} disabled={currentCardIndex === cards.length - 1 } wWidth="w-40" onClick={
                 () => setCurrentCardIndex((prev) =>
                   Math.min(cards.length - 1, prev + 1)
                 )}/>
@@ -288,13 +288,13 @@ const DragDropGame = () => {
           </div>
 
           <div className="flex flex-col space-y-4">
-            <DropArea id="question" items={questionArea} title="Question" />
-            <DropArea id="answer" items={answerArea} title="Answer" />
+            <DropArea id="question" items={questionArea} title="Question" theme={theme}/>
+            <DropArea id="answer" items={answerArea} title="Answer" theme={theme}/>
 
             <div
               id="drop-area-available"
             >
-              <h3 className="text-lg font-semibold py-2">
+              <h3 className={`text-lg font-semibold py-2 ${theme ? theme.textClass : 'textClass'}`}>
                 Drag the blocks
               </h3>
               <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
