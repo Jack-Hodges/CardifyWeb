@@ -146,7 +146,7 @@ function CreateCards() {
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme ? theme.shadowClass : 'background-shadow'} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
             </div>
           </>
         ) : (

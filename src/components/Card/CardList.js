@@ -4,7 +4,7 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 
-function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', themeShadow = 'background-shadow' }) {
+function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', themeShadow = 'background-shadow', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
@@ -36,7 +36,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
           onClick={handleAddClick} 
           image={plusIcon} 
           text="Add"
-          bgColor={"yellow"}
+          bgColor={passedInColor}
         />
       </div>
 
