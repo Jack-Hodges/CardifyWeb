@@ -9,7 +9,7 @@ function TitleBar( { text, content }) {
 
   const navigate = useNavigate();
   const { profile, logout, theme } = useUser()
-  const { primaryColor, secondaryColor, textColor } = theme;
+  const { primaryColor } = theme;
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dashBoard = (

@@ -5,8 +5,7 @@ import { useUser } from "../../UserContext";
 
 function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
 
-    const { profile, theme } = useUser();
-    // Memoize theme so it only recalculates if profile.theme changes
+    const { theme } = useUser();
 
     const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
     const navigate = useNavigate();

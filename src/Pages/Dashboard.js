@@ -14,7 +14,6 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import { getColor } from '../components/Functions/getColor';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);

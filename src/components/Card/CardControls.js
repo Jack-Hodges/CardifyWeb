@@ -1,7 +1,7 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 
-function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'orange', cards }) {
+function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'bg-orange-500 hover:bg-orange-400', cards }) {
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -17,9 +17,9 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
 
     // Conditional button for the next action
     const nextButton = currentCardIndex === totalCards && !create ? (
-        <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"green"} />
+        <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"bg-green-500 hover:bg-green-500"} />
     ) : (
-        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={themeSecondary} />
+        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
     );
 
     return (
@@ -31,7 +31,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
              <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
 
                 <div className="mt-[0%]">
-                    <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={themeSecondary} />
+                    <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
                 </div>
 
                 <p className={`text-2xl ${themeText} font-bold text-center w-16`}>

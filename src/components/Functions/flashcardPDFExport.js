@@ -8,6 +8,7 @@ import BackgroundButton from '../Elements/BackgroundButton';
 const FlashcardPDFExport = ({ flashcards }) => {
   const contentRef = useRef(null);
   const { theme } = useUser();
+  const { primaryColor } = theme;
 
   const generatePDF = () => {
     const element = contentRef.current;
@@ -30,7 +31,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
 
   return (
     <div>
-      <BackgroundButton bgColor={theme ? theme.primary : 'purple'} onClick={() => generatePDF()} text="Export to PDF"/>
+      <BackgroundButton bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'} onClick={() => generatePDF()} text="Export to PDF"/>
 
       {/* Hidden content that will be converted to PDF */}
       <div className="hidden">

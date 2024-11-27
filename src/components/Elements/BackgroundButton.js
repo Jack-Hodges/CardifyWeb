@@ -1,10 +1,8 @@
 import React from 'react';
 import { useUser } from '../../UserContext';
-import { getTheme } from '../Functions/getTheme';
-import { useMemo } from 'react';
 
 const BackgroundButton = ({ text, image = null, bgColor, onClick, wWidth = "w-auto", wSizing = "w-10", hSizing = "h-10", flip = false, disabled = false}) => {
-    const { profile, theme } = useUser();
+    const { theme } = useUser();
 
     if (image && text) {
       if (flip) {

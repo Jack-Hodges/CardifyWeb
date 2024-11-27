@@ -12,7 +12,7 @@ function Home() {
 
     const navigate = useNavigate();
     const { user, getUser, profile, theme } = useUser();
-    const { primaryColor, secondaryColor, textColor } = theme;
+    const { primaryColor } = theme;
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);

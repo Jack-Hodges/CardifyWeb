@@ -27,6 +27,7 @@ function CreateCards() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
+  const { secondaryColor, tertiaryColor } = theme;
 
   useEffect(() => {
     if (!user) {
@@ -138,7 +139,7 @@ function CreateCards() {
                   onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
                   create
                   themeText={theme.textClass}
-                  themeSecondary={theme.secondary}
+                  themeSecondary={secondaryColor}
                   cards={cards}
                 />
               </div>
@@ -154,16 +155,16 @@ function CreateCards() {
               <div>
                 <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center`}>{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
-                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={theme ? theme.secondary : "orange"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
-                  <BackgroundButton text="Create New Subject" bgColor={theme ? theme.tertiary : "purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
+                  <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             ) : (
               <div>
                 <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton text="Add Cards to Subject" bgColor={theme ? theme.secondary : "orange"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                  <BackgroundButton text="Create New Subject" bgColor={theme ? theme.tertiary : "purple"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton text="Add Cards to Subject" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
+                  <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
                 </div>
               </div>
             )}
