@@ -2,7 +2,6 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
-import { getColor } from "../Functions/getColor";
 
 function TitleBar( { text, content }) {
 
@@ -10,6 +9,7 @@ function TitleBar( { text, content }) {
 
   const navigate = useNavigate();
   const { profile, logout, theme } = useUser()
+  const { primaryColor, secondaryColor, textColor } = theme;
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const dashBoard = (
@@ -85,8 +85,6 @@ function TitleBar( { text, content }) {
   
   var firstImg = images[text] || null;
 
-  const bgCols = getColor(theme ? theme.primary : 'green');
-
   return (
     <div className="flex justify-between px-4 my-2">
       {/* Drop Down Navigation */}
@@ -94,7 +92,7 @@ function TitleBar( { text, content }) {
         {/* Use BackgroundButton as the main button */}
         <BackgroundButton
           text={text}
-          bgColor={theme ? theme.primary : 'green'}
+          bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
           wWidth="w-44"
           image={firstImg}
           flip
@@ -103,16 +101,16 @@ function TitleBar( { text, content }) {
 
         {/* Dropdown options with animation */}
         <div
-          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${bgCols.bgClass} ${theme ? theme.shadowClass : 'background-shadow'} rounded-3xl transform transition-all duration-300 origin-top ${
+          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${primaryColor.bgClass} ${theme ? theme.shadowClass : 'background-shadow'} rounded-3xl transform transition-all duration-300 origin-top ${
             isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
           }`}
           style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
         >
-          <LinkButton text="Home" img={home} hoverClass={bgCols.hoverClass}/>
-          <LinkButton text="Dashboard" img={dashBoard} hoverClass={bgCols.hoverClass}/>
-          <LinkButton text="Create" img={create} hoverClass={bgCols.hoverClass}/>
-          <LinkButton text="Practice" img={practice} hoverClass={bgCols.hoverClass}/>
-          <LinkButton text="Quiz" img={quiz} hoverClass={bgCols.hoverClass}/>
+          <LinkButton text="Home" img={home} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Dashboard" img={dashBoard} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Create" img={create} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Practice" img={practice} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Quiz" img={quiz} hoverClass={primaryColor.hoverClass}/>
         </div>
       </div>
 

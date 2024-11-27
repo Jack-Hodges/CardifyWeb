@@ -12,6 +12,7 @@ function Home() {
 
     const navigate = useNavigate();
     const { user, getUser, profile, theme } = useUser();
+    const { primaryColor, secondaryColor, textColor } = theme;
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
@@ -151,7 +152,7 @@ function Home() {
                             <div>
                                 <div className="flex justify-between ml-5 mr-2 mt-6">
                                     <p>Continue Learning</p>
-                                    <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? theme.tertiary : 'purple'}/>
+                                    <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
                                 </div>
                                 <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
                                     {subjects.map((subject, index) => (

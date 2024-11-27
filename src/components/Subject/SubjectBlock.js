@@ -1,14 +1,12 @@
 import { getColor } from "../Functions/getColor";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
-import { getTheme } from "../Functions/getTheme";
 
 function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
 
-    const { profile } = useUser();
+    const { profile, theme } = useUser();
     // Memoize theme so it only recalculates if profile.theme changes
-    const theme = useMemo(() => getTheme(profile.theme), [profile.theme]);
 
     const [hoveredIcon, setHoveredIcon] = useState(null); // State to track hovered icon
     const navigate = useNavigate();
