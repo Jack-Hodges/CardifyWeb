@@ -164,19 +164,20 @@ function FlashcardQuiz() {
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
                   practice
+                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
                 />
               ) : (
                 <div className="flex flex-col justify-center items-center w-full h-full">
                   {subject ? (
                     <div>
-                      <p className="text-gray-500 text-4xl font-bold text-center">{subject.name} has no flashcards</p>
+                      <p className="text-gray-500 text-4xl font-bold text-center drop-shadow-custom">{subject.name} has no flashcards</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
                         <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center`}>No subject selected</p>
+                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center drop-shadow-custom`}>No subject selected</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
                         <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
                       </div>
@@ -214,7 +215,7 @@ function FlashcardQuiz() {
         ) : (
           <div className="flex flex-col justify-center items-center h-full w-full">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
-            <p className="text-gray-500 text-2xl mb-10">You have completed all the cards.</p>
+            <p className={`${theme ? theme.textClass : 'textColor'} font-bold text-2xl mb-10 drop-shadow-custom`}>You have completed all the cards.</p>
             <div className="flex flex-col sm:flex-row gap-4">
               <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />
               <BackgroundButton text={`Review ${subject.name} Again`} bgColor={"bg-blue-500 hover:bg-blue-400"} onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />

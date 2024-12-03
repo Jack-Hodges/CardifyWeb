@@ -109,16 +109,16 @@ function Home() {
                             {/* Welcome top section */}
                             <div className="mx-5">
                                 <div className="flex justify-between">
-                                    <p className="text-4xl sm:text-5xl font-bold">Welcome back, {profile.first_name}!</p>
+                                    <p className="text-4xl sm:text-5xl font-bold drop-shadow-custom">Welcome back, {profile.first_name}!</p>
                                 </div>
                                 
-                                <p className="font-normal">🔥 99 days</p>
+                                <p className="font-normal drop-shadow-custom">🔥 99 days</p>
                             </div>
     
                             {/* In Progress Section */}
                             {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
                                 <div>
-                                    <div className="flex justify-between ml-5 mr-2 mt-6 mb-3">
+                                    <div className="flex justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
                                         <p>In Progress</p>
                                     </div>
                                     <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
@@ -135,7 +135,7 @@ function Home() {
     
                             {/* Jump In Section */}
                             <div>
-                                <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3">
+                                <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
                                     <p>Jump In</p>
                                 </div>
                                 <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
@@ -151,7 +151,7 @@ function Home() {
                             {/* Continue Learning Section */}
                             <div>
                                 <div className="flex justify-between ml-5 mr-2 mt-6">
-                                    <p>Continue Learning</p>
+                                    <p className="drop-shadow-custom">Continue Learning</p>
                                     <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
                                 </div>
                                 <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">

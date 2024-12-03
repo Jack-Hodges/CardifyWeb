@@ -135,7 +135,7 @@ function Welcome() {
         <div className="absolute top-4 right-4 z-50">
           <BackgroundButton
             text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-            bgColor={['green', 500]}
+            bgColor={'bg-green-500 hover:bg-green-400'}
             onClick={toggleSignUp}
           />
         </div>
@@ -157,8 +157,8 @@ function Welcome() {
           </h2>
 
           <div className="flex space-x-4 mt-4">
-            <BackgroundButton text="Google" image={GoogleSVG} flip wWidth="w-full" bgColor={["red", 500]} />
-            <BackgroundButton text="Apple" image={AppleSVG} flip wWidth="w-full" bgColor={["red", 500]} />
+            <BackgroundButton text="Google" image={GoogleSVG} flip wWidth="w-full" bgColor={'bg-red-500 hover:bg-red-400'} />
+            <BackgroundButton text="Apple" image={AppleSVG} flip wWidth="w-full" bgColor={'bg-red-500 hover:bg-red-400'} />
           </div>
 
           <div className="mt-8">
@@ -213,7 +213,7 @@ function Welcome() {
               <BackgroundButton
                 text={isSignUp ? "Sign Up" : "Start Learning"}
                 onClick={handleAuth}
-                bgColor={["blue", 500]}
+                bgColor={'bg-blue-500 hover:bg-blue-400'}
                 wWidth="w-full"
               />
             </div>

@@ -58,6 +58,8 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 profile.first_name,
                 themeKey
             );
+            // Reload the page to apply the new theme
+            window.location.reload();
         } catch (error) {
             console.error('Error updating theme:', error);
         }

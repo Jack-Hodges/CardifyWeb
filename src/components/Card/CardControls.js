@@ -34,7 +34,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
                     <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
                 </div>
 
-                <p className={`text-2xl ${themeText} font-bold text-center w-16`}>
+                <p className={`text-2xl ${themeText} font-bold text-center w-16 drop-shadow-custom`}>
                     {currentCardIndex}/{totalCards}
                 </p>
 
