@@ -135,10 +135,10 @@ function Home() {
     
                             {/* Jump In Section */}
                             <div>
-                                <div className="flex overflow-x-scroll justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
+                                <div className="flex justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
                                     <p>Jump In</p>
                                 </div>
-                                <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
+                                <div className="grid grid-cols-3 gap-4 sm:gap-0 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4">
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
@@ -192,10 +192,10 @@ export default Home;
 
 function JumpButton( { text, img, color, onClick, theme }) {
     return (
-        <div className={`group flex flex-col justify-between items-center p-2 w-40 h-40 bg-white dark:bg-gray-600 rounded-xl ${theme} background-hover cursor-pointer ${color}`}
+        <div className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40 bg-white dark:bg-gray-600 rounded-xl ${theme} background-hover cursor-pointer ${color}`}
             onClick={() => onClick(text.toLowerCase())}>
             {img}
-            <p>{text}</p>
+            <p className="text-2xl sm:text-3xl">{text}</p>
         </div>
     );
 }
