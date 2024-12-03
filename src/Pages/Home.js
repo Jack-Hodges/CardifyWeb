@@ -154,7 +154,7 @@ function Home() {
                                     <p className="drop-shadow-custom">Continue Learning</p>
                                     <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
                                 </div>
-                                <div className="flex w-full overflow-x-auto space-x-0 sm:space-x-4 py-2 scrollbar-hide">
+                                <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
                                     {subjects.map((subject, index) => (
                                         <div 
                                             key={index} 

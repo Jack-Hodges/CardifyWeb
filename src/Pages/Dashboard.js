@@ -187,7 +187,7 @@ function Dashboard() {
         // Loading State
         <DashboardLoading />
       ) : subjects.length > 0 || collections.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 p-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 py-4 px-10 sm:p-4 gap-4">
           {/* Render Collections with Subjects */}
           {collectionsWithSubjects.map((collection) => (
             <CollectionBlock
