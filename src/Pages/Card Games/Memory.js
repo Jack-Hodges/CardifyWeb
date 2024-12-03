@@ -196,7 +196,7 @@ function Memory() {
                                 🎉 Congratulations! 🎉
                             </h2>
                             <p className={`text-2xl mb-6 font-bold drop-shadow-custom ${theme ? textColor : 'textClass'}`}>
-                                You completed the memory game in {formatTime(timer)}!
+                                You finished in {formatTime(timer)}!
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />

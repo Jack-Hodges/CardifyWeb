@@ -161,7 +161,7 @@ function Dash() {
             </div>
 
             {/* Game Area */}
-            <div className="relative h-96 bg-gradient-to-b from-blue-50 to-blue-100 rounded-lg overflow-hidden border border-blue-200">
+            <div className="relative h-[70dvh] rounded-lg overflow-hidden">
                 {/* Falling Cards */}
                 {fallingCards.map((card) => (
                     <div
