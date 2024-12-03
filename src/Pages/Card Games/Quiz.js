@@ -161,7 +161,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-4/5 h-4/5 sm:h-3/5 mt-5 px-5">
+              <div className="mx-auto w-full h-4/5 sm:h-3/5 mt-5 px-5">
                 <Card
                   frontContent={cards[currentCardIndex]?.question}
                   backContent={cards[currentCardIndex]?.answer}
@@ -172,7 +172,7 @@ function Quiz() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 grid-rows-2 w-4/5 mx-auto gap-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 w-4/5 mx-auto gap-4 mt-4">
                 {randomizedOptions[currentCardIndex]?.map((option, index) => (
                   <SelectionBox
                     key={index}
