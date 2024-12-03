@@ -80,7 +80,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
             ></div>
 
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-1/2 h-3/4 transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] h-4/5 sm:w-1/2 sm:h-3/4 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()}
