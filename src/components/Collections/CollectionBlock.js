@@ -28,7 +28,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
     return (
         <>
             {/* Closed collection box for the grid */}
-            <div className={`group relative w-full h-56 cursor-pointer background-hover bg-[#f2f1ed] dark:bg-gray-700 rounded-xl ${theme.shadowClass} transition duration-300`}
+            <div className={`group relative w-[90%] mx-auto sm:w-full h-56 cursor-pointer background-hover bg-[#f2f1ed] dark:bg-gray-700 rounded-xl ${theme.shadowClass} transition duration-300`}
             onClick={onClick}>
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
@@ -49,7 +49,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 {/* Text and Icons Section */}
                 <div className="absolute bottom-0 left-0 mb-1 w-full">
                     {/* Collection name and subject count */}
-                    <div className="text-left">
+                    <div className="text-left mb-[-6%] sm:mb-0">
                         <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {collection ? collection.name : 'name'}
                         </h1>

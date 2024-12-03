@@ -161,7 +161,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-full h-4/5 sm:h-3/5 mt-5 px-5">
+              <div className="mx-auto w-full h-2/5 sm:h-3/5 mt-5 px-5">
                 <Card
                   frontContent={cards[currentCardIndex]?.question}
                   backContent={cards[currentCardIndex]?.answer}
@@ -254,11 +254,12 @@ function Quiz() {
             ) : (
               <div>
                 <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center drop-shadow-custom`}>No subject selected</p>
-                <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                <div className="flex justify-center gap-4 mt-5 mx-auto">
                 <BackgroundButton
                   text="Select a subject"
                   bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
                   onClick={() => setIsSubjectListModalOpen(true)}
+                  wWidth='w-full sm:w-auto'
                 />
                 </div>
               </div>

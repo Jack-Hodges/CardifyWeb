@@ -152,9 +152,9 @@ function Home() {
                             <div>
                                 <div className="flex justify-between ml-5 mr-2 mt-6">
                                     <p className="drop-shadow-custom">Continue Learning</p>
-                                    <BackgroundButton text="View all and Edit" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+                                    <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
                                 </div>
-                                <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
+                                <div className="flex w-full overflow-x-auto space-x-0 sm:space-x-4 py-2 scrollbar-hide">
                                     {subjects.map((subject, index) => (
                                         <div 
                                             key={index} 

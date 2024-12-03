@@ -21,7 +21,7 @@ function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
     const colors = getColor(subject.bgCol);
 
     return (
-        <div className={`group relative w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl ${theme.shadowClass} background-hover cursor-pointer transition duration-300`}>
+        <div className={`group relative mx-auto w-[90%] sm:w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl ${theme.shadowClass} background-hover cursor-pointer transition duration-300`}>
         <div className="absolute bottom-0 left-0 mb-1 w-full">
             <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
             {subject.name}
