@@ -3,6 +3,8 @@ import { useUser } from '../../UserContext';
 import { useLocation } from 'react-router-dom';
 import { fetchCards } from "../../components/Card/CardManipulation";
 import ReactMarkdown from 'react-markdown';
+import BackgroundButton from '../../components/Elements/BackgroundButton';
+import { useNavigate } from 'react-router-dom';
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
@@ -23,6 +25,8 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
+    const { textColor } = theme;
+    const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
     const [currentCardIndex, setCurrentCardIndex] = useState(0); // Track current page
@@ -38,6 +42,10 @@ function Memory() {
     
     // Ref to store the timeout for flipping cards back
     const flipTimeoutRef = useRef(null);
+
+    const handleSwitchToHome = () => {
+        navigate('/home');
+    };
 
     useEffect(() => {
         if (!user) {
@@ -183,19 +191,17 @@ function Memory() {
 
                 {gameCompleted && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-white p-8 rounded-lg shadow-xl text-center transform transition-all duration-500 scale-100">
-                            <h2 className="text-4xl font-bold text-green-600 mb-6">
+                        <div className="p-8 text-center transform transition-all duration-500 scale-100">
+                            <h2 className={`text-4xl font-bold drop-shadow-custom ${theme ? textColor : 'textClass'} mb-6`}>
                                 🎉 Congratulations! 🎉
                             </h2>
-                            <p className="text-2xl mb-6">
+                            <p className={`text-2xl mb-6 font-bold drop-shadow-custom ${theme ? textColor : 'textClass'}`}>
                                 You completed the memory game in {formatTime(timer)}!
                             </p>
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="bg-blue-500 text-white px-8 py-3 rounded-lg text-xl hover:bg-blue-600 transition-colors"
-                            >
-                                Play Again
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />
+                                <BackgroundButton text={`Review ${subject.name} Again`} bgColor={"bg-blue-500 hover:bg-blue-400"} onClick={() => window.location.reload()} />
+                            </div>
                         </div>
                     </div>
                 )}

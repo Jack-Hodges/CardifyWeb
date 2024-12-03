@@ -196,6 +196,7 @@ function Quiz() {
                   text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
                   bgColor={currentCardIndex === cards.length - 1 ? 'bg-green-500 hover:bg-green-400' : theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
                   wWidth="w-40"
+                  disabled={!selectedAnswers[currentCardIndex]} // Disable button if no answer is selected
                   onClick={() => {
                     if (currentCardIndex === cards.length - 1) {
                       setFinished(true);
