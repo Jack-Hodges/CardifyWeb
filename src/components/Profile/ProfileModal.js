@@ -69,7 +69,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
 
     return ReactDOM.createPortal(
         <div
-            className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+            className={`fixed p-3 sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
                 isClosing ? 'opacity-0' : 'opacity-100'
             }`}
             onClick={handleOnClose}
@@ -80,7 +80,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
             ></div>
 
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] h-4/5 sm:w-1/2 sm:h-3/4 transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full h-full sm:w-4/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()}

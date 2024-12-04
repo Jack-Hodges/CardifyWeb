@@ -97,11 +97,11 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
             {/* Expanded view overlay */}
             {isExpanded && (
                 <div 
-                    className="fixed inset-0 flex items-center justify-center z-50 p-10 bg-black bg-opacity-50"
+                    className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-10 bg-black bg-opacity-50"
                     onClick={onClick} // Collapse the overlay when clicking on the background
                 >
                     <div 
-                        className={`relative w-[95%] h-[90%] bg-white dark:bg-gray-800 rounded-xl p-4`}
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-white dark:bg-gray-800 rounded-xl p-4`}
                         onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
                     >
                         {/* Title and close button */}
