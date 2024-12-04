@@ -41,7 +41,7 @@ const DragDropGame = () => {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
-  const { secondaryColor, tertiaryColor } = theme;
+  const { secondaryColor, tertiaryColor, shadow, textColor } = theme;
   const borderCol = theme ? getBorder(theme.border) : 'blue';
 
   useEffect(() => {
@@ -233,7 +233,7 @@ const DragDropGame = () => {
       id={`drop-area-${id}`}
       className="w-full"
     >
-      <h3 className={`text-lg font-semibold py-2 ${theme ? theme.textClass : 'textClass'}`}>{title}</h3>
+      <h3 className={`text-lg font-semibold py-2 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>{title}</h3>
       <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">
         {items.map((item, index) => (
           <React.Fragment key={item.id}>
@@ -266,14 +266,14 @@ const DragDropGame = () => {
         </div>
       ) : !cards.length ? (
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">
+          <div className={`text-lg text-gray-600 ${shadow ? 'drop-shadow-custom' : ''}`}>
             No cards available for this subject
           </div>
         </div>
       ) : (
         <div className="p-4">
           <div className="mb-4 flex justify-between items-center">
-            <h2 className={`text-xl font-bold ${theme ? theme.textClass : 'textClass'}`}>
+            <h2 className={`text-xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
               Card {currentCardIndex + 1} of {cards.length}
             </h2>
             <div className="space-x-2">
@@ -294,7 +294,7 @@ const DragDropGame = () => {
             <div
               id="drop-area-available"
             >
-              <h3 className={`text-lg font-semibold py-2 ${theme ? theme.textClass : 'textClass'}`}>
+              <h3 className={`text-lg font-semibold py-2 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
                 Drag the blocks
               </h3>
               <div className="px-4 py-2 min-h-14 rounded-lg border-2 border-dashed border-gray-300 flex flex-wrap gap-2 relative">

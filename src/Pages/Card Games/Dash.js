@@ -18,6 +18,7 @@ function Dash() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
+    const { textColor, shadow } = theme;
 
     // Initialize with a random target card
     useEffect(() => {
@@ -152,11 +153,11 @@ function Dash() {
             <div className="flex justify-between items-center mb-6 p-4">
                 <div className="flex items-center gap-2">
                     <Timer className="text-blue-500" />
-                    <span className={`text-2xl font-bold ${theme ? theme.textClass : 'textColor'}`}>{timeLeft}s</span>
+                    <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{timeLeft}s</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <Zap className="text-yellow-500" />
-                    <span className={`text-2xl font-bold ${theme ? theme.textClass : 'textColor'}`}>{score}</span>
+                    <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{score}</span>
                 </div>
             </div>
 
@@ -205,7 +206,7 @@ function Dash() {
                 )}
             </div>
 
-            {/* Power-up Bar */}
+            {/* Power-up Bar
             <div className="flex justify-center gap-4 mt-4">
                 <button 
                     className="px-4 py-2 bg-blue-100 rounded-lg flex items-center gap-2 hover:bg-blue-200"
@@ -222,7 +223,7 @@ function Dash() {
                     <Ban size={16} />
                     Clear All
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 }

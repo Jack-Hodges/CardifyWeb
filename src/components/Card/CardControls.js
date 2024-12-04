@@ -28,13 +28,13 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
 
     return (
         <div className="w-full h-12 flex items-center justify-between">
-            <div className="mt-[0.5%]">
+            <div className="mt-2">
                 <FlashcardPDFExport flashcards={cards} />
             </div>
             
              <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
 
-                <div className="mt-[0%]">
+                <div className="mt-0">
                     <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
                 </div>
 

@@ -3,12 +3,15 @@ import EditModal from './EditModal';
 import BackgroundButton from '../Elements/BackgroundButton';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import { useUser } from '../../UserContext';
 
 function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', themeShadow = 'background-shadow', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
   const [newBackContent, setNewBackContent] = useState('');  // State for new flashcard's back content
+  const { theme } = useUser();
+  const { textColor, shadow } = theme;
 
   const handleAddClick = () => {
     setNewFrontContent(''); // Clear the front content for a new flashcard
@@ -31,7 +34,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
     <div className="w-full h-full px-4">
       {/* Header Section: Fixed */}
       <div className="flex items-center mb-4 justify-between sticky top-0 z-10">
-        <h2 className={`font-bold text-2xl ${themeText}`}>All Flashcards</h2>
+        <h2 className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${textColor}`}>All Flashcards</h2>
         <BackgroundButton 
           onClick={handleAddClick} 
           image={plusIcon} 
