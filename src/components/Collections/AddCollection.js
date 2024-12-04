@@ -64,8 +64,8 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
                 </div>
 
                 <div className="flex justify-end space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
-                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />
+                    <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={handleClose} />
+                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSave} />
                 </div>
             </div>
         </div>,

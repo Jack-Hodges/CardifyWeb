@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'gray', secondActionCol = 'red', titleCol = 'text-red-500'}) {
+function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'bg-gray-500 hover:bg-gray-400', secondActionCol = 'bg-red-500 hover:bg-red-400', titleCol = 'text-red-500'}) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
 

@@ -86,7 +86,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <span className={`textClass text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                    <span className={`textColor text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
                         <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
                         <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />

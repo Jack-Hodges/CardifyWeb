@@ -223,15 +223,38 @@ function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow }) {
                 <div className="text-center prose prose-sm max-w-full overflow-auto" style={{ userSelect: "none" }}>
                     <ReactMarkdown 
                         components={{
-                            p: ({node, ...props}) => <p className="text-2xl font-bold m-0" {...props} />,
-                            // Add more component overrides as needed
-                            h1: ({node, ...props}) => <h1 className="text-2xl font-bold m-0" {...props} />,
-                            h2: ({node, ...props}) => <h2 className="text-xl font-bold m-0" {...props} />,
-                            h3: ({node, ...props}) => <h3 className="text-lg font-bold m-0" {...props} />,
-                            ul: ({node, ...props}) => <ul className="list-disc m-0 pl-4" {...props} />,
-                            ol: ({node, ...props}) => <ol className="list-decimal m-0 pl-4" {...props} />,
-                            li: ({node, ...props}) => <li className="m-0" {...props} />,
-                            code: ({node, ...props}) => <code className="bg-gray-100 px-1 rounded" {...props} />
+                            p: ({ node, ...props }) => {
+                                const content = props.children || "Default paragraph content";
+                                return <p className="text-2xl font-bold m-0" {...props}>{content}</p>;
+                            },
+                            h1: ({ node, ...props }) => {
+                                const content = props.children || "Default Heading 1";
+                                return <h1 className="text-2xl font-bold m-0" {...props}>{content}</h1>;
+                            },
+                            h2: ({ node, ...props }) => {
+                                const content = props.children || "Default Heading 2";
+                                return <h2 className="text-xl font-bold m-0" {...props}>{content}</h2>;
+                            },
+                            h3: ({ node, ...props }) => {
+                                const content = props.children || "Default Heading 3";
+                                return <h3 className="text-lg font-bold m-0" {...props}>{content}</h3>;
+                            },
+                            ul: ({ node, ...props }) => {
+                                const content = props.children || <li>Default list item</li>;
+                                return <ul className="list-disc m-0 pl-4" {...props}>{content}</ul>;
+                            },
+                            ol: ({ node, ...props }) => {
+                                const content = props.children || <li>Default ordered item</li>;
+                                return <ol className="list-decimal m-0 pl-4" {...props}>{content}</ol>;
+                            },
+                            li: ({ node, ...props }) => {
+                                const content = props.children || "Default list item";
+                                return <li className="m-0" {...props}>{content}</li>;
+                            },
+                            code: ({ node, ...props }) => {
+                                const content = props.children || "Default code snippet";
+                                return <code className="bg-gray-100 px-1 rounded" {...props}>{content}</code>;
+                            }
                         }}
                     >
                         {content}
