@@ -113,10 +113,10 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow' 
     return (
         <div 
             key={subject.id} 
-            className={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer ${themeShadow} background-hover`}
+            className={`${subjectCol.bgClass} ${subjectCol.hoverClass} w-full h-16 mb-2 justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={handleClick}>
-            <p>{subject.name}</p>
-            <p>{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
+            <p className="text-2xl">{subject.name}</p>
+            <p className="text-lg font-normal">{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
         </div>
     );
 }
@@ -134,11 +134,11 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
             key={collection.id} 
             className={`bg-gray-400 w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={onClick}>
-            <p>{collection.name}</p>
-            <div className="flex items-center">
-                <p>{subjects.length} {subjects.length === 1 ? "subject" : "subjects"}</p>
-                {chev}
+            <div>
+                <p className="text-2xl">{collection.name}</p>
+                <p className="text-lg font-normal">{subjects.length} {subjects.length === 1 ? "subject" : "subjects"}</p>
             </div>
+                {chev}
            
         </div>
     );
