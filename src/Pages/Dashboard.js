@@ -169,7 +169,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="fixed w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       {/* Header Section */}
       <TitleBar text="Dashboard" user={user}
         content={
