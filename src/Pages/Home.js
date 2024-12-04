@@ -12,7 +12,7 @@ function Home() {
 
     const navigate = useNavigate();
     const { user, getUser, profile, theme } = useUser();
-    const { primaryColor } = theme;
+    const { primaryColor, textColor, shadow } = theme;
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
@@ -95,7 +95,7 @@ function Home() {
     return (
         <div className="w-screen h-full overflow-auto bg-cover bg-screen relative" style={{ backgroundImage: theme ? theme.image : 'none' }}>
             {/* Overlay gradient positioned at the top */}
-            <div className="fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-0 pointer-events-none"></div>
+            <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-0 pointer-events-none' : ''}`}></div>
             
             {/* Main content */}
             <div className="relative z-10">
@@ -103,22 +103,22 @@ function Home() {
                     <TitleBar text="Home" user={user} />
                 </div>
                 
-                <div className={`text-3xl font-bold ${theme ? theme.textClass : 'textColor'}`}>
+                <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
                     {user && profile ? (
                         <div>
                             {/* Welcome top section */}
                             <div className="mx-5">
                                 <div className="flex justify-between">
-                                    <p className="text-4xl sm:text-5xl font-bold drop-shadow-custom">Welcome back, {profile.first_name}!</p>
+                                    <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>Welcome back, {profile.first_name}!</p>
                                 </div>
                                 
-                                <p className="font-normal drop-shadow-custom">🔥 99 days</p>
+                                <p className={`font-normal ${shadow ? 'drop-shadow-custom' : ''}`}>🔥 99 days</p>
                             </div>
     
                             {/* In Progress Section */}
                             {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
                                 <div>
-                                    <div className="flex justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
+                                    <div className={`flex justify-between ml-5 mr-2 mt-6 mb-3 ${shadow ? 'drop-shadow-custom' : ''}`}>
                                         <p>In Progress</p>
                                     </div>
                                     <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
@@ -135,7 +135,7 @@ function Home() {
     
                             {/* Jump In Section */}
                             <div>
-                                <div className="flex justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
+                                <div className={`flex justify-between ml-5 mr-2 mt-6 mb-3 ${shadow ? 'drop-shadow-custom' : ''}`}>
                                     <p>Jump In</p>
                                 </div>
                                 <div className="grid grid-cols-3 gap-2 sm:gap-0 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4">
@@ -151,7 +151,7 @@ function Home() {
                             {/* Continue Learning Section */}
                             <div>
                                 <div className="flex justify-between ml-5 mr-2 mt-6">
-                                    <p className="drop-shadow-custom">Continue Learning</p>
+                                    <p className={`${shadow ? 'drop-shadow-custom' : ''}`}>Continue Learning</p>
                                     <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
                                 </div>
                                 <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">

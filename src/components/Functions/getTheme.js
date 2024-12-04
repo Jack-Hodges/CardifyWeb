@@ -7,6 +7,7 @@ import Serenity from '../../images/backgrounds/Serenity.jpg';
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
   return [
+    { name: 'Default', url: null },
     { name: 'Beach', url: Beach },
     { name: 'Forest', url: Forest },
     { name: 'Mountain', url: Mountain },
@@ -26,6 +27,7 @@ export const getTheme = (theme) => {
       secondary: ['orange', 500],
       tertiary: ['purple', 500],
       border: ['green', 500],
+      shadow: false,
     };
   } else {
     const themes = {
@@ -38,6 +40,7 @@ export const getTheme = (theme) => {
         secondary: ['blue', 500],
         tertiary: ['yellow', 500],
         border: ['cyan', 500],
+        shadow: true,
       },
       forest: {
         name: "forest",
@@ -48,6 +51,7 @@ export const getTheme = (theme) => {
         secondary: ['emerald', 600],
         tertiary: ['lime', 500],
         border: ['green', 700],
+        shadow: true,
       },
       mountain: {
         name: "mountain",
@@ -58,6 +62,7 @@ export const getTheme = (theme) => {
         secondary: ['stone', 400],
         tertiary: ['slate', 400],
         border: ['zinc', 700],
+        shadow: true,
       },
       newyorkcity: {
         name: "newyorkcity",
@@ -68,6 +73,7 @@ export const getTheme = (theme) => {
         secondary: ['stone', 400],
         tertiary: ['slate', 400],
         border: ['zinc', 700],
+        shadow: true,
       },
       serenity: {
         name: "serenity",
@@ -78,6 +84,7 @@ export const getTheme = (theme) => {
         secondary: ['orange', 500],
         tertiary: ['red', 300],
         boder: ['red', 700],
+        shadow: true,
       }
     };
     return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: ['green', 500], secondary: ['orange', 500], tertiary: ['purple', 500], border: ['green', 500] };

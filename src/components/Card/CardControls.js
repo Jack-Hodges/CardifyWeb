@@ -1,7 +1,11 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
+import { useUser } from '../../UserContext';
 
 function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'bg-orange-500 hover:bg-orange-400', cards }) {
+
+    const { theme } = useUser();
+    const { shadow } = theme;
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -34,7 +38,7 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
                     <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
                 </div>
 
-                <p className={`text-2xl ${themeText} font-bold text-center w-16 drop-shadow-custom`}>
+                <p className={`text-2xl ${themeText} font-bold text-center w-16 ${shadow ? 'drop-shadow-custom' : ''}`}>
                     {currentCardIndex}/{totalCards}
                 </p>
 

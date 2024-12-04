@@ -13,10 +13,10 @@ import { useUser } from './UserContext';
 function App() {
 
   const { profile } = useUser();
-  const theme = profile ? profile.theme : { image: 'url("https://images.unsplash.com/photo-1532708329130-4f3f7f6b99d6")' };
+  const theme = profile ? profile.theme : { image: '' };
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900 bg-cover bg-screen" style={{ backgroundImage: theme.image}}>
+    <div className="w-screen h-[100dvh] overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       <Router>
         {/* MenuBar will be rendered on all pages */}
 

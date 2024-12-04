@@ -13,11 +13,12 @@ const resolveThemeColors = (theme) => {
     name: "default",
     image: null,
     shadowClass: "background-shadow",
-    textClass: "text-black",
-    primary: ["gray", 500],
-    secondary: ["gray", 400],
-    tertiary: ["gray", 300],
-    border: ["gray", 500],
+    textClass: "text-gray-700 dark:text-gray-200",
+    primary: ["green", 500],
+    secondary: ["purple", 500],
+    tertiary: ["orange", 500],
+    border: ["green", 500],
+    shadow: false,
   };
 
   const resolvedTheme = {
@@ -32,6 +33,7 @@ const resolveThemeColors = (theme) => {
     tertiaryColor: getColors(resolvedTheme.tertiary),
     borderColor: getColors(resolvedTheme.border),
     textColor: resolvedTheme.textClass,
+    shadow: resolvedTheme.shadow,
   };
 };
 

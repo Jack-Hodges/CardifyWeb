@@ -27,7 +27,7 @@ function CreateCards() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
-  const { secondaryColor, tertiaryColor } = theme;
+  const { secondaryColor, tertiaryColor, shadow } = theme;
 
   useEffect(() => {
     if (!user) {
@@ -153,7 +153,7 @@ function CreateCards() {
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div>
-                <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center drop-shadow-custom`}>{subject.name} has no flashcards</p>
+                <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
                   <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
                   <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
@@ -161,7 +161,7 @@ function CreateCards() {
               </div>
             ) : (
               <div>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center drop-shadow-custom`}>No subject selected</p>
+                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
                   <BackgroundButton text="Add Cards to Subject" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
                   <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>

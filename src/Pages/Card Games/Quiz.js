@@ -24,7 +24,7 @@ function Quiz() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
-  const { primaryColor, secondaryColor, tertiaryColor } = theme;
+  const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   // Navigation function
   const navToCreate = () => {
@@ -209,8 +209,8 @@ function Quiz() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center">
-              <h2 className={`text-3xl font-bold mb-4 drop-shadow-custom ${theme ? theme.textClass : 'textClass'}`}>{message}</h2>
-              <p className={`text-7xl drop-shadow-custom ${theme ? theme.textClass : 'secondaryTextColor'}`}>{percentage.toFixed(0)}%</p>
+              <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>{message}</h2>
+              <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>{percentage.toFixed(0)}%</p>
               <div className="flex gap-4 mt-4">
                 <BackgroundButton
                   text="Retry Quiz"
@@ -234,10 +234,10 @@ function Quiz() {
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div className="flex flex-col justify-center items-center gap-4">
-                <p className={`font-bold text-2xl drop-shadow-custom ${theme ? theme.textClass : 'textColor'}`}>
+                <p className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>
                   {subject.name} does not have enough cards.
                 </p>
-                <p className="textColor drop-shadow-custom">At least 4 cards are required to start a quiz</p>
+                <p className={`textColor ${shadow ? 'drop-shadow-custom' : ''}`}>At least 4 cards are required to start a quiz</p>
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
@@ -253,7 +253,7 @@ function Quiz() {
               </div>
             ) : (
               <div>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center drop-shadow-custom`}>No subject selected</p>
+                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
                 <div className="flex justify-center gap-4 mt-5 mx-auto">
                 <BackgroundButton
                   text="Select a subject"
