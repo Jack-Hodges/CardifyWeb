@@ -53,7 +53,7 @@ function AddBar({ text, addSub, addCol }) {
           w-44 ${secondaryColor.bgClass} 
           ${theme ? theme.shadowClass : 'background-shadow'} 
           rounded-3xl transform transition-all duration-300 
-           sm:mt-2 sm:origin-top 
+           mt-2 sm:origin-top 
           max-sm:right-0 max-sm:top-full max-sm:origin-top-right
           ${
             isOpen 

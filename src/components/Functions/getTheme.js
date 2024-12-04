@@ -3,6 +3,7 @@ import Forest from '../../images/backgrounds/Forest.jpg';
 import Mountain from '../../images/backgrounds/Mountain.jpg';
 import NewYorkCity from '../../images/backgrounds/NewYorkCity.jpg';
 import Serenity from '../../images/backgrounds/Serenity.jpg';
+import Pastel from '../../images/backgrounds/Pastel.jpg';
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
@@ -13,6 +14,7 @@ export const getThemeAssets = () => {
     { name: 'Mountain', url: Mountain },
     { name: "New York City", url: NewYorkCity },
     { name: 'Serenity', url: Serenity },
+    { name: 'Pastel', url: Pastel },
   ];
 };
 
@@ -84,6 +86,17 @@ export const getTheme = (theme) => {
         secondary: ['orange', 500],
         tertiary: ['red', 300],
         boder: ['red', 700],
+        shadow: true,
+      },
+      pastel: {
+        name: "pastel",
+        image: `url(${Pastel})`,
+        shadowClass: 'background-shadow-pastel',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['violet', 300],
+        secondary: ['emerald', 300],
+        tertiary: ['blue', 300],
+        border: ['blue', 500],
         shadow: true,
       }
     };

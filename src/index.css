@@ -46,6 +46,10 @@ code {
   @apply border-4 border-[rgba(212,213,214,1)] shadow-[3px_3px_0px_0px_rgba(212,213,214,1)];
 }
 
+.background-shadow-pastel {
+  @apply border-4 border-[rgba(206,190,176,1)] shadow-[3px_3px_0px_0px_rgba(206,190,176,1)];
+}
+
 .background-hover {
   @apply sm:hover:shadow-none sm:hover:translate-x-1 sm:hover:translate-y-1 transition-all duration-300 transform;
 }
