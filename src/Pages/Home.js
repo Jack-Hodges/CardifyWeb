@@ -138,7 +138,7 @@ function Home() {
                                 <div className="flex justify-between ml-5 mr-2 mt-6 mb-3 drop-shadow-custom">
                                     <p>Jump In</p>
                                 </div>
-                                <div className="grid grid-cols-3 gap-4 sm:gap-0 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-0 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4">
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
                                     <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+// eslint-disable-next-line import/no-unresolved
 import html2pdf from 'html2pdf.js';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
