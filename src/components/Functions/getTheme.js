@@ -24,8 +24,8 @@ export const getTheme = (theme) => {
       shadowClass: 'background-shadow',
       textClass: 'textColor',
       primary: ['green', 500],
-      secondary: ['orange', 500],
-      tertiary: ['purple', 500],
+      secondary: ['purple', 500],
+      tertiary: ['orange', 500],
       border: ['green', 500],
       shadow: false,
     };
@@ -70,7 +70,7 @@ export const getTheme = (theme) => {
         shadowClass: `background-shadow-newyorkcity`,
         textClass: 'text-gray-100',
         primary: ['zinc', 700],
-        secondary: ['stone', 400],
+        secondary: ['stone', 600],
         tertiary: ['slate', 400],
         border: ['zinc', 700],
         shadow: true,
@@ -87,6 +87,6 @@ export const getTheme = (theme) => {
         shadow: true,
       }
     };
-    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: ['green', 500], secondary: ['orange', 500], tertiary: ['purple', 500], border: ['green', 500] };
+    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }
 };

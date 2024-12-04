@@ -1,5 +1,4 @@
 function getColors(colorArray) {
-  console.log(colorArray);
   if (!Array.isArray(colorArray) || colorArray.length !== 2) {
     throw new Error("Input must be an array with two elements: [color, intensity]");
   }
