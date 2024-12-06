@@ -8,6 +8,7 @@ import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import Ad from '../../components/Advertisement/Ad';
 
 function Quiz() {
   // State variables
@@ -249,6 +250,7 @@ function Quiz() {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center">
                 <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>Advertisement</h2>
+                <Ad />
                 <BackgroundButton 
                   text="Continue" 
                   bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
