@@ -23,7 +23,7 @@ function Quiz() {
   const navigate = useNavigate();
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser, theme } = useUser();
+  const { user, getUser, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   // Navigation function
@@ -216,16 +216,26 @@ function Quiz() {
                   text="Retry Quiz"
                   bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
                   onClick={() => {
-                    setFinished(false);
-                    setCurrentCardIndex(0);
-                    setSelectedAnswers({});
-                    randomizeOptions(cards);
+                    if (profile.pro) {
+                      setFinished(false);
+                      setCurrentCardIndex(0);
+                      setSelectedAnswers({});
+                      randomizeOptions(cards);
+                    } else {
+                      // show advertisement
+                    }
                   }}
                 />
                 <BackgroundButton
                   text="Go to Home"
                   bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                  onClick={() => navigate('/home')}
+                  onClick={() => {
+                    if (profile.pro) {
+                      navigate('/home')
+                    } else {
+                      // show advertisement
+                    }
+                  }}
                 />
               </div>
             </div>
