@@ -19,6 +19,9 @@ function Quiz() {
   const [loading, setLoading] = useState(true);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
+  const [showAd, setShowAd] = useState(false);
+  const [leaveAd, setLeaveAd] = useState("Home");
+
   // Hooks
   const navigate = useNavigate();
   const location = useLocation();
@@ -208,37 +211,60 @@ function Quiz() {
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center">
-              <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>{message}</h2>
-              <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>{percentage.toFixed(0)}%</p>
-              <div className="flex gap-4 mt-4">
-                <BackgroundButton
-                  text="Retry Quiz"
-                  bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
+            // Check if showAd is false
+            !showAd ? (
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>{message}</h2>
+                <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>{percentage.toFixed(0)}%</p>
+                <div className="flex gap-4 mt-4">
+                  <BackgroundButton
+                    text="Retry Quiz"
+                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
+                    onClick={() => {
+                      if (profile.pro) {
+                        setFinished(false);
+                        setCurrentCardIndex(0);
+                        setSelectedAnswers({});
+                        randomizeOptions(cards);
+                      } else {
+                        setLeaveAd("Retry Quiz");
+                        setShowAd(true);
+                      }
+                    }}
+                  />
+                  <BackgroundButton
+                    text="Go to Home"
+                    bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
+                    onClick={() => {
+                      if (profile.pro) {
+                        navigate('/home')
+                      } else {
+                        setLeaveAd("Home");
+                        setShowAd(true);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center">
+                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>Advertisement</h2>
+                <BackgroundButton 
+                  text="Continue" 
+                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
                   onClick={() => {
-                    if (profile.pro) {
+                    setShowAd(false);
+                    if (leaveAd === "Home") {
+                      navigate('/home');
+                    } else {
                       setFinished(false);
                       setCurrentCardIndex(0);
                       setSelectedAnswers({});
                       randomizeOptions(cards);
-                    } else {
-                      // show advertisement
                     }
-                  }}
-                />
-                <BackgroundButton
-                  text="Go to Home"
-                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                  onClick={() => {
-                    if (profile.pro) {
-                      navigate('/home')
-                    } else {
-                      // show advertisement
-                    }
-                  }}
-                />
+                  }}/>
               </div>
-            </div>
+            )
           )
         ) : (
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
