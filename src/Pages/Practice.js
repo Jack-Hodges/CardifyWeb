@@ -186,7 +186,7 @@ function FlashcardQuiz() {
                 </div>
               )}
 
-              { subject && cards > 0 && (
+              { subject && cards.length > 0 && (
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
                   totalCards={cards.length}
