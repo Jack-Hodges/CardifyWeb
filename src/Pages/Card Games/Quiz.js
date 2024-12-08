@@ -254,6 +254,7 @@ function Quiz() {
                 <BackgroundButton 
                   text="Continue" 
                   bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
+                  delay={5}
                   onClick={() => {
                     setShowAd(false);
                     if (leaveAd === "Home") {
