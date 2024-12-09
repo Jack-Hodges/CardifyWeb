@@ -96,36 +96,69 @@ const DragDropGame = () => {
     return [];
   };
 
-  const handleMouseDown = (event, area, chunk) => {
+  const getEventCoordinates = (event) => {
+    // Support both mouse and touch events
+    const clientX = event.clientX || (event.touches && event.touches[0]?.clientX);
+    const clientY = event.clientY || (event.touches && event.touches[0]?.clientY);
+    return { clientX, clientY };
+  };
+
+  const handleStartDrag = (event, area, chunk) => {
+    // Prevent default to stop scroll/selection
     event.preventDefault();
+    
+    const { clientX, clientY } = getEventCoordinates(event);
+    const target = event.target;
+
     setDraggedItem(chunk);
     setDraggedItemOrigin(area);
     setMouseOffset({
-      x: event.clientX - event.target.getBoundingClientRect().left,
-      y: event.clientY - event.target.getBoundingClientRect().top,
+      x: clientX - target.getBoundingClientRect().left,
+      y: clientY - target.getBoundingClientRect().top,
     });
     setDragging(true);
+
+    // Add move and end event listeners
+    if (event.type === 'touchstart') {
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+    } else {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
   };
 
   const handleMouseMove = (event) => {
     if (!dragging) return;
+    const { clientX, clientY } = getEventCoordinates(event);
+    updateDragPosition(clientX, clientY);
+  };
+
+  const handleTouchMove = (event) => {
+    if (!dragging) return;
+    event.preventDefault(); // Prevent scrolling
+    const { clientX, clientY } = getEventCoordinates(event);
+    updateDragPosition(clientX, clientY);
+  };
+
+  const updateDragPosition = (clientX, clientY) => {
     const dragItem = dragItemRef.current;
     if (dragItem) {
-      dragItem.style.left = `${event.clientX - mouseOffset.x}px`;
-      dragItem.style.top = `${event.clientY - mouseOffset.y}px`;
+      dragItem.style.left = `${clientX - mouseOffset.x}px`;
+      dragItem.style.top = `${clientY - mouseOffset.y}px`;
     }
 
-    // Determine which drop area the mouse is over
+    // Determine which drop area the pointer is over
     const dropAreas = ['question', 'answer', 'available'];
     let overArea = null;
     for (let area of dropAreas) {
       const dropAreaElement = document.getElementById(`drop-area-${area}`);
       const rect = dropAreaElement.getBoundingClientRect();
       if (
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
       ) {
         overArea = area;
         break;
@@ -144,17 +177,17 @@ const DragDropGame = () => {
         if (itemElement) {
           const itemRect = itemElement.getBoundingClientRect();
 
-          // Calculate distance from mouse to item's center
+          // Calculate distance from pointer to item's center
           const itemCenterX = itemRect.left + itemRect.width / 2;
           const itemCenterY = itemRect.top + itemRect.height / 2;
-          const deltaX = event.clientX - itemCenterX;
-          const deltaY = event.clientY - itemCenterY;
+          const deltaX = clientX - itemCenterX;
+          const deltaY = clientY - itemCenterY;
           const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
           if (distance < minDistance) {
             minDistance = distance;
-            // Check if mouse is to the left of the item
-            if (event.clientX < itemCenterX) {
+            // Check if pointer is to the left of the item
+            if (clientX < itemCenterX) {
               dropIndex = i;
             } else {
               dropIndex = i + 1;
@@ -169,6 +202,24 @@ const DragDropGame = () => {
   };
 
   const handleMouseUp = () => {
+    cleanupDragListeners();
+    finalizeDrop();
+  };
+
+  const handleTouchEnd = (event) => {
+    event.preventDefault();
+    cleanupDragListeners();
+    finalizeDrop();
+  };
+
+  const cleanupDragListeners = () => {
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+  };
+
+  const finalizeDrop = () => {
     if (!dragging || !draggedItem) return;
     let droppedInArea = activeDropArea;
 
@@ -221,8 +272,9 @@ const DragDropGame = () => {
   const ChunkItem = ({ chunk, area }) => (
     <div
       id={chunk.id}
-      onMouseDown={(e) => handleMouseDown(e, area, chunk)}
-      className="px-2 py-1 rounded bg-white shadow-sm border border-gray-200 text-gray-700 cursor-pointer inline-block"
+      onMouseDown={(e) => handleStartDrag(e, area, chunk)}
+      onTouchStart={(e) => handleStartDrag(e, area, chunk)}
+      className="px-2 py-1 rounded bg-white shadow-sm border border-gray-200 text-gray-700 cursor-pointer inline-block touch-none"
     >
       <ReactMarkdown>{chunk.content}</ReactMarkdown>
     </div>
