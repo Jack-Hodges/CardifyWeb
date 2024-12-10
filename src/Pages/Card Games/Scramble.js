@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import { getBorder } from '../../components/Functions/getColor';
+import SubjectList from '../../components/Subject/SubjectList';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
@@ -35,6 +36,7 @@ const DragDropGame = () => {
   const [dragging, setDragging] = useState(false);
   const [activeDropArea, setActiveDropArea] = useState(null);
   const [dropPosition, setDropPosition] = useState(null);
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
   const dragItemRef = useRef(null);
 
@@ -94,6 +96,10 @@ const DragDropGame = () => {
     if (area === 'answer') return answerArea;
     if (area === 'available') return availableChunks;
     return [];
+  };
+
+  const handleOpenSubjectListModal = () => {
+    setIsSubjectListModalOpen(true);
   };
 
   const getEventCoordinates = (event) => {
@@ -317,9 +323,10 @@ const DragDropGame = () => {
           <div className="text-lg text-gray-600">Loading cards...</div>
         </div>
       ) : !cards.length ? (
-        <div className="flex items-center justify-center h-64">
-          <div className={`text-lg text-gray-600 ${shadow ? 'drop-shadow-custom' : ''}`}>
-            No cards available for this subject
+        <div>
+          <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+          <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+            <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
           </div>
         </div>
       ) : (
@@ -383,6 +390,14 @@ const DragDropGame = () => {
           )}
         </div>
       )}
+
+      <SubjectList 
+        isOpen={isSubjectListModalOpen} 
+        onClose={() => setIsSubjectListModalOpen(false)}
+        user={user}
+        page='scramble'
+      />
+
     </div>
   );
 };

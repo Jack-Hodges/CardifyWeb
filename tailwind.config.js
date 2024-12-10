@@ -4,6 +4,14 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  safelist: [
+    {
+      pattern: /^bg-(red|green|blue|yellow|gray|purple|pink|indigo|teal|cyan|emerald|violet)-(300|400|500|600|700|800)$/,
+    },
+    {
+      pattern: /^hover:bg-(red|green|blue|yellow|gray|purple|pink|indigo|teal|cyan|emerald|violet)-(300|400|500|600|700|800)$/,
+    },
+  ],
   theme: {
     extend: {
       keyframes: {

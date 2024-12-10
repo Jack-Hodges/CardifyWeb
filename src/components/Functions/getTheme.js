@@ -1,3 +1,4 @@
+import Default from '../../images/backgrounds/Default.jpg';
 import Beach from '../../images/backgrounds/Beach.jpg';
 import Forest from '../../images/backgrounds/Forest.jpg';
 import Mountain from '../../images/backgrounds/Mountain.jpg';
@@ -8,7 +9,7 @@ import Pastel from '../../images/backgrounds/Pastel.jpg';
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
   return [
-    { name: 'Default', url: null },
+    { name: 'Default', url: Default },
     { name: 'Beach', url: Beach },
     { name: 'Forest', url: Forest },
     { name: 'Mountain', url: Mountain },

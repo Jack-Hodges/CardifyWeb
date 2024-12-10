@@ -110,7 +110,10 @@ function TitleBar( { text, content }) {
           <LinkButton text="Dashboard" img={dashBoard} hoverClass={primaryColor.hoverClass}/>
           <LinkButton text="Create" img={create} hoverClass={primaryColor.hoverClass}/>
           <LinkButton text="Practice" img={practice} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>
           <LinkButton text="Quiz" img={quiz} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Scramble" img={Arrows} hoverClass={primaryColor.hoverClass}/>
+          <LinkButton text="Dash" img={Bolt} hoverClass={primaryColor.hoverClass}/>
         </div>
       </div>
 
