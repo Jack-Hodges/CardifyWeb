@@ -180,7 +180,7 @@ function Memory() {
     }
 
     return (
-        <div className="w-screen h-screen flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: image }}>
+        <div className="w-screen h-[100dvh] flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: image }}>
             <TitleBar text="Memory" />
 
             {!subject ? (

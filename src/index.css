@@ -18,6 +18,16 @@ code {
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
+@layer utilities {
+  .full-safe-area {
+    @apply fixed top-0 left-0 w-screen h-screen bg-cover bg-center;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
 .textColor {
   @apply text-gray-700 dark:text-gray-200;
 }
