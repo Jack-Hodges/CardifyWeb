@@ -31,7 +31,7 @@ function Quiz() {
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   // Navigation function
-  const navToCreate = () => {
+  const handleSwitchToCreate = () => {
     navigate('/create', { state: { subject } });
   };
 
@@ -286,21 +286,27 @@ function Quiz() {
                   <BackgroundButton
                     text={`Add cards to ${subject.name}`}
                     bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                    onClick={navToCreate}
+                    onClick={handleSwitchToCreate}
                   />
                 </div>
               </div>
             ) : (
-              <div>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
-                <div className="flex justify-center gap-4 mt-5 mx-auto">
-                <BackgroundButton
-                  text="Select a subject"
-                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
-                  onClick={() => setIsSubjectListModalOpen(true)}
-                  wWidth='w-full sm:w-auto'
-                />
-                </div>
+              <div className="flex flex-col justify-center items-center w-full h-full">
+                {subject ? (
+                  <div>
+                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
+                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                      <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                      <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => setIsSubjectListModalOpen(true)} wWidth='w-full sm:w-auto'/>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

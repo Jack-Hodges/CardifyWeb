@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
+import SubjectList from '../../components/Subject/SubjectList'; // Make sure this import is correct
 
 // Helper function to shuffle an array
 const shuffleArray = (array) => {
@@ -25,11 +26,11 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor } = theme;
+    const { textColor, secondaryColor, shadowClass, image } = theme;
     const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
-    const [currentCardIndex, setCurrentCardIndex] = useState(0); // Track current page
+    const [currentCardIndex, setCurrentCardIndex] = useState(0); // Track current batch index
     const [shuffledCards, setShuffledCards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [flippedCards, setFlippedCards] = useState([]);
@@ -39,7 +40,8 @@ function Memory() {
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [showCards, setShowCards] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    
+    const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
+
     // Ref to store the timeout for flipping cards back
     const flipTimeoutRef = useRef(null);
 
@@ -47,9 +49,19 @@ function Memory() {
         navigate('/home');
     };
 
+    const handleOpenSubjectListModal = () => {
+        setIsSubjectListModalOpen(true);
+    };
+
     useEffect(() => {
         if (!user) {
             getUser();
+            return;
+        }
+
+        // If no subject is selected, we won't load cards.
+        if (!subject) {
+            setLoading(false);
             return;
         }
 
@@ -92,10 +104,11 @@ function Memory() {
         const shuffled = shuffleArray(combinedCards);
         setShuffledCards(shuffled);
         setFlippedCards([]);
+        setMatchedCards([]); // reset matched for new batch
     };
 
     const handleCardClick = async (card) => {
-        if (gameCompleted || isProcessing) return;
+        if (gameCompleted || isProcessing || !subject) return;
 
         // If the card is already flipped or matched, do nothing
         if (flippedCards.some(flipped => flipped.id === card.id && flipped.isFront === card.isFront) 
@@ -129,12 +142,13 @@ function Memory() {
                 setMatchedCards(newMatchedCards);
                 setFlippedCards([]);
                 
-                // Check if all cards are matched
+                // Check if all cards in the current batch are matched
                 const allCurrentMatched = shuffledCards.every(c => 
                     newMatchedCards.includes(c.id) || c.id === firstCard.id
                 );
 
                 if (allCurrentMatched) {
+                    // Move to next batch or end game
                     if (currentCardIndex + 5 < allCards.length) {
                         setCurrentCardIndex(prev => prev + 5);
                         loadNextBatch(allCards, currentCardIndex + 5);
@@ -156,56 +170,98 @@ function Memory() {
         }
     };
 
+    // Render logic
     if (loading) {
-        return <p>Loading...</p>;
+        return (
+            <div className="w-screen h-screen flex items-center justify-center bg-cover bg-screen" style={{ backgroundImage: image }}>
+                <p>Loading...</p>
+            </div>
+        );
     }
 
     return (
-        <div className="w-screen h-screen flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+        <div className="w-screen h-screen flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: image }}>
             <TitleBar text="Memory" />
 
-            <div className="relative flex-1">
-                <div 
-                    className={`grid grid-cols-2 sm:grid-cols-5 sm:grid-rows-2 gap-4 w-full h-full p-4 transition-opacity duration-1000 
-                        ${showCards ? 'opacity-100' : 'opacity-0'}`}
-                    style={{ display: showCards ? 'grid' : 'none' }}
-                >
-                    {shuffledCards.map((card, index) => (
-                        <MatchCard
-                            key={`${card.id}-${card.isFront}-${index}`}
-                            content={card.content}
-                            onClick={() => handleCardClick(card)}
-                            isFlipped={
-                                flippedCards.some(
-                                    flipped => 
-                                        flipped.id === card.id && 
-                                        flipped.isFront === card.isFront
-                                ) || 
-                                matchedCards.includes(card.id)
-                            }
-                            isMatched={matchedCards.includes(card.id)}
-                            themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+            {!subject ? (
+                // No subject selected section
+                <div className="flex flex-col justify-center items-center h-full w-full">
+                    <p className={`${textColor} text-4xl font-bold text-center ${shadowClass ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                        <BackgroundButton 
+                            text="Select a subject to practice" 
+                            bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                            onClick={handleOpenSubjectListModal} 
+                            wWidth='w-full sm:w-auto'
                         />
-                    ))}
-                </div>
+                    </div>
 
-                {gameCompleted && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="p-8 text-center transform transition-all duration-500 scale-100">
-                            <h2 className={`text-4xl font-bold drop-shadow-custom ${theme ? textColor : 'textClass'} mb-6`}>
-                                🎉 Congratulations! 🎉
-                            </h2>
-                            <p className={`text-2xl mb-6 font-bold drop-shadow-custom ${theme ? textColor : 'textClass'}`}>
-                                You finished in {formatTime(timer)}!
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />
-                                <BackgroundButton text={`Review ${subject.name} Again`} bgColor={"bg-blue-500 hover:bg-blue-400"} onClick={() => window.location.reload()} />
+                    <SubjectList 
+                        isOpen={isSubjectListModalOpen} 
+                        onClose={() => setIsSubjectListModalOpen(false)}
+                        user={user}
+                        page='memory'
+                    />
+                </div>
+            ) : (
+                <div className="relative flex-1">
+                    <div 
+                        className={`grid grid-cols-2 sm:grid-cols-5 sm:grid-rows-2 gap-4 w-full h-full p-4 transition-opacity duration-1000 
+                            ${showCards ? 'opacity-100' : 'opacity-0'}`}
+                        style={{ display: showCards ? 'grid' : 'none' }}
+                    >
+                        {shuffledCards.map((card, index) => (
+                            <MatchCard
+                                key={`${card.id}-${card.isFront}-${index}`}
+                                content={card.content}
+                                onClick={() => handleCardClick(card)}
+                                isFlipped={
+                                    flippedCards.some(
+                                        flipped => 
+                                            flipped.id === card.id && 
+                                            flipped.isFront === card.isFront
+                                    ) || 
+                                    matchedCards.includes(card.id)
+                                }
+                                isMatched={matchedCards.includes(card.id)}
+                                themeShadow={shadowClass}
+                            />
+                        ))}
+                    </div>
+
+                    {gameCompleted && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="p-8 text-center transform transition-all duration-500 scale-100">
+                                <h2 className={`text-4xl font-bold drop-shadow-custom ${textColor} mb-6`}>
+                                    🎉 Congratulations! 🎉
+                                </h2>
+                                <p className={`text-2xl mb-6 font-bold drop-shadow-custom ${textColor}`}>
+                                    You finished in {formatTime(timer)}!
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <BackgroundButton 
+                                        text="Back to Home" 
+                                        bgColor={"bg-green-500 hover:bg-green-400"} 
+                                        onClick={handleSwitchToHome} 
+                                    />
+                                    <BackgroundButton 
+                                        text={`Review ${subject.name} Again`} 
+                                        bgColor={"bg-blue-500 hover:bg-blue-400"} 
+                                        onClick={() => window.location.reload()} 
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    )}
+
+                    <SubjectList 
+                        isOpen={isSubjectListModalOpen} 
+                        onClose={() => setIsSubjectListModalOpen(false)}
+                        user={user}
+                        page={'memory'}
+                    />
+                </div>
+            )}
         </div>
     );
 }

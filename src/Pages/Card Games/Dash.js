@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Timer, Zap, Ban } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Timer, Zap } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
+import BackgroundButton from '../../components/Elements/BackgroundButton'; // Ensure this is correctly imported
+import SubjectList from '../../components/Subject/SubjectList'; // If you need subject selection
+// Make sure you have functions handleSwitchToCreate and handleOpenSubjectListModal defined,
+// and also ensure secondaryColor is defined from your theme context just like in Practice.
 
 function Dash() {
     const [cards, setCards] = useState([]); 
@@ -13,14 +17,24 @@ function Dash() {
     const [gameOver, setGameOver] = useState(false);
     const [currentTarget, setCurrentTarget] = useState(null);
     const [fallingCards, setFallingCards] = useState([]);
-    const [isPaused, setIsPaused] = useState(false);
+
+    const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, shadow } = theme;
+    const { textColor, shadow, secondaryColor } = theme;
 
-    // Initialize with a random target card
+    const navigate = useNavigate();
+
+    const handleOpenSubjectListModal = () => {
+        setIsSubjectListModalOpen(true);
+    };
+
+    const handleSwitchToCreate = () => {
+        navigate('/create', { state: { subject } });
+    };
+
     useEffect(() => {
         if (!user) {
             getUser();
@@ -46,7 +60,6 @@ function Dash() {
         }
     }, [cards]);
 
-    // Generate a falling card
     const generateFallingCard = useCallback(() => {
         if (!currentTarget || !cards || cards.length === 0) return null;
 
@@ -71,9 +84,8 @@ function Dash() {
         };
     }, [currentTarget, cards]);
 
-    // Spawn new cards periodically
     useEffect(() => {
-        if (gameOver || isPaused) return;
+        if (gameOver) return;
 
         const spawnInterval = setInterval(() => {
             const newCard = generateFallingCard();
@@ -83,11 +95,10 @@ function Dash() {
         }, 2000);
 
         return () => clearInterval(spawnInterval);
-    }, [generateFallingCard, gameOver, isPaused]);
+    }, [generateFallingCard, gameOver]);
 
-    // Move cards down
     useEffect(() => {
-        if (gameOver || isPaused) return;
+        if (gameOver) return;
 
         const moveInterval = setInterval(() => {
             setFallingCards(prev => {
@@ -101,11 +112,10 @@ function Dash() {
         }, 50);
 
         return () => clearInterval(moveInterval);
-    }, [gameOver, isPaused]);
+    }, [gameOver]);
 
-    // Timer countdown
     useEffect(() => {
-        if (gameOver || isPaused) return;
+        if (gameOver) return;
 
         const timer = setInterval(() => {
             setTimeLeft(prev => {
@@ -118,17 +128,16 @@ function Dash() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [gameOver, isPaused]);
+    }, [gameOver]);
 
-    // Handle card click
     function handleCardClick(clickedCard) {
-        if (gameOver || isPaused) return;
+        if (gameOver) return;
 
         if (clickedCard.content === currentTarget.answer) {
             setScore(prev => prev + 10);
             setTimeLeft(prev => prev + 5);
             setFallingCards(prev => prev.filter(card => card.id !== clickedCard.id));
-            
+
             const newTarget = cards[Math.floor(Math.random() * cards.length)];
             setCurrentTarget(newTarget);
         } else {
@@ -136,94 +145,97 @@ function Dash() {
         }
     }
 
-    // Power-ups
-    function slowTime() {
-        setIsPaused(true);
-        setTimeout(() => setIsPaused(false), 3000);
-    }
-
-    function clearScreen() {
-        setFallingCards([]);
-    }
-
     return (
         <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
             <TitleBar text="Dash" />
-            {/* Stats Bar */}
-            <div className="flex justify-between items-center mb-6 p-4">
-                <div className="flex items-center gap-2">
-                    <Timer className="text-blue-500" />
-                    <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{timeLeft}s</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Zap className="text-yellow-500" />
-                    <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{score}</span>
-                </div>
-            </div>
 
-            {/* Game Area */}
-            <div className="relative h-[70dvh] rounded-lg overflow-hidden">
-                {/* Falling Cards */}
-                {fallingCards.map((card) => (
-                    <div
-                        key={card.id}
-                        className="absolute p-3 bg-white rounded-lg shadow-md cursor-pointer hover:bg-blue-50 transition-colors transform -translate-x-1/2"
-                        style={{
-                            left: `${card.xPosition}%`,
-                            top: `${card.yPosition}%`,
-                        }}
-                        onClick={() => handleCardClick(card)}
-                    >
-                        <div className="text-lg font-medium prose prose-sm max-w-none">
-                            <ReactMarkdown>{card.content}</ReactMarkdown>
+            {/* If no subject or no cards, show the snippet */}
+            {(!subject || (cards && cards.length === 0)) ? (
+                <div className="flex flex-col justify-center items-center w-full h-full">
+                  {subject ? (
+                    <div>
+                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
+                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
+                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                      </div>
+                    </div>
+                  )}
+                </div>
+            ) : (
+                // Otherwise, show the game area
+                <React.Fragment>
+                    {/* Stats Bar */}
+                    <div className="flex justify-between items-center mb-6 p-4">
+                        <div className="flex items-center gap-2">
+                            <Timer className="text-blue-500" />
+                            <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{timeLeft}s</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Zap className="text-yellow-500" />
+                            <span className={`text-2xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textColor'}`}>{score}</span>
                         </div>
                     </div>
-                ))}
 
-                {/* Target Card - Fixed at bottom */}
-                {currentTarget && (
-                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-blue-200">
-                        <div className="text-center text-xl font-bold prose max-w-none">
-                            <ReactMarkdown>{currentTarget.question}</ReactMarkdown>
-                        </div>
-                    </div>
-                )}
-
-                {/* Game Over Overlay */}
-                {gameOver && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                        <div className="bg-white p-6 rounded-lg text-center">
-                            <h2 className="text-2xl font-bold mb-4">Game Over!</h2>
-                            <p className="text-xl">Final Score: {score}</p>
-                            <button 
-                                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                onClick={() => window.location.reload()}
+                    {/* Game Area */}
+                    <div className="relative h-[70dvh] rounded-lg overflow-hidden">
+                        {/* Falling Cards */}
+                        {fallingCards.map((card) => (
+                            <div
+                                key={card.id}
+                                className="absolute p-3 bg-white rounded-lg shadow-md cursor-pointer hover:bg-blue-50 transition-colors transform -translate-x-1/2"
+                                style={{
+                                    left: `${card.xPosition}%`,
+                                    top: `${card.yPosition}%`,
+                                }}
+                                onClick={() => handleCardClick(card)}
                             >
-                                Play Again
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                                <div className="text-lg font-medium prose prose-sm max-w-none">
+                                    <ReactMarkdown>{card.content}</ReactMarkdown>
+                                </div>
+                            </div>
+                        ))}
 
-            {/* Power-up Bar
-            <div className="flex justify-center gap-4 mt-4">
-                <button 
-                    className="px-4 py-2 bg-blue-100 rounded-lg flex items-center gap-2 hover:bg-blue-200"
-                    onClick={slowTime}
-                    disabled={isPaused}
-                >
-                    <Timer size={16} />
-                    Slow Time
-                </button>
-                <button 
-                    className="px-4 py-2 bg-purple-100 rounded-lg flex items-center gap-2 hover:bg-purple-200"
-                    onClick={clearScreen}
-                >
-                    <Ban size={16} />
-                    Clear All
-                </button>
-            </div> */}
+                        {/* Target Card - Fixed at bottom */}
+                        {currentTarget && (
+                            <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-blue-200">
+                                <div className="text-center text-xl font-bold prose max-w-none">
+                                    <ReactMarkdown>{currentTarget.question}</ReactMarkdown>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Game Over Overlay */}
+                        {gameOver && (
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                                <div className="bg-white p-6 rounded-lg text-center">
+                                    <h2 className="text-2xl font-bold mb-4">Game Over!</h2>
+                                    <p className="text-xl">Final Score: {score}</p>
+                                    <button 
+                                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                        onClick={() => window.location.reload()}
+                                    >
+                                        Play Again
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </React.Fragment>
+            )}
+
+            <SubjectList 
+              isOpen={isSubjectListModalOpen} 
+              onClose={() => setIsSubjectListModalOpen(false)}
+              user={user}
+              page='dash'
+            />
         </div>
     );
 }
