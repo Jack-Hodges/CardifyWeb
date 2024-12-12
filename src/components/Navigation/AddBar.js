@@ -51,7 +51,7 @@ function AddBar({ text, addSub, addCol }) {
         className={`
           p-1 absolute text-white text-xl font-bold 
           w-44 ${secondaryColor.bgClass} 
-          ${theme ? theme.shadowClass : 'background-shadow'} 
+          background-shadow-new
           rounded-3xl transform transition-all duration-300 
            mt-2 sm:origin-top 
           max-sm:right-0 max-sm:top-full max-sm:origin-top-right

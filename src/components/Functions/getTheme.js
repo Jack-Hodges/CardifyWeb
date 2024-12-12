@@ -24,7 +24,7 @@ export const getTheme = (theme) => {
   if (!theme) {
     return {
       image: null,
-      shadowClass: 'background-shadow',
+      color: 'rgba(3,15,64,1)',
       textClass: 'textColor',
       primary: ['green', 500],
       secondary: ['purple', 500],
@@ -37,7 +37,7 @@ export const getTheme = (theme) => {
       beach: {
         name: "beach",
         image: `url(${Beach})`,
-        shadowClass: `background-shadow-beach`,
+        color: 'rgba(226,219,150,1)',
         textClass: 'text-[rgb(245,241,230)]',
         primary: ['cyan', 500],
         secondary: ['blue', 500],
@@ -48,7 +48,7 @@ export const getTheme = (theme) => {
       forest: {
         name: "forest",
         image: `url(${Forest})`,
-        shadowClass: `background-shadow-forest`,
+        color: 'rgba(58,110,76,1)',
         textClass: 'text-white',
         primary: ['green', 700],
         secondary: ['emerald', 600],
@@ -59,7 +59,7 @@ export const getTheme = (theme) => {
       mountain: {
         name: "mountain",
         image: `url(${Mountain})`,
-        shadowClass: `background-shadow-mountain`,
+        color: 'rgba(117,117,117,1)',
         textClass: 'text-gray-100',
         primary: ['zinc', 700],
         secondary: ['stone', 400],
@@ -70,7 +70,7 @@ export const getTheme = (theme) => {
       newyorkcity: {
         name: "newyorkcity",
         image: `url(${NewYorkCity})`,
-        shadowClass: `background-shadow-newyorkcity`,
+        color: 'rgba(212,213,214,1)',
         textClass: 'text-gray-100',
         primary: ['zinc', 700],
         secondary: ['stone', 600],
@@ -81,7 +81,7 @@ export const getTheme = (theme) => {
       serenity: {
         name: "serenity",
         image: `url(${Serenity})`,
-        shadowClass: 'background-shadow',
+        color: 'rgba(3,15,64,1)',
         textClass: 'text-[rgb(245,241,230)]',
         primary: ['red', 700],
         secondary: ['orange', 500],
@@ -92,7 +92,7 @@ export const getTheme = (theme) => {
       pastel: {
         name: "pastel",
         image: `url(${Pastel})`,
-        shadowClass: 'background-shadow-pastel',
+        color: 'rgba(206,190,176,1)',
         textClass: 'text-[rgb(245,241,230)]',
         primary: ['violet', 300],
         secondary: ['emerald', 300],
@@ -101,6 +101,6 @@ export const getTheme = (theme) => {
         shadow: true,
       }
     };
-    return themes[theme] || { name: "default", image: null, shadowClass: 'background-shadow', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
+    return themes[theme] || { name: "default", image: null, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }
 };

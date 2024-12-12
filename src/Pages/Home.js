@@ -126,7 +126,7 @@ function Home() {
                                             .filter(subject => subject.up_to_index !== null)
                                             .slice(0, 4)
                                             .map((subject, index) => (
-                                                <InProgress theme={theme ? theme.shadowClass : 'background-shadow'} key={index} subject={subject} />
+                                                <InProgress theme={'background-shadow-new'} key={index} subject={subject} />
                                             ))
                                         }
                                     </div>
@@ -139,12 +139,12 @@ function Home() {
                                     <p>Jump In</p>
                                 </div>
                                 <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                                    <JumpButton theme={theme ? theme.shadowClass : 'background-shadow'} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Create" img={Plus} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Practice" img={Play} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Quiz" img={Document} color="text-green-400" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Scramble" img={Arrows} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
+                                    <JumpButton theme={'background-shadow-new'} text="Dash" img={Bolt} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
                                 </div>
                             </div>
     

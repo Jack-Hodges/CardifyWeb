@@ -12,6 +12,7 @@ const resolveThemeColors = (theme) => {
   const defaultTheme = {
     name: "default",
     image: null,
+    color: '#f1ebe0',
     shadowClass: "background-shadow",
     textClass: "text-gray-700 dark:text-gray-200",
     primary: ["green", 500],
@@ -34,6 +35,7 @@ const resolveThemeColors = (theme) => {
     borderColor: getColors(resolvedTheme.border),
     textColor: resolvedTheme.textClass,
     shadow: resolvedTheme.shadow,
+    color: resolvedTheme.color,
   };
 };
 
@@ -51,6 +53,20 @@ export const UserProvider = ({ children }) => {
     const userTheme = getTheme(profile.theme); // Synchronous call
     return resolveThemeColors(userTheme);
   }, [profile?.theme]);
+
+  // Update CSS variables whenever the theme changes
+  useEffect(() => {
+    if (theme && theme.color) {
+      // Update CSS variable
+      document.documentElement.style.setProperty('--theme-border-color', theme.color);
+  
+      // Update the meta tag
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', theme.color);
+      }
+    }
+  }, [theme]);
 
   // Fetch the user and profile
   const getUser = async () => {

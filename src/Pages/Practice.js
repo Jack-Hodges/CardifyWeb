@@ -164,7 +164,7 @@ function FlashcardQuiz() {
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
                   practice
-                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+                  themeShadow={'background-shadow-new'}
                 />
               ) : (
                 <div className="flex flex-col justify-center items-center w-full h-full">

@@ -180,7 +180,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={theme ? theme.shadowClass : 'background-shadow'} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={'background-shadow-new'} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
 
       {/* Main Content Section */}
       {loading ? (

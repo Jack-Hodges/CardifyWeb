@@ -101,7 +101,7 @@ function TitleBar( { text, content }) {
 
         {/* Dropdown options with animation */}
         <div
-          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${primaryColor.bgClass} ${theme ? theme.shadowClass : 'background-shadow'} rounded-3xl transform transition-all duration-300 origin-top ${
+          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
             isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
           }`}
           style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
@@ -120,7 +120,7 @@ function TitleBar( { text, content }) {
       {/* User Profile and Additional Content */}
       <div className="flex gap-2">
         {content}
-        <div className={`w-10 h-10 rounded-full bg-black flex items-center justify-center ${theme ? theme.shadowClass : 'background-shadow'} background-hover cursor-pointer`}
+        <div className={`w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow-new background-hover cursor-pointer`}
           onClick={() => setIsProfileOpen(true)}>
           <p className="text-white font-bold text-xl">{profile?.first_name?.charAt(0) || 'U'}</p>
         </div>

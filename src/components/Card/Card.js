@@ -17,7 +17,7 @@ function Card({
   edit,
   practice,
   user,
-  themeShadow = 'background-shadow',
+  themeShadow = 'background-shadow-new',
 }) {
   const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
   const [newBackContent, setNewBackContent] = useState(backContent); // Card content state
@@ -176,7 +176,7 @@ function CardContent({
   back,
   alignment,
   align,
-  themeShadow = 'background-shadow',
+  themeShadow = 'background-shadow-new',
 }) {
   return (
     <div

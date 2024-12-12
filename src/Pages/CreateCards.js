@@ -130,7 +130,7 @@ function CreateCards() {
                   onDeleteCard={handleDeleteCard}
                   edit={true}
                   user={user}
-                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+                  themeShadow={'background-shadow-new'}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
@@ -146,7 +146,7 @@ function CreateCards() {
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={theme ? theme.shadowClass : 'background-shadow'} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={'background-shadow-new'} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
             </div>
           </>
         ) : (

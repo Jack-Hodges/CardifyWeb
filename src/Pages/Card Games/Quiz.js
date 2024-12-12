@@ -172,7 +172,7 @@ function Quiz() {
                   cardId={cards[currentCardIndex]?.id}
                   edit={false}
                   user={user}
-                  themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+                  themeShadow={'background-shadow-new'}
                 />
               </div>
 
@@ -184,7 +184,7 @@ function Quiz() {
                     correctAnswer={cards[currentCardIndex].answer}
                     selectedAnswer={selectedAnswers[currentCardIndex]}
                     onClick={() => handleAnswerClick(option)}
-                    themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+                    themeShadow={'background-shadow-new'}
                   />
                 ))}
               </div>
@@ -338,7 +338,7 @@ function SelectionBox({ text, onClick, selectedAnswer, correctAnswer, themeShado
 
   return (
     <div
-      className={`w-full h-20 ${boxColor} ${themeShadow ? themeShadow : 'background-shadow'} background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
+      className={`w-full h-20 ${boxColor} ${'background-shadow-new'} background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
       onClick={onClick}
     >
       <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">

@@ -10,6 +10,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const themeAssets = getThemeAssets();
+    const {color} = theme;
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -37,6 +38,12 @@ function Modal({ isOpen, onClose, mainText, logout }) {
             setIsVisible(false);
         }
     }, [isOpen, isClosing]);
+
+    useEffect(() => {
+        if (theme && color) {
+          document.documentElement.style.setProperty('--theme-border-color', color);
+        }
+      }, [theme, color]);
 
     const handleOnClose = (event) => {
         onClose();

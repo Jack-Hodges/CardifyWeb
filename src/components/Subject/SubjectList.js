@@ -80,14 +80,14 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                         {/* Render the sorted combined list */}
                         {sortedCombinedList.map((item) => {
                             if (item.type === 'subject') {
-                                return <SubjectRow key={`subject-${item.id}`} subject={item} page={page} onClose={onClose} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>;
+                                return <SubjectRow key={`subject-${item.id}`} subject={item} page={page} onClose={onClose} themeShadow={'background-shadow-new'}/>;
                             } else if (item.type === 'collection') {
                                 return <CollectionRow 
                                     key={`collection-${item.id}`} 
                                     collection={item} 
                                     subjects={item.subjects} 
                                     onClick={() => setSelectedCollection(item)} 
-                                    themeShadow={theme ? theme.shadowClass : 'background-shadow'}
+                                    themeShadow={'background-shadow-new'}
                                 />;
                             }
                             return null;
@@ -101,7 +101,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
 export default SubjectList;
 
-function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow' }) {
+function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-new' }) {
     const subjectCol = getColor(subject.bgCol);
     const navigate = useNavigate();
 
@@ -121,7 +121,7 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow' 
     );
 }
 
-function CollectionRow({ collection, subjects, onClick, themeShadow = 'background-shadow' }) {
+function CollectionRow({ collection, subjects, onClick, themeShadow = 'background-shadow-new' }) {
 
     const chev = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -161,7 +161,7 @@ function CollectionView({ collection, subjects, onBack, onClose, page, cross, th
             </div>
             {subjects.length > 0 ? (
                 subjects.map((subject) => (
-                    <SubjectRow key={subject.id} subject={subject} onClose={onClose} page={page} themeShadow={theme ? theme.shadowClass : 'background-shadow'}/>
+                    <SubjectRow key={subject.id} subject={subject} onClose={onClose} page={page} themeShadow={'background-shadow-new'}/>
                 ))
             ) : (
                 <p>No subjects in this collection.</p>

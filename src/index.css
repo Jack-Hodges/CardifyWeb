@@ -56,24 +56,10 @@ body {
   @apply border-4 border-[rgba(3,15,64,1)] shadow-[3px_3px_0px_0px_rgba(3,15,64,1)] dark:border-[rgba(56,57,59,1)] dark:shadow-[3px_3px_0px_0px_rgba(56,57,59,1)];
 }
 
-.background-shadow-beach {
-  @apply border-4 border-[rgba(226,219,150,1)] shadow-[3px_3px_0px_0px_rgba(226,219,150,1)];
-}
-
-.background-shadow-forest {
-  @apply border-4 border-[rgba(58,110,76,1)] shadow-[3px_3px_0px_0px_rgba(58,110,76,1)];
-}
-
-.background-shadow-mountain {
-  @apply border-4 border-[rgba(117,117,117,1)] shadow-[3px_3px_0px_0px_rgba(117,117,117,1)];
-}
-
-.background-shadow-newyorkcity {
-  @apply border-4 border-[rgba(212,213,214,1)] shadow-[3px_3px_0px_0px_rgba(212,213,214,1)];
-}
-
-.background-shadow-pastel {
-  @apply border-4 border-[rgba(206,190,176,1)] shadow-[3px_3px_0px_0px_rgba(206,190,176,1)];
+.background-shadow-new {
+  @apply border-4;
+  border-color: var(--theme-border-color);
+  box-shadow: 3px 3px 0px 0px var(--theme-border-color);
 }
 
 .background-hover {

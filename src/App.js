@@ -12,8 +12,7 @@ import { useUser } from './UserContext';
 
 function App() {
 
-  const { profile } = useUser();
-  const theme = profile ? profile.theme : { image: '' };
+  const { theme } = useUser();
 
   return (
     <div className="w-screen h-[100dvh] overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-900 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>

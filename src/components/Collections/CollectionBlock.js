@@ -2,11 +2,9 @@ import BackgroundButton from "../Elements/BackgroundButton";
 import { getColor } from "../Functions/getColor";
 import SubjectBlock from "../Subject/SubjectBlock";
 import { useState } from "react";
-import { useUser } from "../../UserContext";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection }) {
 
-    const { theme } = useUser();
     // Memoize theme so it only recalculates if profile.theme changes
 
     const subject_count = subjects.length;
@@ -28,7 +26,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
     return (
         <>
             {/* Closed collection box for the grid */}
-            <div className={`group relative mx-auto w-full h-56 cursor-pointer background-hover bg-[#f2f1ed] dark:bg-gray-700 rounded-xl ${theme.shadowClass} transition duration-300`}
+            <div className={`group relative mx-auto w-full h-56 cursor-pointer background-hover bg-[#f2f1ed] dark:bg-gray-700 rounded-xl background-shadow-new transition duration-300`}
             onClick={onClick}>
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
