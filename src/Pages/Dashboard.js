@@ -36,7 +36,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme, popupStates, updatePopupState  } = useUser();
-  const { secondaryColor } = theme;  // Get the secondary color
+  const { secondaryColor, shadow } = theme;  // Get the secondary color
 
   useEffect(() => {
     if (userLoading) {
@@ -231,7 +231,7 @@ function Dashboard() {
         // No Subjects or Collections Message
         <div className="flex flex-col justify-center items-center w-full h-4/5">
           <div>
-            <p className="text-gray-500 text-4xl font-bold text-center">You have no subjects</p>
+            <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>You have no subjects</p>
             <div className="block sm:flex gap-4 mt-5 items-center justify-center">
               <BackgroundButton
                 text="Create New Subject"

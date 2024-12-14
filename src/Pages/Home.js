@@ -19,7 +19,7 @@ function Home() {
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
     const [subjectPage, setSubjectPage] = useState('create');
     
-    const [homePopUp, setHomePopUp] = useState(true);
+    const [homePopUp, setHomePopUp] = useState(false);
 
     useEffect(() => {
 
@@ -33,8 +33,8 @@ function Home() {
         }
 
         // Show the popup if it hasn't been dismissed
-        if (popupStates?.home_popup) {
-            setHomePopUp(false); 
+        if (!popupStates?.home_popup) {
+            setHomePopUp(true); 
         }
     
         // Function to fetch profile and subjects

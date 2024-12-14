@@ -10,7 +10,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const themeAssets = getThemeAssets();
-    const {color} = theme;
+    const {color, primaryColor} = theme;
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -58,17 +58,21 @@ function Modal({ isOpen, onClose, mainText, logout }) {
     }
 
     const handleThemeSelect = async (themeName) => {
-        try {
-            const themeKey = themeName.toLowerCase().replaceAll(' ', '');
-            await saveProfile(
-                profile.id,
-                profile.first_name,
-                themeKey
-            );
-            // Reload the page to apply the new theme
-            window.location.reload();
-        } catch (error) {
-            console.error('Error updating theme:', error);
+        if (profile.pro) {
+            try {
+                const themeKey = themeName.toLowerCase().replaceAll(' ', '');
+                await saveProfile(
+                    profile.id,
+                    profile.first_name,
+                    themeKey
+                );
+                // Reload the page to apply the new theme
+                window.location.reload();
+            } catch (error) {
+                console.error('Error updating theme:', error);
+            }
+        } else {
+            alert('This feature is only available to Pro users.');
         }
     };
 
@@ -95,6 +99,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 <div className="flex justify-between items-center mb-6">
                     <span className={`textColor text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
+                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Update to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
                         <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
                         <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                     </div>
