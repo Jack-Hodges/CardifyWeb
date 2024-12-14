@@ -24,7 +24,7 @@ const resolveThemeColors = (theme) => {
 
   const resolvedTheme = {
     ...defaultTheme,
-    ...theme, // Overwrite defaults with provided theme values
+    ...theme,
   };
 
   return {
@@ -43,6 +43,7 @@ const resolveThemeColors = (theme) => {
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [popupStates, setPopupStates] = useState({});
   const [loading, setLoading] = useState(true);
 
   // Memoize the theme calculation
@@ -57,10 +58,7 @@ export const UserProvider = ({ children }) => {
   // Update CSS variables whenever the theme changes
   useEffect(() => {
     if (theme && theme.color) {
-      // Update CSS variable
       document.documentElement.style.setProperty('--theme-border-color', theme.color);
-  
-      // Update the meta tag
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
         metaThemeColor.setAttribute('content', theme.color);
@@ -80,10 +78,15 @@ export const UserProvider = ({ children }) => {
     if (session?.user) {
       setUser(session.user);
       const userProfile = await fetchProfile(session.user.id);
-      setProfile(userProfile);
+
+      if (userProfile) {
+        setProfile(userProfile);
+        setPopupStates(userProfile.popup_states || {});  // Initialize popup states
+      }
     } else {
       setUser(null);
       setProfile(null);
+      setPopupStates({});
     }
 
     setLoading(false);
@@ -97,6 +100,26 @@ export const UserProvider = ({ children }) => {
     } else {
       setUser(null);
       setProfile(null);
+      setPopupStates({});
+    }
+  };
+
+  // Update popup state in Supabase and locally
+  const updatePopupState = async (popupKey, dismissed) => {
+    try {
+      const updatedStates = { ...popupStates, [popupKey]: dismissed };
+      const { error } = await supabase
+        .from('profiles')
+        .update({ popup_states: updatedStates })
+        .eq('id', user?.id);
+
+      if (error) {
+        console.error("Error updating popup states:", error);
+      } else {
+        setPopupStates(updatedStates);  // Update locally if successful
+      }
+    } catch (err) {
+      console.error("Unexpected error updating popup states:", err);
     }
   };
 
@@ -106,10 +129,15 @@ export const UserProvider = ({ children }) => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user.id).then(userProfile => {
+          setUser(session.user);
+          setProfile(userProfile);
+          setPopupStates(userProfile?.popup_states || {});
+        });
       } else {
         setUser(null);
         setProfile(null);
+        setPopupStates({});
       }
     });
 
@@ -119,7 +147,19 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, profile, theme, setUser, loading, getUser, logout }}>
+    <UserContext.Provider
+      value={{
+        user,
+        profile,
+        theme,
+        popupStates,
+        setUser,
+        loading,
+        getUser,
+        logout,
+        updatePopupState,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

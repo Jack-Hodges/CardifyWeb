@@ -7,16 +7,19 @@ import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { getColor } from "../components/Functions/getColor";
 import SubjectList from "../components/Subject/SubjectList";
+import CustomModal from "../components/Modal/CustomModal";
 
 function Home() {
 
     const navigate = useNavigate();
-    const { user, getUser, profile, theme } = useUser();
+    const { user, getUser, profile, theme, popupStates, updatePopupState } = useUser();
     const { primaryColor, textColor, shadow } = theme;
     // const [loading, setLoading] = useState(true); // Loading state
     const [subjects, setSubjects] = useState([]);
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
     const [subjectPage, setSubjectPage] = useState('create');
+    
+    const [homePopUp, setHomePopUp] = useState(true);
 
     useEffect(() => {
 
@@ -27,6 +30,11 @@ function Home() {
                 navigate('/');
             }
             return;
+        }
+
+        // Show the popup if it hasn't been dismissed
+        if (popupStates?.home_popup) {
+            setHomePopUp(false); 
         }
     
         // Function to fetch profile and subjects
@@ -42,7 +50,12 @@ function Home() {
     
         loadData();
         
-    }, [user, navigate, getUser]);
+    }, [user, navigate, getUser, popupStates?.home_popup]);
+
+    const handleDismissPopup = () => {
+        setHomePopUp(false); 
+        updatePopupState("home_popup", true); // Update Supabase
+    };
 
     const handleOpenSubjectListModal = (navigateTo) => {
         setSubjectPage(navigateTo);
@@ -184,6 +197,19 @@ function Home() {
                     )}
                 </div>
             </div>
+
+            <CustomModal
+                isOpen={homePopUp}
+                content={
+                    <div>
+                        <p className="text-2xl font-semibold mb-6">Welcome to Cardify!</p>
+                        <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">Cardify is a platform for creating, practicing, and mastering your own flashcards. Get started by creating your first subject and adding flashcards to it. You can also practice your flashcards and track your progress.</p>
+                    </div>
+                }
+                firstActionText={'Got it!'}
+                firstActionCol="bg-green-500 hover:bg-green-400"
+                onFirstAction={handleDismissPopup}
+            />
         </div>
     );
 }

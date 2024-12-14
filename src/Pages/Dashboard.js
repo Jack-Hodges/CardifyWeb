@@ -10,6 +10,7 @@ import { fetchCollections, removeCollection } from '../components/Collections/Co
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
 import Modal from '../components/Modal/Modal';
+import CustomModal from '../components/Modal/CustomModal';
 import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
@@ -31,8 +32,10 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollection, setSelectedCollection] = useState(null);
 
+  const [dashboardPopUp, setDashboardPopUp] = useState(false);
+
   const navigate = useNavigate();
-  const { user, loading: userLoading, theme } = useUser();
+  const { user, loading: userLoading, theme, popupStates, updatePopupState  } = useUser();
   const { secondaryColor } = theme;  // Get the secondary color
 
   useEffect(() => {
@@ -43,6 +46,10 @@ function Dashboard() {
     if (!user) {
       navigate('/');
       return;
+    }
+
+    if (!popupStates?.dashboard_popup) {
+      setDashboardPopUp(true); 
     }
 
     const loadData = async () => {
@@ -57,7 +64,12 @@ function Dashboard() {
     };
 
     loadData();
-  }, [user, userLoading, navigate]);
+  }, [user, userLoading, navigate, popupStates?.dashboard_popup]);
+
+  const handleDismissPopup = () => {
+    setDashboardPopUp(false); 
+    updatePopupState("dashboard_popup", true); // Update Supabase
+};
 
   // Subject
   const handleSaveSubject = async (id, subjectName, subjectColor, up_to_index, collectionId) => {
@@ -271,6 +283,22 @@ function Dashboard() {
         onSave={handleSaveCollection}
         onClose={() => setIsCollectionModalOpen(false)}
         text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
+      />
+
+      <CustomModal
+        isOpen={dashboardPopUp}
+        content={
+            <div>
+                <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
+                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">Dashboard shows your all of your flashcards, organised into subjects
+                  <br></br>Subjects can be given a colour and a name, and can also be organised in Collections. You can always move subjects between or out of collections
+                  <br></br>You can search and filter your subjects and collections
+                  <br></br>To get started, click Create New Subject. You can add more subjects and collections by clicking Add in the top right corner</p>
+            </div>
+        }
+        firstActionText={'Got it!'}
+        firstActionCol="bg-green-500 hover:bg-green-400"
+        onFirstAction={handleDismissPopup}
       />
     </div>
   );
