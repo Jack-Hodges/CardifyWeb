@@ -109,7 +109,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                             return (
                                 <div 
                                     key={asset.name}
-                                    className={`${theme.shadowClass} background-hover relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                    className={`background-shadow-new background-hover relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
                                     onClick={() => handleThemeSelect(asset.name)}
                                 >
                                     {isSelected && (

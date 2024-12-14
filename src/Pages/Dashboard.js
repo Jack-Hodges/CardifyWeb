@@ -223,7 +223,7 @@ function Dashboard() {
             <div className="block sm:flex gap-4 mt-5 items-center justify-center">
               <BackgroundButton
                 text="Create New Subject"
-                bgColor={theme ? theme.secondary : 'orange'}
+                bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
                 onClick={handleAddSubject}
                 wWidth="w-full sm:w-auto mb-3 sm:mb-0"
               />

@@ -5,6 +5,9 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import { useUser } from '../UserContext'; // Import the useUser hook
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function Welcome() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,13 +44,13 @@ function Welcome() {
     if (isSignUp) {
       // Check if passwords match
       if (password !== confirmPassword) {
-        displayPopup("Passwords do not match");
+        toast.error("Passwords do not match");
         return;
       }
 
       // Check if first name is provided
       if (!firstName) {
-        displayPopup("Please enter your first name");
+        toast.error("Please enter your first name");
         return;
       }
 
@@ -59,12 +62,12 @@ function Welcome() {
 
       // Handle error (e.g., email already in use)
       if (error) {
-        displayPopup(`Error signing up: ${error.message}`);
         if (error.message.includes("already registered")) {
-          displayPopup("This email is already registered.");
+          toast.error("This email is already registered.");
         }
       } else {
         console.log("User signed up successfully!", data);
+        toast.success("Welcome to Cardify! Please check your email to verify your account.");
 
         // Create a new entry in the Profiles table using the user's ID
         const { user } = data;
@@ -131,6 +134,8 @@ function Welcome() {
 
   return (
     <div className="min-h-screen block sm:flex">
+
+      <ToastContainer position="top-center" autoClose={3000} />
 
         <div className="absolute top-4 right-4 z-50">
           <BackgroundButton

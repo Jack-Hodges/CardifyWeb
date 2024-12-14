@@ -12,7 +12,7 @@ const resolveThemeColors = (theme) => {
   const defaultTheme = {
     name: "default",
     image: null,
-    color: '#f1ebe0',
+    color: 'rgba(3,15,64,1)',
     shadowClass: "background-shadow",
     textClass: "text-gray-700 dark:text-gray-200",
     primary: ["green", 500],

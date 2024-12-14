@@ -26,7 +26,7 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, secondaryColor, shadowClass, image } = theme;
+    const { textColor, secondaryColor, shadowClass, image, shadow } = theme;
     const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
@@ -186,7 +186,7 @@ function Memory() {
             {!subject ? (
                 // No subject selected section
                 <div className="flex flex-col justify-center items-center h-full w-full">
-                    <p className={`${textColor} text-4xl font-bold text-center ${shadowClass ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                    <p className={`${textColor} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
                     <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
                         <BackgroundButton 
                             text="Select a subject to practice" 
