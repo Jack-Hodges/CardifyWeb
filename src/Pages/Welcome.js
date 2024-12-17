@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"; // For redirection after login
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import { useUser } from '../UserContext'; // Import the useUser hook
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
+import WelcomeMobile from '../images/Logos/CardifyText.png';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -133,7 +134,8 @@ function Welcome() {
         </div>
 
       <div className="w-full sm:w-1/2 flex items-center justify-center">
-        <img src={WelcomeImage} alt="Illustration" className="object-contain w-full sm:mt-[-20%]" />
+        <img src={WelcomeImage} alt="Illustration" className="hidden sm:block object-contain w-full sm:mt-[-20%]" />
+        <img src={WelcomeMobile} alt="Illustration" className="block sm:hidden object-contain w-full mt-24 mb-10" />
       </div>
 
       <div className="w-full sm:w-1/2 flex flex-col justify-center relative">
