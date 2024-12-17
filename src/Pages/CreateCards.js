@@ -11,6 +11,8 @@ import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
+import CustomModal from "../components/Modal/CustomModal";
+import CreateImage from '../images/tutorial/Create.png';
 
 function CreateCards() {
   const [cards, setCards] = useState([]);
@@ -22,17 +24,27 @@ function CreateCards() {
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
   const [newFrontContent, setNewFrontContent] = useState('');
   const [newBackContent, setNewBackContent] = useState('');
+  const [createPopUp, setCreatePopUp] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { subject } = location.state || {};
-  const { user, getUser, theme } = useUser();
+  const { user, getUser, theme, userLoading, popupStates, updatePopupState } = useUser();
   const { secondaryColor, tertiaryColor, shadow } = theme;
 
   useEffect(() => {
+
+    if (userLoading) {
+      return;
+    }
+
     if (!user) {
       getUser();
       return;
+    }
+
+    if (!popupStates?.create_popup) {
+      setCreatePopUp(true); 
     }
 
     if (subject === null) {
@@ -57,6 +69,11 @@ function CreateCards() {
 
   const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
     updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subject.id);
+  };
+
+  const handleDismissPopup = () => {
+    setCreatePopUp(false); 
+    updatePopupState("create_popup", true); // Update Supabase
   };
 
   const handleAddNewCard = async (newFrontContent, newBackContent) => {
@@ -199,6 +216,30 @@ function CreateCards() {
         onClose={() => setIsSubjectListModalOpen(false)}
         user={user}
         page="create"
+      />
+
+      <CustomModal
+        isOpen={createPopUp}
+        content={
+            <div className="text-center">
+                <p className="text-2xl font-semibold mb-6">Welcome to Cardify!</p>
+                <div className="flex items-center h-full">
+                    <div className="w-[40%]">
+                        <img src={CreateImage} alt="Home Tutorial" className="w-[90%]" />
+                    </div>
+                    <div className="w-2/3 flex items-center text-left">
+                        <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
+                            Cardify is a platform for creating, practicing, and mastering your own flashcards.
+                            Get started by creating your first subject and adding flashcards to it.
+                            You can also practice your flashcards and track your progress.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+        firstActionText={'Got it!'}
+        firstActionCol="bg-green-500 hover:bg-green-400"
+        onFirstAction={handleDismissPopup}
       />
 
     </div>
