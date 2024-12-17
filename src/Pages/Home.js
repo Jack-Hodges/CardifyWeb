@@ -2,79 +2,87 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import { useEffect, useState } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
+import { getColor } from "../components/Functions/getColor";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
-import { getColor } from "../components/Functions/getColor";
 import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modal/CustomModal";
-
 import HomeImage from '../images/tutorial/Home.png';
 
-// You may want to create a loading component similar to DashboardLoading
+// Loading component
 function HomeLoading() {
     const { theme } = useUser();
-    const { shadow } = theme;
+    const { shadow, textColor } = theme;
     return (
         <div className="flex flex-col items-center justify-center h-64">
-            <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>Loading your content</p>
+            <p className={`${textColor} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
+                Loading your content
+            </p>
         </div>
     );
 }
 
 function Home() {
-  const navigate = useNavigate();
-  const { user, getUser, profile, theme, popupStates, updatePopupState, loading: userLoading } = useUser();
-  
-  const { primaryColor, textColor, shadow } = theme;
-  const [subjects, setSubjects] = useState([]);
-  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
-  const [subjectPage, setSubjectPage] = useState('create');
-  const [homePopUp, setHomePopUp] = useState(false);
-  const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+    const { 
+        user, 
+        getUser, 
+        profile, 
+        theme, 
+        popupStates, 
+        popupStatesLoaded, 
+        updatePopupState, 
+        loading: userLoading 
+    } = useUser();
+    
+    const { primaryColor, textColor, shadow } = theme;
+    const [subjects, setSubjects] = useState([]);
+    const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
+    const [subjectPage, setSubjectPage] = useState('create');
+    const [homePopUp, setHomePopUp] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // If user data is still loading, don't proceed
-    if (userLoading) return;
+    useEffect(() => {
+        // Ensure both user and popupStates are loaded
+        if (userLoading || !popupStatesLoaded) return;
 
-    // If there's no user after session is fully loaded, redirect to login
-    if (!user) {
-      getUser();
-      if (!user) {
-        navigate('/');
-      }
-      return;
-    }
+        // Redirect if no user
+        if (!user) {
+            getUser();
+            navigate('/');
+            return;
+        }
 
-    // Check popup state after user and profile are loaded
-    if (!popupStates?.home_popup) {
-      setHomePopUp(true);
-    }
+        // Show the popup if it hasn't been dismissed
+        if (popupStates && !popupStates?.home_popup) {
+            setHomePopUp(true);
+        }
 
-    // Load subjects
-    const loadData = async () => {
-      setLoading(true);
-      const subjectsData = await fetchSubjects(user.id);
-      setSubjects(subjectsData);
-      setLoading(false);
+        // Fetch subjects
+        const loadData = async () => {
+            setLoading(true);
+            const subjectsData = await fetchSubjects(user.id);
+            setSubjects(subjectsData);
+            setLoading(false);
+        };
+
+        loadData();
+    }, [user, userLoading, navigate, getUser, popupStatesLoaded, popupStates?.home_popup, popupStates]);
+
+    const handleDismissPopup = () => {
+        setHomePopUp(false);
+        updatePopupState("home_popup", true);  // Update Supabase
     };
 
-    loadData();
-  }, [user, userLoading, navigate, getUser, popupStates?.home_popup]);
+    const handleOpenSubjectListModal = (navigateTo) => {
+        setSubjectPage(navigateTo);
+        setIsSubjectListModalOpen(true);
+    }
 
-  const handleDismissPopup = () => {
-    setHomePopUp(false);
-    updatePopupState("home_popup", true); // Update Supabase
-  };
-
-  const handleOpenSubjectListModal = (navigateTo) => {
-    setSubjectPage(navigateTo);
-    setIsSubjectListModalOpen(true);
-  }
-
-  const goToDashboard = () => {
-    navigate('/dashboard');
-  }
+    const goToDashboard = () => {
+        navigate('/dashboard');
+    }
 
   const Plus = (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">

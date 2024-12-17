@@ -53,7 +53,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/5 h-3/5 transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-4/5 h-3/5 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating

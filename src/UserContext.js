@@ -44,6 +44,7 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [popupStates, setPopupStates] = useState({});
+  const [popupStatesLoaded, setPopupStatesLoaded] = useState(false); // New state
   const [loading, setLoading] = useState(true);
 
   // Memoize the theme calculation
@@ -82,11 +83,13 @@ export const UserProvider = ({ children }) => {
       if (userProfile) {
         setProfile(userProfile);
         setPopupStates(userProfile.popup_states || {});  // Initialize popup states
+        setPopupStatesLoaded(true);  // Mark popup states as loaded
       }
     } else {
       setUser(null);
       setProfile(null);
       setPopupStates({});
+      setPopupStatesLoaded(false);  // Reset state
     }
 
     setLoading(false);
@@ -101,6 +104,7 @@ export const UserProvider = ({ children }) => {
       setUser(null);
       setProfile(null);
       setPopupStates({});
+      setPopupStatesLoaded(false);  // Reset on logout
     }
   };
 
@@ -133,11 +137,13 @@ export const UserProvider = ({ children }) => {
           setUser(session.user);
           setProfile(userProfile);
           setPopupStates(userProfile?.popup_states || {});
+          setPopupStatesLoaded(true);  // Mark popup states as loaded
         });
       } else {
         setUser(null);
         setProfile(null);
         setPopupStates({});
+        setPopupStatesLoaded(false);  // Reset on logout
       }
     });
 
@@ -153,6 +159,7 @@ export const UserProvider = ({ children }) => {
         profile,
         theme,
         popupStates,
+        popupStatesLoaded,  // Provide this state to the context
         setUser,
         loading,
         getUser,
