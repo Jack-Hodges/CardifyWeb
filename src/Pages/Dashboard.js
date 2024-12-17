@@ -37,7 +37,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme, popupStates, updatePopupState  } = useUser();
-  const { secondaryColor, shadow } = theme;  // Get the secondary color
+  const { secondaryColor, shadow, primaryColor } = theme;  // Get the secondary color
 
   useEffect(() => {
     if (userLoading) {
@@ -296,17 +296,19 @@ function Dashboard() {
                       <img src={DashboardImage} alt="Home Tutorial" className="w-full" />
                   </div>
                   <div className="w-2/3 flex items-center">
-                  <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows your all of your flashcards, organised into subjects
-                        <br></br>Subjects can be given a colour and a name, and can also be organised in Collections. You can always move subjects between or out of collections
-                        <br></br>You can search and filter your subjects and collections
-                        <br></br>To get started, click Create New Subject. You can add more subjects and collections by clicking Add in the top right corner</p>
-                    
+                  <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows all of your flashcards, organised into Subjects and Collections 
+                    <br></br><br></br>
+                      <li>Subjects can be given a colour and a name, and can also be attached to a Collections. You can always move Subjects between or out of Collections</li>
+                      <li>You can search and filter your Subjects and Collections</li>
+                      <li>To get started, click Create New Subject. You can add more Subjects and Collections by clicking Add in the top right corner</li>
+                      
+                      </p>
                   </div>
               </div>
             </div>
         }
         firstActionText={'Got it!'}
-        firstActionCol="bg-green-500 hover:bg-green-400"
+        firstActionCol={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
         onFirstAction={handleDismissPopup}
       />
     </div>

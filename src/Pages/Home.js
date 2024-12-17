@@ -12,15 +12,55 @@ import HomeImage from '../images/tutorial/Home.png';
 
 // Loading component
 function HomeLoading() {
-    const { theme } = useUser();
-    const { shadow, textColor } = theme;
-    return (
-        <div className="flex flex-col items-center justify-center h-64">
-            <p className={`${textColor} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
-                Loading your content
-            </p>
+  const { theme } = useUser();
+  const { shadow, textColor } = theme;
+  return (
+    <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
+      <div className="mx-5 animate-pulse">
+        <div className="flex justify-between">
+          <div className="h-8 w-2/3 bg-gray-300 rounded-md"></div>
         </div>
-    );
+        <div className="h-4 w-1/4 mt-2 bg-gray-300 rounded-md"></div>
+      </div>
+
+      {/* In Progress Section */}
+      <div className="mt-6">
+        <div className="ml-5 mr-2 mb-3">
+          <div className="h-6 w-32 bg-gray-300 rounded-md"></div>
+        </div>
+        <div className="flex w-full overflow-x-auto space-x-4 pb-2 px-5 scrollbar-hide">
+          {Array(4).fill('').map((_, index) => (
+            <div key={index} className="h-24 w-40 bg-gray-300 rounded-md"></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Jump In Section */}
+      <div className="mt-6">
+        <div className="ml-5 mr-2 mb-3">
+          <div className="h-6 w-32 bg-gray-300 rounded-md"></div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
+          {Array(6).fill('').map((_, index) => (
+            <div key={index} className="h-16 w-28 bg-gray-300 rounded-md"></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Continue Learning Section */}
+      <div className="mt-6">
+        <div className="flex justify-between ml-5 mr-2">
+          <div className="h-6 w-40 bg-gray-300 rounded-md"></div>
+          <div className="h-8 w-20 bg-gray-300 rounded-md"></div>
+        </div>
+        <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
+          {Array(4).fill('').map((_, index) => (
+            <div key={index} className="h-32 w-72 bg-gray-300 rounded-md flex-shrink-0 min-w-72"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function Home() {
@@ -218,7 +258,7 @@ function Home() {
                     <div className="w-[40%]">
                         <img src={HomeImage} alt="Home Tutorial" className="w-[90%]" />
                     </div>
-                    <div className="w-2/3 flex items-center">
+                    <div className="w-2/3 flex items-center text-left">
                         <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
                             Cardify is a platform for creating, practicing, and mastering your own flashcards.
                             Get started by creating your first subject and adding flashcards to it.

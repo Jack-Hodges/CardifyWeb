@@ -117,7 +117,7 @@ function Welcome() {
   );
 
   if (user) {
-    navigate('/Home');
+    navigate('/home');
   }
 
   return (
