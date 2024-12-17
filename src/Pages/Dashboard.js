@@ -15,6 +15,7 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
+import DashboardImage from '../images/tutorial/Dashboard.png';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -288,12 +289,20 @@ function Dashboard() {
       <CustomModal
         isOpen={dashboardPopUp}
         content={
-            <div>
-                <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
-                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">Dashboard shows your all of your flashcards, organised into subjects
-                  <br></br>Subjects can be given a colour and a name, and can also be organised in Collections. You can always move subjects between or out of collections
-                  <br></br>You can search and filter your subjects and collections
-                  <br></br>To get started, click Create New Subject. You can add more subjects and collections by clicking Add in the top right corner</p>
+            <div className="text-left">
+              <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
+              <div className="flex items-center h-full">
+                  <div className="w-[40%]">
+                      <img src={DashboardImage} alt="Home Tutorial" className="w-full" />
+                  </div>
+                  <div className="w-2/3 flex items-center">
+                  <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows your all of your flashcards, organised into subjects
+                        <br></br>Subjects can be given a colour and a name, and can also be organised in Collections. You can always move subjects between or out of collections
+                        <br></br>You can search and filter your subjects and collections
+                        <br></br>To get started, click Create New Subject. You can add more subjects and collections by clicking Add in the top right corner</p>
+                    
+                  </div>
+              </div>
             </div>
         }
         firstActionText={'Got it!'}

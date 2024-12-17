@@ -55,7 +55,8 @@ export const addNewCard = async (cards, newFrontContent, newBackContent, setCard
 
   const { data, error } = await supabase
     .from('flashcards')
-    .insert([newCard]);
+    .insert([newCard])
+    .select(); // Fetch the newly added card
 
   if (error) {
     console.error('Error adding new card:', error);
