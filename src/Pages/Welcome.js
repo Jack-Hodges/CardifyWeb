@@ -15,8 +15,6 @@ function Welcome() {
   const [firstName, setFirstName] = useState(""); // State to store user's first name
   const [isSignUp, setIsSignUp] = useState(false); // To toggle between sign in and sign up
   const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [showPopup, setShowPopup] = useState(false); // Control popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // Store error message
 
   const navigate = useNavigate();
   const { user, setUser } = useUser(); // Access user and logout from context
@@ -28,15 +26,6 @@ function Welcome() {
     setPassword("");
     setConfirmPassword("");
     setFirstName(""); // Reset the first name field 
-  };
-
-  // Function to display the error popup
-  const displayPopup = (message) => {
-    setPopupMessage(message);
-    setShowPopup(true);
-    setTimeout(() => {
-      setShowPopup(false);
-    }, 3000); // Popup disappears after 3 seconds
   };
 
   // Handle sign-in or sign-up based on the form type
@@ -76,9 +65,8 @@ function Welcome() {
           .insert([{ id: user.id, first_name: firstName }]); // Create profile with user's ID and first name
 
         if (profileError) {
-          displayPopup(`Error creating profile: ${profileError.message}`);
+          toast.error(`Error creating profile: ${profileError.message}`);
         } else {
-          console.log("Profile created successfully");
           setUser(user);
           navigate('/home'); // Redirect to dashboard after successful sign-up and profile creation
         }
@@ -91,9 +79,8 @@ function Welcome() {
       });
 
       if (error) {
-        displayPopup(`Error logging in: ${error.message}`);
+        toast.error(`Error logging in: ${error.message}`);
       } else {
-        console.log("Logged in!", data);
         setUser(data.user); // Set the user globally in context
         navigate('/home'); // Redirect to dashboard
       }
@@ -105,9 +92,9 @@ function Welcome() {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
 
     if (error) {
-      displayPopup(`Error sending password reset email: ${error.message}`);
+      toast.error(`Error sending password reset email: ${error.message}`);
     } else {
-      displayPopup("Password reset email sent!");
+      toast.success("Password reset email sent!");
       setResetEmailSent(true); // Set state to true after email is sent
     }
   };
@@ -145,11 +132,6 @@ function Welcome() {
           />
         </div>
 
-      {showPopup && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 text-black dark:text-white px-4 py-2 rounded z-50">
-          {popupMessage}
-        </div>
-      )}
       <div className="w-full sm:w-1/2 flex items-center justify-center">
         <img src={WelcomeImage} alt="Illustration" className="object-contain w-full sm:mt-[-20%]" />
       </div>

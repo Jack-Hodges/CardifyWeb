@@ -4,6 +4,9 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { getColor } from '../Functions/getColor';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
@@ -70,6 +73,8 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
             // Pass null for collectionId if "None" is selected, otherwise pass the selected collection ID
             onSave(subject?.id, subjectName, subjectColor, subject?.up_to_index, selectedCollectionId);
             handleClose();
+        } else {
+            toast.warning("Please add a subject name");
         }
     };
 
@@ -111,6 +116,9 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
 
     return ReactDOM.createPortal(
         <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+
+            <ToastContainer position="top-center" autoClose={3000} />
+
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
             <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
                 <h2 className="text-2xl font-semibold mb-6 text-green-500">
