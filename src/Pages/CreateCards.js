@@ -222,16 +222,20 @@ function CreateCards() {
         isOpen={createPopUp}
         content={
             <div className="text-center">
-                <p className="text-2xl font-semibold mb-6">Welcome to Cardify!</p>
+                <p className="text-2xl font-semibold mb-6">This is Create</p>
                 <div className="flex items-center h-full">
                     <div className="w-[40%]">
                         <img src={CreateImage} alt="Home Tutorial" className="w-[90%]" />
                     </div>
                     <div className="w-2/3 flex items-center text-left">
                         <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
-                            Cardify is a platform for creating, practicing, and mastering your own flashcards.
-                            Get started by creating your first subject and adding flashcards to it.
-                            You can also practice your flashcards and track your progress.
+                          Here you will create the flashcards to study in your Subjects! You need to select a Subject to start creating flashcards. 
+                          <br></br>If you don't have a Subject, you can create one by clicking the Create New Subject button.
+                          <br></br>Once you have selected a Subject, you can add new flashcards by clicking the Add button at the top of the flashcard stack
+                          <li>You can edit a flashcard by clicking the pencil</li>
+                          <li>You can flip a flashcard by clicking anywhere on the flashcard</li>
+                          <li>Flashcards can be deleted using the trash can icon</li>
+                          <li>If you prefer studying on paper, you can export your flashcards to a printable PDF</li>
                         </p>
                     </div>
                 </div>

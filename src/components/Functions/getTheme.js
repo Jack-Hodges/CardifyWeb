@@ -5,6 +5,9 @@ import Mountain from '../../images/backgrounds/Mountain.jpg';
 import NewYorkCity from '../../images/backgrounds/NewYorkCity.jpg';
 import Serenity from '../../images/backgrounds/Serenity.jpg';
 import Pastel from '../../images/backgrounds/Pastel.jpg';
+import Geometric from '../../images/backgrounds/Geometric.jpg';
+import Fluid from '../../images/backgrounds/Fluid.jpg';
+import Wood from '../../images/backgrounds/Wood.jpg';
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
@@ -16,6 +19,9 @@ export const getThemeAssets = () => {
     { name: "New York City", url: NewYorkCity },
     { name: 'Serenity', url: Serenity },
     { name: 'Pastel', url: Pastel },
+    { name: 'Geometric', url: Geometric},
+    { name: 'Fluid', url: Fluid },
+    { name: 'Wood', url: Wood },
   ];
 };
 
@@ -99,7 +105,40 @@ export const getTheme = (theme) => {
         tertiary: ['blue', 300],
         border: ['blue', 500],
         shadow: true,
-      }
+      },
+      geometric: {
+        name: "geometric",
+        image: `url(${Geometric})`,
+        color: 'rgba(3,15,64,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['blue', 600],
+        secondary: ['violet', 500],
+        tertiary: ['fuchsia', 400],
+        border: ['blue', 600],
+        shadow: true,
+      },
+      fluid: {
+        name: "fluid",
+        image: `url(${Fluid})`,
+        color: 'rgba(3,15,64,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['amber', 400],
+        secondary: ['rose', 500],
+        tertiary: ['blue', 500],
+        border: ['amber', 400],
+        shadow: true,
+      },
+      wood: {
+        name: "wood",
+        image: `url(${Wood})`,
+        color: 'rgba(3,15,64,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['yellow', 800],
+        secondary: ['orange', 800],
+        tertiary: ['amber', 700],
+        border: ['yellow', 800],
+        shadow: true,
+      },
     };
     return themes[theme] || { name: "default", image: null, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }
