@@ -1,9 +1,7 @@
 import ReactDOM from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
-import getColors from '../Functions/getColors';
 import { fetchCollections } from '../Collections/CollectionManipulation';
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -11,14 +9,18 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
-    const [subjectColor, setLocalSubjectColor] = useState(subject?.bgCol || 'red');
+    const [subjectColor, setLocalSubjectColor] = useState(subject?.bgCol ?? 'red-500');
+    const [subjectIntensity, setSubjectIntensity] = useState(subject?.intensity || 500);
     const [filteredCollections, setFilteredCollections] = useState([]);
-    const [collections, setCollections] = useState([]); // New state for collections
+    const [collections, setCollections] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
-    const [selectedCollection, setSelectedCollection] = useState('None'); // Default selection to "None"
-    const [selectedCollectionId, setSelectedCollectionId] = useState(null); // Default to null for "None"
+    const [selectedCollection, setSelectedCollection] = useState('None');
+    const [selectedCollectionId, setSelectedCollectionId] = useState(null);
+    const [clickedColor, setClickedColor] = useState(null);
+    const menuRef = useRef(null);
 
     const colorOptions = ['red', 'orange', 'yellow', 'green', 'emerald', 'sky', 'blue', 'purple', 'violet', 'pink'];
+    const colorIntensities = [300, 400, 500, 600, 700, 800];
 
     useEffect(() => {
         if (isOpen) {
@@ -32,12 +34,13 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         if (subject) {
             setLocalSubjectName(subject.name);
             setLocalSubjectColor(subject.bgCol);
-            
+            setSubjectIntensity(subject.intensity || 500);
+
             if (subject.collection_id) {
                 const selected = collections.find((collection) => collection.id === subject.collection_id);
                 if (selected) {
-                    setSelectedCollection(selected.name); // Prefill the collection name
-                    setSelectedCollectionId(selected.id); // Prefill the collection ID
+                    setSelectedCollection(selected.name);
+                    setSelectedCollectionId(selected.id);
                 }
             } else {
                 setSelectedCollection('None');
@@ -46,18 +49,35 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         }
     }, [subject, collections]);
 
-    // Fetch collections when the component mounts or when the user changes
     useEffect(() => {
         const loadCollections = async () => {
             if (user?.id) {
-                const userCollections = await fetchCollections(user.id); // Fetch collections based on the user ID
-                setCollections(userCollections); // Set the collections to state
-                setFilteredCollections(userCollections); // Initially, all collections are visible
+                const userCollections = await fetchCollections(user.id);
+                setCollections(userCollections);
+                setFilteredCollections(userCollections);
             }
         };
 
         loadCollections();
     }, [user]);
+
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setClickedColor(null);
+            }
+        };
+
+        if (clickedColor) {
+            document.addEventListener('mousedown', handleOutsideClick);
+        } else {
+            document.removeEventListener('mousedown', handleOutsideClick);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleOutsideClick);
+        };
+    }, [clickedColor]);
 
     const handleClose = () => {
         setIsClosing(true);
@@ -70,15 +90,13 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
 
     const handleSave = () => {
         if (subjectName !== '') {
-            // Pass null for collectionId if "None" is selected, otherwise pass the selected collection ID
-            onSave(subject?.id, subjectName, subjectColor, subject?.up_to_index, selectedCollectionId);
+            onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
             handleClose();
         } else {
             toast.warning("Please add a subject name");
         }
     };
 
-    // Function to filter collections based on user input
     const handleCollectionSearch = (e) => {
         const value = e.target.value;
         setSelectedCollection(value);
@@ -90,33 +108,41 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
             setFilteredCollections(filtered);
             setShowDropdown(true);
         } else {
-            setFilteredCollections(collections); // Show all collections if search input is cleared
+            setFilteredCollections(collections);
             setShowDropdown(true);
         }
     };
 
     const handleSelectCollection = (collection) => {
         setSelectedCollection(collection.name);
-        setSelectedCollectionId(collection.id); // Store the collection ID
-        setShowDropdown(false); // Hide dropdown after selection
-    };
-
-    const handleSelectNone = () => {
-        setSelectedCollection('None'); // Select "None"
-        setSelectedCollectionId(null); // Set collectionId to null for "None"
+        setSelectedCollectionId(collection.id);
         setShowDropdown(false);
     };
 
-    const handleDropdownClick = () => {
-        setFilteredCollections(collections); // Show all collections on click
-        setShowDropdown(true); // Display the dropdown
+    const handleSelectNone = () => {
+        setSelectedCollection('None');
+        setSelectedCollectionId(null);
+        setShowDropdown(false);
+    };
+
+    const toggleIntensityMenu = (color) => {
+        if (clickedColor === color) {
+            setClickedColor(null);
+        } else {
+            setClickedColor(color);
+        }
+    };
+
+    const selectIntensity = (color, intensity) => {
+        setLocalSubjectColor(color);
+        setSubjectIntensity(intensity);
+        setClickedColor(null);
     };
 
     if (!isVisible && !isClosing) return null;
 
     return ReactDOM.createPortal(
-        <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
-
+        <div className="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
             <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
@@ -140,7 +166,6 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                     />
                 </div>
 
-                {/* Searchable Dropdown for Collections */}
                 <div className="mb-6 relative">
                     <label htmlFor="collectionDropdown" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Collection
@@ -150,12 +175,10 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         type="text"
                         value={selectedCollection}
                         onChange={handleCollectionSearch}
-                        onClick={handleDropdownClick}
+                        onClick={() => setShowDropdown(true)}
                         className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
                         placeholder="Search for a collection"
                     />
-
-                    {/* Dropdown for filtered collections */}
                     {showDropdown && (
                         <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
                             <li
@@ -164,9 +187,9 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                             >
                                 None
                             </li>
-                            {filteredCollections.map((collection, index) => (
+                            {filteredCollections.map((collection) => (
                                 <li
-                                    key={index}
+                                    key={collection.id}
                                     className="cursor-pointer p-3 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
                                     onClick={() => handleSelectCollection(collection)}
                                 >
@@ -182,16 +205,34 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         Subject Color
                     </label>
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
-                        {colorOptions.map((color) => {
-                            const { bgClass, hoverClass } = getColors([color, 500]);
-                            return (
-                                <button
-                                    key={color}
-                                    onClick={() => setLocalSubjectColor(color)}
-                                    className={`w-12 h-12 rounded-full ${subjectColor === color ? 'ring-4 ring-gray-300 dark:ring-gray-500' : 'ring-0'} ${bgClass} ${hoverClass} transition duration-100`}
-                                />
-                            );
-                        })}
+                        {colorOptions.map((color) => (
+                            <div key={color} className="relative">
+                                {clickedColor === color ? (
+                                    <div
+                                        ref={menuRef}
+                                        className="absolute z-20 bg-white dark:bg-gray-700 shadow-md rounded-lg p-2 flex flex-col"
+                                        style={{ top: '-112px', left: '50%', transform: 'translateX(-50%)' }}
+                                    >
+                                        {colorIntensities.map((intensity) => (
+                                            <button
+                                                key={`${color}-${intensity}`}
+                                                onClick={() => {
+                                                    selectIntensity(color, intensity);
+                                                }}
+                                                className={`w-12 h-12 rounded-full bg-${color}-${intensity} mb-1`}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => toggleIntensityMenu(color)}
+                                        className={`w-12 h-12 rounded-full ${
+                                            subjectColor && subjectColor.startsWith(color) ? 'ring-4 ring-gray-300 dark:ring-gray-500' : ''
+                                        } bg-${color}-500`}
+                                    />
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </div>
 

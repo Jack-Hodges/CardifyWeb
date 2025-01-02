@@ -71,14 +71,14 @@ function Dashboard() {
 };
 
   // Subject
-  const handleSaveSubject = async (id, subjectName, subjectColor, up_to_index, collectionId) => {
-    const data = await saveSubject(id, subjectName, subjectColor, user.id, up_to_index, collectionId);
+  const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId) => {
+    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId);
     if (data && !id) {
       setSubjects([...subjects, ...data]);
     } else {
       const updatedSubjects = subjects.map((subject) =>
         subject.id === id
-          ? { ...subject, name: subjectName, bgCol: subjectColor, collection_id: collectionId }
+          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId }
           : subject
       );
       setSubjects(updatedSubjects);
