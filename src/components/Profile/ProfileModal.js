@@ -99,7 +99,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 <div className="flex justify-between items-center mb-6">
                     <span className={`textColor text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
-                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Update to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
                         <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
                         <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                     </div>

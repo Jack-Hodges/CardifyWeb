@@ -1,5 +1,3 @@
-// Dashboard.js
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';

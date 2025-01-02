@@ -1,5 +1,5 @@
 import BackgroundButton from "../Elements/BackgroundButton";
-import { getColor } from "../Functions/getColor";
+import getColors from "../Functions/getColors";
 import SubjectBlock from "../Subject/SubjectBlock";
 import { useState } from "react";
 
@@ -31,7 +31,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 {/* Eight squares in the background */}
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
                     {subjects.slice(0, 8).map((subject, index) => {
-                        const { bgClass } = getColor(subject.bgCol); // Get background color class
+                        const { bgClass } = getColors([subject.colourText, subject.colourIntensity]); // Get background color class
                         return (
                             <div 
                                 key={index} 

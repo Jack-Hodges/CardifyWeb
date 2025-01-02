@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchSubjects } from './SubjectManipulation';
-import { getColor } from '../Functions/getColor';
+import getColors from '../Functions/getColors';
 import { useNavigate } from 'react-router-dom';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 import BackgroundButton from '../Elements/BackgroundButton';
@@ -102,7 +102,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 export default SubjectList;
 
 function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-new' }) {
-    const subjectCol = getColor(subject.bgCol);
+    const subjectCol = getColors([subject.colourText, subject.colourIntensity]);
     const navigate = useNavigate();
 
     const handleClick = () => {

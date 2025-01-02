@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
-import { getColor } from '../Functions/getColor';
+import getColors from '../Functions/getColors';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -183,7 +183,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                     </label>
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
                         {colorOptions.map((color) => {
-                            const { bgClass, hoverClass } = getColor(color);
+                            const { bgClass, hoverClass } = getColors([color, 500]);
                             return (
                                 <button
                                     key={color}

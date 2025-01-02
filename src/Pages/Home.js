@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import { useEffect, useState } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
-import { getColor } from "../components/Functions/getColor";
+import getColors from "../components/Functions/getColors";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
@@ -13,7 +13,7 @@ import HomeImage from '../images/tutorial/Home.png';
 // Loading component
 function HomeLoading() {
   const { theme } = useUser();
-  const { shadow, textColor } = theme;
+  const { textColor } = theme;
   return (
     <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
       <div className="mx-5 animate-pulse">
@@ -289,7 +289,7 @@ function JumpButton( { text, img, color, onClick, theme }) {
 }
 
 function InProgress({ subject, theme }) {
-  const colors = getColor(subject ? subject.bgCol : 'red');
+  const colors = getColors(subject ? [subject.colourText, subject.colourIntensity] : ['red', 500]);
   const navigate = useNavigate();
   const [cardsRemaining, setCardsRemaining] = useState(0);
   const [percentage, setPercentage] = useState(0);

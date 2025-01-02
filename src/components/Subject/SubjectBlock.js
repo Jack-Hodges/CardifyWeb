@@ -1,5 +1,5 @@
-import { getColor } from "../Functions/getColor";
-import { useState } from "react";
+import getColors from "../Functions/getColors";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
@@ -15,7 +15,11 @@ function SubjectBlock({ subject, onEdit, onRemoveSubject, home }) {
         navigate('/create', { state: { subject } }); // Navigate to CreateCards with subject and user
     };
 
-    const colors = getColor(subject.bgCol);
+    // Memoized colors calculation
+    const colors = useMemo(() => getColors([subject.colourText, subject.colourIntensity]), [
+        subject.colourText,
+        subject.colourIntensity,
+    ]);
 
     return (
         <div className={`group relative mx-auto w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}>
