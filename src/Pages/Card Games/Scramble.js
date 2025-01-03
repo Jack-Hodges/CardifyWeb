@@ -5,7 +5,6 @@ import { useUser } from '../../UserContext';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
-import { getBorder } from '../../components/Functions/getColor';
 import SubjectList from '../../components/Subject/SubjectList';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
@@ -44,7 +43,7 @@ const DragDropGame = () => {
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
   const { secondaryColor, tertiaryColor, shadow, textColor } = theme;
-  const borderCol = theme ? getBorder(theme.border) : 'blue';
+  const borderCol = 'blue';
 
   useEffect(() => {
     if (!user) {
