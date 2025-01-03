@@ -2,7 +2,17 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 import { useUser } from '../../UserContext';
 
-function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, create = false, themeText = 'text-gray-500 dark:text-gray-200', themeSecondary = 'bg-orange-500 hover:bg-orange-400', cards }) {
+function CardControls({ 
+    currentCardIndex, 
+    totalCards, 
+    onPrevClick, 
+    onNextClick, 
+    create = false, 
+    themeText = 'text-gray-500 dark:text-gray-200', 
+    themeSecondary = 'bg-orange-500 hover:bg-orange-400', 
+    themeTertiary = 'bg-purple-500 hover:bg-purple-400', 
+    cards,
+    generateClick }) {
 
     const { theme } = useUser();
     const { shadow } = theme;
@@ -28,8 +38,12 @@ function CardControls({ currentCardIndex, totalCards, onPrevClick, onNextClick, 
 
     return (
         <div className="w-full h-12 flex items-center justify-between">
-            <div className="mt-2">
-                <FlashcardPDFExport flashcards={cards} />
+            <div className="mt-2 flex">
+                <div className="mr-2">
+                    <FlashcardPDFExport flashcards={cards} />
+                </div>
+                
+                <BackgroundButton text="Generate Flashcards" bgColor={`${themeTertiary.bgClass} ${themeTertiary.hoverClass}`} onClick={generateClick}/>
             </div>
             
              <div className="h-12 flex items-center justify-center sm:justify-end mt-2">

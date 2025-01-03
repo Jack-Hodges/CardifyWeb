@@ -35,7 +35,7 @@ function Dashboard() {
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme, popupStates, updatePopupState  } = useUser();
-  const { secondaryColor, shadow, primaryColor } = theme;  // Get the secondary color
+  const { secondaryColor, shadow, primaryColor, textClass } = theme;  // Get the secondary color
 
   useEffect(() => {
     if (userLoading) {
@@ -191,7 +191,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} themeShadow={'background-shadow-new'} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={theme ? theme.textClass : 'text-white'}/>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} shadow={shadow} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={textClass}/>
 
       {/* Main Content Section */}
       {loading ? (
@@ -284,26 +284,27 @@ function Dashboard() {
         text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
       />
 
+      {/* Tooltip */}
       <CustomModal
         isOpen={dashboardPopUp}
         content={
-            <div className="text-left">
-              <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
-              <div className="flex items-center h-full">
-                  <div className="w-[40%]">
-                      <img src={DashboardImage} alt="Home Tutorial" className="w-full" />
-                  </div>
-                  <div className="w-2/3 flex items-center">
-                  <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows all of your flashcards, organised into Subjects and Collections 
-                    <br></br><br></br>
-                      <li>Subjects can be given a colour and a name, and can also be attached to a Collections. You can always move Subjects between or out of Collections</li>
-                      <li>You can search and filter your Subjects and Collections</li>
-                      <li>To get started, click Create New Subject. You can add more Subjects and Collections by clicking Add in the top right corner</li>
-                      
-                      </p>
-                  </div>
+          <div className="text-left">
+            <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
+            <div className="flex items-center h-full">
+              <div className="w-[40%]">
+                  <img src={DashboardImage} alt="Home Tutorial" className="w-full" />
+              </div>
+              <div className="w-2/3 flex items-center">
+              <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows all of your flashcards, organised into Subjects and Collections 
+                <br></br><br></br>
+                  <li>Subjects can be given a colour and a name, and can also be attached to a Collections. You can always move Subjects between or out of Collections</li>
+                  <li>You can search and filter your Subjects and Collections</li>
+                  <li>To get started, click Create New Subject. You can add more Subjects and Collections by clicking Add in the top right corner</li>
+                  
+                  </p>
               </div>
             </div>
+          </div>
         }
         firstActionText={'Got it!'}
         firstActionCol={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
@@ -327,7 +328,7 @@ function DashboardLoading() {
   );
 }
 
-function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, themeShadow, themeCol, themeText = 'text-white' } ) {
+function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, shadow, themeCol, themeText = 'text-white' } ) {
   return (
     <div className="flex mx-4 mt-3 items-center justify-between">
       <div className="flex gap-2">
@@ -336,7 +337,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           <select
             value={selectedSort}
             onChange={(e) => setSelectedSort(e.target.value)}
-            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 ${themeShadow} background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
+            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
           >
             <option value="Most Cards">Most Cards</option>
             <option value="Alphabetical">Alphabetical</option>
@@ -360,7 +361,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} ${themeShadow} background-focus focus:outline-none placeholder-gray-200`}
+          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} background-shadow-new background-focus focus:outline-none placeholder-gray-200`}
           placeholder="Search subjects..."
         />
       </div>

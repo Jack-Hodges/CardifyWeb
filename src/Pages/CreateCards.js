@@ -24,13 +24,16 @@ function CreateCards() {
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
   const [newFrontContent, setNewFrontContent] = useState('');
   const [newBackContent, setNewBackContent] = useState('');
+  const [selectedSort, setSelectedSort] = useState('5');
+  const [generateTerm, setGenerateTerm] = useState('');
   const [createPopUp, setCreatePopUp] = useState(false);
+  const [generateFlash, setGenerateFlash] = useState(true);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme, userLoading, popupStates, updatePopupState } = useUser();
-  const { secondaryColor, tertiaryColor, shadow } = theme;
+  const { secondaryColor, tertiaryColor, shadow, textClass } = theme;
 
   useEffect(() => {
 
@@ -157,7 +160,9 @@ function CreateCards() {
                   create
                   themeText={theme.textClass}
                   themeSecondary={secondaryColor}
+                  themeTertiary={tertiaryColor}
                   cards={cards}
+                  generateClick={() => setGenerateFlash(true)}
                 />
               </div>
             </div>
@@ -218,6 +223,7 @@ function CreateCards() {
         page="create"
       />
 
+      {/* Tooltip */}
       <CustomModal
         isOpen={createPopUp}
         content={
@@ -244,6 +250,56 @@ function CreateCards() {
         firstActionText={'Got it!'}
         firstActionCol="bg-green-500 hover:bg-green-400"
         onFirstAction={handleDismissPopup}
+      />
+
+      <CustomModal 
+        isOpen={generateFlash}
+        content={
+          <div>
+            <h1 className="text-2xl font-semibold mb-6 text-green-500">Cardify Generate</h1>
+            <div className="w-full h-12 flex items-center justify-center p-2 rounded-lg space-x-4 mt-10">
+              <p className="text-xl">Generate</p>
+
+              <div className="relative group">
+                <select
+                  value={selectedSort}
+                  onChange={(e) => setSelectedSort(e.target.value)}
+                  className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${secondaryColor.bgClass} ${secondaryColor.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
+                >
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+
+              <p className="text-xl">{`${selectedSort === "1" ? 'card about' : 'cards about'}`}</p>
+
+              <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
+                <input
+                  type="text"
+                  value={generateTerm}
+                  onChange={(e) => setGenerateTerm(e.target.value)}
+                  className={`w-full h-10 px-4 py-2 text-left rounded-full ${secondaryColor.bgClass} ${textClass} background-shadow-new background-focus focus:outline-none placeholder-gray-200`}
+                  placeholder="Enter topic..."
+                />
+              </div>
+            </div>
+          </div>
+        }
+        firstActionText={'Got it!'}
+        firstActionCol="bg-green-500 hover:bg-green-400"
+        onFirstAction={() => setGenerateFlash(false)}
       />
 
     </div>
