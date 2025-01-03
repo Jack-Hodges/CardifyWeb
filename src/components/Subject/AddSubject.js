@@ -19,7 +19,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [clickedColor, setClickedColor] = useState(null);
     const menuRef = useRef(null);
 
-    const colorOptions = ['red', 'orange', 'yellow', 'green', 'emerald', 'sky', 'blue', 'purple', 'violet', 'pink'];
+    const colorOptions = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'slate', 'rose', 'pink', 'fuchsia', 'purple', 'violet', 'indigo', 'blue', 'sky'];
     const colorIntensities = [300, 400, 500, 600, 700, 800];
 
     useEffect(() => {
@@ -204,7 +204,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                     <label className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
                         Subject Color
                     </label>
-                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-4">
+                    <div className="grid grid-cols-5 sm:grid-cols-9 gap-4">
                         {colorOptions.map((color) => (
                             <div key={color} className="relative">
                                 {clickedColor === color ? (
