@@ -1,27 +1,31 @@
 import Default from '../../images/backgrounds/Default.jpg';
 import Beach from '../../images/backgrounds/Beach.jpg';
+import Beach2 from '../../images/backgrounds/Beach2.jpg';
 import Forest from '../../images/backgrounds/Forest.jpg';
 import Mountain from '../../images/backgrounds/Mountain.jpg';
 import NewYorkCity from '../../images/backgrounds/NewYorkCity.jpg';
 import Serenity from '../../images/backgrounds/Serenity.jpg';
 import Pastel from '../../images/backgrounds/Pastel.jpg';
 import Geometric from '../../images/backgrounds/Geometric.jpg';
-import Fluid from '../../images/backgrounds/Fluid.jpg';
 import Wood from '../../images/backgrounds/Wood.jpg';
+import Fluidity from '../../images/backgrounds/Fluidity.jpg';
+import PurpleGeometric from '../../images/backgrounds/PurpleGeometric.jpg'
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
   return [
     { name: 'Default', url: Default },
     { name: 'Beach', url: Beach },
+    { name: 'Beach 2', url: Beach2},
     { name: 'Forest', url: Forest },
     { name: 'Mountain', url: Mountain },
     { name: "New York City", url: NewYorkCity },
     { name: 'Serenity', url: Serenity },
     { name: 'Pastel', url: Pastel },
     { name: 'Geometric', url: Geometric},
-    { name: 'Fluid', url: Fluid },
+    { name: 'Purple Geometric', url: PurpleGeometric },
     { name: 'Wood', url: Wood },
+    { name: 'Fluidity', url: Fluidity },
   ];
 };
 
@@ -48,6 +52,17 @@ export const getTheme = (theme) => {
         primary: ['cyan', 500],
         secondary: ['blue', 500],
         tertiary: ['yellow', 500],
+        border: ['cyan', 500],
+        shadow: true,
+      },
+      beach2: {
+        name: "beach2",
+        image: `url(${Beach2})`,
+        color: 'rgba(68,118,128,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['cyan', 600],
+        secondary: ['blue', 500],
+        tertiary: ['stone', 400],
         border: ['cyan', 500],
         shadow: true,
       },
@@ -117,15 +132,15 @@ export const getTheme = (theme) => {
         border: ['blue', 600],
         shadow: true,
       },
-      fluid: {
-        name: "fluid",
-        image: `url(${Fluid})`,
+      purplegeometric: {
+        name: "purplegeometric",
+        image: `url(${PurpleGeometric})`,
         color: 'rgba(3,15,64,1)',
         textClass: 'text-[rgb(245,241,230)]',
-        primary: ['amber', 400],
-        secondary: ['rose', 500],
-        tertiary: ['blue', 500],
-        border: ['amber', 400],
+        primary: ['blue', 800],
+        secondary: ['violet', 500],
+        tertiary: ['fuchsia', 400],
+        border: ['blue', 600],
         shadow: true,
       },
       wood: {
@@ -139,6 +154,17 @@ export const getTheme = (theme) => {
         border: ['yellow', 800],
         shadow: true,
       },
+      fluidity: {
+        name: "motion",
+        image: `url(${Fluidity})`,
+        color: 'rgba(37,38,97,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['blue', 400],
+        secondary: ['pink', 400],
+        tertiary: ['yellow', 400],
+        border: ['blue', 500],
+        shadow: true,
+      }
     };
     return themes[theme] || { name: "default", image: null, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }
