@@ -188,20 +188,33 @@ function FlashcardQuiz() {
 
               { subject && cards.length > 0 && (
                 <CardControls
-                  currentCardIndex={currentCardIndex + 1}
+                  currentCardIndex={currentCardIndex + 1} // Display card index starting from 1
                   totalCards={cards.length}
-                  onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
+                  onPrevClick={() => {
+                      if (currentCardIndex > 0) {
+                          setCurrentCardIndex(currentCardIndex - 1);
+                      } else {
+                          setCurrentCardIndex(cards.length - 1); // Loop to the last card
+                      }
+                      setFlipped(false); // Reset flipped state when navigating
+                  }}
                   onNextClick={() => {
-                    if (currentCardIndex < cards.length - 1) {
-                      setCurrentCardIndex(currentCardIndex + 1);
-                    } else {
-                      setFinished(true); // Set finished to true when reaching the last card
-                    }
+                      if (currentCardIndex < cards.length - 1) {
+                          setCurrentCardIndex(currentCardIndex + 1);
+                      } else {
+                          setFinished(true); // Finish quiz when reaching the last card
+                      }
+                      setFlipped(false); // Reset flipped state when navigating
                   }}
                   themeText={theme.textClass}
-                  themeSecondary={secondaryColor}
                   cards={cards}
-                />
+                  generateClick={() => {
+                      // Add logic for flashcard generation if needed
+                      console.log("Generate Flashcards button clicked!");
+                  }}
+                  flipped={flipped}
+                  setFlipped={setFlipped}
+              />
               )}
 
               <SubjectList 

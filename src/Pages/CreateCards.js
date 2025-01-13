@@ -27,7 +27,7 @@ function CreateCards() {
   const [selectedSort, setSelectedSort] = useState('5');
   const [generateTerm, setGenerateTerm] = useState('');
   const [createPopUp, setCreatePopUp] = useState(false);
-  const [generateFlash, setGenerateFlash] = useState(true);
+  const [generateFlash, setGenerateFlash] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const location = useLocation();

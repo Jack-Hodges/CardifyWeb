@@ -9,13 +9,11 @@ function CardControls({
     onNextClick, 
     create = false, 
     themeText = 'text-gray-500 dark:text-gray-200', 
-    themeSecondary = 'bg-orange-500 hover:bg-orange-400', 
-    themeTertiary = 'bg-purple-500 hover:bg-purple-400', 
     cards,
-    generateClick }) {
-
+    generateClick 
+}) {
     const { theme } = useUser();
-    const { shadow } = theme;
+    const { shadow, secondaryColor, tertiaryColor } = theme;
 
     const rightArrow = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
@@ -33,23 +31,32 @@ function CardControls({
     const nextButton = currentCardIndex === totalCards && !create ? (
         <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"bg-green-500 hover:bg-green-500"} />
     ) : (
-        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
+        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} />
     );
 
     return (
-        <div className="w-full h-12 flex items-center justify-between">
-            <div className="mt-2 flex">
-                <div className="mr-2">
-                    <FlashcardPDFExport flashcards={cards} />
+        <div className={`w-full h-12 flex items-center ${create ? 'justify-between' : 'justify-end'}`}>
+            {/* Show these buttons only if `create` is true */}
+            {create && (
+                <div className="mt-2 flex">
+                    <div className="mr-2">
+                        <FlashcardPDFExport flashcards={cards} />
+                    </div>
+                    <BackgroundButton 
+                        text="Generate Flashcards" 
+                        bgColor={`${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`} 
+                        onClick={generateClick}
+                    />
                 </div>
-                
-                <BackgroundButton text="Generate Flashcards" bgColor={`${themeTertiary.bgClass} ${themeTertiary.hoverClass}`} onClick={generateClick}/>
-            </div>
+            )}
             
-             <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
-
+            <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
                 <div className="mt-0">
-                    <BackgroundButton image={leftArrow} onClick={onPrevClick} bgColor={`${themeSecondary.bgClass} ${themeSecondary.hoverClass}`} />
+                    <BackgroundButton 
+                        image={leftArrow} 
+                        onClick={onPrevClick} 
+                        bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} 
+                    />
                 </div>
 
                 <p className={`text-2xl ${themeText} font-bold text-center w-16 ${shadow ? 'drop-shadow-custom' : ''}`}>
@@ -61,7 +68,6 @@ function CardControls({
                 </div>
             </div>
         </div>
-       
     );
 }
 
