@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import supabase from "../supabaseClient"; // Import the Supabase client
-import { useNavigate } from "react-router-dom"; // For redirection after login
+import supabase from "../supabaseClient"; 
+import { useNavigate } from "react-router-dom"; 
 import BackgroundButton from "../components/Elements/BackgroundButton";
-import { useUser } from '../UserContext'; // Import the useUser hook
+import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
 
@@ -10,15 +10,22 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Welcome() {
+  const [showLogin, setShowLogin] = useState(false);  // NEW: Controls whether to show the login form or not
+  const [isSignUp, setIsSignUp] = useState(false);    // Toggles between "Sign In" and "Sign Up"
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // For confirming password
-  const [firstName, setFirstName] = useState(""); // State to store user's first name
-  const [isSignUp, setIsSignUp] = useState(false); // To toggle between sign in and sign up
+  const [confirmPassword, setConfirmPassword] = useState(""); 
+  const [firstName, setFirstName] = useState(""); 
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
-  const { user, setUser } = useUser(); // Access user and logout from context
+  const { user, setUser } = useUser();
+
+  // If user is already logged in, redirect to home
+  if (user) {
+    navigate('/home');
+  }
 
   // Toggle between login and sign up
   const toggleSignUp = () => {
@@ -26,31 +33,26 @@ function Welcome() {
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setFirstName(""); // Reset the first name field 
+    setFirstName(""); 
   };
 
   // Handle sign-in or sign-up based on the form type
   const handleAuth = async () => {
     if (isSignUp) {
-      // Check if passwords match
+      // Check passwords
       if (password !== confirmPassword) {
         toast.error("Passwords do not match");
         return;
       }
 
-      // Check if first name is provided
+      // Check first name
       if (!firstName) {
         toast.error("Please enter your first name");
         return;
       }
 
       // Attempt to sign up
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      // Handle error (e.g., email already in use)
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error("This email is already registered.");
@@ -59,17 +61,17 @@ function Welcome() {
         console.log("User signed up successfully!", data);
         toast.success("Welcome to Cardify! Please check your email to verify your account.");
 
-        // Create a new entry in the Profiles table using the user's ID
+        // Create user profile
         const { user } = data;
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([{ id: user.id, first_name: firstName }]); // Create profile with user's ID and first name
+          .insert([{ id: user.id, first_name: firstName }]);
 
         if (profileError) {
           toast.error(`Error creating profile: ${profileError.message}`);
         } else {
           setUser(user);
-          navigate('/home'); // Redirect to dashboard after successful sign-up and profile creation
+          navigate('/home');
         }
       }
     } else {
@@ -78,12 +80,11 @@ function Welcome() {
         email,
         password,
       });
-
       if (error) {
         toast.error(`Error logging in: ${error.message}`);
       } else {
-        setUser(data.user); // Set the user globally in context
-        navigate('/home'); // Redirect to dashboard
+        setUser(data.user);
+        navigate('/home');
       }
     }
   };
@@ -91,12 +92,11 @@ function Welcome() {
   // Handle password reset
   const handlePasswordReset = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
-
     if (error) {
       toast.error(`Error sending password reset email: ${error.message}`);
     } else {
       toast.success("Password reset email sent!");
-      setResetEmailSent(true); // Set state to true after email is sent
+      setResetEmailSent(true);
     }
   };
 
@@ -116,38 +116,101 @@ function Welcome() {
     </svg>
   );
 
-  if (user) {
-    navigate('/home');
-  }
+  const cross = (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  );  
 
-  return (
-    <div className="min-h-screen block sm:flex">
-
-      <ToastContainer position="top-center" autoClose={3000} />
+  // If showLogin is false, display the simple welcome page
+  if (!showLogin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center relative">
+        <ToastContainer position="top-center" autoClose={3000} />
 
         <div className="absolute top-4 right-4 z-50">
           <BackgroundButton
-            text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+            text="Log in/Sign up"
             bgColor={'bg-green-500 hover:bg-green-400'}
-            onClick={toggleSignUp}
+            onClick={() => setShowLogin(true)}
           />
         </div>
+        
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 my-4">
+          Welcome to Cardify
+        </h1>
+
+        {/* Optional: Add an image or extra branding here */}
+        <img
+          src={WelcomeImage}
+          alt="Welcome"
+          className="hidden sm:block object-contain w-1/2"
+        />
+        <img
+          src={WelcomeMobile}
+          alt="Welcome Mobile"
+          className="block sm:hidden object-contain w-2/3 mt-4"
+        />
+      </div>
+    );
+  }
+
+  // If showLogin is true, show the sign-in/sign-up component
+  return (
+    <div className="min-h-screen block sm:flex">
+      <ToastContainer position="top-center" autoClose={3000} />
+
+      {/* Top bar container */}
+      <div className="absolute top-4 w-full flex items-center justify-between px-4 z-50">
+        {/* Red X button on the left */}
+        <BackgroundButton
+          image={cross}
+          bgColor="bg-red-500 hover:bg-red-400"
+          onClick={() => setShowLogin(false)}  // Return to the Welcome screen
+        />
+
+        {/* Sign In / Sign Up toggle button on the right */}
+        <BackgroundButton
+          text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+          bgColor="bg-green-500 hover:bg-green-400"
+          onClick={toggleSignUp}
+        />
+      </div>
 
       <div className="w-full sm:w-1/2 flex items-center justify-center">
-        <img src={WelcomeImage} alt="Illustration" className="hidden sm:block object-contain w-full sm:mt-[-20%]" />
-        <img src={WelcomeMobile} alt="Illustration" className="block sm:hidden object-contain w-full mt-24 mb-10" />
+        <img 
+          src={WelcomeImage} 
+          alt="Illustration" 
+          className="hidden sm:block object-contain w-full sm:mt-[-20%]" 
+        />
+        <img
+          src={WelcomeMobile}
+          alt="Illustration"
+          className="block sm:hidden object-contain w-full mt-24 mb-10"
+        />
       </div>
 
       <div className="w-full sm:w-1/2 flex flex-col justify-center relative">
-
         <div className="w-[90%] sm:w-4/5 mx-auto sm:p-8">
           <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-300">
             {isSignUp ? "Sign Up" : "Sign In"}
           </h2>
 
           <div className="flex space-x-4 mt-4">
-            <BackgroundButton text="Google" image={GoogleSVG} flip wWidth="w-full" bgColor={'bg-red-500 hover:bg-red-400'} />
-            <BackgroundButton text="Apple" image={AppleSVG} flip wWidth="w-full" bgColor={'bg-red-500 hover:bg-red-400'} />
+            <BackgroundButton 
+              text="Google"
+              image={GoogleSVG}
+              flip
+              wWidth="w-full"
+              bgColor={'bg-red-500 hover:bg-red-400'}
+            />
+            <BackgroundButton
+              text="Apple"
+              image={AppleSVG}
+              flip
+              wWidth="w-full"
+              bgColor={'bg-red-500 hover:bg-red-400'}
+            />
           </div>
 
           <div className="mt-8">
@@ -161,43 +224,65 @@ function Welcome() {
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
                   First Name
                 </label>
-                <FancyInput type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <FancyInput 
+                  type="text" 
+                  value={firstName} 
+                  onChange={(e) => setFirstName(e.target.value)} 
+                />
               </div>
             )}
 
+            {/* Email Input */}
             <div className="mt-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
                 Email address
               </label>
-              <FancyInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <FancyInput 
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+              />
             </div>
 
+            {/* Password Input */}
             <div className="mt-4">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
                 Password
               </label>
-              <FancyInput type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+              <FancyInput 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+              />
             </div>
 
+            {/* Confirm Password for Sign Up */}
             {isSignUp && (
               <div className="mt-4">
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
                   Confirm Password
                 </label>
-                <FancyInput type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <FancyInput
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
             )}
 
+            {/* Forgot Password */}
             {!isSignUp && (
               <div className="mt-4 text-right">
-                <button onClick={handlePasswordReset} className="text-blue-500 hover:underline">Forgot Password?</button>
+                <button onClick={handlePasswordReset} className="text-blue-500 hover:underline">
+                  Forgot Password?
+                </button>
               </div>
             )}
-
             {resetEmailSent && (
               <p className="mt-2 text-green-500">Password reset email sent!</p>
             )}
 
+            {/* Auth Button */}
             <div className="mt-6">
               <BackgroundButton
                 text={isSignUp ? "Sign Up" : "Start Learning"}
