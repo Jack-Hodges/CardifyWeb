@@ -15,7 +15,7 @@ function App() {
   const { theme } = useUser();
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen overflow-y-scroll sm:overflow-y-hidden bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       <Router>
         {/* MenuBar will be rendered on all pages */}
 

@@ -33,7 +33,7 @@ export const getTheme = (theme) => {
   console.log("getting theme");
   if (!theme) {
     return {
-      image: null,
+      image: Default,
       color: 'rgba(3,15,64,1)',
       textClass: 'textColor',
       primary: ['green', 500],
@@ -166,6 +166,6 @@ export const getTheme = (theme) => {
         shadow: true,
       }
     };
-    return themes[theme] || { name: "default", image: null, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
+    return themes[theme] || { name: "default", image: Default, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }
 };

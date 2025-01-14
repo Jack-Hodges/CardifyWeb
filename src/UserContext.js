@@ -3,6 +3,7 @@ import supabase from './supabaseClient';
 import { fetchProfile } from './components/Profile/ProfileManipulation';
 import { getTheme } from './components/Functions/getTheme';
 import getColors from './components/Functions/getColors';
+import Default from './images/backgrounds/Default.jpg';
 
 // Create UserContext
 const UserContext = createContext();
@@ -11,7 +12,7 @@ const UserContext = createContext();
 const resolveThemeColors = (theme) => {
   const defaultTheme = {
     name: "default",
-    image: null,
+    image: Default,
     color: 'rgba(3,15,64,1)',
     shadowClass: "background-shadow",
     textClass: "text-gray-700 dark:text-gray-200",

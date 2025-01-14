@@ -10,8 +10,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Welcome() {
-  const [showLogin, setShowLogin] = useState(false);  // NEW: Controls whether to show the login form or not
-  const [isSignUp, setIsSignUp] = useState(false);    // Toggles between "Sign In" and "Sign Up"
+  const [showLogin, setShowLogin] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,37 +36,28 @@ function Welcome() {
     setFirstName(""); 
   };
 
-  // Handle sign-in or sign-up based on the form type
+  // Handle sign-in or sign-up
   const handleAuth = async () => {
     if (isSignUp) {
-      // Check passwords
       if (password !== confirmPassword) {
         toast.error("Passwords do not match");
         return;
       }
-
-      // Check first name
       if (!firstName) {
         toast.error("Please enter your first name");
         return;
       }
-
-      // Attempt to sign up
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error("This email is already registered.");
         }
       } else {
-        console.log("User signed up successfully!", data);
-        toast.success("Welcome to Cardify! Please check your email to verify your account.");
-
-        // Create user profile
+        toast.success("Welcome to Cardify! Check your email to verify your account.");
         const { user } = data;
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([{ id: user.id, first_name: firstName }]);
-
         if (profileError) {
           toast.error(`Error creating profile: ${profileError.message}`);
         } else {
@@ -75,11 +66,7 @@ function Welcome() {
         }
       }
     } else {
-      // Handle login
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast.error(`Error logging in: ${error.message}`);
       } else {
@@ -118,39 +105,46 @@ function Welcome() {
 
   const cross = (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
     </svg>
   );  
 
   // If showLogin is false, display the simple welcome page
   if (!showLogin) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center relative">
+      // Changed container styles:
+      <div className="relative overflow-y-auto flex flex-col">
         <ToastContainer position="top-center" autoClose={3000} />
-
-        <div className="absolute top-4 right-4 z-50">
+  
+        <div className="fixed top-4 right-4 z-50">
           <BackgroundButton
-            text="Log in/Sign up"
-            bgColor={'bg-green-500 hover:bg-green-400'}
+            text="Get Started"
+            bgColor="bg-green-500 hover:bg-green-400"
             onClick={() => setShowLogin(true)}
           />
         </div>
-        
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 my-4">
-          Welcome to Cardify
-        </h1>
-
-        {/* Optional: Add an image or extra branding here */}
-        <img
-          src={WelcomeImage}
-          alt="Welcome"
-          className="hidden sm:block object-contain w-1/2"
-        />
-        <img
-          src={WelcomeMobile}
-          alt="Welcome Mobile"
-          className="block sm:hidden object-contain w-2/3 mt-4"
-        />
+  
+        {/* Welcome Section */}
+        <div className="h-[100dvh] flex flex-col items-center justify-center">
+          <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4">
+            Cardify
+          </h1>
+          <h2 className="text-2xl text-gray-600">
+            Your all-in-one study solution
+          </h2>
+        </div>
+  
+        {/* Features Section */}
+        <div className="h-[100dvh] flex flex-col items-center justify-center bg-gray-100">
+          <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 mb-4">
+            Features
+          </h2>
+          <p className="text-lg text-gray-600 max-w-md text-center px-4">
+            Create flashcards, track progress, and collaborate with classmates.
+            <br />
+            Cardify is built to help you succeed.
+          </p>
+        </div>
       </div>
     );
   }
@@ -162,14 +156,11 @@ function Welcome() {
 
       {/* Top bar container */}
       <div className="absolute top-4 w-full flex items-center justify-between px-4 z-50">
-        {/* Red X button on the left */}
         <BackgroundButton
           image={cross}
           bgColor="bg-red-500 hover:bg-red-400"
-          onClick={() => setShowLogin(false)}  // Return to the Welcome screen
+          onClick={() => setShowLogin(false)}
         />
-
-        {/* Sign In / Sign Up toggle button on the right */}
         <BackgroundButton
           text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
           bgColor="bg-green-500 hover:bg-green-400"
@@ -192,7 +183,7 @@ function Welcome() {
 
       <div className="w-full sm:w-1/2 flex flex-col justify-center relative">
         <div className="w-[90%] sm:w-4/5 mx-auto sm:p-8">
-          <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-300">
+          <h2 className="text-3xl font-semibold text-gray-800">
             {isSignUp ? "Sign Up" : "Sign In"}
           </h2>
 
@@ -214,14 +205,14 @@ function Welcome() {
           </div>
 
           <div className="mt-8">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600">
               {isSignUp ? "Sign up with your email address" : "Sign in with your email address"}
             </p>
 
             {/* First Name Input */}
             {isSignUp && (
               <div className="mt-4">
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 ml-4">
                   First Name
                 </label>
                 <FancyInput 
@@ -234,7 +225,7 @@ function Welcome() {
 
             {/* Email Input */}
             <div className="mt-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 ml-4">
                 Email address
               </label>
               <FancyInput 
@@ -246,7 +237,7 @@ function Welcome() {
 
             {/* Password Input */}
             <div className="mt-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 ml-4">
                 Password
               </label>
               <FancyInput 
@@ -259,7 +250,7 @@ function Welcome() {
             {/* Confirm Password for Sign Up */}
             {isSignUp && (
               <div className="mt-4">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-500 ml-4">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 ml-4">
                   Confirm Password
                 </label>
                 <FancyInput
@@ -309,7 +300,8 @@ function FancyInput({ type, value, onChange }) {
       placeholder={`Enter ${type}...`}
       value={value}
       onChange={onChange}
-      className="w-full px-4 py-2 text-left rounded-full bg-gray-500 text-white background-shadow background-focus focus:outline-none"
+      className="w-full px-4 py-2 text-left rounded-full bg-gray-500 text-white
+                 focus:outline-none background-shadow background-focus"
     />
   );
 }

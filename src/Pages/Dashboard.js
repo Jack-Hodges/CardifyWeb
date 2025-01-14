@@ -179,8 +179,10 @@ function Dashboard() {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
   };
 
+  console.log(theme.image);
+
   return (
-    <div className="fixed w-screen h-full overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen h-[100dvh] overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       {/* Header Section */}
       <TitleBar text="Dashboard" user={user}
         content={
