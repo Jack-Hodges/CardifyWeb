@@ -160,6 +160,7 @@ function FlashcardQuiz() {
                 <Card
                   frontContent={cards[currentCardIndex]?.question}
                   backContent={cards[currentCardIndex]?.answer}
+                  imageUrl={cards[currentCardIndex]?.image_url}
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
