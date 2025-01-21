@@ -14,7 +14,7 @@ import SubjectList from '../components/Subject/SubjectList';
 import CustomModal from "../components/Modal/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 
-function CreateCards() {
+function Create() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -123,7 +123,7 @@ function CreateCards() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-hidden" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Create" user={user}/>
 
       <div className="block sm:flex w-full h-full">
@@ -306,4 +306,4 @@ function CreateCards() {
   );
 }
 
-export default CreateCards;
+export default Create;

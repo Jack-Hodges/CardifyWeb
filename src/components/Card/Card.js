@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import IconButtons from './IconButtons'; // Import the IconButtons component
-import EditModal from './EditModal'; // Import the EditModal component
+/** 1) Import math plugins **/
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+
+import IconButtons from './IconButtons'; 
+import EditModal from './EditModal';
 import Modal from '../Modal/Modal';
 
 function Card({
@@ -19,77 +23,64 @@ function Card({
   user,
   themeShadow = 'background-shadow-new',
 }) {
-  const [newFrontContent, setNewFrontContent] = useState(frontContent); // Card content state
-  const [newBackContent, setNewBackContent] = useState(backContent); // Card content state
-  const [modalFrontContent, setModalFrontContent] = useState(frontContent); // Modal content state
-  const [modalBackContent, setModalBackContent] = useState(backContent); // Modal content state
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State to control delete modal visibility
-  const [alignment] = useState('center'); // Default alignment is 'center'
+  const [newFrontContent, setNewFrontContent] = useState(frontContent);
+  const [newBackContent, setNewBackContent] = useState(backContent);
+  const [modalFrontContent, setModalFrontContent] = useState(frontContent);
+  const [modalBackContent, setModalBackContent] = useState(backContent);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [alignment] = useState('center');
 
-  // Update the modal content state when the card changes (e.g., new card is selected)
   useEffect(() => {
     setNewFrontContent(frontContent);
     setNewBackContent(backContent);
-    setModalFrontContent(frontContent); // Reset modal content to match card content
-    setModalBackContent(backContent); // Reset modal content to match card content
+    setModalFrontContent(frontContent);
+    setModalBackContent(backContent);
   }, [frontContent, backContent]);
 
   const handleEditClick = () => {
-    setIsModalOpen(true); // Open the modal
+    setIsModalOpen(true);
   };
 
   const handleSave = () => {
-    // Update the card content state with the modal content when Save is clicked
     setNewFrontContent(modalFrontContent);
     setNewBackContent(modalBackContent);
-    onUpdateCard(modalFrontContent, modalBackContent); // Call update function to save in parent
-    setIsModalOpen(false); // Close the modal
+    onUpdateCard(modalFrontContent, modalBackContent);
+    setIsModalOpen(false);
   };
 
   const handleCancel = () => {
-    // Close the modal without saving changes
-    setModalFrontContent(newFrontContent); // Reset modal content to match the current card state
-    setModalBackContent(newBackContent); // Reset modal content to match the current card state
-    setIsModalOpen(false); // Close the modal
+    setModalFrontContent(newFrontContent);
+    setModalBackContent(newBackContent);
+    setIsModalOpen(false);
   };
 
   const handleCardClick = () => {
     if (setFlipped) {
       if (!isDeleteModalOpen) {
-        setFlipped(!flipped); // Flip the card only when delete modal is not open
+        setFlipped(!flipped);
       }
     }
   };
 
-  // Handle delete card confirmation
   const handleDeleteClick = (event) => {
-    event.stopPropagation(); // Prevent the card from flipping
-    setIsDeleteModalOpen(true); // Open the delete confirmation modal
+    event.stopPropagation();
+    setIsDeleteModalOpen(true);
   };
 
   const confirmDeleteCard = (event) => {
-    if (event) {
-      event.stopPropagation(); // Stop propagation when confirming deletion
-    }
-
-    onDeleteCard(cardId); // Pass the cardId back to CreateCards.js to handle the deletion
-
-    setIsDeleteModalOpen(false); // Close the delete confirmation modal
+    if (event) event.stopPropagation();
+    onDeleteCard(cardId);
+    setIsDeleteModalOpen(false);
   };
 
   const cancelDelete = (event) => {
-    // Guard for undefined event
-    if (event) {
-      event.stopPropagation(); // Stop propagation when cancelling deletion
-    }
-
-    setIsDeleteModalOpen(false); // Close the delete confirmation modal without deleting
+    if (event) event.stopPropagation();
+    setIsDeleteModalOpen(false);
   };
 
   var frontAlign = 'text-center';
   var backAlign = 'text-center';
-
   if (user) {
     frontAlign = user.frontAlign;
     backAlign = user.backAlign;
@@ -141,10 +132,10 @@ function Card({
         isOpen={isModalOpen}
         onClose={handleCancel}
         onSave={handleSave}
-        frontContent={modalFrontContent} // Pass the modal state for question
-        backContent={modalBackContent} // Pass the modal state for answer
-        setFrontContent={setModalFrontContent} // Update modal state for question
-        setBackContent={setModalBackContent} // Update modal state for answer
+        frontContent={modalFrontContent}
+        backContent={modalBackContent}
+        setFrontContent={setModalFrontContent}
+        setBackContent={setModalBackContent}
         text="Edit Question and Answer"
         alignment={alignment}
       />
@@ -185,7 +176,7 @@ function CardContent({
         backfaceVisibility: 'hidden',
         transform: rotate,
         whiteSpace: 'pre-wrap',
-      }} // Add whiteSpace styling
+      }}
     >
       {back && (
         <p className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">
@@ -193,9 +184,19 @@ function CardContent({
         </p>
       )}
 
+      {/*
+        2) Enhance your ReactMarkdown by adding:
+           - remarkPlugins={[remarkMath]}
+           - rehypePlugins={[rehypeRaw, rehypeKatex]}
+         This way, $inline math$ and $$block math$$
+         are rendered nicely by KaTeX.
+      */}
       <ReactMarkdown
-        rehypePlugins={[rehypeRaw]}
-        allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+        remarkPlugins={[remarkMath]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
+        // Optionally remove allowedElements if you want math or more HTML tags
+        // If you keep 'allowedElements', you'll need to add 'code', 'span', 'div', etc. 
+        // allowedElements={['p','strong','em','u','i','b']}
         unwrapDisallowed={true}
         components={{
           u: ({ node, ...props }) => <u {...props} />,

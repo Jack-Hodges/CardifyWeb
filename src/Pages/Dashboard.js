@@ -179,8 +179,6 @@ function Dashboard() {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
   };
 
-  console.log(theme.image);
-
   return (
     <div className="w-screen h-[100dvh] overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
       {/* Header Section */}

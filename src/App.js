@@ -1,4 +1,4 @@
-import CreateCards from './Pages/CreateCards';
+import Create from './Pages/Create';
 import Welcome from './Pages/Welcome';
 import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
@@ -23,7 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Welcome />} /> {/* Default route */}
           <Route path="/home" element={<Home />} />
-          <Route path="/create" element={<CreateCards />} />
+          <Route path="/create" element={<Create />} />
           <Route path="/practice" element={<Practice />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/memory" element={<Memory />} />

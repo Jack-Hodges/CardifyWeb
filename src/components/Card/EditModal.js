@@ -1,6 +1,12 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
+// MathQuill
+import { EditableMathField, addStyles } from 'react-mathquill';
+
 import BackgroundButton from '../Elements/BackgroundButton';
+
+// Make sure MathQuill CSS is loaded
+addStyles();
 
 function EditModal({
   isOpen,
@@ -13,38 +19,51 @@ function EditModal({
   text,
   alignment,
 }) {
-  const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
-  const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  // Whether to show text or math for Question
+  const [frontIsMathMode, setFrontIsMathMode] = useState(false);
+  // Whether to show text or math for Answer
+  const [backIsMathMode, setBackIsMathMode] = useState(false);
 
   const frontTextAreaRef = useRef(null);
   const backTextAreaRef = useRef(null);
 
-  // Handle the modal appearing (fade in) when isOpen changes
   useEffect(() => {
     if (isOpen) {
-      setIsVisible(true); // Show modal and trigger the fade-in
+      setIsVisible(true);
     } else if (!isClosing) {
-      setIsVisible(false); // Hide modal after animation if not closing
+      setIsVisible(false);
     }
   }, [isOpen, isClosing]);
 
-  // Handle close animation
   const handleClose = () => {
-    setIsClosing(true); // Start the closing animation
+    setIsClosing(true);
     setTimeout(() => {
-      setIsClosing(false); // Reset closing state after animation
-      onClose(); // Trigger the actual onClose callback
-      setIsVisible(false); // Hide the modal after it fades out
-    }, 300); // 300ms to match the duration of the closing animation
+      setIsClosing(false);
+      onClose();
+      setIsVisible(false);
+    }, 300);
   };
 
   const handleSave = () => {
-    onSave(frontContent, backContent); // Pass the updated content back to parent component
-    handleClose(); // Close the modal after saving
+    onSave(frontContent, backContent);
+    handleClose();
   };
 
-  // Formatting Functions
+  // -----------------------------
+  //  Formatting logic (B, I, U) for TEXT mode only
+  // -----------------------------
   const applyFormatting = (field, openSyntax, closeSyntax = openSyntax) => {
+    // Only apply formatting if we are in TEXT mode
+    if (
+      (field === 'front' && frontIsMathMode) ||
+      (field === 'back' && backIsMathMode)
+    ) {
+      return; // Do nothing if in Math mode
+    }
+
     const textarea =
       field === 'front' ? frontTextAreaRef.current : backTextAreaRef.current;
     const content = field === 'front' ? frontContent : backContent;
@@ -98,61 +117,60 @@ function EditModal({
   };
 
   const handleUnderlineClick = (field) => {
+    // For text, we use <u>...</u>
     applyFormatting(field, '<u>', '</u>');
   };
 
-  const handleKeyDown = (e, setContent, content) => {
+  // Logic for bullet points if you want to keep it for text mode
+  const handleKeyDown = (e, setContent, content, isMathMode) => {
+    if (isMathMode) return; // If in math mode, ignore bullet logic
+
     const textArea = e.target;
     const start = textArea.selectionStart;
     const end = textArea.selectionEnd;
     const value = content;
 
-    // Check if the pressed key is ' ' (space) and the previous character was '-'
+    // 1) If the pressed key is ' ' (space) and the previous character was '-'
     if (e.key === ' ' && value.substring(start - 1, start) === '-') {
-      e.preventDefault(); // Prevent the default action of the space
-
+      e.preventDefault();
       const newValue =
-        value.substring(0, start - 1) + '• ' + value.substring(end); // Replace '- ' with '• '
-
-      setContent(newValue); // Update the content state
-
+        value.substring(0, start - 1) + '• ' + value.substring(end);
+      setContent(newValue);
       setTimeout(() => {
-        textArea.setSelectionRange(start + 1, start + 1); // Move the cursor after the bullet point
+        textArea.setSelectionRange(start + 1, start + 1);
       }, 0);
-    } else if (e.key === 'Enter') {
-      // Check if the line starts with a bullet point (•) and Enter is pressed
-      const lineStart = value.lastIndexOf('\n', start - 1) + 1; // Find the start of the current line
-      const currentLine = value.substring(lineStart, start); // Extract the current line's text
+    }
+    // 2) If user presses Enter after a bullet line
+    else if (e.key === 'Enter') {
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+      const currentLine = value.substring(lineStart, start);
 
       if (currentLine.startsWith('• ')) {
         e.preventDefault();
-
-        // Insert a new bullet point at the start of the new line
         const newValue =
           value.substring(0, start) + '\n• ' + value.substring(end);
-
         setContent(newValue);
-
         setTimeout(() => {
-          textArea.setSelectionRange(start + 3, start + 3); // Move the cursor to the new bullet point line
+          textArea.setSelectionRange(start + 3, start + 3);
         }, 0);
       }
     }
   };
 
-  if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
+  // Don’t render if modal is hidden and not in closing animation
+  if (!isVisible && !isClosing) return null;
 
   return ReactDOM.createPortal(
     <div
       className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
         isClosing ? 'opacity-0' : 'opacity-100'
       }`}
-      onClick={(e) => e.stopPropagation()} // Prevent modal clicks from triggering the card click
+      onClick={(e) => e.stopPropagation()}
     >
       {/* Black Background */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
-        onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
+        onClick={(e) => e.stopPropagation()}
       ></div>
 
       {/* Modal Content */}
@@ -160,11 +178,13 @@ function EditModal({
         className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
           isClosing ? 'animate-pop-down' : 'animate-pop-up'
         }`}
-        onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
 
-        {/* Question Input */}
+        {/* =========================
+             QUESTION Input
+        ========================== */}
         <div className="mb-6">
           <label
             htmlFor="question"
@@ -173,7 +193,7 @@ function EditModal({
             Question
           </label>
 
-          {/* Formatting Buttons for Question */}
+          {/* Formatting Buttons */}
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('front')}
@@ -193,20 +213,53 @@ function EditModal({
             >
               <u>U</u>
             </button>
+
+            {/* Toggle between Text and Math */}
+            <button
+              onClick={() => setFrontIsMathMode((prev) => !prev)}
+              className="bg-gray-100 w-12 h-8 rounded-md sm:hover:bg-gray-200"
+              title="Toggle Math Mode"
+            >
+              Math
+            </button>
           </div>
 
-          <textarea
-            ref={frontTextAreaRef}
-            id="question"
-            value={frontContent}
-            onChange={(e) => setFrontContent(e.target.value)} // Update the front content
-            onKeyDown={(e) => handleKeyDown(e, setFrontContent, frontContent)} // Handle key press events for front content
-            className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
-            placeholder="Enter the question here"
-          />
+          {/* Actual INPUT: text vs. math */}
+          {frontIsMathMode ? (
+            // MATH MODE
+            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
+              <EditableMathField
+                latex={frontContent}
+                onChange={(mathField) => {
+                  setFrontContent(mathField.latex());
+                }}
+                style={{
+                  minHeight: '4rem',
+                  width: '100%',
+                  backgroundColor: 'transparent',
+                  color: 'inherit',
+                }}
+              />
+            </div>
+          ) : (
+            // TEXT MODE
+            <textarea
+              ref={frontTextAreaRef}
+              id="question"
+              value={frontContent}
+              onChange={(e) => setFrontContent(e.target.value)}
+              onKeyDown={(e) =>
+                handleKeyDown(e, setFrontContent, frontContent, frontIsMathMode)
+              }
+              className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+              placeholder="Enter the question here"
+            />
+          )}
         </div>
 
-        {/* Answer Input */}
+        {/* =========================
+             ANSWER Input
+        ========================== */}
         <div className="mb-6">
           <label
             htmlFor="answer"
@@ -215,7 +268,7 @@ function EditModal({
             Answer
           </label>
 
-          {/* Formatting Buttons for Answer */}
+          {/* Formatting Buttons */}
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('back')}
@@ -235,27 +288,66 @@ function EditModal({
             >
               <u>U</u>
             </button>
+
+            {/* Toggle between Text and Math */}
+            <button
+              onClick={() => setBackIsMathMode((prev) => !prev)}
+              className="bg-gray-100 w-12 h-8 rounded-md sm:hover:bg-gray-200"
+              title="Toggle Math Mode"
+            >
+              Math
+            </button>
           </div>
 
-          <textarea
-            ref={backTextAreaRef}
-            id="answer"
-            value={backContent}
-            onChange={(e) => setBackContent(e.target.value)} // Update the back content
-            onKeyDown={(e) => handleKeyDown(e, setBackContent, backContent)} // Handle key press events for back content
-            className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
-            placeholder="Enter the answer here"
-          />
+          {/* Actual INPUT: text vs. math */}
+          {backIsMathMode ? (
+            // MATH MODE
+            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
+              <EditableMathField
+                latex={backContent}
+                onChange={(mathField) => {
+                  setBackContent(mathField.latex());
+                }}
+                style={{
+                  minHeight: '4rem',
+                  width: '100%',
+                  backgroundColor: 'transparent',
+                  color: 'inherit',
+                }}
+              />
+            </div>
+          ) : (
+            // TEXT MODE
+            <textarea
+              ref={backTextAreaRef}
+              id="answer"
+              value={backContent}
+              onChange={(e) => setBackContent(e.target.value)}
+              onKeyDown={(e) =>
+                handleKeyDown(e, setBackContent, backContent, backIsMathMode)
+              }
+              className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+              placeholder="Enter the answer here"
+            />
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="flex justify-end space-x-4">
-          <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={handleClose} />
-          <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSave} />
+          <BackgroundButton
+            text="Cancel"
+            bgColor="bg-red-500 hover:bg-red-400"
+            onClick={handleClose}
+          />
+          <BackgroundButton
+            text="Save"
+            bgColor="bg-blue-500 hover:bg-blue-400"
+            onClick={handleSave}
+          />
         </div>
       </div>
     </div>,
-    document.body // Render the modal into the body of the document
+    document.body
   );
 }
 

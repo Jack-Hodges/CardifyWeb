@@ -9,8 +9,8 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
-    const [subjectColor, setLocalSubjectColor] = useState(subject?.bgCol ?? 'red-500');
-    const [subjectIntensity, setSubjectIntensity] = useState(subject?.intensity || 500);
+    const [subjectColor, setLocalSubjectColor] = useState(subject?.colourText ?? 'red-500');
+    const [subjectIntensity, setSubjectIntensity] = useState(subject?.colourIntensity || 500);
     const [filteredCollections, setFilteredCollections] = useState([]);
     const [collections, setCollections] = useState([]);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -33,8 +33,8 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     useEffect(() => {
         if (subject) {
             setLocalSubjectName(subject.name);
-            setLocalSubjectColor(subject.bgCol);
-            setSubjectIntensity(subject.intensity || 500);
+            setLocalSubjectColor(subject.colourText);
+            setSubjectIntensity(subject.colourIntensity || 500);
 
             if (subject.collection_id) {
                 const selected = collections.find((collection) => collection.id === subject.collection_id);
@@ -89,6 +89,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     };
 
     const handleSave = () => {
+        console.log(subjectColor);
         if (subjectName !== '') {
             onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
             handleClose();
