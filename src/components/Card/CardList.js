@@ -19,9 +19,10 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
     setIsModalOpen(true); // Open the modal for adding a new flashcard
   };
 
-  const handleSaveNewCard = () => {
-    onAddNewCard(newFrontContent, newBackContent); // Pass new flashcard data to parent
-    setIsModalOpen(false); // Close the modal after saving
+  const handleSaveNewCard = (front, back, file) => {
+    // Forward all three (front, back, file) to parent
+    onAddNewCard(front, back, file);
+    setIsModalOpen(false);
   };
 
   const plusIcon = (

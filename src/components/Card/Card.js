@@ -22,6 +22,7 @@ function Card({
   practice,
   user,
   themeShadow = 'background-shadow-new',
+  imageUrl
 }) {
   const [newFrontContent, setNewFrontContent] = useState(frontContent);
   const [newBackContent, setNewBackContent] = useState(backContent);
@@ -124,6 +125,7 @@ function Card({
           practice={practice}
           back={true}
           themeShadow={themeShadow}
+          imageUrl={imageUrl}
         />
       </div>
 
@@ -160,6 +162,7 @@ export default Card;
 function CardContent({
   rotate,
   content,
+  imageUrl,        // <-- pass this if you want an image on the back
   onClickDelete,
   onClickEdit,
   edit,
@@ -171,7 +174,9 @@ function CardContent({
 }) {
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none ${themeShadow} ${alignment}`}
+      className={`absolute inset-0 flex items-center justify-center 
+                  bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none 
+                  ${themeShadow} ${alignment}`}
       style={{
         backfaceVisibility: 'hidden',
         transform: rotate,
@@ -184,27 +189,30 @@ function CardContent({
         </p>
       )}
 
-      {/*
-        2) Enhance your ReactMarkdown by adding:
-           - remarkPlugins={[remarkMath]}
-           - rehypePlugins={[rehypeRaw, rehypeKatex]}
-         This way, $inline math$ and $$block math$$
-         are rendered nicely by KaTeX.
+      {/* 
+        If this is the BACK side and we have an imageUrl,
+        display the image. Otherwise, display Markdown text.
       */}
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeRaw, rehypeKatex]}
-        // Optionally remove allowedElements if you want math or more HTML tags
-        // If you keep 'allowedElements', you'll need to add 'code', 'span', 'div', etc. 
-        // allowedElements={['p','strong','em','u','i','b']}
-        unwrapDisallowed={true}
-        components={{
-          u: ({ node, ...props }) => <u {...props} />,
-        }}
-        className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 font-bold ${align}`}
-      >
-        {content}
-      </ReactMarkdown>
+      {back && imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="Answer Image"
+          className="max-w-full max-h-full object-contain"
+        />
+      ) : (
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeRaw, rehypeKatex]}
+          unwrapDisallowed={true}
+          components={{
+            u: ({ node, ...props }) => <u {...props} />,
+          }}
+          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+                     font-bold ${align}`}
+        >
+          {content}
+        </ReactMarkdown>
+      )}
 
       {edit && (
         <div>
@@ -231,6 +239,7 @@ function CardContent({
           <IconButtons onEditClick={onClickEdit} />
         </div>
       )}
+
       {practice && (
         <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
           {/* Practice Icon */}

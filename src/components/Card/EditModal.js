@@ -23,12 +23,21 @@ function EditModal({
   const [isClosing, setIsClosing] = useState(false);
 
   // Whether to show text or math for Question
+  // (unchanged for front)
   const [frontIsMathMode, setFrontIsMathMode] = useState(false);
-  // Whether to show text or math for Answer
-  const [backIsMathMode, setBackIsMathMode] = useState(false);
 
+  /**
+   * Replace the old "backIsMathMode" boolean with a "backMode" string.
+   * It can be: "text", "math", or "image".
+   */
+  const [backMode, setBackMode] = useState('text');
+
+  // Refs for textareas
   const frontTextAreaRef = useRef(null);
   const backTextAreaRef = useRef(null);
+
+  // State for selected file (only for answer side)
+  const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,21 +56,33 @@ function EditModal({
     }, 300);
   };
 
+  // Called when user clicks "Save"
   const handleSave = () => {
-    onSave(frontContent, backContent);
+    // Pass the selected file (or null) to the parent
+    onSave(frontContent, backContent, selectedFile);
     handleClose();
+  };
+
+  // Handle user selecting a file
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    } else {
+      setSelectedFile(null);
+    }
   };
 
   // -----------------------------
   //  Formatting logic (B, I, U) for TEXT mode only
   // -----------------------------
   const applyFormatting = (field, openSyntax, closeSyntax = openSyntax) => {
-    // Only apply formatting if we are in TEXT mode
+    // If front is the field, check frontIsMathMode
+    // If back is the field, check that backMode === "text"
     if (
       (field === 'front' && frontIsMathMode) ||
-      (field === 'back' && backIsMathMode)
+      (field === 'back' && backMode !== 'text')
     ) {
-      return; // Do nothing if in Math mode
+      return; // Do nothing if in a non-text mode
     }
 
     const textarea =
@@ -117,20 +138,21 @@ function EditModal({
   };
 
   const handleUnderlineClick = (field) => {
-    // For text, we use <u>...</u>
     applyFormatting(field, '<u>', '</u>');
   };
 
-  // Logic for bullet points if you want to keep it for text mode
+  // Logic for bullet points in TEXT mode
   const handleKeyDown = (e, setContent, content, isMathMode) => {
-    if (isMathMode) return; // If in math mode, ignore bullet logic
+    // For front: isMathMode = frontIsMathMode
+    // For back: isMathMode = (backMode === "math")
+    if (isMathMode) return;
 
     const textArea = e.target;
     const start = textArea.selectionStart;
     const end = textArea.selectionEnd;
     const value = content;
 
-    // 1) If the pressed key is ' ' (space) and the previous character was '-'
+    // 1) If the pressed key is ' ' (space) and the previous char was '-'
     if (e.key === ' ' && value.substring(start - 1, start) === '-') {
       e.preventDefault();
       const newValue =
@@ -183,7 +205,7 @@ function EditModal({
         <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
 
         {/* =========================
-             QUESTION Input
+             QUESTION Input (Unchanged)
         ========================== */}
         <div className="mb-6">
           <label
@@ -197,27 +219,26 @@ function EditModal({
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('front')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              className="bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200"
             >
               <b>B</b>
             </button>
             <button
               onClick={() => handleItalicClick('front')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              className="bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200"
             >
               <i>I</i>
             </button>
             <button
               onClick={() => handleUnderlineClick('front')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              className="bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200"
             >
               <u>U</u>
             </button>
-
-            {/* Toggle between Text and Math */}
+            {/* Toggle Math Mode for question */}
             <button
               onClick={() => setFrontIsMathMode((prev) => !prev)}
-              className="bg-gray-100 w-12 h-8 rounded-md sm:hover:bg-gray-200"
+              className="bg-gray-100 w-12 h-8 rounded-md hover:bg-gray-200"
               title="Toggle Math Mode"
             >
               Math
@@ -270,38 +291,71 @@ function EditModal({
 
           {/* Formatting Buttons */}
           <div className="mb-2 flex space-x-2">
+            {/* If backMode === "text", we can do bold/italic/underline */}
             <button
               onClick={() => handleBoldClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              disabled={backMode !== 'text'}
+              className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
+                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <b>B</b>
             </button>
             <button
               onClick={() => handleItalicClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              disabled={backMode !== 'text'}
+              className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
+                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <i>I</i>
             </button>
             <button
               onClick={() => handleUnderlineClick('back')}
-              className="bg-gray-100 w-8 h-8 rounded-md sm:hover:bg-gray-200"
+              disabled={backMode !== 'text'}
+              className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
+                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
               <u>U</u>
             </button>
 
-            {/* Toggle between Text and Math */}
+            {/* Toggle Math Mode for answer */}
             <button
-              onClick={() => setBackIsMathMode((prev) => !prev)}
-              className="bg-gray-100 w-12 h-8 rounded-md sm:hover:bg-gray-200"
-              title="Toggle Math Mode"
+              onClick={() => setBackMode('math')}
+              className={`bg-gray-100 w-12 h-8 rounded-md hover:bg-gray-200 ${
+                backMode === 'math' ? 'bg-green-200' : ''
+              }`}
+              title="Math Mode"
             >
               Math
             </button>
+
+            {/* Toggle Image Mode for answer */}
+            <button
+              onClick={() => setBackMode('image')}
+              className={`bg-gray-100 w-12 h-8 rounded-md hover:bg-gray-200 ${
+                backMode === 'image' ? 'bg-green-200' : ''
+              }`}
+              title="Image Mode"
+            >
+              Image
+            </button>
+
+            {/* (Optionally) a button to go back to text mode */}
+            <button
+              onClick={() => setBackMode('text')}
+              className={`bg-gray-100 w-12 h-8 rounded-md hover:bg-gray-200 ${
+                backMode === 'text' ? 'bg-green-200' : ''
+              }`}
+              title="Text Mode"
+            >
+              Text
+            </button>
           </div>
 
-          {/* Actual INPUT: text vs. math */}
-          {backIsMathMode ? (
-            // MATH MODE
+          {/* Conditional Rendering based on backMode */}
+          {backMode === 'math' && (
             <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
               <EditableMathField
                 latex={backContent}
@@ -316,19 +370,34 @@ function EditModal({
                 }}
               />
             </div>
-          ) : (
-            // TEXT MODE
+          )}
+
+          {backMode === 'text' && (
             <textarea
               ref={backTextAreaRef}
               id="answer"
               value={backContent}
               onChange={(e) => setBackContent(e.target.value)}
               onKeyDown={(e) =>
-                handleKeyDown(e, setBackContent, backContent, backIsMathMode)
+                handleKeyDown(e, setBackContent, backContent, backMode === 'math')
               }
               className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
               placeholder="Enter the answer here"
             />
+          )}
+
+          {backMode === 'image' && (
+            <div className="mt-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="text-gray-600 dark:text-gray-200"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                (Upload an image for the answer)
+              </p>
+            </div>
           )}
         </div>
 

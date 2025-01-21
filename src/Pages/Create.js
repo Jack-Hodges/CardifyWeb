@@ -79,8 +79,18 @@ function Create() {
     updatePopupState("create_popup", true); // Update Supabase
   };
 
-  const handleAddNewCard = async (newFrontContent, newBackContent) => {
-    await addNewCard(cards, newFrontContent, newBackContent, setCards, subject.id, user.id);
+  const handleAddNewCard = async (newFrontContent, newBackContent, file) => {
+    console.log("File is: ", file);
+    await addNewCard(
+      cards,
+      newFrontContent,
+      newBackContent,
+      setCards,
+      subject.id,
+      user.id,
+      file  // pass it here
+    );
+    
     const updatedCards = await fetchCards(subject.id);
     sortCardsById(updatedCards);
     setCards(updatedCards);
@@ -103,8 +113,10 @@ function Create() {
     setIsSubjectListModalOpen(true); // Open SubjectList modal
   };
 
-  const handleSaveNewCard = () => {
-    handleAddNewCard(newFrontContent, newBackContent);
+  const handleSaveNewCard = (front, back, file) => {
+    // Now pass all three (including 'file') to handleAddNewCard
+    console.log("Save file is: ", file);
+    handleAddNewCard(front, back, file);
     setIsModalOpen(false);
     setNewFrontContent('');
     setNewBackContent('');
@@ -142,6 +154,7 @@ function Create() {
                 <Card
                   frontContent={cards[currentCardIndex]?.question}
                   backContent={cards[currentCardIndex]?.answer}
+                  imageUrl={cards[currentCardIndex]?.image_url}
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
