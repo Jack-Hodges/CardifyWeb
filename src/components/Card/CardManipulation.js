@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
  * Utility function: compress an image file in the browser,
  * returning a dataURL (Base64) at ~maxWidth and ~quality.
  */
-async function compressAndConvertToDataURL(file, maxWidth = 400, quality = 0.7) {
+async function compressAndConvertToDataURL(file, maxWidth = 600, quality = 0.5) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = function (event) {

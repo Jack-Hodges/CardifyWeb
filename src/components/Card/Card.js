@@ -197,7 +197,7 @@ function CardContent({
         <img
           src={imageUrl}
           alt="Answer Image"
-          className="max-w-full max-h-full object-contain"
+          className="w-full h-4/5 object-contain"
         />
       ) : (
         <ReactMarkdown
