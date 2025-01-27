@@ -26,7 +26,7 @@ function Create() {
   const [newBackContent, setNewBackContent] = useState('');
   const [selectedSort, setSelectedSort] = useState('5');
   const [generateTerm, setGenerateTerm] = useState('');
-  const [createPopUp, setCreatePopUp] = useState(false);
+  const [createPopUp, setCreatePopUp] = useState(true);
   const [generateFlash, setGenerateFlash] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -46,8 +46,8 @@ function Create() {
       return;
     }
 
-    if (!popupStates?.create_popup) {
-      setCreatePopUp(true); 
+    if (popupStates && popupStates.create_popup == true) {
+      setCreatePopUp(false); 
     }
 
     if (subject === null) {

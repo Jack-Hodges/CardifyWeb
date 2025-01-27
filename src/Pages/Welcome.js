@@ -129,10 +129,10 @@ function Welcome() {
         {/* Welcome Section */}
         <div className="h-[100dvh] flex flex-col items-center justify-center">
           <img src={BackgroundTitle} className="absolute w-full h-[100dvh]"/>
-          <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4">
+          <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4 dark:text-gray-300">
             Cardify
           </h1>
-          <h2 className="text-2xl text-gray-600">
+          <h2 className="text-2xl text-gray-600 dark:text-gray-200">
             Your all-in-one study solution
           </h2>
         </div>
@@ -208,14 +208,14 @@ function Welcome() {
           </div>
 
           <div className="mt-8">
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-200">
               {isSignUp ? "Sign up with your email address" : "Sign in with your email address"}
             </p>
 
             {/* First Name Input */}
             {isSignUp && (
               <div className="mt-4">
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 ml-4">
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
                   First Name
                 </label>
                 <FancyInput 
@@ -228,7 +228,7 @@ function Welcome() {
 
             {/* Email Input */}
             <div className="mt-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 ml-4">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
                 Email address
               </label>
               <FancyInput 
@@ -240,7 +240,7 @@ function Welcome() {
 
             {/* Password Input */}
             <div className="mt-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 ml-4">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
                 Password
               </label>
               <FancyInput 
@@ -253,7 +253,7 @@ function Welcome() {
             {/* Confirm Password for Sign Up */}
             {isSignUp && (
               <div className="mt-4">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 ml-4">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
                   Confirm Password
                 </label>
                 <FancyInput
