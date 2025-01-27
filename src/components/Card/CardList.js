@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useUser } from '../../UserContext';
 
-function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', themeShadow = 'background-shadow-new', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
+function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
@@ -50,7 +50,7 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
           {cards.map((card, index) => (
             <li 
               key={index} 
-              className={`bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer ${themeShadow}
+              className={`bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow-new
                 hover:scale-95 transition duration-300 w-[99%] sm:w-[95%]`}
               onClick={() => onCardClick(index)} // Handle card click
             >

@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import { EditableMathField, addStyles } from 'react-mathquill';
+import { EditableMathField } from 'react-mathquill';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
@@ -19,7 +15,6 @@ function Card({
   edit,
   practice,
   user,
-  themeShadow = 'background-shadow-new',
   imageUrl
 }) {
   const [modalFrontContent, setModalFrontContent] = useState(card.question);
@@ -97,7 +92,6 @@ function Card({
           align={frontAlign}
           practice={practice}
           back={false}
-          themeShadow={themeShadow}
         />
 
         {/* Back card */}
@@ -111,7 +105,6 @@ function Card({
           align={backAlign}
           practice={practice}
           back={true}
-          themeShadow={themeShadow}
           imageUrl={imageUrl}
         />
       </div>
@@ -154,13 +147,12 @@ function CardContent({
   back,
   alignment,
   align,
-  themeShadow = 'background-shadow-new',
 }) {
   return (
     <div
       className={`absolute inset-0 flex items-center justify-center 
                   bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none 
-                  ${themeShadow} ${alignment}`}
+                  background-shadow-new ${alignment}`}
       style={{
         backfaceVisibility: 'hidden',
         transform: rotate,

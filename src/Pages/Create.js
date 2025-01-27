@@ -3,7 +3,7 @@ import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchCards, updateCard, addNewCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
+import { fetchCards, addNewCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
@@ -159,7 +159,6 @@ function Create() {
                   onDeleteCard={handleDeleteCard}
                   edit={true}
                   user={user}
-                  themeShadow={'background-shadow-new'}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
@@ -177,7 +176,7 @@ function Create() {
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} themeShadow={'background-shadow-new'} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
+              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
             </div>
           </>
         ) : (
