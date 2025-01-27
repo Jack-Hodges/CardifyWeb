@@ -158,9 +158,7 @@ function FlashcardQuiz() {
                 </div>
               ) : cards.length > 0 ? (
                 <Card
-                  frontContent={cards[currentCardIndex]?.question}
-                  backContent={cards[currentCardIndex]?.answer}
-                  imageUrl={cards[currentCardIndex]?.image_url}
+                  card={cards[currentCardIndex]}
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
