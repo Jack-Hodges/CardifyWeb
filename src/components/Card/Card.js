@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-/** 1) Import math plugins **/
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
@@ -10,8 +9,7 @@ import EditModal from './EditModal';
 import Modal from '../Modal/Modal';
 
 function Card({
-  frontContent,
-  backContent,
+  card,
   flipped,
   setFlipped,
   animateFlip,
@@ -24,35 +22,27 @@ function Card({
   themeShadow = 'background-shadow-new',
   imageUrl
 }) {
-  const [newFrontContent, setNewFrontContent] = useState(frontContent);
-  const [newBackContent, setNewBackContent] = useState(backContent);
-  const [modalFrontContent, setModalFrontContent] = useState(frontContent);
-  const [modalBackContent, setModalBackContent] = useState(backContent);
+  const [modalFrontContent, setModalFrontContent] = useState(card.question);
+  const [modalBackContent, setModalBackContent] = useState(card.answer);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [alignment] = useState('center');
 
   useEffect(() => {
-    setNewFrontContent(frontContent);
-    setNewBackContent(backContent);
-    setModalFrontContent(frontContent);
-    setModalBackContent(backContent);
-  }, [frontContent, backContent]);
+    setModalFrontContent(card.question);
+    setModalBackContent(card.answer);
+  }, [card.question, card.answer]);
 
   const handleEditClick = () => {
     setIsModalOpen(true);
   };
 
   const handleSave = () => {
-    setNewFrontContent(modalFrontContent);
-    setNewBackContent(modalBackContent);
     onUpdateCard(modalFrontContent, modalBackContent);
     setIsModalOpen(false);
   };
 
   const handleCancel = () => {
-    setModalFrontContent(newFrontContent);
-    setModalBackContent(newBackContent);
     setIsModalOpen(false);
   };
 
@@ -104,7 +94,7 @@ function Card({
       >
         <CardContent
           rotate={'rotateY(0deg)'}
-          content={newFrontContent}
+          content={modalFrontContent}
           onClickDelete={handleDeleteClick}
           onClickEdit={handleEditClick}
           edit={edit}
@@ -117,7 +107,7 @@ function Card({
         {/* Back card */}
         <CardContent
           rotate={'rotateY(180deg)'}
-          content={newBackContent}
+          content={modalBackContent}
           onClickDelete={handleDeleteClick}
           onClickEdit={handleEditClick}
           edit={edit}
@@ -131,6 +121,7 @@ function Card({
 
       {/* Edit Modal */}
       <EditModal
+        card={card}
         isOpen={isModalOpen}
         onClose={handleCancel}
         onSave={handleSave}

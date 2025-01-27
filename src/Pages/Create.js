@@ -152,6 +152,7 @@ function Create() {
             <div className="w-full sm:w-[70%] h-[90%] sm:h-full flex flex-col sm:mt-10">
               <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
                 <Card
+                  card={cards[currentCardIndex]}
                   frontContent={cards[currentCardIndex]?.question}
                   backContent={cards[currentCardIndex]?.answer}
                   imageUrl={cards[currentCardIndex]?.image_url}
