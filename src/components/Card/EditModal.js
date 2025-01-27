@@ -19,9 +19,9 @@ function EditModal({
   const [isClosing, setIsClosing] = useState(false);
 
   // Front mode can be "text", "math", or "image"
-  const [frontMode, setFrontMode] = useState(0);
+  const [frontMode, setFrontMode] = useState('text');
   // Back mode can be "text", "math", or "image"
-  const [backMode, setBackMode] = useState(0);
+  const [backMode, setBackMode] = useState('text');
 
   // Refs for textareas
   const frontTextAreaRef = useRef(null);
@@ -189,9 +189,9 @@ function EditModal({
             </button>
 
             <button
-              onClick={() => setFrontMode(0)}
+              onClick={() => setFrontMode('text')}
               className={`bg-gray-100 w-[4rem] h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 0 ? 'bg-green-200' : ''
+                frontMode === 'text' ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -202,9 +202,9 @@ function EditModal({
               </div>
             </button>
             <button
-              onClick={() => setFrontMode(1)}
+              onClick={() => setFrontMode('math')}
               className={`bg-gray-100 w-18 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 1 ? 'bg-green-200' : ''
+                frontMode === 'math' ? 'bg-green-200' : ''
               }`}
             >
             <div className="flex items-center justify-between space-x-2 px-1">
@@ -215,9 +215,9 @@ function EditModal({
             </div>
             </button>
             <button
-              onClick={() => setFrontMode(2)}
+              onClick={() => setFrontMode('image')}
               className={`bg-gray-100 w-20 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 2 ? 'bg-green-200' : ''
+                frontMode === 'image' ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -314,9 +314,9 @@ function EditModal({
             </button>
 
             <button
-              onClick={() => setBackMode(0)}
+              onClick={() => setBackMode('text')}
               className={`bg-gray-100 w-[4rem] h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 0 ? 'bg-green-200' : ''
+                backMode === 'text' ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -327,9 +327,9 @@ function EditModal({
               </div>
             </button>
             <button
-              onClick={() => setBackMode(1)}
+              onClick={() => setBackMode('math')}
               className={`bg-gray-100 w-18 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 1 ? 'bg-green-200' : ''
+                backMode === 'math' ? 'bg-green-200' : ''
               }`}
             >
             <div className="flex items-center justify-between space-x-2 px-1">
@@ -340,9 +340,9 @@ function EditModal({
             </div>
             </button>
             <button
-              onClick={() => setBackMode(2)}
+              onClick={() => setBackMode('image')}
               className={`bg-gray-100 w-20 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 2 ? 'bg-green-200' : ''
+                backMode === 'image' ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
