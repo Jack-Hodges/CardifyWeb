@@ -216,6 +216,69 @@ export const updateCard = async (
 };
 
 /**
+ * Update a card's content (including an optional new image).
+ * Expects `card` to have:
+ *   - `id` (the primary key in DB)
+ *   - `question` (updated front content)
+ *   - `answer` (updated back content)
+ *   - `imageFile` (optional: new File object if user chose a new image)
+ *   - other fields as needed (e.g. subject_id, user_id, etc.)
+ */
+export const updateCardNew = async (card) => {
+  try {
+    let newImageUrl = card.image_url || null;
+
+    // If a new image file is present, compress & upload to Supabase.
+    if (card.imageFile) {
+      const compressedDataURL = await compressAndConvertToDataURL(card.imageFile);
+      const blob = dataURLToBlob(compressedDataURL);
+
+      // Derive file extension from the file's MIME type or assume '.jpg'
+      const ext = card.imageFile.type.split('/')[1] || 'jpg';
+      const fileName = `${uuidv4()}.${ext}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('FlashcardImages') // your bucket name
+        .upload(fileName, blob, { contentType: card.imageFile.type });
+
+      if (uploadError) {
+        console.error('Error uploading file:', uploadError);
+        // You could choose to bail out here or continue, depending on your app’s needs
+      } else {
+        // Retrieve the public URL for the newly uploaded image
+        const { data: publicUrlData } = supabase.storage
+          .from('FlashcardImages')
+          .getPublicUrl(fileName);
+        newImageUrl = publicUrlData?.publicUrl || null;
+      }
+    }
+
+    // Build the payload to update in DB
+    const updatePayload = {
+      question: card.question,
+      answer: card.answer,
+      image_url: newImageUrl,
+      frontMode: card.frontMode,
+      backMode: card.backMode,
+    };
+
+    // Now update the row in your `flashcards` table
+    const { error } = await supabase
+      .from('flashcards')
+      .update(updatePayload)
+      .eq('id', card.id);
+
+    if (error) {
+      console.error('Error updating card:', error);
+    } else {
+      console.log('Card updated successfully', updatePayload);
+    }
+  } catch (err) {
+    console.error('Unexpected error in updateCardNew:', err);
+  }
+};
+
+/**
  * Delete a card (from DB). 
  * Note: This doesn't remove the image from storage. 
  * If you want to remove the actual file, 

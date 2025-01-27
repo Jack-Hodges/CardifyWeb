@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { EditableMathField, addStyles } from 'react-mathquill';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
@@ -13,7 +14,6 @@ function Card({
   flipped,
   setFlipped,
   animateFlip,
-  onUpdateCard,
   cardId,
   onDeleteCard,
   edit,
@@ -35,11 +35,6 @@ function Card({
 
   const handleEditClick = () => {
     setIsModalOpen(true);
-  };
-
-  const handleSave = () => {
-    onUpdateCard(modalFrontContent, modalBackContent);
-    setIsModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -93,6 +88,7 @@ function Card({
         }}
       >
         <CardContent
+          card={card}
           rotate={'rotateY(0deg)'}
           content={modalFrontContent}
           onClickDelete={handleDeleteClick}
@@ -106,6 +102,7 @@ function Card({
 
         {/* Back card */}
         <CardContent
+          card={card}
           rotate={'rotateY(180deg)'}
           content={modalBackContent}
           onClickDelete={handleDeleteClick}
@@ -124,11 +121,6 @@ function Card({
         card={card}
         isOpen={isModalOpen}
         onClose={handleCancel}
-        onSave={handleSave}
-        frontContent={modalFrontContent}
-        backContent={modalBackContent}
-        setFrontContent={setModalFrontContent}
-        setBackContent={setModalBackContent}
         text="Edit Question and Answer"
         alignment={alignment}
       />
@@ -151,6 +143,7 @@ function Card({
 export default Card;
 
 function CardContent({
+  card,
   rotate,
   content,
   imageUrl,        // <-- pass this if you want an image on the back
@@ -184,26 +177,39 @@ function CardContent({
         If this is the BACK side and we have an imageUrl,
         display the image. Otherwise, display Markdown text.
       */}
-      {back && imageUrl ? (
-        <img
-          src={imageUrl}
-          alt="Answer Image"
-          className="w-full h-4/5 object-contain"
-        />
-      ) : (
-        <ReactMarkdown
-          remarkPlugins={[remarkMath]}
-          rehypePlugins={[rehypeRaw, rehypeKatex]}
-          unwrapDisallowed={true}
-          components={{
-            u: ({ node, ...props }) => <u {...props} />,
+      {back && card.backMode === 1 ? (
+      // -------------------------
+      // CASE A: back=true AND backMode=1
+      // Render something special if needed:
+      <div className="text-gray-700 dark:text-gray-200">
+
+        <EditableMathField
+          latex={content}
+          style={{
+            minHeight: '4rem',
+            width: '100%',
+            backgroundColor: 'transparent',
+            color: 'inherit',
+            border: 'none',
+            pointerEvents: 'none',
+            fontSize: '2.25rem' /* 36px */,
+            fontWeight: 'semibold',
+            color: 'inherit',
           }}
-          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-                     font-bold ${align}`}
-        >
-          {content}
-        </ReactMarkdown>
-      )}
+        />
+      </div>
+    ) : back && imageUrl ? (
+      // -------------------------
+      // CASE B: back=true AND we have an imageUrl
+      <img
+        src={imageUrl}
+        alt="Answer Image"
+        className="w-full h-4/5 object-contain"
+      />
+    ) : (
+      <p className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+        font-bold ${align}`}>{content}</p>
+    )}
 
       {edit && (
         <div>

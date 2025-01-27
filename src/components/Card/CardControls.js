@@ -42,11 +42,11 @@ function CardControls({
                     <div className="mr-2">
                         <FlashcardPDFExport flashcards={cards} />
                     </div>
-                    <BackgroundButton 
+                    {/* <BackgroundButton 
                         text="Generate Flashcards" 
                         bgColor={`${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`} 
                         onClick={generateClick}
-                    />
+                    /> */}
                 </div>
             )}
             

@@ -70,10 +70,6 @@ function Create() {
     }
   }, [subject, user, getUser]);
 
-  const handleUpdateCard = (updatedFrontContent, updatedBackContent) => {
-    updateCard(cards, currentCardIndex, updatedFrontContent, updatedBackContent, setCards, subject.id);
-  };
-
   const handleDismissPopup = () => {
     setCreatePopUp(false); 
     updatePopupState("create_popup", true); // Update Supabase
@@ -159,7 +155,6 @@ function Create() {
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
-                  onUpdateCard={handleUpdateCard}
                   cardId={cards[currentCardIndex]?.id}
                   onDeleteCard={handleDeleteCard}
                   edit={true}

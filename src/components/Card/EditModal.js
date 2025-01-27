@@ -2,26 +2,25 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
 import { EditableMathField, addStyles } from 'react-mathquill';
 import BackgroundButton from '../Elements/BackgroundButton';
+import { updateCardNew } from './CardManipulation';
 
 addStyles();
 
 function EditModal({
+  card,
   isOpen,
   onClose,
-  onSave,
-  frontContent,
-  backContent,
-  setFrontContent,
-  setBackContent,
   text,
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
   // Front mode can be "text", "math", or "image"
-  const [frontMode, setFrontMode] = useState('text');
+  const [frontContent, setFrontContent] = useState('');
+  const [frontMode, setFrontMode] = useState(0);
   // Back mode can be "text", "math", or "image"
-  const [backMode, setBackMode] = useState('text');
+  const [backContent, setBackContent] = useState('');
+  const [backMode, setBackMode] = useState(0);
 
   // Refs for textareas
   const frontTextAreaRef = useRef(null);
@@ -31,12 +30,18 @@ function EditModal({
   const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
+    if (card) {
+      setFrontMode(card.frontMode);
+      setFrontContent(card.question);
+      setBackMode(card.backMode);
+      setBackContent(card.answer);
+    }
     if (isOpen) {
       setIsVisible(true);
     } else if (!isClosing) {
       setIsVisible(false);
     }
-  }, [isOpen, isClosing]);
+  }, [isOpen, isClosing, card]);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -48,7 +53,11 @@ function EditModal({
   };
 
   const handleSave = () => {
-    onSave(frontContent, backContent, selectedFile);
+    card.question = frontContent;
+    card.answer = backContent;
+    card.frontMode = frontMode;
+    card.backMode = backMode;
+    updateCardNew(card);
     handleClose();
   };
 
@@ -60,8 +69,8 @@ function EditModal({
   // Helper for bold/italic/underline in "text" mode only
   const applyFormatting = (field, openSyntax, closeSyntax = openSyntax) => {
     const isInvalid =
-      (field === 'front' && frontMode !== 'text') ||
-      (field === 'back' && backMode !== 'text');
+      (field === 'front' && frontMode !== 0) ||
+      (field === 'back' && backMode !== 0);
     if (isInvalid) return;
 
     const textarea =
@@ -162,36 +171,36 @@ function EditModal({
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('front')}
-              disabled={frontMode !== 'text'}
+              disabled={frontMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                frontMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                frontMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <b>B</b>
             </button>
             <button
               onClick={() => handleItalicClick('front')}
-              disabled={frontMode !== 'text'}
+              disabled={frontMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                frontMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                frontMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <i>I</i>
             </button>
             <button
               onClick={() => handleUnderlineClick('front')}
-              disabled={frontMode !== 'text'}
+              disabled={frontMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                frontMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                frontMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <u>U</u>
             </button>
 
             <button
-              onClick={() => setFrontMode('text')}
+              onClick={() => setFrontMode(0)}
               className={`bg-gray-100 w-[4rem] h-8 rounded-md hover:bg-gray-200 ${
-                frontMode === 'text' ? 'bg-green-200' : ''
+                frontMode === 0 ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -202,9 +211,9 @@ function EditModal({
               </div>
             </button>
             <button
-              onClick={() => setFrontMode('math')}
+              onClick={() => setFrontMode(1)}
               className={`bg-gray-100 w-18 h-8 rounded-md hover:bg-gray-200 ${
-                frontMode === 'math' ? 'bg-green-200' : ''
+                frontMode === 1 ? 'bg-green-200' : ''
               }`}
             >
             <div className="flex items-center justify-between space-x-2 px-1">
@@ -214,23 +223,10 @@ function EditModal({
               Math
             </div>
             </button>
-            <button
-              onClick={() => setFrontMode('image')}
-              className={`bg-gray-100 w-20 h-8 rounded-md hover:bg-gray-200 ${
-                frontMode === 'image' ? 'bg-green-200' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between space-x-2 px-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-                Image
-              </div>
-            </button>
           </div>
 
           {/* Conditionally render based on frontMode */}
-          {frontMode === 'math' && (
+          {frontMode === 1 && (
             <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
               <EditableMathField
                 latex={frontContent}
@@ -246,7 +242,7 @@ function EditModal({
             </div>
           )}
 
-          {frontMode === 'text' && (
+          {frontMode === 0 && (
             <textarea
               ref={frontTextAreaRef}
               id="question"
@@ -260,7 +256,7 @@ function EditModal({
             />
           )}
 
-          {frontMode === 'image' && (
+          {frontMode === 2 && (
             <div className="mt-2">
               <input
                 type="file"
@@ -287,36 +283,36 @@ function EditModal({
           <div className="mb-2 flex space-x-2">
             <button
               onClick={() => handleBoldClick('back')}
-              disabled={backMode !== 'text'}
+              disabled={backMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                backMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <b>B</b>
             </button>
             <button
               onClick={() => handleItalicClick('back')}
-              disabled={backMode !== 'text'}
+              disabled={backMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                backMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <i>I</i>
             </button>
             <button
               onClick={() => handleUnderlineClick('back')}
-              disabled={backMode !== 'text'}
+              disabled={backMode !== 0}
               className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-                backMode !== 'text' ? 'opacity-50 cursor-not-allowed' : ''
+                backMode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
               <u>U</u>
             </button>
 
             <button
-              onClick={() => setBackMode('text')}
+              onClick={() => setBackMode(0)}
               className={`bg-gray-100 w-[4rem] h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 'text' ? 'bg-green-200' : ''
+                backMode === 0 ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -327,9 +323,9 @@ function EditModal({
               </div>
             </button>
             <button
-              onClick={() => setBackMode('math')}
+              onClick={() => setBackMode(1)}
               className={`bg-gray-100 w-18 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 'math' ? 'bg-green-200' : ''
+                backMode === 1 ? 'bg-green-200' : ''
               }`}
             >
             <div className="flex items-center justify-between space-x-2 px-1">
@@ -340,9 +336,9 @@ function EditModal({
             </div>
             </button>
             <button
-              onClick={() => setBackMode('image')}
+              onClick={() => setBackMode(2)}
               className={`bg-gray-100 w-20 h-8 rounded-md hover:bg-gray-200 ${
-                backMode === 'image' ? 'bg-green-200' : ''
+                backMode === 2 ? 'bg-green-200' : ''
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
@@ -354,7 +350,7 @@ function EditModal({
             </button>
           </div>
 
-          {backMode === 'math' && (
+          {backMode === 1 && (
             <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
               <EditableMathField
                 latex={backContent}
@@ -370,7 +366,7 @@ function EditModal({
             </div>
           )}
 
-          {backMode === 'text' && (
+          {backMode === 0 && (
             <textarea
               ref={backTextAreaRef}
               id="answer"
@@ -384,7 +380,7 @@ function EditModal({
             />
           )}
 
-          {backMode === 'image' && (
+          {backMode === 2 && (
             <div className="mt-2">
               <input
                 type="file"
