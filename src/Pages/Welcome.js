@@ -6,6 +6,8 @@ import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
 
+import BackgroundTitle from '../images/TitleBackground.png';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -126,6 +128,7 @@ function Welcome() {
   
         {/* Welcome Section */}
         <div className="h-[100dvh] flex flex-col items-center justify-center">
+          <img src={BackgroundTitle} className="absolute w-full h-[100dvh]"/>
           <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4">
             Cardify
           </h1>
