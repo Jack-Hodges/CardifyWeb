@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useUser } from '../../UserContext';
 
-function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text-yellow-500', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
+function CardList({ cards, onCardClick, onUpsertCard, onDeleteCard, subject, themeText = 'text-yellow-500', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
@@ -17,12 +17,6 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
     setNewFrontContent(''); // Clear the front content for a new flashcard
     setNewBackContent('');  // Clear the back content for a new flashcard
     setIsModalOpen(true); // Open the modal for adding a new flashcard
-  };
-
-  const handleSaveNewCard = (front, back, file) => {
-    // Forward all three (front, back, file) to parent
-    onAddNewCard(front, back, file);
-    setIsModalOpen(false);
   };
 
   const plusIcon = (
@@ -74,11 +68,8 @@ function CardList({ cards, onCardClick, onAddNewCard, subject, themeText = 'text
       <EditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveNewCard}
-        frontContent={newFrontContent}
-        backContent={newBackContent}
-        setFrontContent={setNewFrontContent}
-        setBackContent={setNewBackContent}
+        subject={subject}
+        handleUpsertCard={onUpsertCard}
         text={`Add New Flashcard to ${subject ? subject.name : ""}`}
       />
     </div>

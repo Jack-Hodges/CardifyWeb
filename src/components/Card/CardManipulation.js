@@ -47,10 +47,7 @@ function dataURLToBlob(dataURL) {
   return new Blob([ab], { type: mimeString });
 }
 
-/**
- * Fetch flashcards from the Supabase database
- * (Includes image_url if present)
- */
+// Fetches all cards for a given subject
 export const fetchCards = async (subjectId) => {
   try {
     const { data, error } = await supabase
@@ -69,221 +66,7 @@ export const fetchCards = async (subjectId) => {
   }
 };
 
-/**
- * Add a new card (with optional image upload to Supabase storage).
- */
-export const addNewCard = async (
-  cards,
-  newFrontContent,
-  newBackContent,
-  setCards,
-  subjectId,
-  userId,
-  imageFile // <-- optional File from <input type="file" />
-) => {
-  let imageUrl = null;
-  console.log('Adding card');
-
-  // If an image file is provided, compress & upload
-  if (imageFile) {
-    console.log('Uploading image file');
-    try {
-      const ext = imageFile.type.split('/')[1];
-      // 1) Compress the image to a dataURL
-      const compressedDataURL = await compressAndConvertToDataURL(imageFile);
-
-      // 2) Convert dataURL to Blob
-      const blob = dataURLToBlob(compressedDataURL);
-
-      // 3) Create a unique filename
-      const fileName = `${uuidv4()}.${ext}`;
-
-      // 4) Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('FlashcardImages') // your bucket name
-        .upload(fileName, blob, { contentType: `image/${ext}` });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-      } else {
-        // 5) Retrieve the public URL (or a signed URL if you prefer)
-        const { data: publicUrlData } = supabase.storage
-          .from('FlashcardImages')
-          .getPublicUrl(fileName);
-        imageUrl = publicUrlData?.publicUrl || null;
-      }
-    } catch (err) {
-      console.error('Error compressing/uploading image:', err);
-    }
-  }
-
-  // Now create the new card, storing the image_url
-  const newCard = {
-    user_id: userId,
-    question: newFrontContent,
-    answer: newBackContent,
-    subject_id: subjectId,
-    image_url: imageUrl,
-  };
-
-  const { data, error } = await supabase
-    .from('flashcards')
-    .insert([newCard])
-    .select();
-
-  if (error) {
-    console.error('Error adding new card:', error);
-  } else if (data?.length > 0) {
-    const updatedCards = [...cards, data[0]];
-    setCards(updatedCards);
-  } else {
-    console.error('No data returned after inserting the new card.');
-  }
-};
-
-/**
- * Update a card's content and optionally its image.
- */
-export const updateCard = async (
-  cards,
-  currentCardIndex,
-  updatedFrontContent,
-  updatedBackContent,
-  setCards,
-  imageFile // <-- optional File
-) => {
-  const cardId = cards[currentCardIndex]?.id;
-
-  let imageUrl = null;
-
-  if (imageFile) {
-    try {
-      // Same compression/upload steps
-      const compressedDataURL = await compressAndConvertToDataURL(imageFile);
-      const blob = dataURLToBlob(compressedDataURL);
-      const fileName = `${uuidv4()}.jpg`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('FlashcardImages')
-        .upload(fileName, blob, { contentType: 'image/jpeg' });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-      } else {
-        const { data: publicUrlData } = supabase.storage
-          .from('FlashcardImages')
-          .getPublicUrl(fileName);
-        imageUrl = publicUrlData?.publicUrl || null;
-      }
-    } catch (err) {
-      console.error('Error compressing/uploading image:', err);
-    }
-  }
-
-  // Update card in local state
-  const updatedCards = cards.map((card, i) => {
-    if (i === currentCardIndex) {
-      return {
-        ...card,
-        question: updatedFrontContent,
-        answer: updatedBackContent,
-        // Only update image_url if we actually uploaded a new one:
-        ...(imageUrl ? { image_url: imageUrl } : {}),
-      };
-    }
-    return card;
-  });
-  setCards(updatedCards);
-
-  // Prepare payload for Supabase
-  const updatePayload = {
-    question: updatedFrontContent,
-    answer: updatedBackContent,
-  };
-  if (imageUrl) {
-    updatePayload.image_url = imageUrl;
-  }
-
-  // Update in Supabase
-  const { error } = await supabase
-    .from('flashcards')
-    .update(updatePayload)
-    .eq('id', cardId);
-
-  if (error) {
-    console.error('Error updating card:', error);
-  }
-};
-
-/**
- * Update a card's content (including an optional new image).
- * Expects `card` to have:
- *   - `id` (the primary key in DB)
- *   - `question` (updated front content)
- *   - `answer` (updated back content)
- *   - `imageFile` (optional: new File object if user chose a new image)
- *   - other fields as needed (e.g. subject_id, user_id, etc.)
- */
-export const updateCardNew = async (card) => {
-  try {
-    let newImageUrl = card.image_url || null;
-
-    // If a new image file is present, compress & upload to Supabase.
-    if (card.imageFile) {
-      const compressedDataURL = await compressAndConvertToDataURL(card.imageFile);
-      const blob = dataURLToBlob(compressedDataURL);
-
-      // Derive file extension from the file's MIME type or assume '.jpg'
-      const ext = card.imageFile.type.split('/')[1] || 'jpg';
-      const fileName = `${uuidv4()}.${ext}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('FlashcardImages') // your bucket name
-        .upload(fileName, blob, { contentType: card.imageFile.type });
-
-      if (uploadError) {
-        console.error('Error uploading file:', uploadError);
-        // You could choose to bail out here or continue, depending on your app’s needs
-      } else {
-        // Retrieve the public URL for the newly uploaded image
-        const { data: publicUrlData } = supabase.storage
-          .from('FlashcardImages')
-          .getPublicUrl(fileName);
-        newImageUrl = publicUrlData?.publicUrl || null;
-      }
-    }
-
-    // Build the payload to update in DB
-    const updatePayload = {
-      question: card.question,
-      answer: card.answer,
-      image_url: newImageUrl,
-      frontMode: card.frontMode,
-      backMode: card.backMode,
-    };
-
-    // Now update the row in your `flashcards` table
-    const { error } = await supabase
-      .from('flashcards')
-      .update(updatePayload)
-      .eq('id', card.id);
-
-    if (error) {
-      console.error('Error updating card:', error);
-    } else {
-      console.log('Card updated successfully', updatePayload);
-    }
-  } catch (err) {
-    console.error('Unexpected error in updateCardNew:', err);
-  }
-};
-
-/**
- * Delete a card (from DB). 
- * Note: This doesn't remove the image from storage. 
- * If you want to remove the actual file, 
- * you need to store the object path and call supabase.storage.from('flashcards').remove([path]).
- */
+// Removes a present card from database
 export const deleteCard = async (
   cards,
   cardId,
@@ -317,4 +100,88 @@ export const deleteCard = async (
  */
 export const sortCardsById = (cards) => {
   return cards.sort((a, b) => a.id - b.id);
+};
+
+// Updates or inserts a card if not present
+export const upsertCard = async (card, imageFile) => {
+  try {
+    let newImageUrl = card.image_url || null;
+
+    // 1) If a new image file is provided, compress & upload to Supabase Storage
+    if (imageFile) {
+      try {
+        const ext = imageFile.type.split('/')[1] || 'jpg';
+
+        // Compress & convert to dataURL
+        const compressedDataURL = await compressAndConvertToDataURL(imageFile);
+        // Convert dataURL to Blob
+        const blob = dataURLToBlob(compressedDataURL);
+
+        // Unique filename
+        const fileName = `${uuidv4()}.${ext}`;
+
+        // Upload to bucket "FlashcardImages"
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('FlashcardImages')
+          .upload(fileName, blob, { contentType: `image/${ext}` });
+
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+        } else {
+          // Grab the public URL
+          const { data: publicUrlData } = supabase.storage
+            .from('FlashcardImages')
+            .getPublicUrl(fileName);
+          newImageUrl = publicUrlData?.publicUrl || null;
+        }
+      } catch (err) {
+        console.error('Error compressing/uploading image:', err);
+      }
+    }
+
+    // 2) Prepare the DB payload
+    const payload = {
+      user_id: card.user_id,
+      question: card.question,
+      answer: card.answer,
+      subject_id: card.subject_id,
+      image_url: newImageUrl,
+      frontMode: card.frontMode,
+      backMode: card.backMode,
+    };
+
+    // 3) Upsert logic: if card.id => update, else insert
+    if (card.id) {
+      // ---- Update existing record ----
+      const { data, error } = await supabase
+        .from('flashcards')
+        .update(payload)
+        .eq('id', card.id)
+        .select();
+
+      if (error) {
+        console.error('Error updating card:', error);
+        return null;
+      }
+      // Return the updated record (usually data[0])
+      return data?.[0] || null;
+    } else {
+      // ---- Insert new record ----
+      const { data, error } = await supabase
+        .from('flashcards')
+        .insert([payload])
+        .select();
+
+      if (error) {
+        console.error('Error inserting new card:', error);
+        return null;
+      }
+
+      // Return the newly inserted record
+      return data?.[0] || null;
+    }
+  } catch (err) {
+    console.error('Unexpected error in upsertCard:', err);
+    return null;
+  }
 };

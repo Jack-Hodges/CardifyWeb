@@ -3,7 +3,7 @@ import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { fetchCards, addNewCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
+import { fetchCards, upsertCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import EditModal from '../components/Card/EditModal';
@@ -21,117 +21,115 @@ function Create() {
   const [animateFlip] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
-  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false); // New state for SubjectList modal
-  const [newFrontContent, setNewFrontContent] = useState('');
-  const [newBackContent, setNewBackContent] = useState('');
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState('5');
   const [generateTerm, setGenerateTerm] = useState('');
-  const [createPopUp, setCreatePopUp] = useState(true);
+  const [createPopUp, setCreatePopUp] = useState(false);
   const [generateFlash, setGenerateFlash] = useState(false);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
   const location = useLocation();
   const { subject } = location.state || {};
+
   const { user, getUser, theme, userLoading, popupStates, updatePopupState } = useUser();
   const { secondaryColor, tertiaryColor, shadow, textClass } = theme;
 
+  // === 1) Load user, subject, and cards ===
   useEffect(() => {
-
-    if (userLoading) {
-      return;
-    }
+    if (userLoading) return;
 
     if (!user) {
       getUser();
       return;
     }
 
-    if (popupStates && popupStates.create_popup == true) {
+    // Show "createPopUp" tutorial if not dismissed
+    if (popupStates && popupStates.create_popup === true) {
       setCreatePopUp(false); 
+    } else {
+      setCreatePopUp(true);
     }
 
-    if (subject === null) {
+    // If no subject selected, no cards
+    if (!subject) {
       setCards([]);
       setLoading(false);
       return;
     }
 
-    if (subject) {
-      const loadCards = async () => {
-        setLoading(true);
-        const data = await fetchCards(subject.id);
-        sortCardsById(data);
-        setCards(data);
-        setLoading(false);
-      };
-      loadCards();
-    } else {
+    // Otherwise, fetch the cards for this subject
+    const loadCards = async () => {
+      setLoading(true);
+      const data = await fetchCards(subject.id);
+      sortCardsById(data);
+      setCards(data);
       setLoading(false);
-    }
-  }, [subject, user, getUser]);
+    };
+    loadCards();
+  }, [subject, user, getUser, userLoading, popupStates]);
 
-  const handleDismissPopup = () => {
-    setCreatePopUp(false); 
-    updatePopupState("create_popup", true); // Update Supabase
-  };
-
-  const handleAddNewCard = async (newFrontContent, newBackContent, file) => {
-    console.log("File is: ", file);
-    await addNewCard(
-      cards,
-      newFrontContent,
-      newBackContent,
-      setCards,
-      subject.id,
-      user.id,
-      file  // pass it here
-    );
-    
+  // === 2) A function to refetch & update state after create/update ===
+  const refreshCards = async () => {
+    if (!subject) return;
     const updatedCards = await fetchCards(subject.id);
     sortCardsById(updatedCards);
     setCards(updatedCards);
   };
 
-  const handleDeleteCard = (cardId) => {
-    deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
+  // === 3) The universal upsert callback ===
+  //     (called by EditModal after saving or editing a card)
+  const handleUpsertCard = async (cardData, file) => {
+    // upsertCard will insert or update depending on cardData.id
+    await upsertCard(cardData, file);
+    await refreshCards(); 
   };
 
+  // === 4) Delete card logic ===
+  const handleDeleteCard = async (cardId) => {
+    await deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
+    // Optionally, you could call refreshCards() again if your `deleteCard` 
+    // does not already handle local state fully
+    // await refreshCards(); 
+  };
+
+  // === 5) Card selection logic ===
   const handleCardClick = (index) => {
     setFlipped(false);
     setCurrentCardIndex(index);
   };
 
   const handleOpenModal = () => {
-    setIsModalOpen(true);
+    setIsModalOpen(true); // For adding a NEW card
   };
 
   const handleOpenSubjectListModal = () => {
-    setIsSubjectListModalOpen(true); // Open SubjectList modal
+    setIsSubjectListModalOpen(true);
   };
 
-  const handleSaveNewCard = (front, back, file) => {
-    // Now pass all three (including 'file') to handleAddNewCard
-    console.log("Save file is: ", file);
-    handleAddNewCard(front, back, file);
-    setIsModalOpen(false);
-    setNewFrontContent('');
-    setNewBackContent('');
-  };
-
+  // === 6) AddSubject logic ===
   const handleCreateNewSubject = () => {
     setIsAddSubjectModalOpen(true);
   };
-
   const handleSaveSubject = async (id, subjectName, subjectColor, collectionId) => {
-    const data = await saveSubject(id, subjectName, subjectColor, user.id, null, collectionId); // Ensure collectionId is passed
+    const data = await saveSubject(id, subjectName, subjectColor, user.id, null, collectionId); 
     if (data) {
-        setIsAddSubjectModalOpen(false);
-        navigate('/create', { state: { subject: data[0] } });
+      setIsAddSubjectModalOpen(false);
+      navigate('/create', { state: { subject: data[0] } });
     }
   };
 
+  // === 7) Tutorial popup dismiss ===
+  const handleDismissPopup = () => {
+    setCreatePopUp(false); 
+    updatePopupState("create_popup", true);
+  };
+
   return (
-    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-hidden" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div 
+      className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-hidden" 
+      style={{ backgroundImage: theme ? theme.image : ''}}
+    >
       <TitleBar text="Create" user={user}/>
 
       <div className="block sm:flex w-full h-full">
@@ -147,6 +145,7 @@ function Create() {
           <>
             <div className="w-full sm:w-[70%] h-[90%] sm:h-full flex flex-col sm:mt-10">
               <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
+                {/* The main Card display */}
                 <Card
                   card={cards[currentCardIndex]}
                   frontContent={cards[currentCardIndex]?.question}
@@ -159,12 +158,21 @@ function Create() {
                   onDeleteCard={handleDeleteCard}
                   edit={true}
                   user={user}
+                  onUpsertCard={handleUpsertCard}
                 />
                 <CardControls
                   currentCardIndex={currentCardIndex + 1}
                   totalCards={cards.length}
-                  onPrevClick={() => setCurrentCardIndex(currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1)}
-                  onNextClick={() => setCurrentCardIndex(currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0)}
+                  onPrevClick={() => 
+                    setCurrentCardIndex(
+                      currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1
+                    )
+                  }
+                  onNextClick={() => 
+                    setCurrentCardIndex(
+                      currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0
+                    )
+                  }
                   create
                   themeText={theme.textClass}
                   themeSecondary={secondaryColor}
@@ -176,25 +184,78 @@ function Create() {
             </div>
 
             <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
-              <CardList cards={cards} onCardClick={handleCardClick} onAddNewCard={handleAddNewCard} subject={subject} themeText={theme.textClass} passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}/>
+              {/* The sidebar CardList */}
+              <CardList 
+                cards={cards}
+                onCardClick={handleCardClick}
+                onUpsertCard={handleUpsertCard}
+                onDeleteCard={handleDeleteCard}
+                subject={subject}
+                themeText={theme.textClass}
+                passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
+              />
             </div>
           </>
         ) : (
           <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
             {subject ? (
               <div>
-                <p className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
+                <p 
+                  className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}
+                >
+                  {subject.name} has no flashcards
+                </p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
-                  <BackgroundButton text={`Add Card to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenModal}  wWidth='w-full sm:w-auto mb-3 sm:mb-0'/> {/* Open modal */}
-                  <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton
+                    text={`Add Card to ${subject.name}`}
+                    bgColor={
+                      theme 
+                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
+                        : "bg-orange-500 hover:bg-orange-400"
+                    }
+                    onClick={handleOpenModal}
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                  />
+                  <BackgroundButton
+                    text="Create New Subject"
+                    bgColor={
+                      theme 
+                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
+                        : "bg-purple-500 hover:bg-purple-400"
+                    }
+                    onClick={handleCreateNewSubject}
+                    wWidth="w-full sm:w-auto"
+                  />
                 </div>
               </div>
             ) : (
               <div>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                <p 
+                  className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}
+                >
+                  No subject selected
+                </p>
                 <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton text="Add Cards to Subject" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto mb-3 sm:mb-0'/>
-                  <BackgroundButton text="Create New Subject" bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} onClick={handleCreateNewSubject} wWidth='w-full sm:w-auto'/>
+                  <BackgroundButton
+                    text="Add Cards to Subject"
+                    bgColor={
+                      theme 
+                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
+                        : "bg-orange-500 hover:bg-orange-400"
+                    }
+                    onClick={handleOpenSubjectListModal}
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                  />
+                  <BackgroundButton
+                    text="Create New Subject"
+                    bgColor={
+                      theme 
+                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
+                        : "bg-purple-500 hover:bg-purple-400"
+                    }
+                    onClick={handleCreateNewSubject}
+                    wWidth="w-full sm:w-auto"
+                  />
                 </div>
               </div>
             )}
@@ -202,17 +263,14 @@ function Create() {
         )}
       </div>
 
-      {/* EditModal for adding new cards */}
-      <EditModal
+      {/* <EditModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveNewCard}
-        frontContent={newFrontContent}
-        backContent={newBackContent}
-        setFrontContent={setNewFrontContent}
-        setBackContent={setNewBackContent}
+        card={null}            // null => new card
+        subject={subject}
+        handleUpsertCard={handleUpsertCard}
         text="Add New Flashcard"
-      />
+      /> */}
 
       {/* AddSubject Modal */}
       <AddSubject
@@ -231,35 +289,38 @@ function Create() {
         page="create"
       />
 
-      {/* Tooltip */}
+      {/* Tooltip Popup for "Create" tutorial */}
       <CustomModal
         isOpen={createPopUp}
         content={
-            <div className="text-center">
-                <p className="text-2xl font-semibold mb-6">This is Create</p>
-                <div className="flex items-center h-full">
-                    <div className="w-[40%]">
-                        <img src={CreateImage} alt="Home Tutorial" className="w-[90%]" />
-                    </div>
-                    <div className="w-2/3 flex items-center text-left">
-                        <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
-                          Here you will create the flashcards to study in your Subjects! You need to select a Subject to start creating flashcards. 
-                          <br></br>If you don't have a Subject, you can create one by clicking the Create New Subject button.
-                          <br></br>Once you have selected a Subject, you can add new flashcards by clicking the Add button at the top of the flashcard stack
-                          <li>You can edit a flashcard by clicking the pencil</li>
-                          <li>You can flip a flashcard by clicking anywhere on the flashcard</li>
-                          <li>Flashcards can be deleted using the trash can icon</li>
-                          <li>If you prefer studying on paper, you can export your flashcards to a printable PDF</li>
-                        </p>
-                    </div>
-                </div>
+          <div className="text-center">
+            <p className="text-2xl font-semibold mb-6">This is Create</p>
+            <div className="flex items-center h-full">
+              <div className="w-[40%]">
+                <img src={CreateImage} alt="Home Tutorial" className="w-[90%]" />
+              </div>
+              <div className="w-2/3 flex items-center text-left">
+                <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
+                  Here you will create the flashcards to study in your Subjects! 
+                  <br />
+                  If you don't have a Subject, create one by clicking "Create New Subject".
+                  <br />
+                  Once you select a Subject, you can add new flashcards by clicking the "Add" button.
+                  <li>You can edit a flashcard by clicking the pencil.</li>
+                  <li>You can flip a flashcard by clicking anywhere on it.</li>
+                  <li>You can delete a flashcard using the trash can icon.</li>
+                  <li>You can export flashcards to a PDF to study on paper.</li>
+                </p>
+              </div>
             </div>
+          </div>
         }
         firstActionText={'Got it!'}
         firstActionCol="bg-green-500 hover:bg-green-400"
         onFirstAction={handleDismissPopup}
       />
 
+      {/* Popup for generating flashcards (not changed) */}
       <CustomModal 
         isOpen={generateFlash}
         content={
@@ -267,7 +328,6 @@ function Create() {
             <h1 className="text-2xl font-semibold mb-6 text-green-500">Cardify Generate</h1>
             <div className="w-full h-12 flex items-center justify-center p-2 rounded-lg space-x-4 mt-10">
               <p className="text-xl">Generate</p>
-
               <div className="relative group">
                 <select
                   value={selectedSort}
@@ -309,7 +369,6 @@ function Create() {
         firstActionCol="bg-green-500 hover:bg-green-400"
         onFirstAction={() => setGenerateFlash(false)}
       />
-
     </div>
   );
 }

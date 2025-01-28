@@ -15,7 +15,8 @@ function Card({
   edit,
   practice,
   user,
-  imageUrl
+  imageUrl,
+  onUpsertCard,
 }) {
   const [modalFrontContent, setModalFrontContent] = useState(card.question);
   const [modalBackContent, setModalBackContent] = useState(card.answer);
@@ -115,7 +116,7 @@ function Card({
         isOpen={isModalOpen}
         onClose={handleCancel}
         text="Edit Question and Answer"
-        alignment={alignment}
+        handleUpsertCard={onUpsertCard}
       />
 
       <Modal

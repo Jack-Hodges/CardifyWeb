@@ -2,18 +2,21 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
 import { EditableMathField, addStyles } from 'react-mathquill';
 import BackgroundButton from '../Elements/BackgroundButton';
-import { updateCardNew } from './CardManipulation';
+import { useUser } from '../../UserContext';
 
 addStyles();
 
 function EditModal({
-  card,
   isOpen,
   onClose,
-  text,
+  card,
+  subject,
+  handleUpsertCard,
+  text
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const { user } = useUser();
 
   // Front mode can be "text", "math", or "image"
   const [frontContent, setFrontContent] = useState('');
@@ -52,12 +55,26 @@ function EditModal({
     }, 300);
   };
 
-  const handleSave = () => {
-    card.question = frontContent;
-    card.answer = backContent;
-    card.frontMode = frontMode;
-    card.backMode = backMode;
-    updateCardNew(card);
+  // Called when user presses "Save"
+  const handleSave = async () => {
+    // Build the object for upsert
+    const cardToSave = {
+      id: card?.id,  // if undefined => insert, if defined => update
+      user_id: card?.user_id || user?.id,
+      subject_id: card?.subject_id || subject?.id,
+      question: frontContent,
+      answer: backContent,
+      frontMode,
+      backMode,
+      image_url: card?.image_url,
+    };
+
+    try {
+      await handleUpsertCard(cardToSave, selectedFile);
+    } catch (error) {
+      console.error('Error in handleSave:', error);
+    }
+
     handleClose();
   };
 
@@ -204,7 +221,7 @@ function EditModal({
               }`}
             >
               <div className="flex items-center justify-between space-x-2 px-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
                 </svg>
                 Text
@@ -217,7 +234,7 @@ function EditModal({
               }`}
             >
             <div className="flex items-center justify-between space-x-2 px-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 15.75V18m-7.5-6.75h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V13.5Zm0 2.25h.008v.008H8.25v-.008Zm0 2.25h.008v.008H8.25V18Zm2.498-6.75h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V13.5Zm0 2.25h.007v.008h-.007v-.008Zm0 2.25h.007v.008h-.007V18Zm2.504-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5Zm0 2.25h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V18Zm2.498-6.75h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V13.5ZM8.25 6h7.5v2.25h-7.5V6ZM12 2.25c-1.892 0-3.758.11-5.593.322C5.307 2.7 4.5 3.65 4.5 4.757V19.5a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V4.757c0-1.108-.806-2.057-1.907-2.185A48.507 48.507 0 0 0 12 2.25Z" />
               </svg>
               Math
