@@ -167,9 +167,7 @@ function Quiz() {
             <div className="w-full h-full flex flex-col">
               <div className="mx-auto w-full h-2/5 sm:h-3/5 mt-5 px-5">
                 <Card
-                  frontContent={cards[currentCardIndex]?.question}
-                  backContent={cards[currentCardIndex]?.answer}
-                  cardId={cards[currentCardIndex]?.id}
+                  card={cards[currentCardIndex]}
                   edit={false}
                   user={user}
                   themeShadow={'background-shadow-new'}
