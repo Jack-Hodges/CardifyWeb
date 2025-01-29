@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EditableMathField } from 'react-mathquill';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
@@ -200,8 +202,16 @@ function CardContent({
         className="w-full h-4/5 object-contain"
       />
     ) : (
-      <p className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-        font-bold ${align}`}>{content}</p>
+        <ReactMarkdown
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            u: ({ node, ...props }) => <u {...props} />,
+          }}
+          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+          font-bold ${align}`}
+        >
+          {content}
+        </ReactMarkdown>
     )}
 
       {edit && (

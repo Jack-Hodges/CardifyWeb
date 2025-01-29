@@ -5,17 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useUser } from '../../UserContext';
 
-function CardList({ cards, onCardClick, onUpsertCard, onDeleteCard, subject, themeText = 'text-yellow-500', passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
+function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [newFrontContent, setNewFrontContent] = useState(''); // State for new flashcard's front content
-  const [newBackContent, setNewBackContent] = useState('');  // State for new flashcard's back content
   const { theme } = useUser();
   const { textColor, shadow } = theme;
 
   const handleAddClick = () => {
-    setNewFrontContent(''); // Clear the front content for a new flashcard
-    setNewBackContent('');  // Clear the back content for a new flashcard
     setIsModalOpen(true); // Open the modal for adding a new flashcard
   };
 
@@ -70,6 +66,7 @@ function CardList({ cards, onCardClick, onUpsertCard, onDeleteCard, subject, the
         onClose={() => setIsModalOpen(false)}
         subject={subject}
         handleUpsertCard={onUpsertCard}
+        clear={true}
         text={`Add New Flashcard to ${subject ? subject.name : ""}`}
       />
     </div>

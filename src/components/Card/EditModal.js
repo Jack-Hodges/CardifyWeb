@@ -12,7 +12,8 @@ function EditModal({
   card,
   subject,
   handleUpsertCard,
-  text
+  text,
+  clear,
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -33,6 +34,15 @@ function EditModal({
   const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
+
+    if (clear) {
+      setFrontContent('');
+      setFrontMode(0);
+      setBackContent('');
+      setBackMode(0);
+      setSelectedFile(null);
+    }
+
     if (card) {
       setFrontMode(card.frontMode);
       setFrontContent(card.question);
@@ -44,7 +54,7 @@ function EditModal({
     } else if (!isClosing) {
       setIsVisible(false);
     }
-  }, [isOpen, isClosing, card]);
+  }, [isOpen, isClosing, card, clear]);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -74,7 +84,6 @@ function EditModal({
     } catch (error) {
       console.error('Error in handleSave:', error);
     }
-
     handleClose();
   };
 
