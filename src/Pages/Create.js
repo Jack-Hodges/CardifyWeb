@@ -88,9 +88,6 @@ function Create() {
   // === 4) Delete card logic ===
   const handleDeleteCard = async (cardId) => {
     await deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
-    // Optionally, you could call refreshCards() again if your `deleteCard` 
-    // does not already handle local state fully
-    // await refreshCards(); 
   };
 
   // === 5) Card selection logic ===
@@ -262,15 +259,6 @@ function Create() {
           </div>
         )}
       </div>
-
-      {/* <EditModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        card={null}            // null => new card
-        subject={subject}
-        handleUpsertCard={handleUpsertCard}
-        text="Add New Flashcard"
-      /> */}
 
       {/* AddSubject Modal */}
       <AddSubject
