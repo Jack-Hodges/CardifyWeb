@@ -155,16 +155,12 @@ function Create() {
                 {/* The main Card display */}
                 <Card
                   card={cards[currentCardIndex]}
-                  frontContent={cards[currentCardIndex]?.question}
-                  backContent={cards[currentCardIndex]?.answer}
-                  imageUrl={cards[currentCardIndex]?.image_url}
                   flipped={flipped}
                   setFlipped={setFlipped}
                   animateFlip={animateFlip}
                   cardId={cards[currentCardIndex]?.id}
                   onDeleteCard={handleDeleteCard}
                   edit={true}
-                  user={user}
                   onUpsertCard={handleUpsertCard}
                 />
                 <CardControls

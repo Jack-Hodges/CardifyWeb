@@ -64,51 +64,65 @@ function HomeLoading() {
 }
 
 function Home() {
-    const navigate = useNavigate();
-    const { 
-        user, 
-        getUser, 
-        profile, 
-        theme, 
-        popupStates, 
-        popupStatesLoaded, 
-        updatePopupState, 
-        loading: userLoading 
-    } = useUser();
-    
-    const { primaryColor, textColor, shadow } = theme;
-    const [subjects, setSubjects] = useState([]);
-    const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
-    const [subjectPage, setSubjectPage] = useState('create');
-    const [homePopUp, setHomePopUp] = useState(false);
-    const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { 
+    user, 
+    getUser, 
+    profile, 
+    theme, 
+    popupStates, 
+    popupStatesLoaded, 
+    updatePopupState, 
+    loading: userLoading 
+  } = useUser();
+  
+  const { primaryColor, textColor, shadow } = theme;
+  const [subjects, setSubjects] = useState([]);
+  const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
+  const [subjectPage, setSubjectPage] = useState('create');
+  const [homePopUp, setHomePopUp] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Ensure both user and popupStates are loaded
-        if (userLoading || !popupStatesLoaded) return;
+  useEffect(() => {
+    let isMounted = true;
 
-        // Redirect if no user
-        if (!user) {
-            getUser();
-            navigate('/');
-            return;
+    const loadData = async () => {
+      // Wait until both the user and popupStates are loaded
+      if (userLoading || !popupStatesLoaded) return;
+
+      // Redirect if there is no user
+      if (!user) {
+        getUser();
+        navigate('/');
+        return;
+      }
+
+      // Show the home popup if it hasn't been dismissed
+      if (popupStates && !popupStates.home_popup && isMounted) {
+        setHomePopUp(true);
+      }
+
+      try {
+        if (isMounted) setLoading(true);
+        const subjectsData = await fetchSubjects(user.id);
+        if (isMounted) {
+          setSubjects(subjectsData);
+          setLoading(false);
         }
-
-        // Show the popup if it hasn't been dismissed
-        if (popupStates && !popupStates?.home_popup) {
-            setHomePopUp(true);
+      } catch (error) {
+        if (isMounted) {
+          setLoading(false);
+          // Optionally, handle the error (e.g., log it or show a notification)
         }
+      }
+    };
 
-        // Fetch subjects
-        const loadData = async () => {
-            setLoading(true);
-            const subjectsData = await fetchSubjects(user.id);
-            setSubjects(subjectsData);
-            setLoading(false);
-        };
+    loadData();
 
-        loadData();
-    }, [user, userLoading, navigate, getUser, popupStatesLoaded, popupStates?.home_popup, popupStates]);
+    return () => {
+      isMounted = false;
+    };
+  }, [user, userLoading, popupStatesLoaded, popupStates, getUser, navigate]);
 
     const handleDismissPopup = () => {
         setHomePopUp(false);

@@ -4,6 +4,9 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useUser } from '../../UserContext';
+import { EditableMathField, addStyles } from 'react-mathquill';
+
+addStyles();
 
 function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
 
@@ -45,15 +48,32 @@ function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "
               onClick={() => onCardClick(index)} // Handle card click
             >
               <div className="text-gray-700 dark:text-gray-200 w-full overflow-hidden whitespace-nowrap text-ellipsis">
-                <ReactMarkdown
-                  rehypePlugins={[rehypeRaw]}
-                  components={{
-                    u: ({ node, ...props }) => <u {...props} />,
-                  }}
-                  className="text-lg font-bold inline" // Add 'inline' class
-                >
-                  {card.question}
-                </ReactMarkdown>
+                {card.frontMode === 1 ? (
+                  <EditableMathField
+                    latex={card.question}
+                    style={{
+                      minHeight: '4rem',
+                      width: '100%',
+                      backgroundColor: 'transparent',
+                      color: 'inherit',
+                      border: 'none',
+                      pointerEvents: 'none',
+                      fontSize: '2rem',
+                      fontWeight: 'semibold',
+                      color: 'inherit',
+                    }}
+                  />
+                ) : (
+                  <ReactMarkdown
+                    rehypePlugins={[rehypeRaw]}
+                    components={{
+                      u: ({ node, ...props }) => <u {...props} />,
+                    }}
+                    className="text-lg font-bold inline" // Add 'inline' class
+                  >
+                    {card.question}
+                  </ReactMarkdown>
+                )}
               </div>
             </li>
           ))}
