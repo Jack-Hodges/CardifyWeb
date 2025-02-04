@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { EditableMathField } from 'react-mathquill';
+import { useUser } from '../../UserContext';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 
@@ -16,14 +17,14 @@ function Card({
   onDeleteCard,
   edit,
   practice,
-  user,
-  imageUrl,
   onUpsertCard,
 }) {
   const [modalFrontContent, setModalFrontContent] = useState(card.question);
   const [modalBackContent, setModalBackContent] = useState(card.answer);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const { user } = useUser();
 
   useEffect(() => {
     setModalFrontContent(card.question);
@@ -85,7 +86,7 @@ function Card({
         }}
       >
         <CardContent
-          card={card}
+          cardMode={card.frontMode}
           rotate={'rotateY(0deg)'}
           content={modalFrontContent}
           onClickDelete={handleDeleteClick}
@@ -98,7 +99,7 @@ function Card({
 
         {/* Back card */}
         <CardContent
-          card={card}
+          cardMode={card.backMode}
           rotate={'rotateY(180deg)'}
           content={modalBackContent}
           onClickDelete={handleDeleteClick}
@@ -107,7 +108,7 @@ function Card({
           align={backAlign}
           practice={practice}
           back={true}
-          imageUrl={imageUrl}
+          imageUrl={card.image_url}
         />
       </div>
 
@@ -137,16 +138,16 @@ function Card({
 
 export default Card;
 
-function CardContent({
-  card,
+function CardContent ({
+  cardMode,
+  imageUrl,
   rotate,
   content,
-  imageUrl,        // <-- pass this if you want an image on the back
   onClickDelete,
   onClickEdit,
+  back,
   edit,
   practice,
-  back,
   alignment,
   align,
 }) {
@@ -167,11 +168,7 @@ function CardContent({
         </p>
       )}
 
-      {/* 
-        If this is the BACK side and we have an imageUrl,
-        display the image. Otherwise, display Markdown text.
-      */}
-      {back && card.backMode === 1 ? (
+      {cardMode === 1 ? (
       // -------------------------
       // CASE A: back=true AND backMode=1
       // Render something special if needed:
@@ -192,7 +189,18 @@ function CardContent({
           }}
         />
       </div>
-    ) : back && imageUrl ? (
+    ) : cardMode == 0 ? (
+        <ReactMarkdown
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            u: ({ node, ...props }) => <u {...props} />,
+          }}
+          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+          font-bold ${align}`}
+        >
+          {content}
+        </ReactMarkdown>
+    ) : imageUrl ? (
       // -------------------------
       // CASE B: back=true AND we have an imageUrl
       <img
