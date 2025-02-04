@@ -6,22 +6,22 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchCards, upsertCard, deleteCard, sortCardsById } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
-import EditModal from '../components/Card/EditModal';
 import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
 import CustomModal from "../components/Modal/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
+import EditModal from '../components/Card/EditModal';
 
 function Create() {
   const [cards, setCards] = useState([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState('5');
   const [generateTerm, setGenerateTerm] = useState('');
   const [createPopUp, setCreatePopUp] = useState(false);
@@ -37,36 +37,50 @@ function Create() {
 
   // === 1) Load user, subject, and cards ===
   useEffect(() => {
-    if (userLoading) return;
+    let isMounted = true;
 
-    if (!user) {
-      getUser();
-      return;
-    }
+    const loadData = async () => {
+      if (userLoading) return;
 
-    // Show "createPopUp" tutorial if not dismissed
-    if (popupStates && popupStates.create_popup === true) {
-      setCreatePopUp(false); 
-    } else {
-      setCreatePopUp(true);
-    }
+      if (!user) {
+        getUser();
+        return;
+      }
 
-    // If no subject selected, no cards
-    if (!subject) {
-      setCards([]);
-      setLoading(false);
-      return;
-    }
+      // Show tutorial popup if not dismissed
+      if (popupStates && popupStates.create_popup === true) {
+        setCreatePopUp(false); 
+      } else {
+        setCreatePopUp(true);
+      }
 
-    // Otherwise, fetch the cards for this subject
-    const loadCards = async () => {
-      setLoading(true);
-      const data = await fetchCards(subject.id);
-      sortCardsById(data);
-      setCards(data);
-      setLoading(false);
+      if (!subject) {
+        if (isMounted) {
+          setCards([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      // Fetch cards for the subject
+      try {
+        if (isMounted) setLoading(true);
+        const data = await fetchCards(subject.id);
+        if (isMounted) {
+          sortCardsById(data);
+          setCards(data);
+          setLoading(false);
+        }
+      } catch (error) {
+        if (isMounted) setLoading(false);
+      }
     };
-    loadCards();
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [subject, user, getUser, userLoading, popupStates]);
 
   // === 2) A function to refetch & update state after create/update ===
@@ -94,10 +108,6 @@ function Create() {
   const handleCardClick = (index) => {
     setFlipped(false);
     setCurrentCardIndex(index);
-  };
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true); // For adding a NEW card
   };
 
   const handleOpenSubjectListModal = () => {
@@ -210,7 +220,7 @@ function Create() {
                         ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
                         : "bg-orange-500 hover:bg-orange-400"
                     }
-                    onClick={handleOpenModal}
+                    onClick={() => setIsModalOpen(true)}
                     wWidth="w-full sm:w-auto mb-3 sm:mb-0"
                   />
                   <BackgroundButton
@@ -259,6 +269,15 @@ function Create() {
           </div>
         )}
       </div>
+
+      <EditModal
+        subject={subject}
+        card={cards[currentCardIndex]}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        text="Edit Question and Answer"
+        handleUpsertCard={handleUpsertCard}
+      />
 
       {/* AddSubject Modal */}
       <AddSubject

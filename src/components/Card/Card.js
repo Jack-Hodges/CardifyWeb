@@ -24,7 +24,6 @@ function Card({
   const [modalBackContent, setModalBackContent] = useState(card.answer);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [alignment] = useState('center');
 
   useEffect(() => {
     setModalFrontContent(card.question);

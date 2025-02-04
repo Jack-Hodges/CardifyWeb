@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@reduxjs/toolkit": "^2.5.1",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.45.3",
@@ -25,6 +26,7 @@
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
     "react-mathquill": "^1.0.3",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-sketch-canvas": "^6.2.0",

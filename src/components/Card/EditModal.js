@@ -434,7 +434,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
               height: '300px',
               width: '100%',
             }}
-            canvasColor='transparent'
+            canvasColor='white'
             strokeColor={brushColor}
           />
         </div>
@@ -458,7 +458,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
                 type="color"
                 value={brushColor}
                 onChange={(e) => setBrushColor(e.target.value)}
-                class="w-10 h-10 rounded-xl"
+                className="w-10 h-10 rounded-xl"
               />
             <Undo 
               className={`cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
@@ -484,17 +484,6 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     </div>,
     document.body
   );
-}
-
-function DrawingButtons({onClick, bool, asset}) {
-  <button
-      onClick={() => onClick}
-      className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
-        bool ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
-    >
-      {asset}
-    </button>
 }
 
 /**
