@@ -184,7 +184,7 @@ function Create() {
                 />
             </div>
 
-            <div className="w-full lg:w-[30%] h-full mt-20 lg:mt-0">
+            <div className="w-full lg:w-[30%] mt-20 lg:mt-0">
               {/* The sidebar CardList */}
               <CardList 
                 cards={cards}
