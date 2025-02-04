@@ -134,12 +134,12 @@ function Create() {
 
   return (
     <div 
-      className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-hidden" 
+      className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
       style={{ backgroundImage: theme ? theme.image : ''}}
     >
       <TitleBar text="Create" user={user}/>
 
-      <div className="block sm:flex w-full h-full">
+      <div className="block lg:flex w-full h-full">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">
@@ -150,8 +150,7 @@ function Create() {
           </div>
         ) : cards.length > 0 ? (
           <>
-            <div className="w-full sm:w-[70%] h-[90%] sm:h-full flex flex-col sm:mt-10">
-              <div className="w-full h-4/5 sm:h-3/5 mt-4 px-5">
+            <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
                 {/* The main Card display */}
                 <Card
                   card={cards[currentCardIndex]}
@@ -183,10 +182,9 @@ function Create() {
                   cards={cards}
                   generateClick={() => setGenerateFlash(true)}
                 />
-              </div>
             </div>
 
-            <div className="w-full sm:w-[30%] h-full mt-[-10%] sm:mt-0">
+            <div className="w-full lg:w-[30%] h-full mt-20 lg:mt-0">
               {/* The sidebar CardList */}
               <CardList 
                 cards={cards}

@@ -39,7 +39,7 @@ function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "
 
       {/* Scrollable Card List */}
       <div className="h-[calc(100vh-160px)] overflow-y-auto"> 
-        <ul className="flex flex-col space-y-4">
+        <ul className="flex flex-col space-y-4 justify-center items-center">
           {cards.map((card, index) => (
             <li 
               key={index} 

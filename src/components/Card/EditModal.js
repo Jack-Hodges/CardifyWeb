@@ -21,10 +21,8 @@ function EditModal({
   const [isClosing, setIsClosing] = useState(false);
   const { user } = useUser();
 
-  // Front side: 0 = text, 1 = math, 2 = image
   const [frontContent, setFrontContent] = useState('');
   const [frontMode, setFrontMode] = useState(0);
-  // Back side: 0 = text, 1 = math, 2 = image
   const [backContent, setBackContent] = useState('');
   const [backMode, setBackMode] = useState(0);
 
@@ -343,11 +341,11 @@ function EditButton({ mode, setMode, svg, text, val, extend, onClick }) {
   return (
     <button
       onClick={handleClick}
-      className={`bg-gray-100 ${extend ? 'w-[4rem]' : 'w-20'} h-8 rounded-md hover:bg-gray-200 ${
-        mode === val ? 'bg-gray-300' : ''
+      className={`bg-gray-100 dark:bg-gray-700 ${extend ? 'w-[4rem]' : 'w-20'} h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
+        mode === val ? 'bg-gray-300 dark:bg-gray-500' : ''
       }`}
     >
-      <div className="flex items-center justify-around space-x-2 px-1 text-gray-700">
+      <div className="flex items-center justify-around space-x-2 px-1 text-gray-700 dark:text-gray-300">
         {svg}
         {text}
       </div>
@@ -360,11 +358,13 @@ function TextButton({ text, handleClick, mode, modeText }) {
     <button
       onClick={() => handleClick(modeText)}
       disabled={mode !== 0}
-      className={`bg-gray-100 w-8 h-8 rounded-md hover:bg-gray-200 ${
+      className={`bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
         mode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      {text}
+      <div className="text-gray-700 dark:text-gray-300">
+        {text}
+      </div>
     </button>
   );
 }
