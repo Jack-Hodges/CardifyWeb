@@ -53,6 +53,7 @@ function Quiz() {
       const data = await fetchCards(subject.id);
       sortCardsById(data);
       setCards(data);
+      setSelectedAnswers({});
       randomizeOptions(data);
       setLoading(false);
     };

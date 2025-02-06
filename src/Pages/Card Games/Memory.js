@@ -97,9 +97,19 @@ function Memory() {
 
     const loadNextBatch = (cards, startIndex) => {
         const nextBatch = cards.slice(startIndex, startIndex + 5);
+        // Create two card objects for each card. The back card will use image_url if backMode is 2 or 3.
         const combinedCards = nextBatch.flatMap(card => [
-            { id: card.id, content: card.question, isFront: true },
-            { id: card.id, content: card.answer, isFront: false }
+            { 
+                id: card.id, 
+                content: card.question, 
+                isFront: true 
+            },
+            { 
+                id: card.id, 
+                content: (card.backMode === 2 || card.backMode === 3) ? card.image_url : card.answer, 
+                isFront: false,
+                isImage: (card.backMode === 2 || card.backMode === 3)
+            }
         ]);
         const shuffled = shuffleArray(combinedCards);
         setShuffledCards(shuffled);
@@ -225,6 +235,7 @@ function Memory() {
                                 }
                                 isMatched={matchedCards.includes(card.id)}
                                 themeShadow={shadowClass}
+                                isImage={card.isImage}
                             />
                         ))}
                     </div>
@@ -266,7 +277,7 @@ function Memory() {
     );
 }
 
-function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow }) {
+function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow, isImage }) {
     return (
         <div
             className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer ${themeShadow} background-hover 
@@ -276,46 +287,55 @@ function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow }) {
             style={{ userSelect: "none" }}
         >
             {isFlipped ? (
-                <div className="text-center prose prose-sm max-w-full overflow-auto" style={{ userSelect: "none" }}>
-                    <ReactMarkdown 
-                        components={{
-                            p: ({ node, ...props }) => {
-                                const content = props.children || "Default paragraph content";
-                                return <p className="text-2xl font-bold m-0" {...props}>{content}</p>;
-                            },
-                            h1: ({ node, ...props }) => {
-                                const content = props.children || "Default Heading 1";
-                                return <h1 className="text-2xl font-bold m-0" {...props}>{content}</h1>;
-                            },
-                            h2: ({ node, ...props }) => {
-                                const content = props.children || "Default Heading 2";
-                                return <h2 className="text-xl font-bold m-0" {...props}>{content}</h2>;
-                            },
-                            h3: ({ node, ...props }) => {
-                                const content = props.children || "Default Heading 3";
-                                return <h3 className="text-lg font-bold m-0" {...props}>{content}</h3>;
-                            },
-                            ul: ({ node, ...props }) => {
-                                const content = props.children || <li>Default list item</li>;
-                                return <ul className="list-disc m-0 pl-4" {...props}>{content}</ul>;
-                            },
-                            ol: ({ node, ...props }) => {
-                                const content = props.children || <li>Default ordered item</li>;
-                                return <ol className="list-decimal m-0 pl-4" {...props}>{content}</ol>;
-                            },
-                            li: ({ node, ...props }) => {
-                                const content = props.children || "Default list item";
-                                return <li className="m-0" {...props}>{content}</li>;
-                            },
-                            code: ({ node, ...props }) => {
-                                const content = props.children || "Default code snippet";
-                                return <code className="bg-gray-100 px-1 rounded" {...props}>{content}</code>;
-                            }
-                        }}
-                    >
-                        {content}
-                    </ReactMarkdown>
-                </div>
+                isImage ? (
+                    <img 
+                        src={content} 
+                        alt="Card back" 
+                        className="max-w-full max-h-full object-contain" 
+                        style={{ userSelect: "none" }}
+                    />
+                ) : (
+                    <div className="text-center prose prose-sm max-w-full overflow-auto" style={{ userSelect: "none" }}>
+                        <ReactMarkdown 
+                            components={{
+                                p: ({ node, ...props }) => {
+                                    const content = props.children || "Default paragraph content";
+                                    return <p className="text-2xl font-bold m-0" {...props}>{content}</p>;
+                                },
+                                h1: ({ node, ...props }) => {
+                                    const content = props.children || "Default Heading 1";
+                                    return <h1 className="text-2xl font-bold m-0" {...props}>{content}</h1>;
+                                },
+                                h2: ({ node, ...props }) => {
+                                    const content = props.children || "Default Heading 2";
+                                    return <h2 className="text-xl font-bold m-0" {...props}>{content}</h2>;
+                                },
+                                h3: ({ node, ...props }) => {
+                                    const content = props.children || "Default Heading 3";
+                                    return <h3 className="text-lg font-bold m-0" {...props}>{content}</h3>;
+                                },
+                                ul: ({ node, ...props }) => {
+                                    const content = props.children || <li>Default list item</li>;
+                                    return <ul className="list-disc m-0 pl-4" {...props}>{content}</ul>;
+                                },
+                                ol: ({ node, ...props }) => {
+                                    const content = props.children || <li>Default ordered item</li>;
+                                    return <ol className="list-decimal m-0 pl-4" {...props}>{content}</ol>;
+                                },
+                                li: ({ node, ...props }) => {
+                                    const content = props.children || "Default list item";
+                                    return <li className="m-0" {...props}>{content}</li>;
+                                },
+                                code: ({ node, ...props }) => {
+                                    const content = props.children || "Default code snippet";
+                                    return <code className="bg-gray-100 px-1 rounded" {...props}>{content}</code>;
+                                }
+                            }}
+                        >
+                            {content}
+                        </ReactMarkdown>
+                    </div>
+                )
             ) : (
                 <img src={CardifyLogo} alt="Cardify Logo" className="w-16 h-16" />
             )}
