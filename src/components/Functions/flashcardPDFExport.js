@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { useUser } from '../../UserContext';
 import BackgroundButton from '../Elements/BackgroundButton';
+import { Download } from 'lucide-react';
 
 const FlashcardPDFExport = ({ flashcards }) => {
   const contentRef = useRef(null);
@@ -32,7 +33,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
 
   return (
     <div>
-      <BackgroundButton bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'} onClick={() => generatePDF()} text="Export to PDF"/>
+      <BackgroundButton bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'} onClick={() => generatePDF()} text="Export to PDF" image={<Download />} flip/>
 
       {/* Hidden content that will be converted to PDF */}
       <div className="hidden">

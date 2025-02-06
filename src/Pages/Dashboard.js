@@ -14,6 +14,7 @@ import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
 import DashboardImage from '../images/tutorial/Dashboard.png';
+import { ChevronDown } from 'lucide-react';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -344,14 +345,7 @@ function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchT
             <option value="Date Created">Date Created</option>
           </select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-            </svg>
+            <ChevronDown className="text-white"/>
           </div>
         </div>
       </div>

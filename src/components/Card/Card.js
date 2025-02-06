@@ -8,6 +8,8 @@ import IconButtons from './IconButtons';
 import EditModal from './EditModal';
 import Modal from '../Modal/Modal';
 
+import { Trash2, RefreshCw } from 'lucide-react';
+
 function Card({
   card,
   flipped,
@@ -228,40 +230,15 @@ function CardContent ({
             onClick={onClickDelete}
           >
             {/* Delete Icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M14.74 9l-.346 9M9.26 9l-.346 9M18.16 5.79L17.84 19.67a2.25 2.25 0 0 1-2.244 2.08H8.084A2.25 2.25 0 0 1 5.84 19.67L5.772 5.79M5.772 5.79a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916C16.75 3.794 15.84 2.81 14.66 2.774a51.96 51.96 0 0 0-3.32 0C10.16 2.81 9.25 3.794 9.25 4.874v.916m7.5 0a48.11 48.11 0 0 0-7.5 0"
-              />
-            </svg>
+            <Trash2 />
           </div>
           <IconButtons onEditClick={onClickEdit} />
         </div>
       )}
 
       {practice && (
-        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
-          {/* Practice Icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="w-8 text-gray-700 dark:text-gray-500"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.755 10.059a7.5 7.5 0 0 1 12.548-3.364l1.903 1.903h-3.183a.75.75 0 1 0 0 1.5h4.992a.75.75 0 0 0 .75-.75V4.356a.75.75 0 0 0-1.5 0v3.18l-1.9-1.9A9 9 0 0 0 3.306 9.67a.75.75 0 1 0 1.45.388Zm15.408 3.352a.75.75 0 0 0-.919.53 7.5 7.5 0 0 1-12.548 3.364l-1.902-1.903h3.183a.75.75 0 0 0 0-1.5H2.984a.75.75 0 0 0-.75.75v4.992a.75.75 0 0 0 1.5 0v-3.18l1.9 1.9a9 9 0 0 0 15.059-4.035.75.75 0 0 0-.53-.918Z"
-              clipRule="evenodd"
-            />
-          </svg>
+        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-500 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
+          <RefreshCw size="32"/>
         </div>
       )}
     </div>

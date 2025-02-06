@@ -1,6 +1,8 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 import { useUser } from '../../UserContext';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
 
 function CardControls({ 
     currentCardIndex, 
@@ -13,25 +15,13 @@ function CardControls({
     generateClick 
 }) {
     const { theme } = useUser();
-    const { shadow, secondaryColor, tertiaryColor } = theme;
-
-    const rightArrow = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-        </svg>
-    );
-
-    const leftArrow = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>
-    );
+    const { shadow, secondaryColor } = theme;
 
     // Conditional button for the next action
     const nextButton = currentCardIndex === totalCards && !create ? (
         <BackgroundButton text="Finish" onClick={onNextClick} bgColor={"bg-green-500 hover:bg-green-500"} />
     ) : (
-        <BackgroundButton image={rightArrow} onClick={onNextClick} bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} />
+        <BackgroundButton image={<ArrowRight strokeWidth={3} />} onClick={onNextClick} bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} />
     );
 
     return (
@@ -53,7 +43,7 @@ function CardControls({
             <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
                 <div className="mt-0">
                     <BackgroundButton 
-                        image={leftArrow} 
+                        image={<ArrowLeft strokeWidth={3} />} 
                         onClick={onPrevClick} 
                         bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} 
                     />
