@@ -32,11 +32,15 @@ function EditModal({
 
   // The file that will eventually be sent (uploaded image or exported drawing)
   const [selectedFile, setSelectedFile] = useState(null);
+  const [imageUploaded, setImageUploaded] = useState(false);
+  const [drawingSaved, setDrawingSaved] = useState(false);
 
   // Controls whether the drawing popup is open
   const [isDrawingPopupOpen, setIsDrawingPopupOpen] = useState(false);
 
   useEffect(() => {
+    setImageUploaded(false);
+    setDrawingSaved(false);
     if (clear) {
       setFrontContent('');
       setFrontMode(0);
@@ -89,8 +93,19 @@ function EditModal({
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files?.length > 0) setSelectedFile(e.target.files[0]);
+    if (e.target.files?.length > 0) {
+      setSelectedFile(e.target.files[0]);
+      setImageUploaded(true);
+    }
     else setSelectedFile(null);
+  };
+
+  const backImageInputRef = useRef(null);
+
+  const handleBackImageUploadClick = () => {
+    if (backImageInputRef.current) {
+      backImageInputRef.current.click();
+    }
   };
 
   // Helper for text formatting (works only in text mode)
@@ -167,6 +182,7 @@ function EditModal({
   // Callback when the drawing popup saves a drawing.
   const handleDrawingSave = (file) => {
     setSelectedFile(file);
+    setDrawingSaved(true);
   };
 
   const closeDrawingPopup = () => {
@@ -264,10 +280,10 @@ function EditModal({
             <EditButton mode={backMode} setMode={setBackMode} svg={<Calculator />} text="Math" val={1} extend />
             <EditButton mode={backMode} setMode={setBackMode} svg={<Image />} text="Image" val={2} />
             {/* The Draw button opens the separate drawing popup */}
-            <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} onClick={openDrawingPopup} />
+            <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} />
           </div>
           {backMode === 1 && (
-            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
+            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md h-24 text-gray-500 dark:text-gray-200">
               <EditableMathField
                 latex={backContent}
                 onChange={(mathField) => setBackContent(mathField.latex())}
@@ -293,21 +309,29 @@ function EditModal({
             />
           )}
           {backMode === 2 && (
-            <div className="mt-2">
+            <div
+              className="w-full h-24 bg-gray-100 rounded-md flex justify-center items-center cursor-pointer mt-2"
+              onClick={handleBackImageUploadClick}
+            >
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                className="text-gray-600 dark:text-gray-200"
+                ref={backImageInputRef}
+                className="hidden"
               />
-              <p className="text-sm text-gray-500 mt-2">(Upload an image for the answer)</p>
+              <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
+                <Image />
+                {imageUploaded ? <h1>Image uploaded</h1> : <h1>Upload an image</h1>}
+              </div>
             </div>
           )}
-          {selectedFile && (
-            <div className="mt-2">
-              <p className="text-sm text-gray-500">
-                Drawing saved. (You can re-open the drawing editor to update it.)
-              </p>
+          {backMode === 3 && (
+            <div className="w-full h-24 bg-gray-100 rounded-md justify-center items-center flex cursor-pointer" onClick={openDrawingPopup}>
+              <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
+                <Brush />
+                {drawingSaved ? <h1>Drawing added</h1> : <h1>Add a drawing</h1>}
+              </div>
             </div>
           )}
         </div>
@@ -371,18 +395,15 @@ function TextButton({ text, handleClick, mode, modeText }) {
 
 /**
  * DrawingPopup renders a separate popup for drawing.
- * It includes:
- *  - A ReactSketchCanvas with a transparent background.
- *  - A toggle button to switch between brush and eraser modes.
- *  - A color picker (visible only in brush mode).
- *  - Buttons to clear, save, or cancel.
+ * It uses ReactSketchCanvas and allows the user to toggle between
+ * brush and eraser, change the brush color, and then export the drawing as a WebP.
  */
 function DrawingPopup({ onSaveDrawing, onClose }) {
   const canvasRef = useRef();
   const [brushColor, setBrushColor] = useState('#000000');
   const [isEraserMode, setIsEraserMode] = useState(false);
 
-  // When isEraserMode changes, update the canvas context's composite operation.
+  // Update canvas context for eraser mode.
   useEffect(() => {
     if (
       canvasRef.current &&
@@ -395,19 +416,12 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     }
   }, [isEraserMode]);
 
-  // When the brush color changes and we're not in eraser mode, update the stroke color.
-  useEffect(() => {
-    if (!isEraserMode && canvasRef.current) {
-      // If needed, you might also call a method to update stroke color.
-      // Here, ReactSketchCanvas takes the strokeColor prop.
-    }
-  }, [brushColor, isEraserMode]);
-
-  // Export the drawing as a PNG (with transparency) and convert it to a File.
+  // Export the drawing as a WebP and convert it to a File.
   const handleSaveDrawing = async () => {
     try {
-      const dataUrl = await canvasRef.current.exportImage('png');
-      const file = dataURLtoFile(dataUrl, 'drawing.png');
+      // Export the drawing as WebP.
+      const dataUrl = await canvasRef.current.exportImage('webp');
+      const file = dataURLtoFile(dataUrl, 'drawing.webp');
       onSaveDrawing(file);
       onClose();
     } catch (err) {
@@ -422,63 +436,64 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     >
       <div className="absolute inset-0 bg-black opacity-50" />
       <div
-        className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-1/2"
+        className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-xl mb-2">Drawing</h2>
-        <div className="mb-2">
+        <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
           <ReactSketchCanvas
             ref={canvasRef}
+            width={3840}
+            height={2160}
             style={{
-              border: '1px solid #ccc',
-              height: '300px',
+              height: '100%',
               width: '100%',
             }}
-            canvasColor='white'
+            canvasColor="white"
             strokeColor={brushColor}
           />
         </div>
 
         <div className="mb-2 flex items-center space-x-4">
-            <Brush 
-              className={`cursor-pointer ${isEraserMode ? '' : 'bg-gray-100'} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-              onClick={() => {
-                setIsEraserMode(false);
-                canvasRef.current?.eraseMode(false);
-              }}
-            />
-            <Eraser 
-              className={`cursor-pointer ${isEraserMode ? 'bg-gray-100' : ''} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-              onClick={() => {
-                setIsEraserMode(true);
-                canvasRef.current?.eraseMode(true);
-              }}
-            />
-            <input
-                type="color"
-                value={brushColor}
-                onChange={(e) => setBrushColor(e.target.value)}
-                className="w-10 h-10 rounded-xl"
-              />
-            <Undo 
-              className={`cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-              onClick={() => {
-                canvasRef.current?.undo();
-              }}
-            />
-            <Redo 
-              className={`cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-              onClick={() => {
-                setIsEraserMode(false);
-                canvasRef.current?.redo();
-              }}
-            />
+          <Brush 
+            className={`cursor-pointer ${isEraserMode ? '' : 'bg-gray-100'} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
+            onClick={() => {
+              setIsEraserMode(false);
+              canvasRef.current?.eraseMode(false);
+            }}
+          />
+          <Eraser 
+            className={`cursor-pointer ${isEraserMode ? 'bg-gray-100' : ''} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
+            onClick={() => {
+              setIsEraserMode(true);
+              canvasRef.current?.eraseMode(true);
+            }}
+          />
+          <input
+            type="color"
+            value={brushColor}
+            onChange={(e) => setBrushColor(e.target.value)}
+            className="w-10 h-10 rounded-xl"
+          />
+          <Undo 
+            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
+            onClick={() => {
+              canvasRef.current?.undo();
+            }}
+          />
+          <Redo 
+            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
+            onClick={() => {
+              setIsEraserMode(false);
+              canvasRef.current?.redo();
+            }}
+          />
         </div>
 
         <div className="flex justify-end space-x-2">
           <BackgroundButton text="Clear" bgColor="bg-yellow-500 hover:bg-yellow-400" onClick={() => canvasRef.current.clearCanvas()} />
           <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
-          <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
+          <BackgroundButton text="Save Drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
         </div>
       </div>
     </div>,
@@ -492,7 +507,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
 function dataURLtoFile(dataurl, filename) {
   const arr = dataurl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+  const mime = mimeMatch ? mimeMatch[1] : 'image/webp';
   const bstr = atob(arr[1]);
   let n = bstr.length;
   const u8arr = new Uint8Array(n);

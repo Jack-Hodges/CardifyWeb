@@ -1,29 +1,66 @@
 // CardManipulation.js
 import supabase from '../../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
+import pica from 'pica';
 
 /**
- * Utility function: compress an image file in the browser,
- * returning a dataURL (Base64) at ~maxWidth and ~quality.
+ * Resizes an image file using Pica and exports it as a WebP Blob.
+ * This uses high‑quality resizing so the output stays as sharp as possible
+ * while producing a smaller file size.
+ *
+ * @param {File} file - The input image file.
+ * @param {number} maxWidth - The maximum width for the output image.
+ * @returns {Promise<Blob>} - A promise that resolves with the WebP Blob.
  */
-async function compressAndConvertToDataURL(file, maxWidth = 600, quality = 0.5) {
+async function compressAndConvertToBlob(file, maxWidth = 600) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = function (event) {
+    reader.onload = async function (event) {
       const img = new Image();
-      img.onload = function () {
-        // Create a <canvas> and draw the compressed image
-        const canvas = document.createElement('canvas');
-        const scaleSize = maxWidth / img.width;
-        canvas.width = maxWidth;
-        canvas.height = img.height * scaleSize;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      img.onload = async function () {
+        // Only resize if needed.
+        const targetWidth = img.width > maxWidth ? maxWidth : img.width;
+        const scaleFactor = targetWidth / img.width;
+        const targetHeight = Math.round(img.height * scaleFactor);
 
-        // Convert canvas to a base64 string (JPEG, quality ~0.7)
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
+        // Create a source canvas with the full-size image.
+        const sourceCanvas = document.createElement('canvas');
+        sourceCanvas.width = img.width;
+        sourceCanvas.height = img.height;
+        const srcCtx = sourceCanvas.getContext('2d');
+        srcCtx.drawImage(img, 0, 0);
+
+        // Create a target canvas for the resized image.
+        const targetCanvas = document.createElement('canvas');
+        targetCanvas.width = targetWidth;
+        targetCanvas.height = targetHeight;
+
+        // Use Pica to resize from the source canvas into the target canvas.
+        try {
+          await pica().resize(sourceCanvas, targetCanvas, {
+            quality: 0, // Lower interpolation quality if desired.
+            unsharpAmount: 80,
+            unsharpRadius: 0.6,
+            unsharpThreshold: 2,
+          });
+        } catch (resizeError) {
+          return reject(resizeError);
+        }
+
+        // Export the resized canvas to a WebP Blob with reduced quality.
+        targetCanvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Canvas is empty'));
+            }
+          },
+          'image/webp', // Use WebP format.
+          0.7 // Lower quality (range: 0 to 1) produces a smaller file size.
+        );
       };
+      img.onerror = (err) => reject(err);
       img.src = event.target.result;
     };
     reader.onerror = reject;
@@ -31,23 +68,7 @@ async function compressAndConvertToDataURL(file, maxWidth = 600, quality = 0.5) 
   });
 }
 
-/**
- * Utility function: convert a dataURL to a Blob for uploading.
- */
-function dataURLToBlob(dataURL) {
-  const [meta, base64Content] = dataURL.split(',');
-  const byteString = atob(base64Content);
-  const mimeString = meta.match(/:(.*?);/)?.[1] || 'image/jpeg';
-
-  const ab = new ArrayBuffer(byteString.length);
-  const ia = new Uint8Array(ab);
-  for (let i = 0; i < byteString.length; i++) {
-    ia[i] = byteString.charCodeAt(i);
-  }
-  return new Blob([ab], { type: mimeString });
-}
-
-// Fetches all cards for a given subject
+// Fetches all cards for a given subject.
 export const fetchCards = async (subjectId) => {
   try {
     const { data, error } = await supabase
@@ -66,7 +87,7 @@ export const fetchCards = async (subjectId) => {
   }
 };
 
-// Removes a present card from database
+// Removes a card from the database.
 export const deleteCard = async (
   cards,
   cardId,
@@ -74,9 +95,9 @@ export const deleteCard = async (
   setCards,
   setCurrentCardIndex
 ) => {
-  const updatedCards = cards.filter(card => card.id !== cardId);
+  const updatedCards = cards.filter((card) => card.id !== cardId);
 
-  // Adjust current index if needed
+  // Adjust current index if needed.
   let newCurrentIndex = currentCardIndex;
   if (currentCardIndex === updatedCards.length) {
     newCurrentIndex = currentCardIndex - 1;
@@ -84,7 +105,7 @@ export const deleteCard = async (
   setCards(updatedCards);
   setCurrentCardIndex(Math.max(newCurrentIndex, 0));
 
-  // Delete row in Supabase
+  // Delete the row in Supabase.
   const { error } = await supabase
     .from('flashcards')
     .delete()
@@ -96,31 +117,32 @@ export const deleteCard = async (
 };
 
 /**
- * Sort an array of cards by ID ascending
+ * Sort an array of cards by ID ascending.
  */
 export const sortCardsById = (cards) => {
   return cards.sort((a, b) => a.id - b.id);
 };
 
-// Updates or inserts a card if not present
+/**
+ * Upserts a card.
+ *
+ * If an image file is provided, the file is resized with Pica and
+ * converted to a WebP Blob before uploading it to Supabase Storage.
+ */
 export const upsertCard = async (card, imageFile) => {
   try {
     let newImageUrl = card.image_url || null;
 
-    // 1) If a new image file is provided, compress & upload to Supabase Storage
+    // 1) If a new image file is provided, resize & upload.
     if (imageFile) {
       try {
-        const ext = imageFile.type.split('/')[1] || 'jpg';
-
-        // Compress & convert to dataURL
-        const compressedDataURL = await compressAndConvertToDataURL(imageFile);
-        // Convert dataURL to Blob
-        const blob = dataURLToBlob(compressedDataURL);
-
-        // Unique filename
+        const ext = 'webp';
+        // Compress and convert the image file to a WebP blob.
+        const blob = await compressAndConvertToBlob(imageFile, 600);
+        // Generate a unique filename with the .webp extension.
         const fileName = `${uuidv4()}.${ext}`;
 
-        // Upload to bucket "FlashcardImages"
+        // Upload the WebP blob to the "FlashcardImages" bucket.
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('FlashcardImages')
           .upload(fileName, blob, { contentType: `image/${ext}` });
@@ -128,7 +150,7 @@ export const upsertCard = async (card, imageFile) => {
         if (uploadError) {
           console.error('Error uploading image:', uploadError);
         } else {
-          // Grab the public URL
+          // Retrieve the public URL for the uploaded image.
           const { data: publicUrlData } = supabase.storage
             .from('FlashcardImages')
             .getPublicUrl(fileName);
@@ -139,7 +161,7 @@ export const upsertCard = async (card, imageFile) => {
       }
     }
 
-    // 2) Prepare the DB payload
+    // 2) Prepare the payload.
     const payload = {
       user_id: card.user_id,
       question: card.question,
@@ -150,9 +172,8 @@ export const upsertCard = async (card, imageFile) => {
       backMode: card.backMode,
     };
 
-    // 3) Upsert logic: if card.id => update, else insert
+    // 3) Upsert: update if card.id exists; otherwise, insert.
     if (card.id) {
-      // ---- Update existing record ----
       const { data, error } = await supabase
         .from('flashcards')
         .update(payload)
@@ -163,10 +184,8 @@ export const upsertCard = async (card, imageFile) => {
         console.error('Error updating card:', error);
         return null;
       }
-      // Return the updated record (usually data[0])
       return data?.[0] || null;
     } else {
-      // ---- Insert new record ----
       const { data, error } = await supabase
         .from('flashcards')
         .insert([payload])
@@ -176,8 +195,6 @@ export const upsertCard = async (card, imageFile) => {
         console.error('Error inserting new card:', error);
         return null;
       }
-
-      // Return the newly inserted record
       return data?.[0] || null;
     }
   } catch (err) {
