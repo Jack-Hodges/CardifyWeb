@@ -430,14 +430,12 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
   };
 
   return ReactDOM.createPortal(
-    <div
-      className="fixed inset-0 flex items-center justify-center z-50"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 flex items-center justify-center z-50 select-none">
+      {/* Remove the onClick from this outer container so that clicking outside does nothing */}
       <div className="absolute inset-0 bg-black opacity-50" />
       <div
         className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}  // Prevent clicks inside the popup from bubbling up.
       >
         <h2 className="text-xl mb-2">Drawing</h2>
         <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
@@ -448,6 +446,8 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
             style={{
               height: '100%',
               width: '100%',
+              userSelect: 'none',        
+              WebkitUserSelect: 'none',
             }}
             canvasColor="white"
             strokeColor={brushColor}
@@ -469,12 +469,23 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
               canvasRef.current?.eraseMode(true);
             }}
           />
+
+          {/* Color picker for brush color */}
           <input
             type="color"
             value={brushColor}
             onChange={(e) => setBrushColor(e.target.value)}
-            className="w-10 h-10 rounded-xl"
+            className="w-10 h-10 cursor-pointer rounded-full p-0"
+            style={{
+              WebkitAppearance: "none",
+              MozAppearance: "none",
+              appearance: "none",
+              border: "none",
+              outline: "none",
+              background: brushColor,
+            }}
           />
+          
           <Undo 
             className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
             onClick={() => {
@@ -491,7 +502,11 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
         </div>
 
         <div className="flex justify-end space-x-2">
-          <BackgroundButton text="Clear" bgColor="bg-yellow-500 hover:bg-yellow-400" onClick={() => canvasRef.current.clearCanvas()} />
+          <BackgroundButton
+            text="Clear"
+            bgColor="bg-yellow-500 hover:bg-yellow-400"
+            onClick={() => canvasRef.current.clearCanvas()}
+          />
           <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
           <BackgroundButton text="Save Drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
         </div>
