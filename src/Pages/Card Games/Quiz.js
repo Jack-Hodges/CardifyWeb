@@ -190,7 +190,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-4/5 h-3/5 sm:h-1/2 mt-5 px-5">
+              <div className="mx-auto w-4/5 min-h-[40vh] h-4/5 sm:h-1/2 mt-5 px-5">
                 <Card
                   card={cards[currentCardIndex]}
                   edit={false}
@@ -411,7 +411,7 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
 
   return (
     <div
-      className={`w-full h-32 ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-2 flex items-center justify-center font-bold text-xl textColor`}
+      className={`w-full h-24 sm:h-32 ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-2 flex items-center justify-center font-bold text-xl textColor`}
       onClick={onClick}
     >
       <div className="w-full h-full overflow-hidden flex items-center justify-center">
