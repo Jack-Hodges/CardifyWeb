@@ -5,6 +5,7 @@ import { ReactSketchCanvas } from 'react-sketch-canvas'; // Ensure you have this
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { Image, Calculator, Text, Brush, Eraser, Undo, Redo } from 'lucide-react';
+import { Stage, Layer, Line } from 'react-konva';
 
 addStyles();
 
@@ -437,7 +438,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
         className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
         onClick={(e) => e.stopPropagation()}  // Prevent clicks inside the popup from bubbling up.
       >
-        <h2 className="text-xl mb-2">Drawing</h2>
+        <h2 className="text-2xl font-semibold mb-0 text-yellow-500">Add Drawing</h2>
         <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
           <ReactSketchCanvas
             ref={canvasRef}

@@ -57,7 +57,7 @@ async function compressAndConvertToBlob(file, maxWidth = 600) {
             }
           },
           'image/webp', // Use WebP format.
-          0.7 // Lower quality (range: 0 to 1) produces a smaller file size.
+          0.9 // Lower quality (range: 0 to 1) produces a smaller file size.
         );
       };
       img.onerror = (err) => reject(err);
