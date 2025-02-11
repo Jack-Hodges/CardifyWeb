@@ -9,17 +9,20 @@ import Card from '../../components/Card/Card';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import Ad from '../../components/Advertisement/Ad';
+// Import EditableMathField from MathQuill
+import { EditableMathField } from 'react-mathquill';
 
 function Quiz() {
   // State variables
   const [cards, setCards] = useState([]);
+  // randomizedOptions: each card gets an array of option objects: { mode: number, content: string }
   const [randomizedOptions, setRandomizedOptions] = useState([]);
+  // selectedAnswers: stores the chosen option for each card index
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
-
   const [showAd, setShowAd] = useState(false);
   const [leaveAd, setLeaveAd] = useState("Home");
 
@@ -30,12 +33,12 @@ function Quiz() {
   const { user, getUser, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
-  // Navigation function
+  // Navigation function to switch to the create page
   const handleSwitchToCreate = () => {
     navigate('/create', { state: { subject } });
   };
 
-  // Load cards and randomize options
+  // Load cards and generate randomized options
   useEffect(() => {
     if (!user) {
       getUser();
@@ -61,32 +64,49 @@ function Quiz() {
     loadCards();
   }, [subject, user, getUser]);
 
-  // Randomize options for each card
+  // Randomize options for each card.
+  // Mode logic:
+  // - If either frontMode or backMode is 1, use math mode (EditableMathField).
+  // - If mode is 2 or 3, render as image.
+  // - Otherwise, mode 0 uses text rendering via ReactMarkdown.
   const randomizeOptions = (cards) => {
     const optionsPerCard = cards.map((card) => {
-      const incorrectAnswers = cards
+      const mode = card.frontMode === 1 || card.backMode === 1 ? 1 : card.backMode;
+      // Build the correct option
+      const correctOption =
+        mode === 2 || mode === 3
+          ? { mode, content: card.image_url || '' }
+          : { mode, content: card.answer || '' };
+
+      // Build incorrect options from other cards
+      const incorrectOptions = cards
         .filter((c) => c.id !== card.id)
-        .map((c) => c.answer)
+        .map((c) => {
+          const m = c.frontMode === 1 || c.backMode === 1 ? 1 : c.backMode;
+          return m === 2 || m === 3
+            ? { mode: m, content: c.image_url || '' }
+            : { mode: m, content: c.answer || '' };
+        })
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
 
-      const options = [...incorrectAnswers, card.answer].sort(() => Math.random() - 0.5);
+      // Combine and shuffle the options
+      const options = [...incorrectOptions, correctOption].sort(() => Math.random() - 0.5);
       return options;
     });
     setRandomizedOptions(optionsPerCard);
   };
 
   // Handle answer selection
-  const handleAnswerClick = (selectedAnswer) => {
+  const handleAnswerClick = (selectedOption) => {
     if (selectedAnswers[currentCardIndex] !== undefined) return;
-
     setSelectedAnswers((prev) => ({
       ...prev,
-      [currentCardIndex]: selectedAnswer,
+      [currentCardIndex]: selectedOption,
     }));
   };
 
-  // Navigation between cards
+  // Navigation functions
   const goToPreviousCard = () => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex((prev) => prev - 1);
@@ -99,7 +119,7 @@ function Quiz() {
     }
   };
 
-  // Compute quiz results
+  // Compute quiz results when finished
   let correctCount = 0;
   let incorrectCount = 0;
   let percentage = 0;
@@ -107,8 +127,17 @@ function Quiz() {
 
   if (finished) {
     cards.forEach((card, index) => {
-      const selectedAnswer = selectedAnswers[index];
-      if (selectedAnswer === card.answer) {
+      const selectedOption = selectedAnswers[index];
+      const mode = card.frontMode === 1 || card.backMode === 1 ? 1 : card.backMode;
+      const correctOption =
+        mode === 2 || mode === 3
+          ? { mode, content: card.image_url }
+          : { mode, content: card.answer };
+      if (
+        selectedOption &&
+        selectedOption.content === correctOption.content &&
+        selectedOption.mode === correctOption.mode
+      ) {
         correctCount += 1;
       } else {
         incorrectCount += 1;
@@ -119,7 +148,6 @@ function Quiz() {
     percentage = totalAnswered > 0 ? (correctCount / totalAnswered) * 100 : 0;
     const roundedPercentage = Math.round(percentage / 5) * 5; // Round to nearest 5%
 
-    // Define unique messages for each 5% increment with emojis at the end
     const messages = {
       0: "Don't worry, keep trying! 😕",
       5: "A rough start, but don't give up! 😟",
@@ -144,16 +172,12 @@ function Quiz() {
       100: "Perfect score! Outstanding! 🎉",
     };
 
-    // Get the message based on the rounded percentage
     message = messages[roundedPercentage] || "Good attempt! Keep practicing!";
-
-    // Ensure message is different for each 5% increment
   }
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
       <TitleBar text="Quiz" />
-
       <div className="block sm:flex w-full h-full">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
@@ -166,7 +190,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-full h-2/5 sm:h-3/5 mt-5 px-5">
+              <div className="mx-auto w-4/5 h-3/5 sm:h-1/2 mt-5 px-5">
                 <Card
                   card={cards[currentCardIndex]}
                   edit={false}
@@ -174,20 +198,28 @@ function Quiz() {
                   themeShadow={'background-shadow-new'}
                 />
               </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 w-4/5 mx-auto gap-4 mt-4">
-                {randomizedOptions[currentCardIndex]?.map((option, index) => (
-                  <SelectionBox
-                    key={index}
-                    text={option.slice(0, 50)}
-                    correctAnswer={cards[currentCardIndex].answer}
-                    selectedAnswer={selectedAnswers[currentCardIndex]}
-                    onClick={() => handleAnswerClick(option)}
-                    themeShadow={'background-shadow-new'}
-                  />
-                ))}
+                {randomizedOptions[currentCardIndex]?.map((option, index) => {
+                  // Determine the mode for the current card using the same logic:
+                  const mode = cards[currentCardIndex].frontMode === 1 || cards[currentCardIndex].backMode === 1
+                    ? 1
+                    : cards[currentCardIndex].backMode;
+                  const correctOption =
+                    mode === 2 || mode === 3
+                      ? { mode, content: cards[currentCardIndex].image_url }
+                      : { mode, content: cards[currentCardIndex].answer };
+                  return (
+                    <SelectionBox
+                      key={index}
+                      option={option}
+                      correctOption={correctOption}
+                      selectedOption={selectedAnswers[currentCardIndex]}
+                      onClick={() => handleAnswerClick(option)}
+                      themeShadow={'background-shadow-new'}
+                    />
+                  );
+                })}
               </div>
-
               <div className="flex justify-around mt-4 mx-auto gap-4">
                 <BackgroundButton
                   text="Previous Card"
@@ -197,9 +229,15 @@ function Quiz() {
                 />
                 <BackgroundButton
                   text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
-                  bgColor={currentCardIndex === cards.length - 1 ? 'bg-green-500 hover:bg-green-400' : theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
+                  bgColor={
+                    currentCardIndex === cards.length - 1
+                      ? 'bg-green-500 hover:bg-green-400'
+                      : theme
+                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
+                        : 'bg-purple-500 hover:bg-purple-400'
+                  }
                   wWidth="w-40"
-                  disabled={!selectedAnswers[currentCardIndex]} // Disable button if no answer is selected
+                  disabled={!selectedAnswers[currentCardIndex]}
                   onClick={() => {
                     if (currentCardIndex === cards.length - 1) {
                       setFinished(true);
@@ -211,11 +249,14 @@ function Quiz() {
               </div>
             </div>
           ) : (
-            // Check if showAd is false
             !showAd ? (
               <div className="w-full h-full flex flex-col items-center justify-center">
-                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>{message}</h2>
-                <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>{percentage.toFixed(0)}%</p>
+                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
+                  {message}
+                </h2>
+                <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>
+                  {percentage.toFixed(0)}%
+                </p>
                 <div className="flex gap-4 mt-4">
                   <BackgroundButton
                     text="Retry Quiz"
@@ -237,7 +278,7 @@ function Quiz() {
                     bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
                     onClick={() => {
                       if (profile.pro) {
-                        navigate('/home')
+                        navigate('/home');
                       } else {
                         setLeaveAd("Home");
                         setShowAd(true);
@@ -248,10 +289,12 @@ function Quiz() {
               </div>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center">
-                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>Advertisement</h2>
+                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
+                  Advertisement
+                </h2>
                 <Ad />
-                <BackgroundButton 
-                  text="Continue" 
+                <BackgroundButton
+                  text="Continue"
                   bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
                   delay={5}
                   onClick={() => {
@@ -264,7 +307,8 @@ function Quiz() {
                       setSelectedAnswers({});
                       randomizeOptions(cards);
                     }
-                  }}/>
+                  }}
+                />
               </div>
             )
           )
@@ -275,7 +319,9 @@ function Quiz() {
                 <p className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>
                   {subject.name} does not have enough cards.
                 </p>
-                <p className={`textColor ${shadow ? 'drop-shadow-custom' : ''}`}>At least 4 cards are required to start a quiz</p>
+                <p className={`textColor ${shadow ? 'drop-shadow-custom' : ''}`}>
+                  At least 4 cards are required to start a quiz
+                </p>
                 <div className="flex gap-4">
                   <BackgroundButton
                     text="Choose a different subject"
@@ -293,16 +339,30 @@ function Quiz() {
               <div className="flex flex-col justify-center items-center w-full h-full">
                 {subject ? (
                   <div>
-                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
+                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
+                      {subject.name} has no flashcards
+                    </p>
                     <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                      <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                      <BackgroundButton
+                        text={`Add Flashcards to ${subject.name}`}
+                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                        onClick={handleSwitchToCreate}
+                        wWidth="w-full sm:w-auto"
+                      />
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
+                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
+                      No subject selected
+                    </p>
                     <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                      <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => setIsSubjectListModalOpen(true)} wWidth='w-full sm:w-auto'/>
+                      <BackgroundButton
+                        text="Select a subject to practice"
+                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                        onClick={() => setIsSubjectListModalOpen(true)}
+                        wWidth="w-full sm:w-auto"
+                      />
                     </div>
                   </div>
                 )}
@@ -311,7 +371,6 @@ function Quiz() {
           </div>
         )}
       </div>
-
       <SubjectList
         isOpen={isSubjectListModalOpen}
         onClose={() => setIsSubjectListModalOpen(false)}
@@ -324,30 +383,69 @@ function Quiz() {
 
 export default Quiz;
 
-function SelectionBox({ text, onClick, selectedAnswer, correctAnswer, themeShadow }) {
+// -----------------------------------------------------------------------
+// SelectionBox Component
+// Renders differently based on the option's mode:
+// - Mode 0: Render text with ReactMarkdown.
+// - Mode 1: Render an EditableMathField (MathQuill).
+// - Modes 2 and 3: Render an image.
+// The image is styled to fit inside the selection box.
+// -----------------------------------------------------------------------
+function SelectionBox({ option, onClick, selectedOption, correctOption, themeShadow }) {
+  if (!option) return null;
+  const optionContent = option.content || '';
   let boxColor = 'bg-white dark:bg-gray-600';
 
-  if (selectedAnswer !== undefined) {
-    if (selectedAnswer === text) {
-      boxColor = text === correctAnswer ? 'bg-green-400' : 'bg-red-400';
-    } else if (text === correctAnswer) {
+  if (selectedOption !== undefined) {
+    const isSelected = (selectedOption.content || '') === optionContent && selectedOption.mode === option.mode;
+    const isCorrect =
+      correctOption &&
+      (correctOption.content || '') === optionContent &&
+      correctOption.mode === option.mode;
+    if (isSelected) {
+      boxColor = isCorrect ? 'bg-green-400' : 'bg-red-400';
+    } else if (isCorrect) {
       boxColor = 'bg-green-200 dark:text-gray-500';
     }
   }
 
   return (
     <div
-      className={`w-full h-20 ${boxColor} ${'background-shadow-new'} background-hover cursor-pointer rounded-xl p-2 flex items-center font-bold text-xl textColor`}
+      className={`w-full h-32 ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-2 flex items-center justify-center font-bold text-xl textColor`}
       onClick={onClick}
     >
-      <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
-        <ReactMarkdown
-          rehypePlugins={[rehypeRaw]}
-          components={{ u: ({ node, ...props }) => <u {...props} /> }}
-          className="inline"
-        >
-          {text}
-        </ReactMarkdown>
+      <div className="w-full h-full overflow-hidden flex items-center justify-center">
+        {option.mode === 2 || option.mode === 3 ? (
+          <img
+            src={optionContent}
+            alt="Answer option"
+            className="w-full h-full object-contain"
+          />
+        ) : option.mode === 1 ? (
+          <EditableMathField
+            latex={optionContent}
+            style={{
+              minHeight: '4rem',
+              width: '100%',
+              backgroundColor: 'transparent',
+              color: 'inherit',
+              border: 'none',
+              pointerEvents: 'none',
+              fontSize: '2rem',
+              fontWeight: 'semibold',
+              color: 'inherit',
+              textAlign: 'center',
+            }}
+          />
+        ) : (
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw]}
+            components={{ u: ({ node, ...props }) => <u {...props} /> }}
+            className="inline"
+          >
+            {optionContent.length > 50 ? optionContent.slice(0, 50) + '...' : optionContent}
+          </ReactMarkdown>
+        )}
       </div>
     </div>
   );
