@@ -5,7 +5,6 @@ import { ReactSketchCanvas } from 'react-sketch-canvas'; // Ensure you have this
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { Image, Calculator, Text, Brush, Eraser, Undo, Redo } from 'lucide-react';
-import { Stage, Layer, Line } from 'react-konva';
 
 addStyles();
 
