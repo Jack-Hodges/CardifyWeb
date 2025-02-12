@@ -4,7 +4,7 @@ import { EditableMathField, addStyles } from 'react-mathquill';
 import { ReactSketchCanvas } from 'react-sketch-canvas'; // Ensure you have this installed
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { Image, Calculator, Text, Brush, Eraser, Undo, Redo } from 'lucide-react';
+import { Image, Calculator, Text, Brush, Eraser, Undo, Redo, X } from 'lucide-react';
 
 addStyles();
 
@@ -499,14 +499,14 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
               canvasRef.current?.redo();
             }}
           />
+
+          <X 
+            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
+            onClick={() => canvasRef.current.clearCanvas()}
+          />    
         </div>
 
         <div className="absolute flex justify-end space-x-2 bottom-2 right-2">
-          <BackgroundButton
-            text="Clear"
-            bgColor="bg-yellow-500 hover:bg-yellow-400"
-            onClick={() => canvasRef.current.clearCanvas()}
-          />
           <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
           <BackgroundButton text="Save Drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
         </div>

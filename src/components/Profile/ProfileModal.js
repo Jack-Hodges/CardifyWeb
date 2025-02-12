@@ -4,6 +4,7 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { saveProfile } from './ProfileManipulation';
+import { Cog } from 'lucide-react';
 
 function Modal({ isOpen, onClose, mainText, logout }) {
     const { theme, profile } = useUser();
@@ -99,7 +100,12 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 <div className="flex justify-between items-center mb-6">
                     <span className={`textColor text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
-                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                        <div className="hidden sm:block">
+                            <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                        </div>
+                        <div className="block sm:hidden">
+                            <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                        </div>
                         <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
                         <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                     </div>
