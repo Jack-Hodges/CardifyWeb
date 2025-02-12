@@ -218,7 +218,7 @@ function EditModal({
           >
             Question
           </label>
-          <div className="mb-2 flex space-x-2">
+          <div className="mb-2 flex space-x-2 overflow-x-auto scrollbar-hide">
             <TextButton text={<b>B</b>} handleClick={handleBoldClick} mode={frontMode} modeText="front" />
             <TextButton text={<i>I</i>} handleClick={handleItalicClick} mode={frontMode} modeText="front" />
             <TextButton text={<u>U</u>} handleClick={handleUnderlineClick} mode={frontMode} modeText="front" />
@@ -272,7 +272,7 @@ function EditModal({
           >
             Answer
           </label>
-          <div className="mb-2 flex space-x-2">
+          <div className="mb-2 flex space-x-2 overflow-x-auto">
             <TextButton text={<b>B</b>} handleClick={handleBoldClick} mode={backMode} modeText="back" />
             <TextButton text={<i>I</i>} handleClick={handleItalicClick} mode={backMode} modeText="back" />
             <TextButton text={<u>U</u>} handleClick={handleUnderlineClick} mode={backMode} modeText="back" />
@@ -382,7 +382,7 @@ function TextButton({ text, handleClick, mode, modeText }) {
     <button
       onClick={() => handleClick(modeText)}
       disabled={mode !== 0}
-      className={`bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
+      className={`bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0 ${
         mode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
@@ -501,7 +501,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
           />
         </div>
 
-        <div className="flex justify-end space-x-2">
+        <div className="absolute flex justify-end space-x-2 bottom-2 right-2">
           <BackgroundButton
             text="Clear"
             bgColor="bg-yellow-500 hover:bg-yellow-400"

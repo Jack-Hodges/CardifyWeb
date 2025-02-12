@@ -33,7 +33,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
 
   return (
     <div>
-      <BackgroundButton bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'} onClick={() => generatePDF()} text="Export to PDF" image={<Download />} flip/>
+      <BackgroundButton bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'} onClick={() => generatePDF()} text="Export" image={<Download />} flip/>
 
       {/* Hidden content that will be converted to PDF */}
       <div className="hidden">
