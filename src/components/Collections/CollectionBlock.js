@@ -4,7 +4,7 @@ import SubjectBlock from "../Subject/SubjectBlock";
 import { useState } from "react";
 import { PencilRuler, ArrowRight } from 'lucide-react';
 
-function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection }) {
+function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
 
     // Memoize theme so it only recalculates if profile.theme changes
 
@@ -121,6 +121,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                     subject={subject}
                                     user={user}
                                     onEdit={() => onEditSubject(subject)}  // Pass the onEditSubject function here
+                                    onSave={onSaveSubject}  // Pass the onSaveSubject function here
                                     onRemoveSubject={() => onRemoveSubject(subject)}  // Handle removal
                                 />
                             ))}

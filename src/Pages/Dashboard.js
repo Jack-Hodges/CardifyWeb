@@ -72,14 +72,14 @@ function Dashboard() {
 };
 
   // Subject
-  const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId) => {
-    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId);
+  const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
+    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
     if (data && !id) {
       setSubjects([...subjects, ...data]);
     } else {
       const updatedSubjects = subjects.map((subject) =>
         subject.id === id
-          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId }
+          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned }
           : subject
       );
       setSubjects(updatedSubjects);
@@ -213,6 +213,7 @@ function Dashboard() {
               onRemoveSubject={confirmDeleteSubject}  // Pass the delete function as a prop
               onEditCollection={handleEditCollection}
               onRemoveCollection={confirmDeleteCollection}
+              onSaveSubject={handleSaveSubject}
             />
           ))}
 
@@ -222,6 +223,7 @@ function Dashboard() {
               key={subject.id}
               subject={subject}
               user={user}
+              onSave={handleSaveSubject}
               onEdit={() => handleEditSubject(subject)}
               onRemoveSubject={() => confirmDeleteSubject(subject)}
             />

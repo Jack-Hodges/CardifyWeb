@@ -83,6 +83,7 @@ function Home() {
   const [subjectPage, setSubjectPage] = useState('create');
   const [homePopUp, setHomePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
+  const pinnedSubjects = subjects.filter(subject => subject.pinned);
 
   useEffect(() => {
     let isMounted = true;
@@ -199,6 +200,31 @@ function Home() {
                 <JumpButton theme={'background-shadow-new'} text="Dash" img={<Zap size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
+
+            {pinnedSubjects.length > 0 && (
+              <div>
+                <div className="flex justify-between ml-5 mr-2 mt-6">
+                  <p className={`${shadow ? 'drop-shadow-custom' : ''}`}>Pinned</p>
+                </div>
+                <div className="flex w-full overflow-x-auto space-x-4 py-2 scrollbar-hide">
+                  {pinnedSubjects.map((subject, index) => (
+                    <div
+                      key={index}
+                      className={`flex-shrink-0 min-w-72 w-1/2 sm:w-1/4 xl:w-1/5 2xl:w-1/6 ${
+                        index === 0 ? 'pl-4' : ''
+                      } ${index === pinnedSubjects.length - 1 ? 'pr-4' : ''}`}
+                    >
+                      <SubjectBlock
+                        bgCol={subject.bgCol}
+                        subject={subject}
+                        user={user}
+                        home
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <div className="flex justify-between ml-5 mr-2 mt-6">
