@@ -23,7 +23,7 @@ function FlashcardQuiz() {
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
-  const { secondaryColor, shadow } = theme;
+  const { secondaryColor, tertiaryColor, shadow } = theme;
 
   const navigate = useNavigate();
 
@@ -228,8 +228,16 @@ function FlashcardQuiz() {
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
             <p className={`${theme ? theme.textClass : 'textColor'} font-bold text-2xl mb-10 ${shadow ? 'drop-shadow-custom' : ''}`}>You have completed all the cards.</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <BackgroundButton text="Back to Home" bgColor={"bg-green-500 hover:bg-green-400"} onClick={handleSwitchToHome} />
-              <BackgroundButton text={`Review ${subject.name} Again`} bgColor={"bg-blue-500 hover:bg-blue-400"} onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
+              <BackgroundButton text="Back to Home" bgColor={
+                      theme 
+                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
+                        : "bg-orange-500 hover:bg-orange-400"
+                    } onClick={handleSwitchToHome} />
+              <BackgroundButton text={`Review ${subject.name} Again`} bgColor={
+                      theme 
+                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
+                        : "bg-purple-500 hover:bg-purple-400"
+                    } onClick={() => {setFinished(false); setCurrentCardIndex(0);}} />
             </div>
           </div>
         )}

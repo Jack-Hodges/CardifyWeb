@@ -226,7 +226,7 @@ function Home() {
               </div>
             )}
 
-            <div>
+            {/* <div>
               <div className="flex justify-between ml-5 mr-2 mt-6">
                 <p className={`${shadow ? 'drop-shadow-custom' : ''}`}>Continue Learning</p>
                 <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
@@ -246,7 +246,7 @@ function Home() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
 
             <SubjectList 
               isOpen={isSubjectListModalOpen} 
