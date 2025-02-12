@@ -14,7 +14,7 @@ import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
 import DashboardImage from '../images/tutorial/Dashboard.png';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -331,36 +331,118 @@ function DashboardLoading() {
   );
 }
 
-function ControlSection( { selectedSort, setSelectedSort, searchTerm, setSearchTerm, shadow, themeCol, themeText = 'text-white' } ) {
+function ControlSection({
+  selectedSort,
+  setSelectedSort,
+  searchTerm,
+  setSearchTerm,
+  shadow,
+  themeCol,
+  themeText = 'text-white'
+}) {
+  // 'filter' means the filter dropdown is fully shown and search is collapsed,
+  // 'search' means the search input is expanded and filter is collapsed.
+  const [activeSection, setActiveSection] = useState('filter');
+
   return (
-    <div className="flex mx-4 mt-3 items-center justify-between">
-      <div className="flex gap-2">
-        {/* Sorting Dropdown */}
-        <div className="relative group">
-          <select
-            value={selectedSort}
-            onChange={(e) => setSelectedSort(e.target.value)}
-            className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
-          >
-            <option value="Most Cards">Most Cards</option>
-            <option value="Alphabetical">Alphabetical</option>
-            <option value="Date Created">Date Created</option>
-          </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
-            <ChevronDown className="text-white"/>
-          </div>
+    <>
+      {/* Mobile version: visible on screens below the "sm" breakpoint */}
+      <div className="flex mx-4 mt-3 items-center justify-between sm:hidden">
+        {/* Filter Container */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            activeSection === 'filter' ? 'w-1/2' : 'w-10'
+          }`}
+        >
+          {activeSection === 'filter' ? (
+            // Expanded filter: just the select without an extra ChevronDown button.
+            <div className="relative w-[90%]">
+              <select
+                value={selectedSort}
+                onChange={(e) => setSelectedSort(e.target.value)}
+                className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 w-full transition-colors duration-300 appearance-none`}
+              >
+                <option value="Most Cards">Most Cards</option>
+                <option value="Alphabetical">Alphabetical</option>
+                <option value="Date Created">Date Created</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
+                <ChevronDown className="w-5 h-5 text-white" />
+              </div>
+            </div>
+          ) : (
+            // Collapsed filter: only the ChevronDown button.
+            <BackgroundButton
+              image={<ChevronDown />}
+              onClick={() => setActiveSection('filter')}
+              bgColor={
+                themeCol
+                  ? `${themeCol.bgClass} ${themeCol.hoverClass}`
+                  : 'bg-orange-500 hover:bg-orange-400'
+              }
+            />
+          )}
+        </div>
+
+        {/* Search Container */}
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            activeSection === 'search' ? 'w-4/5' : 'w-10'
+          }`}
+        >
+          {activeSection === 'search' ? (
+            // Expanded search: full input.
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} background-shadow-new background-focus focus:outline-none w-full transition-all duration-300 placeholder-gray-200`}
+              placeholder="Search subjects..."
+            />
+          ) : (
+            // Collapsed search: only the magnifying glass button.
+            <BackgroundButton
+              image={<Search />}
+              onClick={() => setActiveSection('search')}
+              bgColor={
+                themeCol
+                  ? `${themeCol.bgClass} ${themeCol.hoverClass}`
+                  : 'bg-orange-500 hover:bg-orange-400'
+              }
+            />
+          )}
         </div>
       </div>
-      {/* Search Input */}
-      <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} background-shadow-new background-focus focus:outline-none placeholder-gray-200`}
-          placeholder="Search subjects..."
-        />
+
+      {/* Desktop version: always show both controls fully */}
+      <div className="hidden sm:flex mx-4 mt-3 items-center justify-between">
+        <div className="flex gap-2">
+          {/* Fully expanded filter dropdown */}
+          <div className="relative group">
+            <select
+              value={selectedSort}
+              onChange={(e) => setSelectedSort(e.target.value)}
+              className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${themeCol.bgClass} ${themeCol.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
+            >
+              <option value="Most Cards">Most Cards</option>
+              <option value="Alphabetical">Alphabetical</option>
+              <option value="Date Created">Date Created</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
+              <ChevronDown className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 items-center w-1/4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full h-10 px-4 py-2 text-left rounded-full ${themeCol.bgClass} ${themeText} background-shadow-new background-focus focus:outline-none placeholder-gray-200`}
+            placeholder="Search subjects..."
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
