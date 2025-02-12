@@ -87,7 +87,6 @@ export const fetchCards = async (subjectId) => {
   }
 };
 
-// Removes a card from the database.
 export const deleteCard = async (
   cards,
   cardId,
@@ -95,9 +94,33 @@ export const deleteCard = async (
   setCards,
   setCurrentCardIndex
 ) => {
-  const updatedCards = cards.filter((card) => card.id !== cardId);
+  // 1. Find the card that is about to be deleted.
+  const cardToDelete = cards.find((card) => card.id === cardId);
 
-  // Adjust current index if needed.
+  // 2. If an image URL exists, extract the file path and delete the image.
+  if (cardToDelete && cardToDelete.image_url) {
+    // Split by '/FlashcardImages/' to get the file part.
+    const parts = cardToDelete.image_url.split('/FlashcardImages/');
+    if (parts.length > 1) {
+      // parts[1] might start with an extra '/', so remove any leading slashes.
+      let filePath = parts[1].replace(/^\/+/, ''); 
+      // filePath should now be "b0ba536b-1b95-43b9-8950-f0c441a46e0b.webp"
+      
+      // Delete the file from Supabase Storage.
+      const { error: storageError } = await supabase.storage
+        .from('FlashcardImages')
+        .remove(filePath);
+        
+      if (storageError) {
+        console.error('Error deleting image from storage:', storageError);
+      } else {
+        console.log('Image deleted successfully from storage.');
+      }
+    }
+  }
+
+  // 3. Update the UI optimistically by removing the card.
+  const updatedCards = cards.filter((card) => card.id !== cardId);
   let newCurrentIndex = currentCardIndex;
   if (currentCardIndex === updatedCards.length) {
     newCurrentIndex = currentCardIndex - 1;
@@ -105,14 +128,14 @@ export const deleteCard = async (
   setCards(updatedCards);
   setCurrentCardIndex(Math.max(newCurrentIndex, 0));
 
-  // Delete the row in Supabase.
+  // 4. Delete the card from the database.
   const { error } = await supabase
     .from('flashcards')
     .delete()
     .eq('id', cardId);
 
   if (error) {
-    console.error('Error deleting card:', error);
+    console.error('Error deleting card from database:', error);
   }
 };
 
