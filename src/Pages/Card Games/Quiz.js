@@ -319,19 +319,21 @@ function Quiz() {
                 <p className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>
                   {subject.name} does not have enough cards.
                 </p>
-                <p className={`textColor ${shadow ? 'drop-shadow-custom' : ''}`}>
+                <p className={`${theme ? theme.textClass : 'textColor'} ${shadow ? 'drop-shadow-custom' : ''}`}>
                   At least 4 cards are required to start a quiz
                 </p>
-                <div className="flex gap-4">
+                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
                   <BackgroundButton
                     text="Choose a different subject"
                     bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
                     onClick={() => setIsSubjectListModalOpen(true)}
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
                   />
                   <BackgroundButton
                     text={`Add cards to ${subject.name}`}
                     bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
                     onClick={handleSwitchToCreate}
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
                   />
                 </div>
               </div>
