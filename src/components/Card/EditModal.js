@@ -523,6 +523,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
             // Set canvasColor to transparent so the background image shows.
             canvasColor="transparent"
             strokeColor={brushColor}
+            preserveBackgroundImageAspectRatio={true}
           />
         </div>
 
