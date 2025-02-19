@@ -492,6 +492,8 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
       style={{ 
         userSelect: 'none',
         WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none', // Prevent touch callout (iOS)
+        touchAction: 'none', 
       }}
     >
       <div className="absolute inset-0 bg-black opacity-50" />
