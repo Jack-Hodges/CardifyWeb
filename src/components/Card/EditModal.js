@@ -514,23 +514,23 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
 
         {/* Canvas using the backgroundImage prop */}
         <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
-          <ReactSketchCanvas
-            ref={canvasRef}
-            width={3840}
-            height={2160}
-            backgroundImage={backgroundImage}
-            style={{
-              height: '100%',
-              width: '100%',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-              touchAction: 'none',
-            }}
-            // Set canvasColor to transparent so the background image shows.
-            canvasColor="transparent"
-            strokeColor={brushColor}
-            preserveBackgroundImageAspectRatio={true}
-          />
+        <ReactSketchCanvas
+          ref={canvasRef}
+          width={3840}
+          height={2160}
+          backgroundImage={backgroundImage}
+          style={{
+            height: '100%',
+            width: '100%',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none', // Prevent touch callout (iOS)
+            touchAction: 'none',         // Disable default touch actions
+          }}
+          canvasColor="transparent"
+          strokeColor={brushColor}
+          preserveBackgroundImageAspectRatio={true}
+        />
         </div>
 
         <div className="mb-2 flex items-center space-x-4">
