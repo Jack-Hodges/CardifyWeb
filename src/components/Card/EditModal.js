@@ -4,7 +4,7 @@ import { EditableMathField, addStyles } from 'react-mathquill';
 import { ReactSketchCanvas } from 'react-sketch-canvas'; // Ensure you have this installed
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { Image, Calculator, Text, Brush, Eraser, Undo, Redo, X } from 'lucide-react';
+import { Image, Calculator, Text, Brush, Eraser, Undo, Redo, X, Upload } from 'lucide-react';
 
 addStyles();
 
@@ -400,8 +400,10 @@ function TextButton({ text, handleClick, mode, modeText }) {
  */
 function DrawingPopup({ onSaveDrawing, onClose }) {
   const canvasRef = useRef();
+  const backgroundFileInputRef = useRef();
   const [brushColor, setBrushColor] = useState('#000000');
   const [isEraserMode, setIsEraserMode] = useState(false);
+  const [backgroundImage, setBackgroundImage] = useState(null);
 
   // Update canvas context for eraser mode.
   useEffect(() => {
@@ -412,16 +414,72 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     ) {
       const canvas = canvasRef.current.canvas.current;
       const ctx = canvas.getContext('2d');
-      ctx.globalCompositeOperation = isEraserMode ? 'destination-out' : 'source-over';
+      ctx.globalCompositeOperation = isEraserMode
+        ? 'destination-out'
+        : 'source-over';
     }
   }, [isEraserMode]);
 
-  // Export the drawing as a WebP and convert it to a File.
+  // Handle background image selection.
+  const handleBackgroundFileChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setBackgroundImage(event.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Trigger the hidden file input when the Upload icon is clicked.
+  const handleUploadButtonClick = () => {
+    if (backgroundFileInputRef.current) {
+      backgroundFileInputRef.current.click();
+    }
+  };
+
+  // Export the drawing.
+  // If a background image is set, merge it with the drawing using an offscreen canvas.
   const handleSaveDrawing = async () => {
     try {
-      // Export the drawing as WebP.
-      const dataUrl = await canvasRef.current.exportImage('webp');
-      const file = dataURLtoFile(dataUrl, 'drawing.webp');
+      // Export the current drawing as PNG.
+      const drawingDataUrl = await canvasRef.current.exportImage('png');
+
+      // If no background is set, simply save the drawing.
+      if (!backgroundImage) {
+        const file = dataURLtoFile(drawingDataUrl, 'drawing.png');
+        onSaveDrawing(file);
+        onClose();
+        return;
+      }
+
+      // Otherwise, merge the background and drawing.
+      const offscreenCanvas = document.createElement('canvas');
+      offscreenCanvas.width = 3840;
+      offscreenCanvas.height = 2160;
+      const ctx = offscreenCanvas.getContext('2d');
+
+      // Draw the background image.
+      const bgImg = new window.Image();
+      bgImg.src = backgroundImage;
+      await new Promise((resolve, reject) => {
+        bgImg.onload = resolve;
+        bgImg.onerror = reject;
+      });
+      ctx.drawImage(bgImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+      // Draw the drawing (strokes) on top.
+      const drawingImg = new window.Image();
+      drawingImg.src = drawingDataUrl;
+      await new Promise((resolve, reject) => {
+        drawingImg.onload = resolve;
+        drawingImg.onerror = reject;
+      });
+      ctx.drawImage(drawingImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+
+      const combinedDataUrl = offscreenCanvas.toDataURL('image/png');
+      const file = dataURLtoFile(combinedDataUrl, 'drawing.png');
       onSaveDrawing(file);
       onClose();
     } catch (err) {
@@ -431,84 +489,106 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 flex items-center justify-center z-50 select-none">
-      {/* Remove the onClick from this outer container so that clicking outside does nothing */}
       <div className="absolute inset-0 bg-black opacity-50" />
       <div
         className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
-        onClick={(e) => e.stopPropagation()}  // Prevent clicks inside the popup from bubbling up.
+        onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-semibold mb-0 text-yellow-500">Add Drawing</h2>
+        <h2 className="text-2xl font-semibold mb-2 text-yellow-500">
+          Add Drawing
+        </h2>
+
+        {/* Hidden file input for uploading background image */}
+        <input
+          ref={backgroundFileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleBackgroundFileChange}
+          className="hidden"
+        />
+
+        {/* Canvas using the backgroundImage prop */}
         <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
           <ReactSketchCanvas
             ref={canvasRef}
             width={3840}
             height={2160}
+            backgroundImage={backgroundImage}
             style={{
               height: '100%',
               width: '100%',
-              userSelect: 'none',        
+              userSelect: 'none',
               WebkitUserSelect: 'none',
             }}
-            canvasColor="white"
+            // Set canvasColor to transparent so the background image shows.
+            canvasColor="transparent"
             strokeColor={brushColor}
           />
         </div>
 
         <div className="mb-2 flex items-center space-x-4">
-          <Brush 
+          <Brush
             className={`cursor-pointer ${isEraserMode ? '' : 'bg-gray-100'} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
             onClick={() => {
               setIsEraserMode(false);
               canvasRef.current?.eraseMode(false);
             }}
           />
-          <Eraser 
+          <Eraser
             className={`cursor-pointer ${isEraserMode ? 'bg-gray-100' : ''} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
             onClick={() => {
               setIsEraserMode(true);
               canvasRef.current?.eraseMode(true);
             }}
           />
-
-          {/* Color picker for brush color */}
           <input
             type="color"
             value={brushColor}
             onChange={(e) => setBrushColor(e.target.value)}
             className="w-10 h-10 cursor-pointer rounded-full p-0"
             style={{
-              WebkitAppearance: "none",
-              MozAppearance: "none",
-              appearance: "none",
-              border: "none",
-              outline: "none",
+              WebkitAppearance: 'none',
+              MozAppearance: 'none',
+              appearance: 'none',
+              border: 'none',
+              outline: 'none',
               background: brushColor,
             }}
           />
-          
-          <Undo 
+          <Undo
             className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
             onClick={() => {
               canvasRef.current?.undo();
             }}
           />
-          <Redo 
+          <Redo
             className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
             onClick={() => {
               setIsEraserMode(false);
               canvasRef.current?.redo();
             }}
           />
-
-          <X 
+          <X
             className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
             onClick={() => canvasRef.current.clearCanvas()}
-          />    
+          />
+          <Upload
+            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
+            onClick={handleUploadButtonClick}
+          />
         </div>
 
         <div className="absolute flex justify-end space-x-2 bottom-2 right-2">
-          <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
-          <BackgroundButton text="Save Drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
+          <BackgroundButton
+            text="Cancel"
+            bgColor="bg-red-500 hover:bg-red-400"
+            onClick={onClose}
+          />
+          <BackgroundButton
+            text="Save Drawing"
+            bgColor="bg-blue-500 hover:bg-blue-400"
+            onClick={handleSaveDrawing}
+          />
         </div>
       </div>
     </div>,
@@ -522,7 +602,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
 function dataURLtoFile(dataurl, filename) {
   const arr = dataurl.split(',');
   const mimeMatch = arr[0].match(/:(.*?);/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/webp';
+  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
   const bstr = atob(arr[1]);
   let n = bstr.length;
   const u8arr = new Uint8Array(n);

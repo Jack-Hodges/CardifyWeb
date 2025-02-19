@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import supabase from "../supabaseClient"; 
 import { useNavigate } from "react-router-dom"; 
 import BackgroundButton from "../components/Elements/BackgroundButton";
@@ -7,6 +7,8 @@ import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
 
 import BackgroundTitle from '../images/TitleBackground.png';
+
+import ThemeVideo from '../videos/title/Themes.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -138,15 +140,43 @@ function Welcome() {
         </div>
   
         {/* Features Section */}
-        <div className="h-[100dvh] flex flex-col items-center justify-center bg-gray-100">
-          <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 mb-4">
+        <div className="h-[100dvh] flex flex-col items-center justify-center">
+          <div className="grid grid-rows-3 grid-cols-4 gap-4 w-4/5 h-4/5">
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2">
+              <h2>Create cards</h2>
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
+              <h2>Practice</h2>
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
+              <h2>Memory</h2>
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
+              <h2>Quiz</h2>
+            </div>
+            <div className="rounded-lg p-4 cursor-pointer col-span-2 flex items-center justify-center">
+              <h2 className="text-6xl font-bold">Features</h2>
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2 flex items-center justify-center bg-black">
+                <HoverVideo 
+                  videoSrc={ThemeVideo}
+                />
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer col-span-2">
+              <h2>Import and export</h2>
+            </div>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
+              <h2>Organise</h2>
+            </div>
+          </div>
+          {/* <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 mb-4">
             Features
           </h2>
           <p className="text-lg text-gray-600 max-w-md text-center px-4">
             Create flashcards, track progress, and collaborate with classmates.
             <br />
             Cardify is built to help you succeed.
-          </p>
+          </p> */}
         </div>
       </div>
     );
@@ -306,5 +336,51 @@ function FancyInput({ type, value, onChange }) {
       className="w-full px-4 py-2 text-left rounded-full bg-gray-500 text-white
                  focus:outline-none background-shadow background-focus"
     />
+  );
+}
+
+function HoverVideo({ videoSrc, title }) {
+  const videoRef = useRef(null);
+
+  const handleMouseEnter = async () => {
+    try {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
+    } catch (error) {
+      console.error("Error attempting to play:", error);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    try {
+      videoRef.current.pause();
+    } catch (error) {
+      console.error("Error attempting to pause:", error);
+    }
+  };
+
+  return (
+    <div
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className="relative cursor-pointer rounded-lg overflow-hidden"
+    >
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="w-full h-full object-cover"
+      />
+      {title && (
+        <div className="absolute bottom-0 left-0 p-2 bg-black bg-opacity-50 text-white">
+          {title}
+        </div>
+      )}
+    </div>
   );
 }
