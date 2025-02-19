@@ -519,6 +519,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
               width: '100%',
               userSelect: 'none',
               WebkitUserSelect: 'none',
+              touchAction: 'none',
             }}
             // Set canvasColor to transparent so the background image shows.
             canvasColor="transparent"
