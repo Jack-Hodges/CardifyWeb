@@ -488,7 +488,12 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-50 select-none">
+    <div className="fixed inset-0 flex items-center justify-center z-50 select-none" 
+      style={{ 
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+    >
       <div className="absolute inset-0 bg-black opacity-50" />
       <div
         className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
