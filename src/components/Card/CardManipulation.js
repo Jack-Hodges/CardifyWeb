@@ -156,8 +156,25 @@ export const upsertCard = async (card, imageFile) => {
   try {
     let newImageUrl = card.image_url || null;
 
-    // 1) If a new image file is provided, resize & upload.
+    // 1) If a new image file is provided, delete the old image (if one exists) and then upload the new image.
     if (imageFile) {
+      // If the card already exists and has an image_url, delete the old image.
+      if (card.id && card.image_url) {
+        const parts = card.image_url.split('/FlashcardImages/');
+        if (parts.length > 1) {
+          // Remove any leading slashes from the file path.
+          const filePath = parts[1].replace(/^\/+/, '');
+          const { error: deleteError } = await supabase.storage
+            .from('FlashcardImages')
+            .remove(filePath);
+          if (deleteError) {
+            console.error('Error deleting old image:', deleteError);
+          } else {
+            console.log('Old image deleted successfully.');
+          }
+        }
+      }
+
       try {
         const ext = 'webp';
         // Compress and convert the image file to a WebP blob.

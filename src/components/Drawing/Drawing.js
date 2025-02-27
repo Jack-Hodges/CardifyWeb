@@ -264,41 +264,42 @@ const Drawing = forwardRef((props, ref) => {
 
   const fileInputRef = useRef(null)
   const handleImageUpload = (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-    const reader = new FileReader()
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
     reader.onload = (event) => {
-      const img = new Image()
+      const img = new Image();
       img.onload = () => {
-        const offCanvas = document.createElement('canvas')
-        const maxWidth = 800
-        const scale = Math.min(1, maxWidth / img.width)
-        offCanvas.width = img.width * scale
-        offCanvas.height = img.height * scale
-        const offCtx = offCanvas.getContext('2d')
-        offCtx.drawImage(img, 0, 0, offCanvas.width, offCanvas.height)
-        const webpDataUrl = offCanvas.toDataURL('image/webp', 0.8)
-        const compressedImg = new Image()
-        compressedImg.onload = () => {
+        const offCanvas = document.createElement('canvas');
+        const maxWidth = 800;
+        const scale = Math.min(1, maxWidth / img.width);
+        offCanvas.width = img.width * scale;
+        offCanvas.height = img.height * scale;
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.drawImage(img, 0, 0, offCanvas.width, offCanvas.height);
+        // Use the original file's MIME type and quality 1 for maximum quality.
+        const originalDataUrl = offCanvas.toDataURL(file.type, 1);
+        const highQualityImg = new Image();
+        highQualityImg.onload = () => {
           const newImage = {
             id: Date.now(),
-            img: compressedImg,
+            img: highQualityImg,
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
             width: offCanvas.width,
             height: offCanvas.height,
             rotation: 0
-          }
-          setImages((prev) => [...prev, newImage])
-          setMode('select')
-          setSelectedImageId(newImage.id)
-        }
-        compressedImg.src = webpDataUrl
-      }
-      img.src = event.target.result
-    }
-    reader.readAsDataURL(file)
-  }
+          };
+          setImages((prev) => [...prev, newImage]);
+          setMode('select');
+          setSelectedImageId(newImage.id);
+        };
+        highQualityImg.src = originalDataUrl;
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleImageCanvasMouseDown = (e) => {
     if (mode !== 'select') return
