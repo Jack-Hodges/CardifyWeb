@@ -1,10 +1,10 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
 import { EditableMathField, addStyles } from 'react-mathquill';
-import { ReactSketchCanvas } from 'react-sketch-canvas'; // Ensure you have this installed
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { Image, Calculator, Text, Brush, Eraser, Undo, Redo, X, Upload } from 'lucide-react';
+import { Image, Calculator, Text, Brush, Eraser } from 'lucide-react';
+import Drawing from '../Drawing/Drawing'; // Adjust path if needed
 
 addStyles();
 
@@ -15,7 +15,7 @@ function EditModal({
   subject,
   handleUpsertCard,
   text,
-  clear,
+  clear
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -26,16 +26,16 @@ function EditModal({
   const [backContent, setBackContent] = useState('');
   const [backMode, setBackMode] = useState(0);
 
-  // Refs for textareas
+  // Refs for textareas.
   const frontTextAreaRef = useRef(null);
   const backTextAreaRef = useRef(null);
 
-  // The file that will eventually be sent (uploaded image or exported drawing)
+  // The file to be uploaded (image or exported drawing).
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageUploaded, setImageUploaded] = useState(false);
   const [drawingSaved, setDrawingSaved] = useState(false);
 
-  // Controls whether the drawing popup is open
+  // Controls whether the drawing popup is open.
   const [isDrawingPopupOpen, setIsDrawingPopupOpen] = useState(false);
 
   useEffect(() => {
@@ -70,8 +70,7 @@ function EditModal({
     }, 300);
   };
 
-  // Called when the user clicks "Save" in the edit modal.
-  // This passes the card data along with the file (if any) to your handler.
+  // Save handler: passes card data along with the selected file.
   const handleSave = async () => {
     const cardToSave = {
       id: card?.id,
@@ -81,7 +80,7 @@ function EditModal({
       answer: backContent,
       frontMode,
       backMode,
-      image_url: card?.image_url,
+      image_url: card?.image_url
     };
 
     try {
@@ -96,19 +95,17 @@ function EditModal({
     if (e.target.files?.length > 0) {
       setSelectedFile(e.target.files[0]);
       setImageUploaded(true);
-    }
-    else setSelectedFile(null);
+    } else setSelectedFile(null);
   };
 
   const backImageInputRef = useRef(null);
-
   const handleBackImageUploadClick = () => {
     if (backImageInputRef.current) {
       backImageInputRef.current.click();
     }
   };
 
-  // Helper for text formatting (works only in text mode)
+  // Helper for text formatting.
   const applyFormatting = (field, openSyntax, closeSyntax = openSyntax) => {
     const isInvalid =
       (field === 'front' && frontMode !== 0) ||
@@ -151,7 +148,6 @@ function EditModal({
   const handleItalicClick = (field) => applyFormatting(field, '*');
   const handleUnderlineClick = (field) => applyFormatting(field, '<u>', '</u>');
 
-  // Handle bullet point behavior in text mode
   const handleKeyDown = (e, setContent, content, isMathMode) => {
     if (isMathMode) return;
     const { selectionStart: start, selectionEnd: end } = e.target;
@@ -174,12 +170,11 @@ function EditModal({
     }
   };
 
-  // Opens the drawing popup (separate modal)
   const openDrawingPopup = () => {
     setIsDrawingPopupOpen(true);
   };
 
-  // Callback when the drawing popup saves a drawing.
+  // When the drawing popup saves a drawing, set the file.
   const handleDrawingSave = (file) => {
     setSelectedFile(file);
     setDrawingSaved(true);
@@ -198,10 +193,7 @@ function EditModal({
       }`}
       onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={(e) => e.stopPropagation()}
-      />
+      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => e.stopPropagation()} />
       <div
         className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
           isClosing ? 'animate-pop-down' : 'animate-pop-up'
@@ -210,12 +202,9 @@ function EditModal({
       >
         <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
 
-        {/* ========== Front (Question) ========== */}
+        {/* Front (Question) */}
         <div className="mb-6">
-          <label
-            htmlFor="question"
-            className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200"
-          >
+          <label htmlFor="question" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
             Question
           </label>
           <div className="mb-2 flex space-x-2 overflow-x-auto scrollbar-hide">
@@ -235,7 +224,7 @@ function EditModal({
                   width: '100%',
                   backgroundColor: 'transparent',
                   color: 'inherit',
-                  border: 'none',
+                  border: 'none'
                 }}
               />
             </div>
@@ -253,23 +242,15 @@ function EditModal({
           )}
           {frontMode === 2 && (
             <div className="mt-2">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="text-gray-600 dark:text-gray-200"
-              />
+              <input type="file" accept="image/*" onChange={handleFileChange} className="text-gray-600 dark:text-gray-200" />
               <p className="text-sm text-gray-500 mt-2">(Upload an image for the question)</p>
             </div>
           )}
         </div>
 
-        {/* ========== Back (Answer) ========== */}
+        {/* Back (Answer) */}
         <div className="mb-6">
-          <label
-            htmlFor="answer"
-            className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200"
-          >
+          <label htmlFor="answer" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
             Answer
           </label>
           <div className="mb-2 flex space-x-2 overflow-x-auto">
@@ -279,7 +260,6 @@ function EditModal({
             <EditButton mode={backMode} setMode={setBackMode} svg={<Text />} text="Text" val={0} extend />
             <EditButton mode={backMode} setMode={setBackMode} svg={<Calculator />} text="Math" val={1} extend />
             <EditButton mode={backMode} setMode={setBackMode} svg={<Image />} text="Image" val={2} />
-            {/* The Draw button opens the separate drawing popup */}
             <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} />
           </div>
           {backMode === 1 && (
@@ -292,7 +272,7 @@ function EditModal({
                   width: '100%',
                   backgroundColor: 'transparent',
                   color: 'inherit',
-                  border: 'none',
+                  border: 'none'
                 }}
               />
             </div>
@@ -313,13 +293,7 @@ function EditModal({
               className="w-full h-24 bg-gray-100 rounded-md flex justify-center items-center cursor-pointer mt-2"
               onClick={handleBackImageUploadClick}
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                ref={backImageInputRef}
-                className="hidden"
-              />
+              <input type="file" accept="image/*" onChange={handleFileChange} ref={backImageInputRef} className="hidden" />
               <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
                 <Image />
                 {imageUploaded ? <h1>Image uploaded</h1> : <h1>Upload an image</h1>}
@@ -327,7 +301,7 @@ function EditModal({
             </div>
           )}
           {backMode === 3 && (
-            <div className="w-full h-24 bg-gray-100 rounded-md justify-center items-center flex cursor-pointer" onClick={openDrawingPopup}>
+            <div className="w-full h-24 bg-gray-100 rounded-md flex justify-center items-center cursor-pointer" onClick={openDrawingPopup}>
               <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
                 <Brush />
                 {drawingSaved ? <h1>Drawing added</h1> : <h1>Add a drawing</h1>}
@@ -343,7 +317,7 @@ function EditModal({
         </div>
       </div>
 
-      {/* Render the drawing popup as a separate modal */}
+      {/* Drawing Popup */}
       {isDrawingPopupOpen && (
         <DrawingPopup onSaveDrawing={handleDrawingSave} onClose={closeDrawingPopup} />
       )}
@@ -386,100 +360,21 @@ function TextButton({ text, handleClick, mode, modeText }) {
         mode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      <div className="text-gray-700 dark:text-gray-300">
-        {text}
-      </div>
+      <div className="text-gray-700 dark:text-gray-300">{text}</div>
     </button>
   );
 }
 
 /**
- * DrawingPopup renders a separate popup for drawing.
- * It uses ReactSketchCanvas and allows the user to toggle between
- * brush and eraser, change the brush color, and then export the drawing as a WebP.
+ * DrawingPopup renders a separate popup that uses the imported DrawingCanvas component.
+ * When "Save Drawing" is clicked, it calls exportDrawing() and passes the resulting file.
  */
 function DrawingPopup({ onSaveDrawing, onClose }) {
   const canvasRef = useRef();
-  const backgroundFileInputRef = useRef();
-  const [brushColor, setBrushColor] = useState('#000000');
-  const [isEraserMode, setIsEraserMode] = useState(false);
-  const [backgroundImage, setBackgroundImage] = useState(null);
 
-  // Update canvas context for eraser mode.
-  useEffect(() => {
-    if (
-      canvasRef.current &&
-      canvasRef.current.canvas &&
-      canvasRef.current.canvas.current
-    ) {
-      const canvas = canvasRef.current.canvas.current;
-      const ctx = canvas.getContext('2d');
-      ctx.globalCompositeOperation = isEraserMode
-        ? 'destination-out'
-        : 'source-over';
-    }
-  }, [isEraserMode]);
-
-  // Handle background image selection.
-  const handleBackgroundFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setBackgroundImage(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Trigger the hidden file input when the Upload icon is clicked.
-  const handleUploadButtonClick = () => {
-    if (backgroundFileInputRef.current) {
-      backgroundFileInputRef.current.click();
-    }
-  };
-
-  // Export the drawing.
-  // If a background image is set, merge it with the drawing using an offscreen canvas.
-  const handleSaveDrawing = async () => {
+  const handleSaveDrawing = () => {
     try {
-      // Export the current drawing as PNG.
-      const drawingDataUrl = await canvasRef.current.exportImage('png');
-
-      // If no background is set, simply save the drawing.
-      if (!backgroundImage) {
-        const file = dataURLtoFile(drawingDataUrl, 'drawing.png');
-        onSaveDrawing(file);
-        onClose();
-        return;
-      }
-
-      // Otherwise, merge the background and drawing.
-      const offscreenCanvas = document.createElement('canvas');
-      offscreenCanvas.width = 3840;
-      offscreenCanvas.height = 2160;
-      const ctx = offscreenCanvas.getContext('2d');
-
-      // Draw the background image.
-      const bgImg = new window.Image();
-      bgImg.src = backgroundImage;
-      await new Promise((resolve, reject) => {
-        bgImg.onload = resolve;
-        bgImg.onerror = reject;
-      });
-      ctx.drawImage(bgImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
-
-      // Draw the drawing (strokes) on top.
-      const drawingImg = new window.Image();
-      drawingImg.src = drawingDataUrl;
-      await new Promise((resolve, reject) => {
-        drawingImg.onload = resolve;
-        drawingImg.onerror = reject;
-      });
-      ctx.drawImage(drawingImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
-
-      const combinedDataUrl = offscreenCanvas.toDataURL('image/png');
-      const file = dataURLtoFile(combinedDataUrl, 'drawing.png');
+      const file = canvasRef.current.exportDrawing();
       onSaveDrawing(file);
       onClose();
     } catch (err) {
@@ -488,135 +383,26 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
   };
 
   return ReactDOM.createPortal(
-    <div className="fixed inset-0 flex items-center justify-center z-50 select-none" 
-      style={{ 
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50 select-none"
+      style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
-        WebkitTouchCallout: 'none', // Prevent touch callout (iOS)
-        touchAction: 'none', 
+        touchAction: 'none'
       }}
     >
-      <div className="absolute inset-0 bg-black opacity-50" />
-      <div
-        className="relative bg-white p-4 rounded shadow-lg w-[90%] sm:w-3/4 h-3/4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-2xl font-semibold mb-2 text-yellow-500">
-          Add Drawing
-        </h2>
-
-        {/* Hidden file input for uploading background image */}
-        <input
-          ref={backgroundFileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleBackgroundFileChange}
-          className="hidden"
-        />
-
-        {/* Canvas using the backgroundImage prop */}
-        <div className="w-full h-4/5 mb-2 background-shadow-new rounded-2xl p-1">
-        <ReactSketchCanvas
-          ref={canvasRef}
-          width={3840}
-          height={2160}
-          backgroundImage={backgroundImage}
-          style={{
-            height: '100%',
-            width: '100%',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTouchCallout: 'none', // Prevent touch callout (iOS)
-            touchAction: 'none',         // Disable default touch actions
-          }}
-          canvasColor="transparent"
-          strokeColor={brushColor}
-          preserveBackgroundImageAspectRatio={true}
-        />
+      <div className="absolute inset-0 bg-black opacity-50" onClick={onClose} />
+      <div className="relative bg-white shadow-lg w-full h-full" onClick={(e) => e.stopPropagation()}>
+        <div className="absolute flex justify-end space-x-2 bottom-2 right-2 z-10">
+          <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
+          <BackgroundButton text="Save Drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
         </div>
-
-        <div className="mb-2 flex items-center space-x-4">
-          <Brush
-            className={`cursor-pointer ${isEraserMode ? '' : 'bg-gray-100'} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-            onClick={() => {
-              setIsEraserMode(false);
-              canvasRef.current?.eraseMode(false);
-            }}
-          />
-          <Eraser
-            className={`cursor-pointer ${isEraserMode ? 'bg-gray-100' : ''} hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600`}
-            onClick={() => {
-              setIsEraserMode(true);
-              canvasRef.current?.eraseMode(true);
-            }}
-          />
-          <input
-            type="color"
-            value={brushColor}
-            onChange={(e) => setBrushColor(e.target.value)}
-            className="w-10 h-10 cursor-pointer rounded-full p-0"
-            style={{
-              WebkitAppearance: 'none',
-              MozAppearance: 'none',
-              appearance: 'none',
-              border: 'none',
-              outline: 'none',
-              background: brushColor,
-            }}
-          />
-          <Undo
-            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
-            onClick={() => {
-              canvasRef.current?.undo();
-            }}
-          />
-          <Redo
-            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
-            onClick={() => {
-              setIsEraserMode(false);
-              canvasRef.current?.redo();
-            }}
-          />
-          <X
-            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
-            onClick={() => canvasRef.current.clearCanvas()}
-          />
-          <Upload
-            className="cursor-pointer hover:bg-gray-200 p-2 w-10 h-10 rounded-lg text-gray-600"
-            onClick={handleUploadButtonClick}
-          />
-        </div>
-
-        <div className="absolute flex justify-end space-x-2 bottom-2 right-2">
-          <BackgroundButton
-            text="Cancel"
-            bgColor="bg-red-500 hover:bg-red-400"
-            onClick={onClose}
-          />
-          <BackgroundButton
-            text="Save Drawing"
-            bgColor="bg-blue-500 hover:bg-blue-400"
-            onClick={handleSaveDrawing}
-          />
+        <div className="w-full h-4/5 mb-2 rounded-2xl p-1 z-0">
+          {/* Pass the ref to Drawing */}
+          <Drawing ref={canvasRef} />
         </div>
       </div>
     </div>,
     document.body
   );
-}
-
-/**
- * Helper function to convert a data URL to a File object.
- */
-function dataURLtoFile(dataurl, filename) {
-  const arr = dataurl.split(',');
-  const mimeMatch = arr[0].match(/:(.*?);/);
-  const mime = mimeMatch ? mimeMatch[1] : 'image/png';
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
-  return new File([u8arr], filename, { type: mime });
 }
