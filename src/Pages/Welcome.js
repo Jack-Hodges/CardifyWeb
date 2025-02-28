@@ -9,6 +9,8 @@ import WelcomeMobile from '../images/Logos/CardifyText.png';
 import BackgroundTitle from '../images/TitleBackground.png';
 
 import ThemeVideo from '../videos/title/Themes.webm';
+import PracticeVideo from '../videos/title/Quiz.webm';
+import OrganiseVideo from '../videos/title/Organise.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -145,13 +147,15 @@ function Welcome() {
             <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2">
               <h2>Create cards</h2>
             </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
-              <h2>Practice</h2>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
+              <HoverVideo 
+                videoSrc={PracticeVideo}
+              />
             </div>
             <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
               <h2>Memory</h2>
             </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
               <h2>Quiz</h2>
             </div>
             <div className="rounded-lg p-4 cursor-pointer col-span-2 flex items-center justify-center">
@@ -165,8 +169,10 @@ function Welcome() {
             <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer col-span-2">
               <h2>Import and export</h2>
             </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
-              <h2>Organise</h2>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
+              <HoverVideo 
+                  videoSrc={OrganiseVideo}
+                />
             </div>
           </div>
           {/* <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 mb-4">
@@ -374,6 +380,7 @@ function HoverVideo({ videoSrc, title }) {
         muted
         playsInline
         preload="auto"
+        autoPlay={true}
         className="w-full h-full object-cover"
       />
       {title && (

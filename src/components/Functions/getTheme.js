@@ -10,6 +10,8 @@ import Geometric from '../../images/backgrounds/Geometric.jpg';
 import Wood from '../../images/backgrounds/Wood.jpg';
 import Fluidity from '../../images/backgrounds/Fluidity.jpg';
 import PurpleGeometric from '../../images/backgrounds/PurpleGeometric.jpg'
+import Nature1 from '../../images/backgrounds/Nature1.jpg'
+import Space1 from '../../images/backgrounds/Space1.jpg'
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
@@ -26,6 +28,8 @@ export const getThemeAssets = () => {
     { name: 'Purple Geometric', url: PurpleGeometric },
     { name: 'Wood', url: Wood },
     { name: 'Fluidity', url: Fluidity },
+    { name: 'Nature1', url: Nature1 },
+    { name: 'Space1', url: Space1 },
   ];
 };
 
@@ -164,7 +168,29 @@ export const getTheme = (theme) => {
         tertiary: ['yellow', 400],
         border: ['blue', 500],
         shadow: true,
-      }
+      }, 
+      nature1: {
+        name: "nature1",
+        image: `url(${Nature1})`,
+        color: 'rgba(58,110,76,1)',
+        textClass: 'text-white',
+        primary: ['green', 700],
+        secondary: ['emerald', 600],
+        tertiary: ['lime', 500],
+        border: ['green', 700],
+        shadow: true,
+      },
+      space1: {
+        name: "space1",
+        image: `url(${Space1})`,
+        color: 'rgba(3,15,64,1)',
+        textClass: 'text-[rgb(245,241,230)]',
+        primary: ['blue', 800],
+        secondary: ['violet', 500],
+        tertiary: ['fuchsia', 400],
+        border: ['blue', 600],
+        shadow: true,
+      },
     };
     return themes[theme] || { name: "default", image: Default, color: 'rgba(3,15,64,1)', textClass: 'textColor', primary: ['green', 500], secondary: ['purple', 500], tertiary: ['orange', 500], border: ['green', 500] };
   }

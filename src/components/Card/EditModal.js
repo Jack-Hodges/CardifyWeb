@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { EditableMathField, addStyles } from 'react-mathquill';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { Image, Calculator, Text, Brush, Eraser } from 'lucide-react';
+import { Image, Calculator, Text, Brush } from 'lucide-react';
 import Drawing from '../Drawing/Drawing'; // Adjust path if needed
 
 addStyles();

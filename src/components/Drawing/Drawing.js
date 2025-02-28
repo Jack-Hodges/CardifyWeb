@@ -113,6 +113,7 @@ const Drawing = forwardRef((props, ref) => {
   // Drawing handlers (note: preventDefault() calls have been removed)
   const startDrawing = (e) => {
     if (mode === 'brush' || mode === 'erase') {
+        e.preventDefault()
       setShowBrushSettings(false)
       setShowEraserSettings(false)
       setShowSizeInput(false)
@@ -127,6 +128,7 @@ const Drawing = forwardRef((props, ref) => {
 
   const finishDrawing = (e) => {
     if (mode === 'brush' || mode === 'erase') {
+        e && e.preventDefault()
       drawingContextRef.current.closePath()
       setIsDrawing(false)
       setShowCursor(false)
@@ -140,6 +142,7 @@ const Drawing = forwardRef((props, ref) => {
   const draw = (e) => {
     if (!(mode === 'brush' || mode === 'erase')) return
     if (!isDrawing) return
+    e.preventDefault()
     const pos = getEventPos(e, drawingCanvasRef.current)
     drawingContextRef.current.lineTo(pos.offsetX, pos.offsetY)
     drawingContextRef.current.stroke()
@@ -303,6 +306,7 @@ const Drawing = forwardRef((props, ref) => {
 
   const handleImageCanvasMouseDown = (e) => {
     if (mode !== 'select') return
+    e.preventDefault()
     const pos = getEventPos(e, imageCanvasRef.current)
     const x = pos.offsetX
     const y = pos.offsetY
@@ -351,6 +355,7 @@ const Drawing = forwardRef((props, ref) => {
 
   const handleImageCanvasMouseMove = (e) => {
     if (mode !== 'select' || !imageAction || !selectedImageId) return
+    e.preventDefault()
     const pos = getEventPos(e, imageCanvasRef.current)
     const x = pos.offsetX
     const y = pos.offsetY
@@ -381,6 +386,7 @@ const Drawing = forwardRef((props, ref) => {
 
   const handleImageCanvasMouseUp = (e) => {
     if (mode !== 'select') return
+    e && e.preventDefault()
     setImageAction(null)
   }
 
