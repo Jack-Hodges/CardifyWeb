@@ -1,0 +1,79 @@
+{
+  "name": "cardify",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.5.1",
+    "@supabase/auth-ui-react": "^0.4.7",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/supabase-js": "^2.45.3",
+    "@testing-library/user-event": "^13.5.0",
+    "better-react-mathjax": "^2.0.3",
+    "canvas-confetti": "^1.9.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.2",
+    "jspdf": "^2.5.2",
+    "katex": "^0.16.20",
+    "lucide-react": "^0.460.0",
+    "mathquill": "^0.10.1-a",
+    "node": "^23.7.0",
+    "pica": "^9.0.1",
+    "react": "^18.3.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-color": "^2.19.3",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
+    "react-mathquill": "^1.0.3",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.26.2",
+    "react-scripts": "5.0.1",
+    "react-sketch-canvas": "^6.2.0",
+    "react-toastify": "^10.0.6",
+    "react-transition-group": "^4.4.5",
+    "rehype-katex": "^7.0.1",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-math": "^6.0.0",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "jest": "^27.5.1",
+    "tailwindcss": "^3.4.10"
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": "tailwind.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
