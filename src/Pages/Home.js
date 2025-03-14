@@ -197,7 +197,7 @@ function Home() {
                 <JumpButton theme={'background-shadow-new'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
                 <JumpButton theme={'background-shadow-new'} text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
                 <JumpButton theme={'background-shadow-new'} text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Dash" img={<Zap size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                {/* <JumpButton theme={'background-shadow-new'} text="Dash" img={<Zap size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/> */}
               </div>
             </div>
 
