@@ -290,7 +290,7 @@ function EditModal({
           )}
           {backMode === 2 && (
             <div
-              className="w-full h-24 bg-gray-100 rounded-md flex justify-center items-center cursor-pointer mt-2"
+              className="w-full h-24 bg-gray-100 dark:bg-gray-600 rounded-md flex justify-center items-center cursor-pointer mt-2"
               onClick={handleBackImageUploadClick}
             >
               <input type="file" accept="image/*" onChange={handleFileChange} ref={backImageInputRef} className="hidden" />
@@ -301,7 +301,7 @@ function EditModal({
             </div>
           )}
           {backMode === 3 && (
-            <div className="w-full h-24 bg-gray-100 rounded-md flex justify-center items-center cursor-pointer" onClick={openDrawingPopup}>
+            <div className="w-full h-24 bg-gray-100 dark:bg-gray-600 rounded-md flex justify-center items-center cursor-pointer" onClick={openDrawingPopup}>
               <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
                 <Brush />
                 {drawingSaved ? <h1>Drawing added</h1> : <h1>Add a drawing</h1>}

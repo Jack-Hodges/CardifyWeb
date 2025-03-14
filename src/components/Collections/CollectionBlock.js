@@ -2,7 +2,6 @@ import BackgroundButton from "../Elements/BackgroundButton";
 import getColors from "../Functions/getColors";
 import SubjectBlock from "../Subject/SubjectBlock";
 import { useState } from "react";
-import { PencilRuler, ArrowRight } from 'lucide-react';
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
 

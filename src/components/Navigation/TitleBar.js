@@ -4,7 +4,7 @@ import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
 import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, Zap } from 'lucide-react';
 
-function TitleBar( { text, content }) {
+function TitleBar( { text, content, home = false }) {
 
   // images
 
@@ -45,33 +45,46 @@ function TitleBar( { text, content }) {
   return (
     <div className="flex justify-between px-4 my-2">
       {/* Drop Down Navigation */}
-      <div className="relative inline-block text-left z-50">
+      <div className="relative inline-block text-left z-50 ">
         {/* Use BackgroundButton as the main button */}
-        <BackgroundButton
-          text={text}
-          bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
-          wWidth="w-44"
-          image={firstImg}
-          flip
-          onClick={() => setIsOpen(!isOpen)}
-        />
+        <div className="flex gap-2">
+          {!home && (
+          <BackgroundButton
+            bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
+            wWidth="w-44"
+            image={<House />}
+            flip
+            onClick={() => navigate(`/home`)}
+          />
+          )}
+        
+          <BackgroundButton
+            text={text}
+            bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
+            wWidth="w-44"
+            image={firstImg}
+            flip
+            onClick={() => setIsOpen(!isOpen)}
+          />
 
-        {/* Dropdown options with animation */}
-        <div
-          className={`p-1 absolute text-white text-xl font-bold left-0 mt-2 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
-            isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
-          }`}
-          style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
-        >
-          <LinkButton text="Home" img={<House />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Create" img={<BadgePlus />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Practice" img={<CirclePlay />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Quiz" img={<NotebookText />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
-          <LinkButton text="Dash" img={<Zap />} hoverClass={primaryColor.hoverClass}/>
+          {/* Dropdown options with animation */}
+          <div
+            className={`p-1 absolute text-white text-xl font-bold left-0 ${!home ? 'ml-12' : ''} mt-12 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
+              isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+            }`}
+            style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
+          >
+            <LinkButton text="Home" img={<House />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Create" img={<BadgePlus />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Practice" img={<CirclePlay />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Quiz" img={<NotebookText />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Dash" img={<Zap />} hoverClass={primaryColor.hoverClass}/>
+          </div>
         </div>
+        
       </div>
 
       {/* User Profile and Additional Content */}

@@ -132,7 +132,7 @@ function Welcome() {
   
         {/* Welcome Section */}
         <div className="h-[100dvh] flex flex-col items-center justify-center">
-          <img src={BackgroundTitle} className="absolute w-full h-[100dvh]"/>
+          <img src={BackgroundTitle} alt="Assortment of Cardify images on devices" className="absolute w-full h-[100dvh]"/>
           <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4 dark:text-gray-300">
             Cardify
           </h1>

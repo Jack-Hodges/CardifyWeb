@@ -191,7 +191,7 @@ function CardContent ({
           }}
         />
       </div>
-    ) : cardMode == 0 ? (
+    ) : cardMode === 0 ? (
         <ReactMarkdown
           rehypePlugins={[rehypeRaw]}
           components={{
@@ -207,7 +207,7 @@ function CardContent ({
       // CASE B: back=true AND we have an imageUrl
       <img
         src={imageUrl}
-        alt="Answer Image"
+        alt="Answer"
         className="w-full h-[93%] object-contain"
       />
     ) : (
@@ -237,7 +237,7 @@ function CardContent ({
       )}
 
       {practice && (
-        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-500 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
+        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
           <RefreshCw size="32"/>
         </div>
       )}
