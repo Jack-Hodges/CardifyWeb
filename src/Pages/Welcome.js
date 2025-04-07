@@ -11,6 +11,7 @@ import BackgroundTitle from '../images/TitleBackground.png';
 import ThemeVideo from '../videos/title/Themes.webm';
 import PracticeVideo from '../videos/title/Quiz.webm';
 import OrganiseVideo from '../videos/title/Organise.webm';
+import CreateVideo from '../videos/title/Create.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -144,8 +145,10 @@ function Welcome() {
         {/* Features Section */}
         <div className="h-[100dvh] flex flex-col items-center justify-center">
           <div className="grid grid-rows-3 grid-cols-4 gap-4 w-4/5 h-4/5">
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2">
-              <h2>Create cards</h2>
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2 flex items-center justify-center bg-black">
+              <HoverVideo 
+                videoSrc={CreateVideo}
+              />
             </div>
             <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
               <HoverVideo 
@@ -155,7 +158,7 @@ function Welcome() {
             <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
               <h2>Memory</h2>
             </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
+            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center">
               <h2>Quiz</h2>
             </div>
             <div className="rounded-lg p-4 cursor-pointer col-span-2 flex items-center justify-center">
@@ -380,7 +383,7 @@ function HoverVideo({ videoSrc, title }) {
         muted
         playsInline
         preload="auto"
-        autoPlay={true}
+        autoPlay={false}
         className="w-full h-full object-cover"
       />
       {title && (

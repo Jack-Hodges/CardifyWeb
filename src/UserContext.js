@@ -25,7 +25,7 @@ const resolveThemeColors = (theme) => {
 
   const resolvedTheme = {
     ...defaultTheme,
-    ...theme,
+    ...(theme || {}),
   };
 
   return {

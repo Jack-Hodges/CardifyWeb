@@ -94,9 +94,18 @@ function Create() {
   // === 3) The universal upsert callback ===
   //     (called by EditModal after saving or editing a card)
   const handleUpsertCard = async (cardData, file) => {
+    // Determine if we're creating a new card (no id provided)
+    const isNewCard = !cardData.id;
     // upsertCard will insert or update depending on cardData.id
     await upsertCard(cardData, file);
-    await refreshCards(); 
+    // Refresh cards list
+    const updatedCards = await fetchCards(subject.id);
+    sortCardsById(updatedCards);
+    setCards(updatedCards);
+    // If it's a new card, set the active card to be the last one in the sorted array
+    if (isNewCard) {
+      setCurrentCardIndex(updatedCards.length - 1);
+    }
   };
 
   // === 4) Delete card logic ===
