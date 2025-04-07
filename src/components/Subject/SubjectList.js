@@ -7,11 +7,13 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 
 function SubjectList({ isOpen, onClose, user, page = "practice" }) {
+    const navigate = useNavigate();
     const [subjects, setSubjects] = useState([]);
     const [collections, setCollections] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const { theme } = useUser();
+    const { secondaryColor } = theme;
 
     useEffect(() => {
         const loadData = async () => {
@@ -29,6 +31,10 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
         loadData();
     }, [user]);
+
+    const goToDashboard = () => {
+        navigate('/dashboard');
+    }
 
     if (!isOpen) return null;
     if (loading) return <div>Loading...</div>;
@@ -59,44 +65,61 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll">
-                {selectedCollection ? (
-                    <CollectionView 
-                        collection={selectedCollection} 
-                        subjects={selectedCollection.subjects} 
-                        onBack={() => setSelectedCollection(null)}
-                        onClose={onClose}
-                        page={page}
-                        cross={cross}
-                        theme={theme}
-                    />
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll">
+            {selectedCollection ? (
+              <CollectionView 
+                collection={selectedCollection} 
+                subjects={selectedCollection.subjects} 
+                onBack={() => setSelectedCollection(null)}
+                onClose={onClose}
+                page={page}
+                cross={cross}
+                theme={theme}
+              />
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-semibold mb-0 text-green-500">Subjects & Collections</h2>
+                  <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
+                </div>
+      
+                {subjects.length > 0 ? (
+                  sortedCombinedList.map((item) => {
+                    if (item.type === 'subject') {
+                      return (
+                        <SubjectRow 
+                          key={`subject-${item.id}`} 
+                          subject={item} 
+                          page={page} 
+                          onClose={onClose} 
+                          themeShadow={'background-shadow-new'}
+                        />
+                      );
+                    } else if (item.type === 'collection') {
+                      return (
+                        <CollectionRow 
+                          key={`collection-${item.id}`} 
+                          collection={item} 
+                          subjects={item.subjects} 
+                          onClick={() => setSelectedCollection(item)} 
+                          themeShadow={'background-shadow-new'}
+                        />
+                      );
+                    }
+                    return null;
+                  })
                 ) : (
-                    <>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-semibold mb-0 text-green-500">Subjects & Collections</h2>
-                            <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
-                        </div>
-
-                        {/* Render the sorted combined list */}
-                        {sortedCombinedList.map((item) => {
-                            if (item.type === 'subject') {
-                                return <SubjectRow key={`subject-${item.id}`} subject={item} page={page} onClose={onClose} themeShadow={'background-shadow-new'}/>;
-                            } else if (item.type === 'collection') {
-                                return <CollectionRow 
-                                    key={`collection-${item.id}`} 
-                                    collection={item} 
-                                    subjects={item.subjects} 
-                                    onClick={() => setSelectedCollection(item)} 
-                                    themeShadow={'background-shadow-new'}
-                                />;
-                            }
-                            return null;
-                        })}
-                    </>
+                  <div className="text-center text-lg text-gray-500 mt-10 flex flex-col items-center">
+                    <p className="mb-3">You have no subjects yet</p>
+                    <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+                  </div>
+                  
                 )}
-            </div>
+              </>
+            )}
+          </div>
         </div>
-    );
+      );
 }
 
 export default SubjectList;

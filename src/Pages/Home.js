@@ -77,7 +77,7 @@ function Home() {
     loading: userLoading 
   } = useUser();
   
-  const { primaryColor, textColor, shadow } = theme;
+  const { primaryColor, secondaryColor, textColor, shadow } = theme;
   const [subjects, setSubjects] = useState([]);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [subjectPage, setSubjectPage] = useState('create');
@@ -226,7 +226,7 @@ function Home() {
               </div>
             )}
 
-            <div>
+            {subjects.length > 0 ? (<div>
               <div className="flex justify-between ml-5 mr-2 mt-6">
                 <p className={`${shadow ? 'drop-shadow-custom' : ''}`}>Continue Learning</p>
                 <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
@@ -247,6 +247,12 @@ function Home() {
                 ))}
               </div>
             </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full mt-10">
+              <h1 className="mb-5">Let's create your first subject</h1>
+              <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+            </div>
+          )}
 
             <SubjectList 
               isOpen={isSubjectListModalOpen} 
