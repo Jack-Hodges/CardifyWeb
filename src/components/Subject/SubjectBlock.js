@@ -49,7 +49,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
 
   return (
     <div
-      className={`group relative mx-auto w-full h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
+      className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
     >
       {!home && (
         // Pin Button
