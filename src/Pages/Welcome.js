@@ -29,6 +29,54 @@ function Welcome() {
   const navigate = useNavigate();
   const { user, setUser } = useUser();
 
+  const [currentFeature, setCurrentFeature] = useState(0);
+  const features = [
+    {
+      title: "Create",
+      bullets: [
+        "Design beautiful flashcards with rich media",
+        "Custom themes and layouts",
+        "Easy-to-use interface"
+      ],
+      video: CreateVideo
+    },
+    {
+      title: "Practice",
+      bullets: [
+        "Smart quiz system",
+        "Progress tracking",
+        "Instant feedback"
+      ],
+      video: PracticeVideo
+    },
+    {
+      title: "Organize",
+      bullets: [
+        "Collections and folders",
+        "Easy navigation",
+        "Quick search"
+      ],
+      video: OrganiseVideo
+    },
+    {
+      title: "Themes",
+      bullets: [
+        "Customizable interface",
+        "Dark and light modes",
+        "Personalized study environment"
+      ],
+      video: ThemeVideo
+    }
+  ];
+
+  const nextFeature = () => {
+    setCurrentFeature((prev) => (prev + 1) % features.length);
+  };
+
+  const prevFeature = () => {
+    setCurrentFeature((prev) => (prev - 1 + features.length) % features.length);
+  };
+
   // If user is already logged in, redirect to home
   if (user) {
     navigate('/home');
@@ -143,49 +191,59 @@ function Welcome() {
         </div>
   
         {/* Features Section */}
-        <div className="h-[100dvh] flex flex-col items-center justify-center">
-          <div className="grid grid-rows-3 grid-cols-4 gap-4 w-4/5 h-4/5">
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2 flex items-center justify-center bg-black">
-              <HoverVideo 
-                videoSrc={CreateVideo}
-              />
+        <div className="min-h-screen flex flex-col items-center py-20">
+          <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 mb-16">Features</h2>
+          
+          <div className="relative w-[80vw] h-[60vh]">
+            {/* Feature Content */}
+            <div className="flex items-center gap-8">
+              <div className="w-1/2 h-full bg-black rounded-lg flex items-center justify-center">
+                <p className="text-white text-lg">Video Placeholder</p>
+              </div>
+              <div className="w-1/2">
+                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800">{features[currentFeature].title}</h3>
+                <ul className="text-gray-600 text-lg space-y-2 mt-4">
+                  {features[currentFeature].bullets.map((bullet, index) => (
+                    <li key={index} className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>{bullet}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
-              <HoverVideo 
-                videoSrc={PracticeVideo}
-              />
-            </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer">
-              <h2>Memory</h2>
-            </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center">
-              <h2>Quiz</h2>
-            </div>
-            <div className="rounded-lg p-4 cursor-pointer col-span-2 flex items-center justify-center">
-              <h2 className="text-6xl font-bold">Features</h2>
-            </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer row-span-2 flex items-center justify-center bg-black">
-                <HoverVideo 
-                  videoSrc={ThemeVideo}
+
+            {/* Navigation Arrows */}
+            <button 
+              onClick={prevFeature}
+              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button 
+              onClick={nextFeature}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Dots Navigation */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+              {features.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentFeature(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentFeature ? 'bg-gray-800' : 'bg-gray-400'
+                  }`}
                 />
-            </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer col-span-2">
-              <h2>Import and export</h2>
-            </div>
-            <div className="background-shadow background-hover rounded-lg p-4 cursor-pointer flex items-center justify-center bg-black">
-              <HoverVideo 
-                  videoSrc={OrganiseVideo}
-                />
+              ))}
             </div>
           </div>
-          {/* <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 mb-4">
-            Features
-          </h2>
-          <p className="text-lg text-gray-600 max-w-md text-center px-4">
-            Create flashcards, track progress, and collaborate with classmates.
-            <br />
-            Cardify is built to help you succeed.
-          </p> */}
         </div>
       </div>
     );
@@ -348,7 +406,7 @@ function FancyInput({ type, value, onChange }) {
   );
 }
 
-function HoverVideo({ videoSrc, title }) {
+function HoverVideo({ videoSrc }) {
   const videoRef = useRef(null);
 
   const handleMouseEnter = async () => {
@@ -386,11 +444,6 @@ function HoverVideo({ videoSrc, title }) {
         autoPlay={false}
         className="w-full h-full object-cover"
       />
-      {title && (
-        <div className="absolute bottom-0 left-0 p-2 bg-black bg-opacity-50 text-white">
-          {title}
-        </div>
-      )}
     </div>
   );
 }
