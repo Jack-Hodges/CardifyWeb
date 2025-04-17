@@ -92,13 +92,13 @@ function Modal({ isOpen, onClose, mainText, logout }) {
             ></div>
 
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-full h-full sm:w-4/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-4/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex justify-between items-center mb-6">
-                    <span className={`textColor text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                    <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
                     <div className="flex space-x-2">
                         <div className="hidden sm:block">
                             <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
@@ -120,7 +120,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                             return (
                                 <div 
                                     key={asset.name}
-                                    className={`background-shadow-new background-hover relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
                                     onClick={() => handleThemeSelect(asset.name)}
                                 >
                                     {isSelected && (

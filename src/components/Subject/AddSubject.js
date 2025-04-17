@@ -147,13 +147,13 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
             <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
-            <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
-                <h2 className="text-2xl font-semibold mb-6 text-green-500">
+            <div className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
+                <h2 className="text-3xl font-bold mb-6 text-white">
                     {subject ? "Edit Subject" : text}
                 </h2>
 
                 <div className="mb-6">
-                    <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                    <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-white/90">
                         Subject Name
                     </label>
                     <input
@@ -161,14 +161,14 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         type="text"
                         value={subjectName}
                         onChange={(e) => setLocalSubjectName(e.target.value)}
-                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
+                        className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
                         placeholder="Enter the subject name here"
                         required
                     />
                 </div>
 
                 <div className="mb-6 relative">
-                    <label htmlFor="collectionDropdown" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                    <label htmlFor="collectionDropdown" className="block text-lg font-medium mb-2 text-white/90">
                         Subject Collection
                     </label>
                     <input
@@ -177,7 +177,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         value={selectedCollection}
                         onChange={handleCollectionSearch}
                         onClick={() => setShowDropdown(true)}
-                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
+                        className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
                         placeholder="Search for a collection"
                     />
                     {showDropdown && (
@@ -202,7 +202,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                    <label className="block text-lg font-medium mb-2 text-white/90">
                         Subject Color
                     </label>
                     <div className="grid grid-cols-5 sm:grid-cols-9 gap-4">

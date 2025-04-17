@@ -65,7 +65,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll">
+          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll shadow-2xl shadow-black/30 border border-white/20">
             {selectedCollection ? (
               <CollectionView 
                 collection={selectedCollection} 
@@ -79,7 +79,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
             ) : (
               <>
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-semibold mb-0 text-green-500">Subjects & Collections</h2>
+                  <h2 className="text-2xl font-semibold mb-0 text-white/90">Subjects & Collections</h2>
                   <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                 </div>
       
@@ -155,14 +155,13 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
     return (
         <div 
             key={collection.id} 
-            className={`bg-gray-400 w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
+            className={`bg-[color-mix(in_srgb,var(--theme-border-color)_80%,black_20%)] w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={onClick}>
             <div>
                 <p className="text-2xl">{collection.name}</p>
                 <p className="text-lg font-normal">{subjects.length} {subjects.length === 1 ? "subject" : "subjects"}</p>
             </div>
-                {chev}
-           
+            {chev}
         </div>
     );
 }

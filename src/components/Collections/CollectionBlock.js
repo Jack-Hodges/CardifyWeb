@@ -99,12 +99,12 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                     onClick={onClick} // Collapse the overlay when clicking on the background
                 >
                     <div 
-                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-white dark:bg-gray-800 rounded-xl p-4`}
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-4 shadow-2xl shadow-black/30 border border-white/20`}
                         onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
                     >
                         {/* Title and close button */}
                         <div className="flex w-full justify-between px-2">
-                            <p className="font-bold text-gray-700 dark:text-gray-200 text-4xl">{collection.name}</p>
+                            <p className="font-bold text-white text-4xl">{collection.name}</p>
                             <div className="flex gap-2">
                                 <BackgroundButton image={edit} bgColor={'bg-blue-500 hover:bg-blue-400'} onClick={() => onEditCollection(collection)}/>
                                 <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClick}/>
