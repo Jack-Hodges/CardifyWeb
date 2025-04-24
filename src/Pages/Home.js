@@ -9,7 +9,7 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modal/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, Zap } from 'lucide-react';
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, Zap, BookText, BrainCog } from 'lucide-react';
 
 // Loading component
 function HomeLoading() {
@@ -197,7 +197,8 @@ function Home() {
                 <JumpButton theme={'background-shadow-new'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
                 <JumpButton theme={'background-shadow-new'} text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
                 <JumpButton theme={'background-shadow-new'} text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                {/* <JumpButton theme={'background-shadow-new'} text="Dash" img={<Zap size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/> */}
+                <JumpButton theme={'background-shadow-new'} text="Type" img={<BookText size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                <JumpButton theme={'background-shadow-new'} text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
 
