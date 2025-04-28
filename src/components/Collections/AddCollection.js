@@ -50,13 +50,13 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
             <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
-            <div className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
+            <div className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
                 <h2 className="text-2xl font-semibold mb-6 text-green-500">
                     {text}
                 </h2>
 
                 <div className="mb-6">
-                    <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+                    <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-white/90">
                         Collection Name
                     </label>
                     <input
@@ -64,8 +64,8 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
                         type="text"
                         value={collectionName}
                         onChange={(e) => setLocalCollectionName(e.target.value)}
-                        className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md text-gray-500 dark:text-gray-200"
-                        placeholder="Enter the subject name here"
+                        className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
+                        placeholder="Enter the collection name here"
                         required
                     />
                 </div>

@@ -53,7 +53,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-md transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-3/4 max-w-md transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
@@ -62,7 +62,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
                     {text}
                 </h2>
 
-                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
+                <p className="mb-6 text-lg text-white dark:text-gray-200">
                     {mainText}
                 </p>
 

@@ -8,6 +8,8 @@ import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
+import { EditableMathField, addStyles } from 'react-mathquill';
+addStyles();
 
 function Type() {
     const [cards, setCards] = useState([]); 
@@ -16,6 +18,12 @@ function Type() {
     const [userAnswer, setUserAnswer] = useState('');
     const [showAnswer, setShowAnswer] = useState(false);
     const [isCorrect, setIsCorrect] = useState(false);
+
+    const [correctCount, setCorrectCount] = useState(0);
+    const [incorrectCount, setIncorrectCount] = useState(0);
+    const [skippedCount, setSkippedCount] = useState(0);
+    const [processedCount, setProcessedCount] = useState(0);
+    const [finished, setFinished] = useState(false);
 
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
@@ -75,11 +83,6 @@ function Type() {
 
     const handleAnswerSubmit = () => {
         if (!filteredCards[currentCardIndex]) return;
-        
-        const correctAnswer = filteredCards[currentCardIndex].answer.toLowerCase().trim();
-        const userAnswerLower = userAnswer.toLowerCase().trim();
-        
-        setIsCorrect(correctAnswer === userAnswerLower);
         setShowAnswer(true);
     };
 
@@ -91,11 +94,58 @@ function Type() {
     };
 
     const handleSkipCard = () => {
-        handleNextCard();
+        setSkippedCount(s => s + 1);
+        const nextProcessed = processedCount + 1;
+        if (nextProcessed >= filteredCards.length) {
+          setFinished(true);
+        } else {
+          setProcessedCount(nextProcessed);
+          setCurrentCardIndex(prev => prev + 1);
+          setUserAnswer('');
+          setShowAnswer(false);
+          setIsCorrect(false);
+        }
     };
 
-    return (
+    const advanceCard = () => {
+      const nextProcessed = processedCount + 1;
+      if (nextProcessed >= filteredCards.length) {
+        setFinished(true);
+      } else {
+        setProcessedCount(nextProcessed);
+        setCurrentCardIndex(prev => prev + 1);
+        setUserAnswer('');
+        setShowAnswer(false);
+        setIsCorrect(false);
+      }
+    };
+
+    const handleMarkCorrect = () => {
+      setCorrectCount(c => c + 1);
+      advanceCard();
+    };
+
+    const handleMarkIncorrect = () => {
+      setIncorrectCount(i => i + 1);
+      advanceCard();
+    };
+
+    if (finished) {
+      return (
         <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+            <TitleBar text="Type" />
+            <div className="flex flex-col items-center justify-center h-full p-4">
+                <h2 className="text-5xl font-bold mb-4 text-white drop-shadow-custom">Session Complete!</h2>
+                <p className="text-3xl mb-2 font-bold text-white drop-shadow-custom">{correctCount} Correct</p>
+                <p className="text-3xl mb-2 font-bold text-white drop-shadow-customd">{incorrectCount} Incorrect</p>
+                <p className="text-3xl mb-2 font-bold text-white drop-shadow-custom">{skippedCount} Skipped</p>
+            </div>
+        </div>
+      );
+    }
+
+    return (
+        <div className="w-screen h-[100dvh] overflow-y-none bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
@@ -120,9 +170,9 @@ function Type() {
             ) : (
                 // Game area
                 <div className="flex flex-col items-center justify-center p-4 w-full h-[100dvh]">
-                    <div className="w-full h-1/2 flex flex-col items-center">
+                    <div className="w-full h-2/3 flex flex-col items-center">
                         {!showAnswer ? (
-                            <div className="w-3/5 mb-8 h-full">
+                            <div className="w-4/5 mb-8 h-full transition-transform duration-500 ease-in-out">
                                 <Card 
                                     card={filteredCards[currentCardIndex]} 
                                     flipped={false}
@@ -132,86 +182,135 @@ function Type() {
                                 />
                             </div>
                         ) : (
-                            <div className="w-full h-[93%] flex gap-4 ml-10 mr-10">
-                                <div className="h-full w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
-                                    <ReactMarkdown
-                                        rehypePlugins={[rehypeRaw]}
-                                        components={{
-                                            u: ({ node, ...props }) => <u {...props} />,
-                                        }}
-                                        className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-                                        font-bold text-center`}
-                                        >
-                                        {filteredCards[currentCardIndex].answer}
-                                    </ReactMarkdown>
+                            <div className="w-full h-[93%] flex gap-4 ml-10 mr-10 transition-opacity duration-500 ease-in-out">
+                                <div className="relative h-4/5 w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
+                                    <h1 className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</h1>
+                                    {filteredCards[currentCardIndex].backMode == 1 ? (
+                                        <EditableMathField
+                                            latex={filteredCards[currentCardIndex].answer}
+                                            style={{
+                                            minHeight: '4rem',
+                                            width: '100%',
+                                            backgroundColor: 'transparent',
+                                            color: 'inherit',
+                                            border: 'none',
+                                            pointerEvents: 'none',
+                                            fontSize: '2.25rem',
+                                            fontWeight: 'semibold',
+                                            color: 'inherit',
+                                            }}
+                                        />
+                                    ) : (
+                                        <ReactMarkdown
+                                            rehypePlugins={[rehypeRaw]}
+                                            components={{
+                                                u: ({ node, ...props }) => <u {...props} />,
+                                            }}
+                                            className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+                                            font-bold text-center`}
+                                            >
+                                            {filteredCards[currentCardIndex].answer}
+                                        </ReactMarkdown>
+                                    )}
+                                    
                                 </div>
-                                <div className="h-full w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
-                                    <ReactMarkdown
-                                        rehypePlugins={[rehypeRaw]}
-                                        components={{
-                                            u: ({ node, ...props }) => <u {...props} />,
-                                        }}
-                                        className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-                                        font-bold text-center`}
-                                        >
-                                        {userAnswer}
-                                    </ReactMarkdown>
+                                <div className="relative h-4/5 w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
+                                    <h1 className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Your Answer</h1>
+                                    {filteredCards[currentCardIndex].backMode == 1 ? (
+                                        <EditableMathField
+                                            latex={userAnswer}
+                                            style={{
+                                            minHeight: '4rem',
+                                            width: '100%',
+                                            backgroundColor: 'transparent',
+                                            color: 'inherit',
+                                            border: 'none',
+                                            pointerEvents: 'none',
+                                            fontSize: '2.25rem',
+                                            fontWeight: 'semibold',
+                                            color: 'inherit',
+                                            }}
+                                        />
+                                    ) : (
+                                        <ReactMarkdown
+                                            rehypePlugins={[rehypeRaw]}
+                                            components={{
+                                                u: ({ node, ...props }) => <u {...props} />,
+                                            }}
+                                            className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
+                                            font-bold text-center`}
+                                            >
+                                            {userAnswer}
+                                        </ReactMarkdown>
+                                    )}
                                 </div>
                             </div>
                         )}
                         
                     </div>
 
-                    <div className="w-full max-w-2xl mb-4">
-                        <input
+                    {!showAnswer && (
+                      <div className="w-full max-w-2xl mb-4 transition-opacity duration-500 ease-in-out">
+                      {/* answer input */}
+                      <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-2xl min-h-[6rem] flex items-center background-shadow-new">
+                        {filteredCards[currentCardIndex].backMode === 1 ? (
+                          <EditableMathField
+                            latex={userAnswer}
+                            onChange={(mathField) => setUserAnswer(mathField.latex())}
+                            onKeyUp={(e) => e.key === 'Enter' && handleAnswerSubmit()}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              backgroundColor: 'transparent',
+                              color: 'inherit',
+                              border: 'none',
+                              minHeight: '1.5rem'
+                            }}
+                            disabled={showAnswer}
+                          />
+                        ) : (
+                          <input
                             type="text"
                             value={userAnswer}
                             onChange={(e) => setUserAnswer(e.target.value)}
-                            onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                    handleAnswerSubmit();
-                                }
-                            }}
+                            onKeyPress={(e) => { if (e.key === 'Enter') handleAnswerSubmit(); }}
                             placeholder="Type your answer here..."
-                            className="w-full p-4 text-xl rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+                            className="w-full bg-transparent text-xl focus:outline-none"
                             disabled={showAnswer}
-                        />
-                    </div>
-
-                    {/* {showAnswer && (
-                        
-                        <div className={`w-full max-w-2xl mb-4 p-4 rounded-lg ${isCorrect ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900'}`}>
-                            <Card 
-                            card={filteredCards[currentCardIndex]} 
-                            flipped={false}
-                            setFlipped={() => {}}
-                            animateFlip={false}
-                            practice={false}
-                        />
-                        </div>
-                    )} */}
-
-                    <div className="flex gap-4">
-                        {!showAnswer ? (
-                            <>
-                                <BackgroundButton 
-                                    text="Skip Card" 
-                                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} 
-                                    onClick={handleSkipCard}
-                                />
-                                <BackgroundButton 
-                                    text="Submit Answer" 
-                                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} 
-                                    onClick={handleAnswerSubmit}
-                                />
-                            </>
-                        ) : (
-                            <BackgroundButton 
-                                text="Next Card" 
-                                bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} 
-                                onClick={handleNextCard}
-                            />
+                          />
                         )}
+                      </div>
+                    </div>
+                    )}
+
+                    <div className="flex gap-4 transition-all duration-300">
+                      {!showAnswer ? (
+                        <>
+                          <BackgroundButton
+                            text="Skip Card"
+                            bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                            onClick={handleSkipCard}
+                          />
+                          <BackgroundButton
+                            text="Submit Answer"
+                            bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                            onClick={handleAnswerSubmit}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <BackgroundButton
+                            text="Incorrect"
+                            bgColor="bg-red-500 hover:bg-red-400"
+                            onClick={handleMarkIncorrect}
+                          />
+                          <BackgroundButton
+                            text="Correct"
+                            bgColor="bg-green-500 hover:bg-green-400"
+                            onClick={handleMarkCorrect}
+                          />
+                        </>
+                      )}
                     </div>
                 </div>
             )}

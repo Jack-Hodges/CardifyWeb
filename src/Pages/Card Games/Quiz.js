@@ -9,7 +9,6 @@ import Card from '../../components/Card/Card';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import Ad from '../../components/Advertisement/Ad';
-// Import EditableMathField from MathQuill
 import { EditableMathField } from 'react-mathquill';
 
 function Quiz() {
