@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
@@ -17,7 +18,6 @@ function Type() {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [userAnswer, setUserAnswer] = useState('');
     const [showAnswer, setShowAnswer] = useState(false);
-    const [isCorrect, setIsCorrect] = useState(false);
 
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
@@ -30,7 +30,7 @@ function Type() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, shadow, secondaryColor, tertiaryColor } = theme;
+    const { shadow, secondaryColor, tertiaryColor } = theme;
 
     const navigate = useNavigate();
 
@@ -81,16 +81,21 @@ function Type() {
         setShowAnswer(false);
     }, [cards]);
 
+    // Trigger confetti when finished becomes true
+    useEffect(() => {
+      if (finished) {
+        confetti({
+          particleCount: 300,
+          spread: 100,
+          origin: { y: 0.5 },
+          gravity: 0.9,
+        });
+      }
+    }, [finished]);
+
     const handleAnswerSubmit = () => {
         if (!filteredCards[currentCardIndex]) return;
         setShowAnswer(true);
-    };
-
-    const handleNextCard = () => {
-        setCurrentCardIndex(prev => (prev + 1) % filteredCards.length);
-        setUserAnswer('');
-        setShowAnswer(false);
-        setIsCorrect(false);
     };
 
     const handleSkipCard = () => {
@@ -103,7 +108,6 @@ function Type() {
           setCurrentCardIndex(prev => prev + 1);
           setUserAnswer('');
           setShowAnswer(false);
-          setIsCorrect(false);
         }
     };
 
@@ -116,7 +120,6 @@ function Type() {
         setCurrentCardIndex(prev => prev + 1);
         setUserAnswer('');
         setShowAnswer(false);
-        setIsCorrect(false);
       }
     };
 
@@ -133,13 +136,40 @@ function Type() {
     if (finished) {
       return (
         <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
-            <TitleBar text="Type" />
-            <div className="flex flex-col items-center justify-center h-full p-4">
-                <h2 className="text-5xl font-bold mb-4 text-white drop-shadow-custom">Session Complete!</h2>
-                <p className="text-3xl mb-2 font-bold text-white drop-shadow-custom">{correctCount} Correct</p>
-                <p className="text-3xl mb-2 font-bold text-white drop-shadow-customd">{incorrectCount} Incorrect</p>
-                <p className="text-3xl mb-2 font-bold text-white drop-shadow-custom">{skippedCount} Skipped</p>
+          <TitleBar text="Type" />
+          <div className="flex flex-col justify-center items-center h-full p-4">
+            <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
+            <p className={`${theme ? theme.textClass : 'textColor'} font-bold text-2xl mb-10 ${shadow ? 'drop-shadow-custom' : ''}`}>Session Complete!</p>
+            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-2 ${shadow ? 'drop-shadow-custom' : ''}`}>{correctCount} Correct</p>
+            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-2 ${shadow ? 'drop-shadow-custom' : ''}`}>{incorrectCount} Incorrect</p>
+            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-5 ${shadow ? 'drop-shadow-custom' : ''}`}>{skippedCount} Skipped</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <BackgroundButton
+                text="Back to Home"
+                bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+                onClick={() => navigate('/home')}
+              />
+              <BackgroundButton
+                text={`Review ${subject?.name} Again`}
+                bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
+                onClick={() => {
+                  setFinished(false);
+                  // Reset counts
+                  setCorrectCount(0);
+                  setIncorrectCount(0);
+                  setSkippedCount(0);
+                  setProcessedCount(0);
+                  // Reshuffle and reset cards
+                  const nonImage = cards.filter(card => card.backMode !== 3);
+                  const reshuffled = shuffleCards(nonImage);
+                  setFilteredCards(reshuffled);
+                  setCurrentCardIndex(0);
+                  setUserAnswer('');
+                  setShowAnswer(false);
+                }}
+              />
             </div>
+          </div>
         </div>
       );
     }
@@ -185,7 +215,7 @@ function Type() {
                             <div className="w-full h-[93%] flex gap-4 ml-10 mr-10 transition-opacity duration-500 ease-in-out">
                                 <div className="relative h-4/5 w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
                                     <h1 className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</h1>
-                                    {filteredCards[currentCardIndex].backMode == 1 ? (
+                                    {filteredCards[currentCardIndex].backMode === 1 ? (
                                         <EditableMathField
                                             latex={filteredCards[currentCardIndex].answer}
                                             style={{
@@ -197,7 +227,6 @@ function Type() {
                                             pointerEvents: 'none',
                                             fontSize: '2.25rem',
                                             fontWeight: 'semibold',
-                                            color: 'inherit',
                                             }}
                                         />
                                     ) : (
@@ -216,7 +245,7 @@ function Type() {
                                 </div>
                                 <div className="relative h-4/5 w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
                                     <h1 className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Your Answer</h1>
-                                    {filteredCards[currentCardIndex].backMode == 1 ? (
+                                    {filteredCards[currentCardIndex].backMode === 1 ? (
                                         <EditableMathField
                                             latex={userAnswer}
                                             style={{
@@ -228,7 +257,6 @@ function Type() {
                                             pointerEvents: 'none',
                                             fontSize: '2.25rem',
                                             fontWeight: 'semibold',
-                                            color: 'inherit',
                                             }}
                                         />
                                     ) : (

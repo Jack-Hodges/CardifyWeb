@@ -2,7 +2,6 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 import { useUser } from '../../UserContext';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { useEffect } from 'react';
 
 
 function CardControls({ 

@@ -258,8 +258,20 @@ function Quiz() {
                 </p>
                 <div className="flex gap-4 mt-4">
                   <BackgroundButton
-                    text="Retry Quiz"
-                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
+                      text="Back to Home"
+                      bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
+                      onClick={() => {
+                        if (profile.pro) {
+                          navigate('/home');
+                        } else {
+                          setLeaveAd("Home");
+                          setShowAd(true);
+                        }
+                      }}
+                    />
+                  <BackgroundButton
+                    text={`Try ${subject.name} again`}
+                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
                     onClick={() => {
                       if (profile.pro) {
                         setFinished(false);
@@ -268,18 +280,6 @@ function Quiz() {
                         randomizeOptions(cards);
                       } else {
                         setLeaveAd("Retry Quiz");
-                        setShowAd(true);
-                      }
-                    }}
-                  />
-                  <BackgroundButton
-                    text="Go to Home"
-                    bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                    onClick={() => {
-                      if (profile.pro) {
-                        navigate('/home');
-                      } else {
-                        setLeaveAd("Home");
                         setShowAd(true);
                       }
                     }}
@@ -434,7 +434,6 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
               pointerEvents: 'none',
               fontSize: '2rem',
               fontWeight: 'semibold',
-              color: 'inherit',
               textAlign: 'center',
             }}
           />

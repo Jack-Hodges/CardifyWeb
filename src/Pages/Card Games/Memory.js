@@ -26,7 +26,7 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, secondaryColor, shadowClass, image, shadow } = theme;
+    const { textColor, secondaryColor, tertiaryColor, image, shadow } = theme;
     const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
@@ -234,7 +234,6 @@ function Memory() {
                                     matchedCards.includes(card.id)
                                 }
                                 isMatched={matchedCards.includes(card.id)}
-                                themeShadow={shadowClass}
                                 isImage={card.isImage}
                             />
                         ))}
@@ -252,12 +251,20 @@ function Memory() {
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <BackgroundButton 
                                         text="Back to Home" 
-                                        bgColor={"bg-green-500 hover:bg-green-400"} 
+                                        bgColor={
+                                            theme 
+                                              ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
+                                              : "bg-orange-500 hover:bg-orange-400"
+                                          }
                                         onClick={handleSwitchToHome} 
                                     />
                                     <BackgroundButton 
                                         text={`Review ${subject.name} Again`} 
-                                        bgColor={"bg-blue-500 hover:bg-blue-400"} 
+                                        bgColor={
+                                            theme 
+                                              ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
+                                              : "bg-purple-500 hover:bg-purple-400"
+                                          }
                                         onClick={() => window.location.reload()} 
                                     />
                                 </div>
@@ -277,10 +284,10 @@ function Memory() {
     );
 }
 
-function MatchCard({ content, onClick, isFlipped, isMatched, themeShadow, isImage }) {
+function MatchCard({ content, onClick, isFlipped, isMatched, isImage }) {
     return (
         <div
-            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer ${themeShadow} background-hover 
+            className={`rounded-3xl w-full h-full p-4 flex items-center justify-center cursor-pointer background-shadow-new background-hover 
                 ${isMatched ? 'border-4 border-green-500' : ''} 
                 ${isFlipped ? 'bg-white' : 'bg-gray-100'}`}
             onClick={onClick}

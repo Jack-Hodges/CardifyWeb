@@ -18,18 +18,13 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const [editingSubject, setEditingSubject] = useState(null);
     const { theme } = useUser();
     const { secondaryColor } = theme;
-    const [menuOpenId, setMenuOpenId] = useState(null);
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
 
-    const handleMenuToggle = (id) => {
-      setMenuOpenId(prev => (prev === id ? null : id));
-    };
 
     const handleRemove = async (id) => {
       await removeSubject(id);
       const refreshed = await fetchSubjects(user.id);
       setSubjects(refreshed);
-      setMenuOpenId(null);
     };
 
     useEffect(() => {

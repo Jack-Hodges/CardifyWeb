@@ -32,56 +32,41 @@ function Create() {
   const location = useLocation();
   const { subject } = location.state || {};
 
-  const { user, getUser, theme, userLoading, popupStates, updatePopupState } = useUser();
+  const { user, theme, popupStates, updatePopupState } = useUser();
   const { secondaryColor, tertiaryColor, shadow, textClass } = theme;
 
-  // === 1) Load user, subject, and cards ===
+
+  // Tutorial popup logic (won’t refetch cards when window focus changes)
   useEffect(() => {
+    if (popupStates && popupStates.create_popup === true) {
+      setCreatePopUp(false);
+    } else {
+      setCreatePopUp(true);
+    }
+  }, [popupStates]);
+
+  // Fetch cards once when the subject ID changes
+  useEffect(() => {
+    if (!subject?.id) {
+      setCards([]);
+      setLoading(false);
+      return;
+    }
     let isMounted = true;
-
-    const loadData = async () => {
-      if (userLoading) return;
-
-      if (!user) {
-        getUser();
-        return;
-      }
-
-      // Show tutorial popup if not dismissed
-      if (popupStates && popupStates.create_popup === true) {
-        setCreatePopUp(false); 
-      } else {
-        setCreatePopUp(true);
-      }
-
-      if (!subject) {
-        if (isMounted) {
-          setCards([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Fetch cards for the subject
+    (async () => {
+      setLoading(true);
       try {
-        if (isMounted) setLoading(true);
         const data = await fetchCards(subject.id);
-        if (isMounted) {
-          sortCardsById(data);
-          setCards(data);
-          setLoading(false);
-        }
+        sortCardsById(data);
+        if (isMounted) setCards(data);
       } catch (error) {
+        console.error(error);
+      } finally {
         if (isMounted) setLoading(false);
       }
-    };
-
-    loadData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [subject, user, getUser, userLoading, popupStates]);
+    })();
+    return () => { isMounted = false; };
+  }, [subject?.id]);
 
   // === 2) A function to refetch & update state after create/update ===
   const refreshCards = async () => {

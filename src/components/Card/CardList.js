@@ -60,7 +60,6 @@ function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "
                       pointerEvents: 'none',
                       fontSize: '2rem',
                       fontWeight: 'semibold',
-                      color: 'inherit',
                     }}
                   />
                 ) : (

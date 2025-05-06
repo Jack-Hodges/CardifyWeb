@@ -187,7 +187,6 @@ function CardContent ({
             pointerEvents: 'none',
             fontSize: '2.25rem' /* 36px */,
             fontWeight: 'semibold',
-            color: 'inherit',
           }}
         />
       </div>

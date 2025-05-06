@@ -30,18 +30,6 @@ function FlashcardQuiz() {
   const currentCardIndexRef = useRef(currentCardIndex);
   const cardsLengthRef = useRef(cards.length);
 
-  const handleOpenSubjectListModal = () => {
-    setIsSubjectListModalOpen(true);
-  };
-
-  const handleSwitchToCreate = () => {
-    navigate('/create', { state: { subject } });
-  };
-
-  const handleSwitchToHome = () => {
-    navigate('/home');
-  };
-
   const [isModalOpen, setIsModalOpen] = useState(false); // To control the modal
 
   const [finished, setFinished] = useState(false);
@@ -119,6 +107,49 @@ function FlashcardQuiz() {
     }
   }, [finished]);
 
+  // Delay changing the card until after the flip animation (300ms)
+  const handleNextCard = () => {
+    if (flipped) {
+      // If viewing answer, flip back then change card after animation
+      setFlipped(false);
+      setTimeout(() => {
+        if (currentCardIndex < cards.length - 1) {
+          setCurrentCardIndex(currentCardIndex + 1);
+        } else {
+          setFinished(true);
+        }
+      }, 300);
+    } else {
+      // If on question side, go to next card immediately
+      if (currentCardIndex < cards.length - 1) {
+        setCurrentCardIndex(currentCardIndex + 1);
+      } else {
+        setFinished(true);
+      }
+    }
+  };
+
+  const handlePrevCard = () => {
+    if (flipped) {
+      // If viewing answer, flip back then go to previous card after animation
+      setFlipped(false);
+      setTimeout(() => {
+        if (currentCardIndex > 0) {
+          setCurrentCardIndex(currentCardIndex - 1);
+        } else {
+          setCurrentCardIndex(cards.length - 1);
+        }
+      }, 300);
+    } else {
+      // If on question side, go to previous card immediately
+      if (currentCardIndex > 0) {
+        setCurrentCardIndex(currentCardIndex - 1);
+      } else {
+        setCurrentCardIndex(cards.length - 1);
+      }
+    }
+  };
+
   return (
     <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Practice" />
@@ -170,14 +201,14 @@ function FlashcardQuiz() {
                     <div>
                       <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => navigate('/create', { state: { subject } })} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   ) : (
                     <div>
                       <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
                       <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
+                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => setIsSubjectListModalOpen(true)} wWidth='w-full sm:w-auto'/>
                       </div>
                     </div>
                   )}
@@ -188,22 +219,8 @@ function FlashcardQuiz() {
                 <CardControls
                   currentCardIndex={currentCardIndex + 1} // Display card index starting from 1
                   totalCards={cards.length}
-                  onPrevClick={() => {
-                      if (currentCardIndex > 0) {
-                          setCurrentCardIndex(currentCardIndex - 1);
-                      } else {
-                          setCurrentCardIndex(cards.length - 1); // Loop to the last card
-                      }
-                      setFlipped(false); // Reset flipped state when navigating
-                  }}
-                  onNextClick={() => {
-                      if (currentCardIndex < cards.length - 1) {
-                          setCurrentCardIndex(currentCardIndex + 1);
-                      } else {
-                          setFinished(true); // Finish quiz when reaching the last card
-                      }
-                      setFlipped(false); // Reset flipped state when navigating
-                  }}
+                  onPrevClick={handlePrevCard}
+                  onNextClick={handleNextCard}
                   themeText={theme.textClass}
                   cards={cards}
                   generateClick={() => {
@@ -232,7 +249,7 @@ function FlashcardQuiz() {
                       theme 
                         ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
                         : "bg-orange-500 hover:bg-orange-400"
-                    } onClick={handleSwitchToHome} />
+                    } onClick={() => navigate('/home')} />
               <BackgroundButton text={`Review ${subject.name} Again`} bgColor={
                       theme 
                         ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 

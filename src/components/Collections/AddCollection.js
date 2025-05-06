@@ -51,7 +51,7 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
             <div className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
-                <h2 className="text-2xl font-semibold mb-6 text-green-500">
+                <h2 className="text-2xl font-semibold mb-6 text-white">
                     {text}
                 </h2>
 

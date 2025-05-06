@@ -85,46 +85,37 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const pinnedSubjects = subjects.filter(subject => subject.pinned);
 
+
+  // Show home popup only when popupStates load changes
+  useEffect(() => {
+    if (popupStatesLoaded && popupStates && !popupStates.home_popup) {
+      setHomePopUp(true);
+    }
+  }, [popupStatesLoaded, popupStates?.home_popup]);
+
+  // Fetch subjects once when user ID becomes available
   useEffect(() => {
     let isMounted = true;
-
-    const loadData = async () => {
-      // Wait until both the user and popupStates are loaded
-      if (userLoading || !popupStatesLoaded) return;
-
-      // Redirect if there is no user
+    const loadSubjects = async () => {
       if (!user) {
         getUser();
-        navigate('/');
         return;
       }
-
-      // Show the home popup if it hasn't been dismissed
-      if (popupStates && !popupStates.home_popup && isMounted) {
-        setHomePopUp(true);
-      }
-
+      setLoading(true);
       try {
-        if (isMounted) setLoading(true);
         const subjectsData = await fetchSubjects(user.id);
-        if (isMounted) {
-          setSubjects(subjectsData);
-          setLoading(false);
-        }
+        if (isMounted) setSubjects(subjectsData);
       } catch (error) {
-        if (isMounted) {
-          setLoading(false);
-          // Optionally, handle the error (e.g., log it or show a notification)
-        }
+        console.error(error);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
-
-    loadData();
-
+    loadSubjects();
     return () => {
       isMounted = false;
     };
-  }, [user, userLoading, popupStatesLoaded, popupStates, getUser, navigate]);
+  }, [user?.id]);
 
     const handleDismissPopup = () => {
         setHomePopUp(false);
