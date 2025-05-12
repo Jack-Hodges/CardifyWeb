@@ -106,6 +106,14 @@ export const UserProvider = ({ children }) => {
       setProfile(null);
       setPopupStates({});
       setPopupStatesLoaded(false);  // Reset on logout
+      
+      // Reset theme to default
+      const defaultTheme = resolveThemeColors(null);
+      document.documentElement.style.setProperty('--theme-border-color', defaultTheme.color);
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', defaultTheme.color);
+      }
     }
   };
 

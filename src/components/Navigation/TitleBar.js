@@ -23,8 +23,10 @@ function TitleBar( { text, content, home = false }) {
   )
 
   const logoutUser = () => {
-    logout()
-    navigate('/');
+    logout();
+    setTimeout(() => {
+      navigate('/');
+    }, 100); // Small timeout to ensure logout completes before navigation
   } 
 
   const [isOpen, setIsOpen] = useState(false);
@@ -98,12 +100,14 @@ function TitleBar( { text, content, home = false }) {
         </div>
       </div>
 
-      <ProfileModal 
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-        logout={logoutUser}
-        profile={profile}
-      />
+      {profile && (
+        <ProfileModal 
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          logout={logoutUser}
+          profile={profile}
+        />
+      )}
     </div>
   )
 }

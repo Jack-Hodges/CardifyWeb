@@ -29,7 +29,6 @@ export const saveSubject = async (id, subjectName, subjectColor, subjectIntensit
         .eq('id', id);
     } else {
       // Insert new subject
-      const numericIntensity = Number(subjectIntensity);
       const { data, error } = await supabase
         .from('subjects')
         .insert([{ user_id: userId, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, flashcard_count: 0, up_to_index: upToIndex, collection_id: collectionId }]) // Ensure collection_id is included

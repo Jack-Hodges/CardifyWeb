@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import supabase from "../supabaseClient"; 
 import { useNavigate } from "react-router-dom"; 
 import BackgroundButton from "../components/Elements/BackgroundButton";
@@ -106,13 +106,19 @@ function Welcome() {
       if (error) {
         if (error.message.includes("already registered")) {
           toast.error("This email is already registered.");
+        } else {
+          toast.error(`Error signing up: ${error.message}`);
         }
       } else {
         toast.success("Welcome to Cardify! Check your email to verify your account.");
         const { user } = data;
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([{ id: user.id, first_name: firstName }]);
+          .insert([{ 
+            id: user.id, 
+            first_name: firstName,
+            theme: 'default'  // Explicitly set default theme
+          }]);
         if (profileError) {
           toast.error(`Error creating profile: ${profileError.message}`);
         } else {
@@ -406,44 +412,44 @@ function FancyInput({ type, value, onChange }) {
   );
 }
 
-function HoverVideo({ videoSrc }) {
-  const videoRef = useRef(null);
+// function HoverVideo({ videoSrc }) {
+//   const videoRef = useRef(null);
 
-  const handleMouseEnter = async () => {
-    try {
-      const playPromise = videoRef.current.play();
-      if (playPromise !== undefined) {
-        await playPromise;
-      }
-    } catch (error) {
-      console.error("Error attempting to play:", error);
-    }
-  };
+//   const handleMouseEnter = async () => {
+//     try {
+//       const playPromise = videoRef.current.play();
+//       if (playPromise !== undefined) {
+//         await playPromise;
+//       }
+//     } catch (error) {
+//       console.error("Error attempting to play:", error);
+//     }
+//   };
 
-  const handleMouseLeave = () => {
-    try {
-      videoRef.current.pause();
-    } catch (error) {
-      console.error("Error attempting to pause:", error);
-    }
-  };
+//   const handleMouseLeave = () => {
+//     try {
+//       videoRef.current.pause();
+//     } catch (error) {
+//       console.error("Error attempting to pause:", error);
+//     }
+//   };
 
-  return (
-    <div
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="relative cursor-pointer rounded-lg overflow-hidden"
-    >
-      <video
-        ref={videoRef}
-        src={videoSrc}
-        loop
-        muted
-        playsInline
-        preload="auto"
-        autoPlay={false}
-        className="w-full h-full object-cover"
-      />
-    </div>
-  );
-}
+//   return (
+//     <div
+//       onMouseEnter={handleMouseEnter}
+//       onMouseLeave={handleMouseLeave}
+//       className="relative cursor-pointer rounded-lg overflow-hidden"
+//     >
+//       <video
+//         ref={videoRef}
+//         src={videoSrc}
+//         loop
+//         muted
+//         playsInline
+//         preload="auto"
+//         autoPlay={false}
+//         className="w-full h-full object-cover"
+//       />
+//     </div>
+//   );
+// }
