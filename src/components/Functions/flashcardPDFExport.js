@@ -71,10 +71,10 @@ const FlashcardPDFExport = ({ flashcards }) => {
                 {chunk.map((card, index) => (
                   <div
                     key={`q-${index}`}
-                    className="aspect-[3/2] bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl flex items-center justify-center"
+                    className="aspect-[3/2] bg-gray-50 p-5 rounded-2xl flex items-center justify-center"
                   >
                     {card.frontMode === 1 ? (
-                      <div className="text-gray-700 dark:text-gray-200 font-bold text-center w-full">
+                      <div className="text-gray-700 font-bold text-center w-full">
                         <EditableMathField
                           latex={card.question}
                           style={{
@@ -97,7 +97,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
                         components={{
                           u: ({ node, ...props }) => <u {...props} />,
                         }}
-                        className={`${getMarkdownFontSizeClass(card.question)} text-gray-700 dark:text-gray-200 font-bold text-center`}
+                        className={`${getMarkdownFontSizeClass(card.question)} text-gray-700 font-bold text-center`}
                       >
                         {card.question}
                       </ReactMarkdown>
@@ -114,13 +114,13 @@ const FlashcardPDFExport = ({ flashcards }) => {
                 {chunk.map((card, index) => (
                   <div
                     key={`a-${index}`}
-                    className="aspect-[3/2] bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl flex items-center justify-center relative"
+                    className="aspect-[3/2] bg-gray-50 p-5 rounded-2xl flex items-center justify-center relative"
                   >
                     <p className={`absolute top-0 font-bold text-2xl mt-2 text-yellow-500`}>
                       Answer
                     </p>
                     {card.backMode === 1 ? (
-                      <div className="text-gray-700 dark:text-gray-200 font-bold text-center w-full">
+                      <div className="text-gray-700 font-bold text-center w-full">
                         <EditableMathField
                           latex={card.answer}
                           style={{
@@ -149,7 +149,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
                         components={{
                           u: ({ node, ...props }) => <u {...props} />,
                         }}
-                        className={`${getMarkdownFontSizeClass(card.answer)} text-gray-700 dark:text-gray-200 font-bold text-center`}
+                        className={`${getMarkdownFontSizeClass(card.answer)} text-gray-700 font-bold text-center`}
                       >
                         {card.answer}
                       </ReactMarkdown>

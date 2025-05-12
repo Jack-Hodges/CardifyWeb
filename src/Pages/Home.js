@@ -9,7 +9,7 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modal/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, Zap, BookText, BrainCog } from 'lucide-react';
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
 
 // Loading component
 function HomeLoading() {
@@ -74,7 +74,6 @@ function Home() {
     popupStates, 
     popupStatesLoaded, 
     updatePopupState, 
-    loading: userLoading 
   } = useUser();
   
   const { primaryColor, secondaryColor, textColor, shadow } = theme;
@@ -91,7 +90,7 @@ function Home() {
     if (popupStatesLoaded && popupStates && !popupStates.home_popup) {
       setHomePopUp(true);
     }
-  }, [popupStatesLoaded, popupStates?.home_popup]);
+  }, [popupStates, popupStatesLoaded, popupStates?.home_popup]);
 
   // Fetch subjects once when user ID becomes available
   useEffect(() => {
@@ -115,7 +114,7 @@ function Home() {
     return () => {
       isMounted = false;
     };
-  }, [user?.id]);
+  }, [getUser, user]);
 
     const handleDismissPopup = () => {
         setHomePopUp(false);

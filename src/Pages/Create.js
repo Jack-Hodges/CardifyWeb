@@ -68,14 +68,6 @@ function Create() {
     return () => { isMounted = false; };
   }, [subject?.id]);
 
-  // === 2) A function to refetch & update state after create/update ===
-  const refreshCards = async () => {
-    if (!subject) return;
-    const updatedCards = await fetchCards(subject.id);
-    sortCardsById(updatedCards);
-    setCards(updatedCards);
-  };
-
   // === 3) The universal upsert callback ===
   //     (called by EditModal after saving or editing a card)
   const handleUpsertCard = async (cardData, file) => {
