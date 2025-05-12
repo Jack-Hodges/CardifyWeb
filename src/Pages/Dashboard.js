@@ -231,17 +231,20 @@ function Dashboard() {
         </div>
       ) : (
         // No Subjects or Collections Message
-        <div className="flex flex-col justify-center items-center w-full h-4/5">
-          <div>
-            <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>You have no subjects</p>
-            <div className="block sm:flex gap-4 mt-5 items-center justify-center">
-              <BackgroundButton
-                text="Create New Subject"
-                bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-                onClick={handleAddSubject}
-                wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-              />
-            </div>
+        <div className="flex flex-col justify-center items-center w-full h-4/5 gap-4">
+          <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>You have no subjects</p>
+          <p className={`${theme ? theme.textClass : 'textColor'} text-2xl font-semibold text-center`}>In order to create flashcards, you need to create a subject first. 
+            <br></br>Subjects organise your flashcards into groups, allowing you to edit and practice them in one go.
+            <br></br>You can also create <span className="text-blue-500">Collections</span> to organise your subjects into different groups.
+            <br></br>To add a subject, click the button below. You can also use the <span className="text-blue-500">Plus button</span> in the top right corner to create a subject or a collection.
+          </p>
+          <div className="block sm:flex gap-4 mt-5 items-center justify-center">
+            <BackgroundButton
+              text="Create New Subject"
+              bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
+              onClick={handleAddSubject}
+              wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+            />
           </div>
         </div>
       )}

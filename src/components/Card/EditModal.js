@@ -193,18 +193,18 @@ function EditModal({
       }`}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={(e) => e.stopPropagation()} />
+      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={(e) => e.stopPropagation()} />
       <div
-        className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
+        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
           isClosing ? 'animate-pop-down' : 'animate-pop-up'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-white/90">{text}</h2>
 
         {/* Front (Question) */}
         <div className="mb-6">
-          <label htmlFor="question" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+          <label htmlFor="question" className="block text-lg font-medium mb-2 text-white/90">
             Question
           </label>
           <div className="mb-2 flex space-x-2 overflow-x-auto scrollbar-hide">
@@ -215,7 +215,7 @@ function EditModal({
             <EditButton mode={frontMode} setMode={setFrontMode} svg={<Calculator />} text="Math" val={1} extend />
           </div>
           {frontMode === 1 && (
-            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md min-h-[6rem] text-gray-500 dark:text-gray-200">
+            <div className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors min-h-[6rem]">
               <EditableMathField
                 latex={frontContent}
                 onChange={(mathField) => setFrontContent(mathField.latex())}
@@ -236,21 +236,26 @@ function EditModal({
               value={frontContent}
               onChange={(e) => setFrontContent(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, setFrontContent, frontContent, frontMode === 'math')}
-              className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+              className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors resize-none h-24"
               placeholder="Enter the question here"
             />
           )}
           {frontMode === 2 && (
             <div className="mt-2">
-              <input type="file" accept="image/*" onChange={handleFileChange} className="text-gray-600 dark:text-gray-200" />
-              <p className="text-sm text-gray-500 mt-2">(Upload an image for the question)</p>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange} 
+                className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors" 
+              />
+              <p className="text-sm text-white/90 mt-2">(Upload an image for the question)</p>
             </div>
           )}
         </div>
 
         {/* Back (Answer) */}
         <div className="mb-6">
-          <label htmlFor="answer" className="block text-lg font-medium mb-2 text-gray-500 dark:text-gray-200">
+          <label htmlFor="answer" className="block text-lg font-medium mb-2 text-white/90">
             Answer
           </label>
           <div className="mb-2 flex space-x-2 overflow-x-auto">
@@ -263,7 +268,7 @@ function EditModal({
             <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} />
           </div>
           {backMode === 1 && (
-            <div className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md h-24 text-gray-500 dark:text-gray-200">
+            <div className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors h-24">
               <EditableMathField
                 latex={backContent}
                 onChange={(mathField) => setBackContent(mathField.latex())}
@@ -284,25 +289,28 @@ function EditModal({
               value={backContent}
               onChange={(e) => setBackContent(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, setBackContent, backContent, backMode === 'math')}
-              className="bg-gray-100 dark:bg-gray-600 w-full p-3 rounded-md resize-none h-24 text-gray-500 dark:text-gray-200"
+              className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors resize-none h-24"
               placeholder="Enter the answer here"
             />
           )}
           {backMode === 2 && (
             <div
-              className="w-full h-24 bg-gray-100 dark:bg-gray-600 rounded-md flex justify-center items-center cursor-pointer mt-2"
+              className="w-full h-24 bg-black/20 backdrop-blur-sm rounded-lg flex justify-center items-center cursor-pointer mt-2 border border-white/20 hover:border-white/40 transition-colors"
               onClick={handleBackImageUploadClick}
             >
               <input type="file" accept="image/*" onChange={handleFileChange} ref={backImageInputRef} className="hidden" />
-              <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
+              <div className="flex items-center space-x-2 text-xl font-semibold text-white/90 p-2">
                 <Image />
                 {imageUploaded ? <h1>Image uploaded</h1> : <h1>Upload an image</h1>}
               </div>
             </div>
           )}
           {backMode === 3 && (
-            <div className="w-full h-24 bg-gray-100 dark:bg-gray-600 rounded-md flex justify-center items-center cursor-pointer" onClick={openDrawingPopup}>
-              <div className="flex items-center space-x-2 text-xl font-semibold text-gray-500 dark:text-gray-200 p-2">
+            <div 
+              className="w-full h-24 bg-black/20 backdrop-blur-sm rounded-lg flex justify-center items-center cursor-pointer border border-white/20 hover:border-white/40 transition-colors" 
+              onClick={openDrawingPopup}
+            >
+              <div className="flex items-center space-x-2 text-xl font-semibold text-white/90 p-2">
                 <Brush />
                 {drawingSaved ? <h1>Drawing added</h1> : <h1>Add a drawing</h1>}
               </div>
@@ -339,11 +347,11 @@ function EditButton({ mode, setMode, svg, text, val, extend, onClick }) {
   return (
     <button
       onClick={handleClick}
-      className={`bg-gray-100 dark:bg-gray-700 ${extend ? 'w-[4rem]' : 'w-20'} h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 ${
-        mode === val ? 'bg-gray-300 dark:bg-gray-500' : ''
+      className={`bg-black/20 backdrop-blur-sm ${extend ? 'w-[4rem]' : 'w-20'} h-8 rounded-lg text-white/90 border border-white/20 hover:border-white/40 transition-colors ${
+        mode === val ? 'bg-black/40 border-white/40' : ''
       }`}
     >
-      <div className="flex items-center justify-around space-x-2 px-1 text-gray-700 dark:text-gray-300">
+      <div className="flex items-center justify-around space-x-2 px-1 text-white/90">
         {svg}
         {text}
       </div>
@@ -356,11 +364,11 @@ function TextButton({ text, handleClick, mode, modeText }) {
     <button
       onClick={() => handleClick(modeText)}
       disabled={mode !== 0}
-      className={`bg-gray-100 dark:bg-gray-700 w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 flex-shrink-0 ${
+      className={`bg-black/20 backdrop-blur-sm w-8 h-8 rounded-lg text-white/90 border border-white/20 hover:border-white/40 transition-colors flex-shrink-0 ${
         mode !== 0 ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      <div className="text-gray-700 dark:text-gray-300">{text}</div>
+      <div className="text-white/90">{text}</div>
     </button>
   );
 }

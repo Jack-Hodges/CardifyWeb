@@ -183,13 +183,13 @@ function Home() {
                 <p>Jump In</p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
-                <JumpButton theme={'background-shadow-new'} text="Create" img={<BadgePlus size="100"/>} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Practice" img={<CirclePlay size="100"/>} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Type" img={<BookText size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
-                <JumpButton theme={'background-shadow-new'} text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Create" img={<BadgePlus size="100"/>} color="text-red-400" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Practice" img={<CirclePlay size="100"/>} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Type" img={<BookText size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
 
@@ -240,9 +240,14 @@ function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full mt-10">
+            <div className="flex flex-col items-center justify-center h-full mt-10 gap-2">
               <h1 className="mb-5">Let's create your first subject</h1>
-              <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+              <div className="flex gap-2 items-center">
+                <p className="text-2xl font-semibold">Click to</p>
+                <BackgroundButton text="go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+                <p className="text-2xl font-semibold">or click Home in the top left to open the dropdown menu</p>
+              </div>
+              <p className="text-2xl font-semibold">You can use the dropdown menu at any time to navigate around the site</p>
             </div>
           )}
 
@@ -287,9 +292,9 @@ function Home() {
 
 export default Home;
 
-function JumpButton( { text, img, color, onClick, theme }) {
+function JumpButton( { text, img, color, onClick }) {
   return (
-    <div className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40 bg-white dark:bg-gray-600 rounded-xl ${theme} background-hover cursor-pointer ${color}`}
+    <div className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow-new background-hover cursor-pointer ${color}`}
       onClick={() => onClick(text.toLowerCase())}>
       {img}
       <p className="text-2xl sm:text-3xl">{text}</p>
