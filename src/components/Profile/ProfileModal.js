@@ -92,7 +92,7 @@ function Modal({ isOpen, onClose, mainText, logout }) {
             ></div>
 
             <div
-                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-4/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
+                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()}
@@ -141,11 +141,25 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                     </div>
                 </div>
 
+                {/* Card Count Progress Bar */}
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-white text-lg">Card Count</span>
+                        <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+                            style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
+                        />
+                    </div>
+                </div>
+
                 <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
                     {mainText}
                 </p>
 
-                <div>
+                <div className="absolute bottom-3 left-3">
                     <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
                 </div>
             </div>

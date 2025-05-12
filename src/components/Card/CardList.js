@@ -8,13 +8,16 @@ import { EditableMathField, addStyles } from 'react-mathquill';
 
 addStyles();
 
-function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "bg-yellow-500 hover:bg-yellow-400" }) {
+function CardList({ cards, onCardClick, onUpsertCard, subject, passedInColor = "bg-yellow-500 hover:bg-yellow-400", onAddClick }) {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const { theme } = useUser();
   const { textColor, shadow } = theme;
 
   const handleAddClick = () => {
+    if (onAddClick && !onAddClick()) {
+      return; // Don't open modal if check fails
+    }
     setIsModalOpen(true); // Open the modal for adding a new flashcard
   };
 

@@ -13,6 +13,8 @@ import SubjectList from '../components/Subject/SubjectList';
 import CustomModal from "../components/Modal/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Create() {
   const [cards, setCards] = useState([]);
@@ -32,11 +34,11 @@ function Create() {
   const location = useLocation();
   const { subject } = location.state || {};
 
-  const { user, theme, popupStates, updatePopupState } = useUser();
+  const { user, theme, popupStates, updatePopupState, profile } = useUser();
   const { secondaryColor, tertiaryColor, shadow, textClass } = theme;
 
 
-  // Tutorial popup logic (won’t refetch cards when window focus changes)
+  // Tutorial popup logic (won't refetch cards when window focus changes)
   useEffect(() => {
     if (popupStates && popupStates.create_popup === true) {
       setCreatePopUp(false);
@@ -118,6 +120,16 @@ function Create() {
     updatePopupState("create_popup", true);
   };
 
+  const handleOpenAddCardModal = () => {
+    const maxCards = profile.pro ? 40 : 40;
+    console.log(profile.flashcard_count);
+    if (profile.flashcard_count >= maxCards) {
+      toast.error(`You've reached your card limit of ${maxCards} cards. ${profile.pro ? '' : 'Upgrade to Pro for up to 500 cards!'}`);
+      return;
+    }
+    setIsModalOpen(true);
+  };
+
   return (
     <div 
       className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
@@ -180,6 +192,14 @@ function Create() {
                 subject={subject}
                 themeText={theme.textClass}
                 passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
+                onAddClick={() => {
+                  const maxCards = profile.pro ? 500 : 100;
+                  if (profile.flashcard_count >= maxCards) {
+                    toast.error(`You've reached your card limit of ${maxCards} cards. ${profile.pro ? '' : 'Upgrade to Pro for up to 500 cards!'}`);
+                    return false;
+                  }
+                  return true;
+                }}
               />
             </div>
           </>
@@ -204,7 +224,7 @@ function Create() {
                         ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
                         : "bg-orange-500 hover:bg-orange-400"
                     }
-                    onClick={() => setIsModalOpen(true)}
+                    onClick={handleOpenAddCardModal}
                     wWidth="w-full sm:w-auto mb-3 sm:mb-0"
                   />
                   <BackgroundButton
@@ -360,6 +380,8 @@ function Create() {
         firstActionCol="bg-green-500 hover:bg-green-400"
         onFirstAction={() => setGenerateFlash(false)}
       />
+
+      <ToastContainer position="top-center" autoClose={3000} />
     </div>
   );
 }
