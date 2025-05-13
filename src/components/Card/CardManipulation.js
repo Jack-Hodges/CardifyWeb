@@ -136,6 +136,15 @@ export const deleteCard = async (
 
   if (error) {
     console.error('Error deleting card from database:', error);
+  } else {
+    // 5. Decrement the flashcard_count in the user's profile
+    const { error: profileError } = await supabase.rpc('decrement_flashcard_count', {
+      user_id: cardToDelete.user_id
+    });
+
+    if (profileError) {
+      console.error('Error updating profile flashcard count:', profileError);
+    }
   }
 };
 
@@ -155,6 +164,7 @@ export const sortCardsById = (cards) => {
 export const upsertCard = async (card, imageFile) => {
   try {
     let newImageUrl = card.image_url || null;
+    let isNewCard = !card.id; // Track if this is a new card
 
     // 1) If a new image file is provided, delete the old image (if one exists) and then upload the new image.
     if (imageFile) {
@@ -212,6 +222,8 @@ export const upsertCard = async (card, imageFile) => {
       backMode: card.backMode,
     };
 
+    let result = null;
+
     // 3) Upsert: update if card.id exists; otherwise, insert.
     if (card.id) {
       const { data, error } = await supabase
@@ -224,7 +236,7 @@ export const upsertCard = async (card, imageFile) => {
         console.error('Error updating card:', error);
         return null;
       }
-      return data?.[0] || null;
+      result = data?.[0] || null;
     } else {
       const { data, error } = await supabase
         .from('flashcards')
@@ -235,8 +247,21 @@ export const upsertCard = async (card, imageFile) => {
         console.error('Error inserting new card:', error);
         return null;
       }
-      return data?.[0] || null;
+      result = data?.[0] || null;
+
+      // If this was a new card, increment the flashcard_count in the user's profile
+      if (result) {
+        const { error: profileError } = await supabase.rpc('increment_flashcard_count', {
+          user_id: card.user_id
+        });
+
+        if (profileError) {
+          console.error('Error updating profile flashcard count:', profileError);
+        }
+      }
     }
+
+    return result;
   } catch (err) {
     console.error('Unexpected error in upsertCard:', err);
     return null;

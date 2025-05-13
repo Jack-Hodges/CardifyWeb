@@ -121,8 +121,7 @@ function Create() {
   };
 
   const handleOpenAddCardModal = () => {
-    const maxCards = profile.pro ? 40 : 40;
-    console.log(profile.flashcard_count);
+    const maxCards = profile.pro ? 500 : 100;
     if (profile.flashcard_count >= maxCards) {
       toast.error(`You've reached your card limit of ${maxCards} cards. ${profile.pro ? '' : 'Upgrade to Pro for up to 500 cards!'}`);
       return;

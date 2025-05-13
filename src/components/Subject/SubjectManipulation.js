@@ -47,10 +47,40 @@ export const saveSubject = async (id, subjectName, subjectColor, subjectIntensit
 // Delete subject
 export const removeSubject = async (subjectId) => {
   try {
+    // First, get the count of cards in this subject
+    const { data: cards, error: countError } = await supabase
+      .from('flashcards')
+      .select('id, user_id')
+      .eq('subject_id', subjectId);
+
+    if (countError) {
+      console.error('Error fetching cards for subject:', countError);
+      return false;
+    }
+
+    // If there are cards, update the user's profile count
+    if (cards && cards.length > 0) {
+      const userId = cards[0].user_id; // All cards in a subject belong to the same user
+      const cardCount = cards.length;
+
+      // Decrement the flashcard_count in the user's profile by the number of cards
+      const { error: profileError } = await supabase.rpc('decrement_flashcard_count_by', {
+        user_id: userId,
+        amount: cardCount
+      });
+
+      if (profileError) {
+        console.error('Error updating profile flashcard count:', profileError);
+        return false;
+      }
+    }
+
+    // Now delete the subject (this will cascade delete the cards)
     const { error } = await supabase
       .from('subjects')
       .delete()
       .eq('id', subjectId);
+
     if (error) {
       console.error('Error deleting subject:', error);
       return false;
