@@ -211,7 +211,7 @@ function Create() {
                 >
                   {subject.name} has no flashcards
                 </p>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-2xl font-semibold text-center`}>This subject is currently empty, click the button below to add a card.
+                <p className={`${theme ? theme.textClass : 'textColor'} text-2xl font-semibold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>This subject is currently empty, click the button below to add a card.
                   <br></br>You can add a text, math, image, or drawing card.
                   <br></br>Cards can be exported to a PDF to study on paper.
                 </p>

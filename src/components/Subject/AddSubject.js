@@ -9,7 +9,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
-    const [subjectColor, setLocalSubjectColor] = useState(subject?.colourText ?? 'red-500');
+    const [subjectColor, setLocalSubjectColor] = useState(subject?.colourText ?? 'red');
     const [subjectIntensity, setSubjectIntensity] = useState(subject?.colourIntensity || 500);
     const [filteredCollections, setFilteredCollections] = useState([]);
     const [collections, setCollections] = useState([]);
