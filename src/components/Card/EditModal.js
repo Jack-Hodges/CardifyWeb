@@ -154,10 +154,17 @@ function EditModal({
     const value = content;
 
     if (e.key === ' ' && value.substring(start - 1, start) === '-') {
-      e.preventDefault();
-      setContent(value.substring(0, start - 1) + '• ' + value.substring(end));
-      setTimeout(() => e.target.setSelectionRange(start + 1, start + 1), 0);
-      return;
+      // Check if the hyphen is at the start of a line
+      const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+      const currentLine = value.substring(lineStart, start);
+      
+      // Only convert to bullet if the hyphen is the only character on the line
+      if (currentLine === '-') {
+        e.preventDefault();
+        setContent(value.substring(0, start - 1) + '• ' + value.substring(end));
+        setTimeout(() => e.target.setSelectionRange(start + 1, start + 1), 0);
+        return;
+      }
     }
     if (e.key === 'Enter') {
       const lineStart = value.lastIndexOf('\n', start - 1) + 1;

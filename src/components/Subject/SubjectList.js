@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchSubjects, saveSubject, removeSubject } from './SubjectManipulation';
 import getColors from '../Functions/getColors';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { fetchCollections } from '../Collections/CollectionManipulation';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import AddSubject from '../Subject/AddSubject';
-import { X, Plus, MoreVertical } from 'lucide-react';
+import { X, Plus, MoreVertical, ArrowUpDown, ChevronDown } from 'lucide-react';
 
 function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const navigate = useNavigate();
@@ -19,7 +19,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const { theme } = useUser();
     const { secondaryColor } = theme;
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
-
+    const [sortBy, setSortBy] = useState('Most Cards');
+    const selectRef = useRef(null);
 
     const handleRemove = async (id) => {
       await removeSubject(id);
@@ -66,8 +67,25 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
         ...collectionsWithSubjects.map(collection => ({ ...collection, type: 'collection' })) // Mark collections as type 'collection'
     ];
 
-    // Sort the combined list alphabetically by name
-    const sortedCombinedList = combinedList.sort((a, b) => a.name.localeCompare(b.name));
+    // Sort the combined list based on the selected sort option
+    const sortedCombinedList = combinedList.sort((a, b) => {
+        switch (sortBy) {
+            case 'Alphabetical':
+                return a.name.localeCompare(b.name);
+            case 'Most Cards':
+                if (a.type === 'subject' && b.type === 'subject') {
+                    return b.flashcard_count - a.flashcard_count;
+                }
+                if (a.type === 'collection' && b.type === 'collection') {
+                    return b.subjects.length - a.subjects.length;
+                }
+                return a.type === 'subject' ? -1 : 1;
+            case 'Date Created':
+                return new Date(b.created_at) - new Date(a.created_at);
+            default:
+                return 0;
+        }
+    });
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -88,6 +106,25 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-semibold mb-0 text-white/90">Subjects & Collections</h2>
                   <div className="flex gap-2">
+                    <div className="relative">
+                      <select
+                        ref={selectRef}
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
+                        style={{ minWidth: '40px' }}
+                      >
+                        <option value="Most Cards">Most Cards</option>
+                        <option value="Alphabetical">Alphabetical</option>
+                        <option value="Date Created">Date Created</option>
+                      </select>
+                      <div className="relative z-0">
+                        <BackgroundButton 
+                          image={<ArrowUpDown/>} 
+                          bgColor={'bg-blue-500 hover:bg-blue-400'} 
+                        />
+                      </div>
+                    </div>
                     <BackgroundButton image={<Plus/>} bgColor={'bg-green-500 hover:bg-green-400'} onClick={() => { setEditingSubject(null); setIsAddOpen(true); }}/>
                     <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                   </div>
@@ -250,30 +287,66 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
 }
 
 function CollectionView({ collection, subjects, onBack, onClose, page, theme, onEditSubject, onDeleteSubject }) {
+    const [sortBy, setSortBy] = useState('Most Cards');
+    const selectRef = useRef(null);
 
     const chev = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
         </svg>
+    );
 
-    )
+    // Sort subjects based on the selected sort option
+    const sortedSubjects = [...subjects].sort((a, b) => {
+        switch (sortBy) {
+            case 'Alphabetical':
+                return a.name.localeCompare(b.name);
+            case 'Most Cards':
+                return b.flashcard_count - a.flashcard_count;
+            case 'Date Created':
+                return new Date(b.created_at) - new Date(a.created_at);
+            default:
+                return 0;
+        }
+    });
 
     return (
         <div className="w-full h-full">
             <div className="flex justify-between items-center mb-4">
                 <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'bg-green-500 hover:bg-green-400'}/>
-                <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
+                <div className="flex gap-2">
+                    <div className="relative">
+                        <select
+                            ref={selectRef}
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
+                            style={{ minWidth: '40px' }}
+                        >
+                            <option value="Most Cards">Most Cards</option>
+                            <option value="Alphabetical">Alphabetical</option>
+                            <option value="Date Created">Date Created</option>
+                        </select>
+                        <div className="relative z-0">
+                            <BackgroundButton 
+                                image={<ArrowUpDown/>} 
+                                bgColor={'bg-blue-500 hover:bg-blue-400'} 
+                            />
+                        </div>
+                    </div>
+                    <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
+                </div>
             </div>
-            {subjects.length > 0 ? (
-                subjects.map((subject) => (
+            {sortedSubjects.length > 0 ? (
+                sortedSubjects.map((subject) => (
                     <SubjectRow
-                      key={subject.id}
-                      subject={subject}
-                      onClose={onClose}
-                      page={page}
-                      themeShadow={'background-shadow-new'}
-                      onEdit={() => onEditSubject(subject)}
-                      onDelete={() => onDeleteSubject(subject)}
+                        key={subject.id}
+                        subject={subject}
+                        onClose={onClose}
+                        page={page}
+                        themeShadow={'background-shadow-new'}
+                        onEdit={() => onEditSubject(subject)}
+                        onDelete={() => onDeleteSubject(subject)}
                     />
                 ))
             ) : (

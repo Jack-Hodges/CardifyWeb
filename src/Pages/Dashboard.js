@@ -149,32 +149,40 @@ function Dashboard() {
     setIsCollectionDeleteModalOpen(false);
   };
 
-  // Apply search and sorting to subjects
+  // Apply search and sorting to subjects and collections
   const sortedSubjects = [...subjects]
-    .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (selectedSort === 'Alphabetical') {
-        return a.name.localeCompare(b.name);
-      } else if (selectedSort === 'Most Cards') {
-        const cardDifference = b.flashcard_count - a.flashcard_count;
-        if (cardDifference === 0) {
-          return a.name.localeCompare(b.name);
-        }
-        return cardDifference;
-      } else if (selectedSort === 'Date Created') {
-        return new Date(b.created_at) - new Date(a.created_at);
-      }
-      return 0;
-  });
-
-  // Separate subjects without a collection
-  const subjectsWithoutCollection = sortedSubjects.filter((subject) => !subject.collection_id);
+    .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Attach subjects to their collections
   const collectionsWithSubjects = collections.map((collection) => ({
     ...collection,
     subjects: sortedSubjects.filter((subject) => subject.collection_id === collection.id),
   }));
+
+  // Combine collections and unassigned subjects into a single array
+  const combinedList = [
+    ...sortedSubjects.filter(subject => !subject.collection_id).map(subject => ({ ...subject, type: 'subject' })),
+    ...collectionsWithSubjects.map(collection => ({ ...collection, type: 'collection' }))
+  ];
+
+  // Sort the combined list based on the selected sort option
+  const sortedCombinedList = combinedList.sort((a, b) => {
+    if (selectedSort === 'Alphabetical') {
+      return a.name.localeCompare(b.name);
+    } else if (selectedSort === 'Most Cards') {
+      const aCount = a.type === 'subject' ? a.flashcard_count : a.subjects.length;
+      const bCount = b.type === 'subject' ? b.flashcard_count : b.subjects.length;
+      const countDiff = bCount - aCount;
+      return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+    } else if (selectedSort === 'Date Created') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    }
+    return 0;
+  });
+
+  // Separate the sorted list back into collections and subjects
+  const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection');
+  const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject');
 
   const handleCollectionClick = (collectionId) => {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
@@ -201,7 +209,7 @@ function Dashboard() {
       ) : subjects.length > 0 || collections.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 py-4 px-5 sm:p-4 gap-4">
           {/* Render Collections with Subjects */}
-          {collectionsWithSubjects.map((collection) => (
+          {sortedCollections.map((collection) => (
             <CollectionBlock
               key={collection.id}
               user={user}
@@ -209,8 +217,8 @@ function Dashboard() {
               subjects={collection.subjects}
               isExpanded={selectedCollection === collection.id}
               onClick={() => handleCollectionClick(collection.id)}
-              onEditSubject={handleEditSubject}  // Pass the edit function as a prop
-              onRemoveSubject={confirmDeleteSubject}  // Pass the delete function as a prop
+              onEditSubject={handleEditSubject}
+              onRemoveSubject={confirmDeleteSubject}
               onEditCollection={handleEditCollection}
               onRemoveCollection={confirmDeleteCollection}
               onSaveSubject={handleSaveSubject}
@@ -218,7 +226,7 @@ function Dashboard() {
           ))}
 
           {/* Render Subjects Not in Any Collection */}
-          {subjectsWithoutCollection.map((subject) => (
+          {sortedUnassignedSubjects.map((subject) => (
             <SubjectBlock
               key={subject.id}
               subject={subject}
