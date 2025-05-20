@@ -190,7 +190,7 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
           className={`${subjectCol.bgClass} ${themeShadow} w-full h-16 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-hover`}
           onClick={() => { navigate(`/${page}`, { state: { subject } }); onClose(); }}
         >
-          <div>
+          <div className="truncate w-full">
             <p className="text-2xl">{subject.name}</p>
             <p className="text-lg font-normal">{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
           </div>
