@@ -75,7 +75,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
       )}
 
       <div className="absolute bottom-0 left-0 mb-1 w-full">
-        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
+        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto">
           {subject.name}
         </h1>
         <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">

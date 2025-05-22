@@ -43,9 +43,9 @@ function FlashcardQuiz() {
 
   const handleExitBeforeCompletion = useCallback(() => {
     if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
-      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, currentCardIndexRef.current, subject.collection_id);
+      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, currentCardIndexRef.current, subject.collection_id, subject.pinned);
     } else if (subject) {
-      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, null, subject.collection_id);
+      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, null, subject.collection_id, subject.pinned);
     }
   }, [currentCardIndexRef, cardsLengthRef, subject, user]);
 
