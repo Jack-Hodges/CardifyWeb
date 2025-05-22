@@ -84,6 +84,12 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const pinnedSubjects = subjects.filter(subject => subject.pinned);
 
+  // Redirect unauthenticated users to root path
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   // Show home popup only when popupStates load changes
   useEffect(() => {

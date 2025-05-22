@@ -51,28 +51,25 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
     <div
       className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
     >
-      {!home && (
-        // Pin Button
-        <div
-          className="absolute top-0 right-0 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300"
-          onClick={handleTogglePin}
+      <div
+        className="absolute top-0 right-0 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300"
+        onClick={handleTogglePin}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          version="1.1"
+          viewBox="-5 -10 110 135"
+          className="w-12 h-12"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-            viewBox="-5 -10 110 135"
-            className="w-12 h-12"
-          >
-            {/* Use subjectPinned for the fill attribute */}
-            <path
-              d="m59.926 58.926 18.52-20.766c2.9961 0.625 5.8672 0.375 8.0312-0.95703 0.78906-0.5 0.91406-1.6211 0.20703-2.3711l-21.516-21.516c-0.75-0.75-1.8711-0.625-2.3711 0.20703-1.332 2.1641-1.582 5.0352-0.95703 8.0312l-20.766 18.52c-5.5352-2.082-11.027-2.1211-14.941 0.29297-1.125 0.70703-1.2891 2.2891-0.29297 3.3281l13.73 13.73-15.523 15.523c-0.83203 0.83203-0.83203 2.1211 0 2.9531 0.83203 0.83203 2.1211 0.83203 2.9531 0l15.523-15.523 13.73 13.73c1.0391 1.0391 2.6211 0.875 3.3281-0.29297 2.4141-3.9531 2.3711-9.4062 0.29297-14.941z"
-              fill={subjectPinned ? "white" : "none"}
-              stroke="white"
-              strokeWidth="5"
-            />
-          </svg>
-        </div>
-      )}
+          {/* Use subjectPinned for the fill attribute */}
+          <path
+            d="m59.926 58.926 18.52-20.766c2.9961 0.625 5.8672 0.375 8.0312-0.95703 0.78906-0.5 0.91406-1.6211 0.20703-2.3711l-21.516-21.516c-0.75-0.75-1.8711-0.625-2.3711 0.20703-1.332 2.1641-1.582 5.0352-0.95703 8.0312l-20.766 18.52c-5.5352-2.082-11.027-2.1211-14.941 0.29297-1.125 0.70703-1.2891 2.2891-0.29297 3.3281l13.73 13.73-15.523 15.523c-0.83203 0.83203-0.83203 2.1211 0 2.9531 0.83203 0.83203 2.1211 0.83203 2.9531 0l15.523-15.523 13.73 13.73c1.0391 1.0391 2.6211 0.875 3.3281-0.29297 2.4141-3.9531 2.3711-9.4062 0.29297-14.941z"
+            fill={subjectPinned ? "white" : "none"}
+            stroke="white"
+            strokeWidth="5"
+          />
+        </svg>
+      </div>
 
       <div className="absolute bottom-0 left-0 mb-1 w-full">
         <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto">
@@ -109,29 +106,26 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
             onClick={handlePracticeClick}
           />
 
-          {!home && (
-            // Add Card button
-            <SubjectButton
-              img={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="size-10"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              }
-              setHoveredIcon={setHoveredIcon}
-              hoveredIcon={hoveredIcon}
-              tooltipText="Add"
-              onClick={handleCreateClick}
-            />
-          )}
+          <SubjectButton
+            img={
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="size-10"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            }
+            setHoveredIcon={setHoveredIcon}
+            hoveredIcon={hoveredIcon}
+            tooltipText="Add"
+            onClick={handleCreateClick}
+          />
 
           {!home && (
             // Edit button
