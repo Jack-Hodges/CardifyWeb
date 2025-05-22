@@ -24,13 +24,13 @@ export const fetchProfile = async (userId) => {
   }
 };
 
-export const saveProfile = async (id, firstName, theme) => {
+export const saveProfile = async (id, firstName, theme, sort_preference = 0) => {
   try {
     if (id) {
       // Update existing profile
       const { data, error } = await supabase
         .from('profiles')
-        .update( { first_name: firstName, theme: theme } )
+        .update( { first_name: firstName, theme: theme, sort_preference: sort_preference } )
         .eq('id', id)
         .select();
 
@@ -44,7 +44,7 @@ export const saveProfile = async (id, firstName, theme) => {
       // Insert new profile
       const { data, error } = await supabase
         .from('profiles')
-        .insert([{ id: id, first_name: firstName, theme: theme }])
+        .insert([{ id: id, first_name: firstName, theme: theme, sort_preference: sort_preference }])
         .select();
 
       if (error) {

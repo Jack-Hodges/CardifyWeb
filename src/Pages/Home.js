@@ -334,7 +334,7 @@ function InProgress({ subject, theme }) {
       onClick={navigateClick}
     >
       <div className="w-3/4">
-        <p>{subject.name}</p>
+        <p className="w-full truncate text-2xl">{subject.name}</p>
         <p className="text-sm">
           {cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining
         </p>

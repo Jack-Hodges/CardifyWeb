@@ -99,7 +99,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                     onClick={onClick} // Collapse the overlay when clicking on the background
                 >
                     <div 
-                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-4 shadow-2xl shadow-black/30 border border-white/20`}
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-4 pb-2 shadow-2xl shadow-black/30 border border-white/20 overflow-hidden`}
                         onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
                     >
                         {/* Title and close button */}
@@ -109,11 +109,10 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                 <BackgroundButton image={edit} bgColor={'bg-blue-500 hover:bg-blue-400'} onClick={() => onEditCollection(collection)}/>
                                 <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClick}/>
                             </div>
-                            
                         </div>
 
                         {/* Grid for subjects */}
-                        <div className="flex flex-col overflow-y-scroll h-[85dvh] sm:h-auto sm:grid sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 p-4 gap-4">
+                        <div className="flex flex-col overflow-y-auto h-[calc(100%-4rem)] sm:h-[calc(100%-4rem)] sm:grid sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 p-4 gap-4">
                             {subjects.map((subject) => (
                                 <SubjectBlock
                                     key={subject.id}

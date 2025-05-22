@@ -4,6 +4,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
 import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation';
+import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
@@ -35,7 +36,7 @@ function Dashboard() {
   const [dashboardPopUp, setDashboardPopUp] = useState(false);
 
   const navigate = useNavigate();
-  const { user, loading: userLoading, theme, popupStates, updatePopupState  } = useUser();
+  const { user, loading: userLoading, theme, popupStates, updatePopupState, profile } = useUser();
   const { secondaryColor, shadow, primaryColor, textClass } = theme;  // Get the secondary color
 
   useEffect(() => {
@@ -52,6 +53,12 @@ function Dashboard() {
       setDashboardPopUp(true); 
     }
 
+    // Set initial sort preference from profile
+    if (profile?.sort_preference !== undefined) {
+      const sortOptions = ['Most Cards', 'Alphabetical', 'Date Created (Newest)', 'Date Created (Oldest)'];
+      setSelectedSort(sortOptions[profile.sort_preference]);
+    }
+
     const loadData = async () => {
       setLoading(true);
       const [subjectsData, collectionsData] = await Promise.all([
@@ -64,7 +71,7 @@ function Dashboard() {
     };
 
     loadData();
-  }, [user, userLoading, navigate, popupStates?.dashboard_popup]);
+  }, [user, userLoading, navigate, popupStates?.dashboard_popup, profile?.sort_preference]);
 
   const handleDismissPopup = () => {
     setDashboardPopUp(false); 
@@ -153,11 +160,30 @@ function Dashboard() {
   const sortedSubjects = [...subjects]
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Attach subjects to their collections
-  const collectionsWithSubjects = collections.map((collection) => ({
-    ...collection,
-    subjects: sortedSubjects.filter((subject) => subject.collection_id === collection.id),
-  }));
+  // Attach subjects to their collections and sort them
+  const collectionsWithSubjects = collections.map((collection) => {
+    const collectionSubjects = sortedSubjects.filter((subject) => subject.collection_id === collection.id);
+    
+    // Sort subjects within the collection
+    const sortedCollectionSubjects = [...collectionSubjects].sort((a, b) => {
+      if (selectedSort === 'Alphabetical') {
+        return a.name.localeCompare(b.name);
+      } else if (selectedSort === 'Most Cards') {
+        const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
+        return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+      } else if (selectedSort === 'Date Created (Newest)') {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else if (selectedSort === 'Date Created (Oldest)') {
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+      return 0;
+    });
+
+    return {
+      ...collection,
+      subjects: sortedCollectionSubjects
+    };
+  });
 
   // Combine collections and unassigned subjects into a single array
   const combinedList = [
@@ -170,12 +196,14 @@ function Dashboard() {
     if (selectedSort === 'Alphabetical') {
       return a.name.localeCompare(b.name);
     } else if (selectedSort === 'Most Cards') {
-      const aCount = a.type === 'subject' ? a.flashcard_count : a.subjects.length;
-      const bCount = b.type === 'subject' ? b.flashcard_count : b.subjects.length;
+      const aCount = a.type === 'subject' ? (a.flashcard_count || 0) : a.subjects.length;
+      const bCount = b.type === 'subject' ? (b.flashcard_count || 0) : b.subjects.length;
       const countDiff = bCount - aCount;
       return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
-    } else if (selectedSort === 'Date Created') {
+    } else if (selectedSort === 'Date Created (Newest)') {
       return new Date(b.created_at) - new Date(a.created_at);
+    } else if (selectedSort === 'Date Created (Oldest)') {
+      return new Date(a.created_at) - new Date(b.created_at);
     }
     return 0;
   });
@@ -186,6 +214,27 @@ function Dashboard() {
 
   const handleCollectionClick = (collectionId) => {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
+  };
+
+  const handleSortChange = async (newSort) => {
+    setSelectedSort(newSort);
+    // Map the sort option to the corresponding preference number
+    const sortPreferenceMap = {
+      'Most Cards': 0,
+      'Alphabetical': 1,
+      'Date Created (Newest)': 2,
+      'Date Created (Oldest)': 3
+    };
+    
+    // Save the new sort preference to the profile
+    if (profile) {
+      await saveProfile(
+        profile.id,
+        profile.first_name,
+        profile.theme,
+        sortPreferenceMap[newSort]
+      );
+    }
   };
 
   return (
@@ -200,7 +249,7 @@ function Dashboard() {
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={setSelectedSort} shadow={shadow} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={textClass}/>
+      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={handleSortChange} shadow={shadow} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={textClass}/>
 
       {/* Main Content Section */}
       {loading ? (
@@ -375,7 +424,8 @@ function ControlSection({
               >
                 <option value="Most Cards">Most Cards</option>
                 <option value="Alphabetical">Alphabetical</option>
-                <option value="Date Created">Date Created</option>
+                <option value="Date Created (Newest)">Date Created (Newest)</option>
+                <option value="Date Created (Oldest)">Date Created (Oldest)</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
                 <ChevronDown className="w-5 h-5 text-white" />
@@ -437,7 +487,8 @@ function ControlSection({
             >
               <option value="Most Cards">Most Cards</option>
               <option value="Alphabetical">Alphabetical</option>
-              <option value="Date Created">Date Created</option>
+              <option value="Date Created (Newest)">Date Created (Newest)</option>
+              <option value="Date Created (Oldest)">Date Created (Oldest)</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 group-hover:translate-x-1 group-hover:translate-y-1">
               <ChevronDown className="w-5 h-5 text-white" />

@@ -89,7 +89,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] overflow-y-scroll shadow-2xl shadow-black/30 border border-white/20">
+          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col">
             {selectedCollection ? (
               <CollectionView 
                 collection={selectedCollection} 
@@ -103,67 +103,70 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
               />
             ) : (
               <>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-semibold mb-0 text-white/90">Subjects & Collections</h2>
-                  <div className="flex gap-2">
-                    <div className="relative">
-                      <select
-                        ref={selectRef}
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
-                        style={{ minWidth: '40px' }}
-                      >
-                        <option value="Most Cards">Most Cards</option>
-                        <option value="Alphabetical">Alphabetical</option>
-                        <option value="Date Created">Date Created</option>
-                      </select>
-                      <div className="relative z-0">
-                        <BackgroundButton 
-                          image={<ArrowUpDown/>} 
-                          bgColor={'bg-blue-500 hover:bg-blue-400'} 
-                        />
+                <div className="flex-none">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-semibold mb-0 text-white/90">Subjects & Collections</h2>
+                    <div className="flex gap-2">
+                      <div className="relative">
+                        <select
+                          ref={selectRef}
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
+                          style={{ minWidth: '40px' }}
+                        >
+                          <option value="Most Cards">Most Cards</option>
+                          <option value="Alphabetical">Alphabetical</option>
+                          <option value="Date Created">Date Created</option>
+                        </select>
+                        <div className="relative z-0">
+                          <BackgroundButton 
+                            image={<ArrowUpDown/>} 
+                            bgColor={'bg-blue-500 hover:bg-blue-400'} 
+                          />
+                        </div>
                       </div>
+                      <BackgroundButton image={<Plus/>} bgColor={'bg-green-500 hover:bg-green-400'} onClick={() => { setEditingSubject(null); setIsAddOpen(true); }}/>
+                      <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                     </div>
-                    <BackgroundButton image={<Plus/>} bgColor={'bg-green-500 hover:bg-green-400'} onClick={() => { setEditingSubject(null); setIsAddOpen(true); }}/>
-                    <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                   </div>
                 </div>
       
-                {subjects.length > 0 ? (
-                  sortedCombinedList.map((item) => {
-                    if (item.type === 'subject') {
-                      return (
-                        <SubjectRow
-                          key={`subject-${item.id}`}
-                          subject={item}
-                          page={page}
-                          onClose={onClose}
-                          themeShadow={'background-shadow-new'}
-                          onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
-                          onDelete={() => setConfirmDeleteSubject(item)}
-                        />
-                      );
-                    } else if (item.type === 'collection') {
-                      return (
-                        <CollectionRow 
-                          key={`collection-${item.id}`} 
-                          collection={item} 
-                          subjects={item.subjects} 
-                          onClick={() => setSelectedCollection(item)} 
-                          themeShadow={'background-shadow-new'}
-                        />
-                      );
-                    }
-                    return null;
-                  })
-                ) : (
-                  <div className="text-center text-lg text-gray-500 mt-10 flex flex-col items-center">
-                    <p className="mb-3">You have no subjects yet</p>
-                    <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
-                  </div>
-                  
-                )}
+                <div className="flex-1 overflow-y-auto pb-8">
+                  {subjects.length > 0 ? (
+                    sortedCombinedList.map((item) => {
+                      if (item.type === 'subject') {
+                        return (
+                          <SubjectRow
+                            key={`subject-${item.id}`}
+                            subject={item}
+                            page={page}
+                            onClose={onClose}
+                            themeShadow={'background-shadow-new'}
+                            onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
+                            onDelete={() => setConfirmDeleteSubject(item)}
+                          />
+                        );
+                      } else if (item.type === 'collection') {
+                        return (
+                          <CollectionRow 
+                            key={`collection-${item.id}`} 
+                            collection={item} 
+                            subjects={item.subjects} 
+                            onClick={() => setSelectedCollection(item)} 
+                            themeShadow={'background-shadow-new'}
+                          />
+                        );
+                      }
+                      return null;
+                    })
+                  ) : (
+                    <div className="text-center text-lg text-gray-500 mt-10 flex flex-col items-center">
+                      <p className="mb-3">You have no subjects yet</p>
+                      <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -222,7 +225,7 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
     const navigate = useNavigate();
 
     return (
-      <div className={`relative mb-2`}>
+      <div className={`relative mb-2 w-[99%]`}>
         <div 
           className={`${subjectCol.bgClass} ${themeShadow} w-full h-16 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-hover`}
           onClick={() => { navigate(`/${page}`, { state: { subject } }); onClose(); }}
@@ -275,7 +278,7 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
     return (
         <div 
             key={collection.id} 
-            className={`bg-[color-mix(in_srgb,var(--theme-border-color)_80%,black_20%)] w-full h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
+            className={`bg-[color-mix(in_srgb,var(--theme-border-color)_80%,black_20%)] w-[99%] h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
             onClick={onClick}>
             <div>
                 <p className="text-2xl">{collection.name}</p>
@@ -311,47 +314,51 @@ function CollectionView({ collection, subjects, onBack, onClose, page, theme, on
     });
 
     return (
-        <div className="w-full h-full">
-            <div className="flex justify-between items-center mb-4">
-                <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'bg-green-500 hover:bg-green-400'}/>
-                <div className="flex gap-2">
-                    <div className="relative">
-                        <select
-                            ref={selectRef}
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
-                            style={{ minWidth: '40px' }}
-                        >
-                            <option value="Most Cards">Most Cards</option>
-                            <option value="Alphabetical">Alphabetical</option>
-                            <option value="Date Created">Date Created</option>
-                        </select>
-                        <div className="relative z-0">
-                            <BackgroundButton 
-                                image={<ArrowUpDown/>} 
-                                bgColor={'bg-blue-500 hover:bg-blue-400'} 
-                            />
+        <div className="w-full h-full flex flex-col">
+            <div className="flex-none">
+                <div className="flex justify-between items-center mb-4">
+                    <BackgroundButton text={collection.name} image={chev} flip onClick={onBack} bgColor={'bg-green-500 hover:bg-green-400'}/>
+                    <div className="flex gap-2">
+                        <div className="relative">
+                            <select
+                                ref={selectRef}
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-base"
+                                style={{ minWidth: '40px' }}
+                            >
+                                <option value="Most Cards">Most Cards</option>
+                                <option value="Alphabetical">Alphabetical</option>
+                                <option value="Date Created">Date Created</option>
+                            </select>
+                            <div className="relative z-0">
+                                <BackgroundButton 
+                                    image={<ArrowUpDown/>} 
+                                    bgColor={'bg-blue-500 hover:bg-blue-400'} 
+                                />
+                            </div>
                         </div>
+                        <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                     </div>
-                    <BackgroundButton image={<X/>} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClose}/>
                 </div>
             </div>
-            {sortedSubjects.length > 0 ? (
-                sortedSubjects.map((subject) => (
-                    <SubjectRow
-                        key={subject.id}
-                        subject={subject}
-                        onClose={onClose}
-                        page={page}
-                        themeShadow={'background-shadow-new'}
-                        onEdit={() => onEditSubject(subject)}
-                        onDelete={() => onDeleteSubject(subject)}
-                    />
-                ))
-            ) : (
-                <p>No subjects in this collection.</p>
-            )}
+            <div className="flex-1 overflow-y-auto pb-8">
+                {sortedSubjects.length > 0 ? (
+                    sortedSubjects.map((subject) => (
+                        <SubjectRow
+                            key={subject.id}
+                            subject={subject}
+                            onClose={onClose}
+                            page={page}
+                            themeShadow={'background-shadow-new'}
+                            onEdit={() => onEditSubject(subject)}
+                            onDelete={() => onDeleteSubject(subject)}
+                        />
+                    ))
+                ) : (
+                    <p>No subjects in this collection.</p>
+                )}
+            </div>
         </div>
     );
 }
