@@ -3,15 +3,56 @@ import supabase from '../../supabaseClient';
 // Fetch subjects
 export const fetchSubjects = async (userId) => {
   try {
-    const { data, error } = await supabase
-      .from('subjects') // Table name in Supabase
+    // Fetch user's own subjects
+    const { data: ownSubjects, error: ownError } = await supabase
+      .from('subjects')
       .select('*')
       .eq('user_id', userId);
-    if (error) {
-      console.error('Error fetching subjects:', error);
+
+    if (ownError) {
+      console.error('Error fetching own subjects:', ownError);
       return [];
     }
-    return data;
+
+    // First get the subject_ids from subject_permissions
+    const { data: permissions, error: permissionsError } = await supabase
+      .from('subject_permissions')
+      .select('subject_id')
+      .eq('user_id', userId);
+
+    console.log('Permissions data:', permissions);
+
+    if (permissionsError) {
+      console.error('Error fetching subject permissions:', permissionsError);
+      return ownSubjects || [];
+    }
+
+    // If we have permissions, fetch the corresponding subjects
+    let sharedSubjects = [];
+    if (permissions && permissions.length > 0) {
+      const subjectIds = permissions.map(p => p.subject_id);
+      const { data: sharedData, error: sharedError } = await supabase
+        .from('subjects')
+        .select('*')
+        .in('id', subjectIds);
+
+      console.log('Shared subjects data:', sharedData);
+      
+      if (sharedError) {
+        console.error('Error fetching shared subjects:', sharedError);
+      } else {
+        sharedSubjects = sharedData || [];
+      }
+    }
+
+    // Combine own subjects with shared subjects
+    const allSubjects = [
+      ...(ownSubjects || []),
+      ...sharedSubjects
+    ];
+
+    console.log('Combined subjects:', allSubjects);
+    return allSubjects;
   } catch (error) {
     console.error('Unexpected error fetching subjects:', error);
     return [];

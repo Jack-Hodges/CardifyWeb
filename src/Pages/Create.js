@@ -13,6 +13,7 @@ import SubjectList from '../components/Subject/SubjectList';
 import CustomModal from "../components/Modal/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
+import ImportModal from '../components/Card/ImportModal';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -29,13 +30,14 @@ function Create() {
   const [createPopUp, setCreatePopUp] = useState(false);
   const [generateFlash, setGenerateFlash] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { subject } = location.state || {};
 
   const { user, theme, popupStates, updatePopupState, profile } = useUser();
-  const { secondaryColor, tertiaryColor, shadow, textClass } = theme;
+  const { primaryColor, secondaryColor, tertiaryColor, shadow, textClass } = theme;
 
 
   // Tutorial popup logic (won't refetch cards when window focus changes)
@@ -178,6 +180,8 @@ function Create() {
                   themeTertiary={tertiaryColor}
                   cards={cards}
                   generateClick={() => setGenerateFlash(true)}
+                  onUpsertCard={handleUpsertCard}
+                  subject={subject}
                 />
             </div>
 
@@ -224,6 +228,16 @@ function Create() {
                         : "bg-orange-500 hover:bg-orange-400"
                     }
                     onClick={handleOpenAddCardModal}
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                  />
+                  <BackgroundButton
+                    text="Import Cards"
+                    bgColor={
+                      theme 
+                        ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` 
+                        : "bg-orange-500 hover:bg-orange-400"
+                    }
+                    onClick={() => setIsImportModalOpen(true)}
                     wWidth="w-full sm:w-auto mb-3 sm:mb-0"
                   />
                   <BackgroundButton
@@ -280,6 +294,14 @@ function Create() {
         onClose={() => setIsModalOpen(false)}
         text="Edit Question and Answer"
         handleUpsertCard={handleUpsertCard}
+      />
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleUpsertCard}
+        subject={subject}
       />
 
       {/* AddSubject Modal */}

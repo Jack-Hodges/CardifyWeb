@@ -160,9 +160,13 @@ function Dashboard() {
   const sortedSubjects = [...subjects]
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
+  // Split subjects into personal and shared
+  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id);
+  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id);
+
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {
-    const collectionSubjects = sortedSubjects.filter((subject) => subject.collection_id === collection.id);
+    const collectionSubjects = personalSubjects.filter((subject) => subject.collection_id === collection.id);
     
     // Sort subjects within the collection
     const sortedCollectionSubjects = [...collectionSubjects].sort((a, b) => {
@@ -187,7 +191,7 @@ function Dashboard() {
 
   // Combine collections and unassigned subjects into a single array
   const combinedList = [
-    ...sortedSubjects.filter(subject => !subject.collection_id).map(subject => ({ ...subject, type: 'subject' })),
+    ...personalSubjects.filter(subject => !subject.collection_id).map(subject => ({ ...subject, type: 'subject' })),
     ...collectionsWithSubjects.map(collection => ({ ...collection, type: 'collection' }))
   ];
 
@@ -211,6 +215,21 @@ function Dashboard() {
   // Separate the sorted list back into collections and subjects
   const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection');
   const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject');
+
+  // Sort shared subjects
+  const sortedSharedSubjects = [...sharedSubjects].sort((a, b) => {
+    if (selectedSort === 'Alphabetical') {
+      return a.name.localeCompare(b.name);
+    } else if (selectedSort === 'Most Cards') {
+      const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
+      return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+    } else if (selectedSort === 'Date Created (Newest)') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    } else if (selectedSort === 'Date Created (Oldest)') {
+      return new Date(a.created_at) - new Date(b.created_at);
+    }
+    return 0;
+  });
 
   const handleCollectionClick = (collectionId) => {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
@@ -256,35 +275,62 @@ function Dashboard() {
         // Loading State
         <DashboardLoading />
       ) : subjects.length > 0 || collections.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 py-4 px-5 sm:p-4 gap-4">
-          {/* Render Collections with Subjects */}
-          {sortedCollections.map((collection) => (
-            <CollectionBlock
-              key={collection.id}
-              user={user}
-              collection={collection}
-              subjects={collection.subjects}
-              isExpanded={selectedCollection === collection.id}
-              onClick={() => handleCollectionClick(collection.id)}
-              onEditSubject={handleEditSubject}
-              onRemoveSubject={confirmDeleteSubject}
-              onEditCollection={handleEditCollection}
-              onRemoveCollection={confirmDeleteCollection}
-              onSaveSubject={handleSaveSubject}
-            />
-          ))}
+        <div className="flex flex-col gap-6 py-4 px-5 sm:p-4">
+          {/* Personal Subjects Section */}
+          {(sortedCollections.length > 0 || sortedUnassignedSubjects.length > 0) && (
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {/* Render Collections with Subjects */}
+                {sortedCollections.map((collection) => (
+                  <CollectionBlock
+                    key={collection.id}
+                    user={user}
+                    collection={collection}
+                    subjects={collection.subjects}
+                    isExpanded={selectedCollection === collection.id}
+                    onClick={() => handleCollectionClick(collection.id)}
+                    onEditSubject={handleEditSubject}
+                    onRemoveSubject={confirmDeleteSubject}
+                    onEditCollection={handleEditCollection}
+                    onRemoveCollection={confirmDeleteCollection}
+                    onSaveSubject={handleSaveSubject}
+                  />
+                ))}
 
-          {/* Render Subjects Not in Any Collection */}
-          {sortedUnassignedSubjects.map((subject) => (
-            <SubjectBlock
-              key={subject.id}
-              subject={subject}
-              user={user}
-              onSave={handleSaveSubject}
-              onEdit={() => handleEditSubject(subject)}
-              onRemoveSubject={() => confirmDeleteSubject(subject)}
-            />
-          ))}
+                {/* Render Subjects Not in Any Collection */}
+                {sortedUnassignedSubjects.map((subject) => (
+                  <SubjectBlock
+                    key={subject.id}
+                    subject={subject}
+                    user={user}
+                    onSave={handleSaveSubject}
+                    onEdit={() => handleEditSubject(subject)}
+                    onRemoveSubject={() => confirmDeleteSubject(subject)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Shared Subjects Section */}
+          {sortedSharedSubjects.length > 0 && (
+            <div>
+              <h2 className={`text-2xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>Shared with You</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {sortedSharedSubjects.map((subject) => (
+                  <SubjectBlock
+                    key={subject.id}
+                    subject={subject}
+                    user={user}
+                    onSave={handleSaveSubject}
+                    onEdit={() => handleEditSubject(subject)}
+                    onRemoveSubject={() => confirmDeleteSubject(subject)}
+                    shared={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         // No Subjects or Collections Message
