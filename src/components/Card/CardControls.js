@@ -1,8 +1,10 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 import { useUser } from '../../UserContext';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
-
+import { ArrowLeft, ArrowRight, Upload } from 'lucide-react';
+import ImportModal from './ImportModal';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function CardControls({ 
     currentCardIndex, 
@@ -12,10 +14,13 @@ function CardControls({
     create = false, 
     themeText = 'text-gray-500 dark:text-gray-200', 
     cards,
-    generateClick 
+    generateClick,
+    onUpsertCard,
+    subject
 }) {
     const { theme } = useUser();
-    const { shadow, secondaryColor } = theme;
+    const { shadow, primaryColor, secondaryColor } = theme;
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     // Conditional button for the next action
     const nextButton = currentCardIndex === totalCards && !create ? (
@@ -23,6 +28,26 @@ function CardControls({
     ) : (
         <BackgroundButton image={<ArrowRight strokeWidth={3} />} onClick={onNextClick} bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`} />
     );
+
+    const handleImport = async (importedCards) => {
+        try {
+            // Add subject_id and user_id to each card
+            const cardsToImport = importedCards.map(card => ({
+                ...card,
+                subject_id: subject.id,
+                user_id: subject.user_id
+            }));
+
+            // Import each card
+            for (const card of cardsToImport) {
+                await onUpsertCard(card);
+            }
+
+            toast.success(`Successfully imported ${cardsToImport.length} cards`);
+        } catch (error) {
+            toast.error('Error importing cards: ' + error.message);
+        }
+    };
 
     return (
         <div className={`w-full h-12 flex items-center ${create ? 'justify-between' : 'justify-end'}`}>
@@ -32,11 +57,13 @@ function CardControls({
                     <div className="mr-2">
                         <FlashcardPDFExport flashcards={cards} />
                     </div>
-                    {/* <BackgroundButton 
-                        text="Generate Flashcards" 
-                        bgColor={`${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`} 
-                        onClick={generateClick}
-                    /> */}
+                    <BackgroundButton 
+                        text="Import" 
+                        image={<Upload />}
+                        flip={true}
+                        bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
+                        onClick={() => setIsImportModalOpen(true)}
+                    />
                 </div>
             )}
             
@@ -57,6 +84,13 @@ function CardControls({
                     {nextButton}
                 </div>
             </div>
+
+            <ImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onImport={handleImport}
+                subject={subject}
+            />
         </div>
     );
 }

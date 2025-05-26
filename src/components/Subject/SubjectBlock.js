@@ -2,7 +2,7 @@ import getColors from "../Functions/getColors";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const navigate = useNavigate();
   // Use local state for the pinned status
@@ -127,7 +127,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
             onClick={handleCreateClick}
           />
 
-          {!home && (
+          {!home && !shared && (
             // Edit button
             <SubjectButton
               img={
@@ -148,7 +148,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
             />
           )}
 
-          {!home && (
+          {!home && !shared && (
             // Delete button
             <SubjectButton
               img={
@@ -170,6 +170,16 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home }) {
               tooltipText="Delete"
               onClick={onRemoveSubject}
             />
+          )}
+
+          {shared && (
+            <SubjectButton
+              img={<svg xmlns="http://www.w3.org/2000/svg" className="size-10" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
+              setHoveredIcon={setHoveredIcon}
+              hoveredIcon={hoveredIcon}
+              tooltipText="Leave"
+              onClick={onRemoveSubject}
+              />
           )}
         </div>
       </div>

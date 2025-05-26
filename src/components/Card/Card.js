@@ -150,14 +150,13 @@ function CardContent ({
   back,
   edit,
   practice,
-  alignment,
   align,
 }) {
   return (
     <div
       className={`absolute inset-0 flex items-center justify-center 
                   bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none 
-                  background-shadow-new ${alignment}`}
+                  background-shadow-new text-center`}
       style={{
         backfaceVisibility: 'hidden',
         transform: rotate,

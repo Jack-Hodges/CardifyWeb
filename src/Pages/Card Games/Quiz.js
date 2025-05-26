@@ -175,7 +175,7 @@ function Quiz() {
   }
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
+    <div className="relative w-screen h-[100vh] overflow-y-none bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
       <TitleBar text="Quiz" />
       <div className="block sm:flex w-full h-full">
         {loading ? (
@@ -189,7 +189,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-4/5 min-h-[40vh] h-4/5 sm:h-1/2 mt-5 px-5">
+              <div className="mx-auto w-4/5 min-h-[40vh] h-4/5 sm:w-3/5 sm:h-1/4 mt-5 px-5">
                 <Card
                   card={cards[currentCardIndex]}
                   edit={false}
@@ -197,7 +197,7 @@ function Quiz() {
                   themeShadow={'background-shadow-new'}
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 w-4/5 mx-auto gap-4 mt-4">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 w-[90%] h-[calc(100%-2rem)] mx-auto gap-4 mt-4 mb-24">
                 {randomizedOptions[currentCardIndex]?.map((option, index) => {
                   // Determine the mode for the current card using the same logic:
                   const mode = cards[currentCardIndex].frontMode === 1 || cards[currentCardIndex].backMode === 1
@@ -219,7 +219,7 @@ function Quiz() {
                   );
                 })}
               </div>
-              <div className="flex justify-around mt-4 mx-auto gap-4">
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4 p-4">
                 <BackgroundButton
                   text="Previous Card"
                   bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
@@ -410,9 +410,20 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
     }
   }
 
+  // Function to determine font size based on content length
+  const getFontSize = (content) => {
+    if (!content) return 'text-lg';
+    const length = content.length;
+    if (length > 200) return 'text-sm';
+    if (length > 100) return 'text-base';
+    if (length > 50) return 'text-lg';
+    if (length > 20) return 'text-xl';
+    return 'text-2xl';
+  };
+
   return (
     <div
-      className={`w-full h-24 sm:h-32 ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-2 flex items-center justify-center font-bold text-xl textColor`}
+      className={`w-full h-[calc(100%-1rem)] ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-4 text-center flex items-center justify-center font-bold textColor`}
       onClick={onClick}
     >
       <div className="w-full h-full overflow-hidden flex items-center justify-center">
@@ -432,7 +443,7 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
               color: 'inherit',
               border: 'none',
               pointerEvents: 'none',
-              fontSize: '2rem',
+              fontSize: optionContent.length > 50 ? '1.5rem' : '2rem',
               fontWeight: 'semibold',
               textAlign: 'center',
             }}
@@ -441,9 +452,9 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
           <ReactMarkdown
             rehypePlugins={[rehypeRaw]}
             components={{ u: ({ node, ...props }) => <u {...props} /> }}
-            className="inline"
+            className={`inline ${getFontSize(optionContent)}`}
           >
-            {optionContent.length > 50 ? optionContent.slice(0, 50) + '...' : optionContent}
+            {optionContent}
           </ReactMarkdown>
         )}
       </div>
