@@ -1,10 +1,13 @@
 import getColors from "../Functions/getColors";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCardArt } from "../Functions/getCardArt";
+import { useUser } from "../../UserContext";
 
 function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const navigate = useNavigate();
+  const { profile } = useUser();
   // Use local state for the pinned status
   const [subjectPinned, setSubjectPinned] = useState(subject?.pinned || false);
 
@@ -47,10 +50,31 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
     [subject.colourText, subject.colourIntensity]
   );
 
+  // Get card art for background
+  const cardArt = useMemo(() => getCardArt(profile?.card_art || 'none'), [profile?.card_art]);
+
   return (
     <div
       className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
+      style={{ 
+        position: 'relative'
+      }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: cardArt.image,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.8,
+          borderRadius: 'inherit'
+        }}
+      />
       {!shared && (<div
         className="absolute top-0 right-0 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300"
         onClick={handleTogglePin}
