@@ -66,7 +66,8 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                     profile.id,
                     profile.first_name,
                     themeKey,
-                    profile.sort_preference
+                    profile.sort_preference,
+                    profile.card_art
                 );
                 // Reload the page to apply the new theme
                 window.location.reload();

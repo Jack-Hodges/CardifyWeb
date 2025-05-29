@@ -256,7 +256,8 @@ function Dashboard() {
         profile.id,
         profile.first_name,
         profile.theme,
-        sortPreferenceMap[newSort]
+        sortPreferenceMap[newSort],
+        profile.card_art
       );
     }
   };

@@ -24,13 +24,13 @@ export const fetchProfile = async (userId) => {
   }
 };
 
-export const saveProfile = async (id, firstName, theme, sort_preference = 0) => {
+export const saveProfile = async (id, firstName, theme, sort_preference = 0, card_art = 'none') => {
   try {
     if (id) {
       // Update existing profile
       const { data, error } = await supabase
         .from('profiles')
-        .update( { first_name: firstName, theme: theme, sort_preference: sort_preference } )
+        .update( { first_name: firstName, theme: theme, sort_preference: sort_preference, card_art: card_art } )
         .eq('id', id)
         .select();
 
