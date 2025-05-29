@@ -65,7 +65,8 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 await saveProfile(
                     profile.id,
                     profile.first_name,
-                    themeKey
+                    themeKey,
+                    profile.sort_preference
                 );
                 // Reload the page to apply the new theme
                 window.location.reload();

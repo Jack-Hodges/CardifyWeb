@@ -42,10 +42,13 @@ function FlashcardQuiz() {
   };
 
   const handleExitBeforeCompletion = useCallback(() => {
-    if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
-      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, currentCardIndexRef.current, subject.collection_id, subject.pinned);
-    } else if (subject) {
-      saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, null, subject.collection_id, subject.pinned);
+    // Only save progress if the subject belongs to the current user
+    if (subject && subject.user_id === user.id) {
+      if (currentCardIndexRef.current > 0 && currentCardIndexRef.current < cardsLengthRef.current - 1) {
+        saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, currentCardIndexRef.current, subject.collection_id, subject.pinned);
+      } else if (subject) {
+        saveSubject(subject.id, subject.name, subject.bgCol, subject.colourIntensity, user.id, null, subject.collection_id, subject.pinned);
+      }
     }
   }, [currentCardIndexRef, cardsLengthRef, subject, user]);
 
@@ -60,10 +63,11 @@ function FlashcardQuiz() {
   }, [cards]);
 
   useEffect(() => {
-    if (subject && subject.up_to_index !== null) {
+    // Only show the continue prompt if the subject belongs to the current user
+    if (subject && subject.up_to_index !== null && subject.user_id === user.id) {
       setIsModalOpen(true);
     }
-  }, [subject, subject?.up_to_index]);
+  }, [subject, subject?.up_to_index, user.id]);
 
   useEffect(() => {
     if (!user) {

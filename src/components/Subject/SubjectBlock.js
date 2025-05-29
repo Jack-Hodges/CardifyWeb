@@ -51,7 +51,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
     <div
       className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
     >
-      <div
+      {!shared && (<div
         className="absolute top-0 right-0 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300"
         onClick={handleTogglePin}
       >
@@ -69,7 +69,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
             strokeWidth="5"
           />
         </svg>
-      </div>
+      </div>)}
 
       <div className="absolute bottom-0 left-0 mb-1 w-full">
         <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto">
@@ -174,7 +174,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
 
           {shared && (
             <SubjectButton
-              img={<svg xmlns="http://www.w3.org/2000/svg" className="size-10" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
+              img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
               setHoveredIcon={setHoveredIcon}
               hoveredIcon={hoveredIcon}
               tooltipText="Leave"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
@@ -34,6 +34,7 @@ function Dashboard() {
   const [selectedCollection, setSelectedCollection] = useState(null);
 
   const [dashboardPopUp, setDashboardPopUp] = useState(false);
+  const mounted = useRef(false);
 
   const navigate = useNavigate();
   const { user, loading: userLoading, theme, popupStates, updatePopupState, profile } = useUser();
@@ -59,18 +60,22 @@ function Dashboard() {
       setSelectedSort(sortOptions[profile.sort_preference]);
     }
 
-    const loadData = async () => {
-      setLoading(true);
-      const [subjectsData, collectionsData] = await Promise.all([
-        fetchSubjects(user.id),
-        fetchCollections(user.id),
-      ]);
-      setSubjects(subjectsData);
-      setCollections(collectionsData);
-      setLoading(false);
-    };
+    // Only load data on initial mount
+    if (!mounted.current) {
+      const loadData = async () => {
+        setLoading(true);
+        const [subjectsData, collectionsData] = await Promise.all([
+          fetchSubjects(user.id),
+          fetchCollections(user.id),
+        ]);
+        setSubjects(subjectsData);
+        setCollections(collectionsData);
+        setLoading(false);
+      };
 
-    loadData();
+      loadData();
+      mounted.current = true;
+    }
   }, [user, userLoading, navigate, popupStates?.dashboard_popup, profile?.sort_preference]);
 
   const handleDismissPopup = () => {

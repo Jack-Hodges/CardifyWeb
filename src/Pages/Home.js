@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { fetchSubjects } from "../components/Subject/SubjectManipulation";
 import getColors from "../components/Functions/getColors";
 import TitleBar from "../components/Navigation/TitleBar";
@@ -82,6 +82,7 @@ function Home() {
   const [subjectPage, setSubjectPage] = useState('create');
   const [homePopUp, setHomePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(false);
   const pinnedSubjects = subjects.filter(subject => subject.pinned);
 
   // Redirect unauthenticated users to root path
@@ -100,26 +101,28 @@ function Home() {
 
   // Fetch subjects once when user ID becomes available
   useEffect(() => {
-    let isMounted = true;
-    const loadSubjects = async () => {
-      if (!user) {
-        getUser();
-        return;
-      }
-      setLoading(true);
-      try {
-        const subjectsData = await fetchSubjects(user.id);
-        if (isMounted) setSubjects(subjectsData);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
-    };
-    loadSubjects();
-    return () => {
-      isMounted = false;
-    };
+    if (!user) {
+      getUser();
+      return;
+    }
+
+    // Only load subjects on initial mount
+    if (!mounted.current) {
+      const loadSubjects = async () => {
+        setLoading(true);
+        try {
+          const subjectsData = await fetchSubjects(user.id);
+          setSubjects(subjectsData);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      loadSubjects();
+      mounted.current = true;
+    }
   }, [getUser, user]);
 
     const handleDismissPopup = () => {
@@ -166,14 +169,14 @@ function Home() {
               <p className={`font-normal ${shadow ? 'drop-shadow-custom' : ''}`}>🔥 99 days</p>
             </div>
 
-            {subjects.filter(subject => subject.up_to_index !== null).length > 0 && (
+            {subjects.filter(subject => subject.up_to_index !== null && subject.user_id === profile.id).length > 0 && (
               <div>
                 <div className={`flex justify-between ml-5 mr-2 mt-6 mb-3 ${shadow ? 'drop-shadow-custom' : ''}`}>
                   <p>In Progress</p>
                 </div>
                 <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
                   {subjects
-                    .filter(subject => subject.up_to_index !== null)
+                    .filter(subject => subject.up_to_index !== null && subject.user_id === profile.id)
                     .slice(0, 4)
                     .map((subject, index) => (
                       <InProgress theme={'background-shadow-new'} key={index} subject={subject} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
@@ -18,6 +18,7 @@ function Type() {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [userAnswer, setUserAnswer] = useState('');
     const [showAnswer, setShowAnswer] = useState(false);
+    const mounted = useRef(false);
 
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
@@ -63,12 +64,16 @@ function Type() {
             return;
         }
 
-        const loadCards = async () => {
-            const data = await fetchCards(subject.id);
-            setCards(data);
-        };
+        // Only load cards on initial mount
+        if (!mounted.current) {
+            const loadCards = async () => {
+                const data = await fetchCards(subject.id);
+                setCards(data);
+            };
 
-        loadCards();
+            loadCards();
+            mounted.current = true;
+        }
     }, [subject, user, getUser]);
 
     useEffect(() => {
