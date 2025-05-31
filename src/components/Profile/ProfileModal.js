@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
+import { getCardArtAssets } from '../Functions/getCardArt';
 import { saveProfile } from './ProfileManipulation';
 import { Cog } from 'lucide-react';
 
@@ -66,12 +67,34 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                     profile.id,
                     profile.first_name,
                     themeKey,
-                    profile.sort_preference
+                    profile.sort_preference,
+                    profile.card_art
                 );
                 // Reload the page to apply the new theme
                 window.location.reload();
             } catch (error) {
                 console.error('Error updating theme:', error);
+            }
+        } else {
+            alert('This feature is only available to Pro users.');
+        }
+    };
+
+    const handleCardArtSelect = async (cardArtName) => {
+        if (profile.pro) {
+            try {
+                const cardArtKey = cardArtName.toLowerCase();
+                await saveProfile(
+                    profile.id,
+                    profile.first_name,
+                    profile.theme,
+                    profile.sort_preference,
+                    cardArtKey
+                );
+                // Reload the page to apply the new card art
+                window.location.reload();
+            } catch (error) {
+                console.error('Error updating card art:', error);
             }
         } else {
             alert('This feature is only available to Pro users.');
@@ -98,70 +121,113 @@ function Modal({ isOpen, onClose, mainText, logout }) {
                 }`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center mb-6">
-                    <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
-                    <div className="flex space-x-2">
-                        <div className="hidden sm:block">
-                            <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                <div className="flex flex-col h-full">
+                    {/* Header - Fixed */}
+                    <div className="flex justify-between items-center mb-6">
+                        <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                        <div className="flex space-x-2">
+                            <div className="hidden sm:block">
+                                <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                            </div>
+                            <div className="block sm:hidden">
+                                <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                            </div>
+                            <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
+                            <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                         </div>
-                        <div className="block sm:hidden">
-                            <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
-                        </div>
-                        <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
-                        <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                     </div>
-                </div>
 
-                {/* Theme Assets Grid */}
-                <div className="mt-4 mb-6 overflow-x-auto">
-                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                        {themeAssets.map((asset) => {
-                            const isSelected = theme.name === asset.name.toLowerCase();
-                             
-                            return (
-                                <div 
-                                    key={asset.name}
-                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                    onClick={() => handleThemeSelect(asset.name)}
-                                >
-                                    {isSelected && (
-                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                            {checkmark}
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto pr-2">
+                        {/* Theme Assets Grid */}
+                        <div className="mt-4 mb-6 overflow-x-auto">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-white text-lg">Themes</span>
+                            </div>
+                            <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                                {themeAssets.map((asset) => {
+                                    const isSelected = theme.name === asset.name.toLowerCase();
+                                     
+                                    return (
+                                        <div 
+                                            key={asset.name}
+                                            className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                            onClick={() => handleThemeSelect(asset.name)}
+                                        >
+                                            {isSelected && (
+                                                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                                    {checkmark}
+                                                </div>
+                                            )}
+                                            <div 
+                                                className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                style={{ backgroundImage: `url(${asset.url})` }}
+                                            />
+                                            <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                {asset.name}
+                                            </p>
                                         </div>
-                                    )}
-                                    <div 
-                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                        style={{ backgroundImage: `url(${asset.url})` }}
-                                    />
-                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                        {asset.name}
-                                    </p>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
 
-                {/* Card Count Progress Bar */}
-                <div className="mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-white text-lg">Card Count</span>
-                        <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
-                            style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
-                        />
-                    </div>
-                </div>
+                        {/* Card Art Grid */}
+                        <div className="mt-4 mb-6 overflow-x-auto">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-white text-lg">Card Art</span>
+                            </div>
+                            <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                                {getCardArtAssets().map((asset) => {
+                                    const isSelected = profile.card_art === asset.name.toLowerCase();
+                                     
+                                    return (
+                                        <div 
+                                            key={asset.name}
+                                            className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                            onClick={() => handleCardArtSelect(asset.name)}
+                                        >
+                                            {isSelected && (
+                                                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                                    {checkmark}
+                                                </div>
+                                            )}
+                                            <div 
+                                                className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
+                                            />
+                                            <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                {asset.name}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
 
-                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
-                    {mainText}
-                </p>
+                        {/* Card Count Progress Bar */}
+                        <div className="mb-6">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-white text-lg">Card Count</span>
+                                <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                                <div 
+                                    className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+                                    style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
+                                />
+                            </div>
+                        </div>
 
-                <div className="absolute bottom-3 left-3">
-                    <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
+                        <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
+                            {mainText}
+                        </p>
+                    </div>
+
+                    {/* Footer - Fixed */}
+                    <div className="mt-auto pt-4">
+                        <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
+                    </div>
                 </div>
             </div>
         </div>,
