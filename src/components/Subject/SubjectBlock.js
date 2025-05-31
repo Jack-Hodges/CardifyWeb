@@ -71,7 +71,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.8,
+          opacity: 0.9,
           borderRadius: 'inherit'
         }}
       />
