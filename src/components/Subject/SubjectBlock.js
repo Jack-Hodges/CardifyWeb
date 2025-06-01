@@ -71,7 +71,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
-          opacity: 0.9,
+          opacity: 0.85,
           borderRadius: 'inherit'
         }}
       />
@@ -96,10 +96,10 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
       </div>)}
 
       <div className="absolute bottom-0 left-0 mb-1 w-full">
-        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto">
+        <h1 className={`ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto ${cardArt.image ? 'drop-shadow-custom' : ''}`}>
           {subject.name}
         </h1>
-        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis">
+        <p className={`ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis ${cardArt.image ? 'drop-shadow-custom' : ''}`}>
           {subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}
         </p>
 
