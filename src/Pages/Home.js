@@ -83,7 +83,7 @@ function Home() {
   const [homePopUp, setHomePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
   const mounted = useRef(false);
-  const pinnedSubjects = subjects.filter(subject => subject.pinned);
+  const pinnedSubjects = subjects.filter(subject => subject.pinned && subject.permission == null);
 
   // Redirect unauthenticated users to root path
   useEffect(() => {
