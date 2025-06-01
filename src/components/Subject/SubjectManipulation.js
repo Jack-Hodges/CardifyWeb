@@ -1,7 +1,7 @@
 import supabase from '../../supabaseClient';
 
 // Fetch subjects
-export const fetchSubjects = async (userId) => {
+export const fetchSubjects = async (userId, userEmail) => {
   try {
     // Fetch user's own subjects
     const { data: ownSubjects, error: ownError } = await supabase
@@ -18,7 +18,7 @@ export const fetchSubjects = async (userId) => {
     const { data: permissions, error: permissionsError } = await supabase
       .from('subject_permissions')
       .select('subject_id')
-      .eq('user_id', userId);
+      .eq('recipient_email', userEmail);
 
     console.log('Permissions data:', permissions);
 
@@ -129,6 +129,46 @@ export const removeSubject = async (subjectId) => {
     return true;
   } catch (error) {
     console.error('Unexpected error deleting subject:', error);
+    return false;
+  }
+};
+
+// Save or update subject share permissions
+export const saveShare = async (id, subjectId, recipientEmail, permission) => {
+  try {
+    if (id) {
+      // Update existing permission
+      const { error: updateError } = await supabase
+        .from('subject_permissions')
+        .update({ 
+          permission: permission,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+
+      if (updateError) {
+        console.error('Error updating subject permission:', updateError);
+        return false;
+      }
+    } else {
+      // Create new permission
+      const { error: insertError } = await supabase
+        .from('subject_permissions')
+        .insert([{
+          subject_id: subjectId,
+          recipient_email: recipientEmail,
+          permission: permission,
+        }]);
+
+      if (insertError) {
+        console.error('Error creating subject permission:', insertError);
+        return false;
+      }
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Unexpected error saving share:', error);
     return false;
   }
 };

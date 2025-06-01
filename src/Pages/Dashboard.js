@@ -65,7 +65,7 @@ function Dashboard() {
       const loadData = async () => {
         setLoading(true);
         const [subjectsData, collectionsData] = await Promise.all([
-          fetchSubjects(user.id),
+          fetchSubjects(user.id, user.email),
           fetchCollections(user.id),
         ]);
         setSubjects(subjectsData);
