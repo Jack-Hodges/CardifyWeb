@@ -5,15 +5,16 @@ import { getCardArt } from "../Functions/getCardArt";
 import { useUser } from "../../UserContext";
 import { Share } from "lucide-react";
 import Modal from "../Modal/Modal";
-import { saveShare } from "./SubjectManipulation";
+import { saveShare, removeShare } from "./SubjectManipulation";
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false, editPermission = true }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [shareRole, setShareRole] = useState("viewer"); // Add role state
   const navigate = useNavigate();
-  const { profile } = useUser();
+  const { profile, user } = useUser();
   // Use local state for the pinned status
   const [subjectPinned, setSubjectPinned] = useState(subject?.pinned || false);
 
@@ -66,14 +67,42 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
     }
   };
 
+  const handleLeaveSubject = async () => {
+    console.log(user.email);
+    const success = await removeShare(subject.id, user.email);
+    if (success) {
+      // Instead of calling onRemoveSubject, we'll navigate to dashboard
+      navigate('/dashboard');
+    }
+    setIsLeaveModalOpen(false);
+  };
+
   // Memoize color calculation based on subject's color info
   const colors = useMemo(
     () => getColors([subject.colourText, subject.colourIntensity]),
     [subject.colourText, subject.colourIntensity]
   );
 
-  // Get card art for background
-  const cardArt = useMemo(() => getCardArt(profile?.card_art || 'none'), [profile?.card_art]);
+  // Memoize the card art value
+  const cardArt = useMemo(() => {
+    const art = profile?.card_art ? getCardArt(profile.card_art) : { image: null };
+    return art;
+  }, [profile?.card_art]);
+
+  // Memoize the background style to prevent recalculation
+  const backgroundStyle = useMemo(() => ({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundImage: cardArt.image,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center center',
+    backgroundRepeat: 'no-repeat',
+    opacity: 0.85,
+    borderRadius: 'inherit'
+  }), [cardArt.image]);
 
   return (
     <>
@@ -83,21 +112,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
           position: 'relative'
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: cardArt.image,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
-            opacity: 0.85,
-            borderRadius: 'inherit'
-          }}
-        />
+        <div style={backgroundStyle} />
         {!shared && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
             <div onClick={handleShareClick}>
@@ -156,26 +171,28 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               onClick={handlePracticeClick}
             />
 
-            <SubjectButton
-              img={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="size-10"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              }
-              setHoveredIcon={setHoveredIcon}
-              hoveredIcon={hoveredIcon}
-              tooltipText="Add"
-              onClick={handleCreateClick}
-            />
+            {(!shared || subject.permission === 'editor') && (
+              <SubjectButton
+                img={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="size-10"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 9a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V15a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V9Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+                setHoveredIcon={setHoveredIcon}
+                hoveredIcon={hoveredIcon}
+                tooltipText="Add"
+                onClick={handleCreateClick}
+              />
+            )}
 
             {!home && !shared && (
               // Edit button
@@ -224,11 +241,11 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
 
             {shared && (
               <SubjectButton
-                img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
+                img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out-icon lucide-log-out"><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
                 setHoveredIcon={setHoveredIcon}
                 hoveredIcon={hoveredIcon}
                 tooltipText="Leave"
-                onClick={onRemoveSubject}
+                onClick={() => setIsLeaveModalOpen(true)}
               />
             )}
           </div>
@@ -277,6 +294,19 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         secondActionText="Share"
         firstActionCol="bg-red-500 hover:bg-red-400"
         secondActionCol="bg-blue-500 hover:bg-blue-400"
+        titleCol="text-white"
+      />
+
+      <Modal
+        isOpen={isLeaveModalOpen}
+        onFirstAction={() => setIsLeaveModalOpen(false)}
+        onSecondAction={handleLeaveSubject}
+        text="Leave Subject"
+        mainText="Are you sure you want to leave this subject? You will no longer have access to it."
+        firstActionText="Cancel"
+        secondActionText="Leave"
+        firstActionCol="bg-gray-500 hover:bg-gray-400"
+        secondActionCol="bg-red-500 hover:bg-red-400"
         titleCol="text-white"
       />
     </>

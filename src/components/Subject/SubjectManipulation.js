@@ -14,13 +14,11 @@ export const fetchSubjects = async (userId, userEmail) => {
       return [];
     }
 
-    // First get the subject_ids from subject_permissions
+    // Get the subject_ids and permissions from subject_permissions
     const { data: permissions, error: permissionsError } = await supabase
       .from('subject_permissions')
-      .select('subject_id')
+      .select('subject_id, permission')
       .eq('recipient_email', userEmail);
-
-    console.log('Permissions data:', permissions);
 
     if (permissionsError) {
       console.error('Error fetching subject permissions:', permissionsError);
@@ -35,13 +33,18 @@ export const fetchSubjects = async (userId, userEmail) => {
         .from('subjects')
         .select('*')
         .in('id', subjectIds);
-
-      console.log('Shared subjects data:', sharedData);
       
       if (sharedError) {
         console.error('Error fetching shared subjects:', sharedError);
       } else {
-        sharedSubjects = sharedData || [];
+        // Add permission information to shared subjects
+        sharedSubjects = (sharedData || []).map(subject => {
+          const permission = permissions.find(p => p.subject_id === subject.id);
+          return {
+            ...subject,
+            permission: permission?.permission || 'viewer' // Default to viewer if no permission found
+          };
+        });
       }
     }
 
@@ -51,7 +54,6 @@ export const fetchSubjects = async (userId, userEmail) => {
       ...sharedSubjects
     ];
 
-    console.log('Combined subjects:', allSubjects);
     return allSubjects;
   } catch (error) {
     console.error('Unexpected error fetching subjects:', error);
@@ -169,6 +171,28 @@ export const saveShare = async (id, subjectId, recipientEmail, permission) => {
     return true;
   } catch (error) {
     console.error('Unexpected error saving share:', error);
+    return false;
+  }
+};
+
+// Remove subject share permission
+export const removeShare = async (subjectId, recipientEmail) => {
+  console.log("Removing share for subject:", subjectId, "and recipient:", recipientEmail);
+  try {
+    const { error } = await supabase
+      .from('subject_permissions')
+      .delete()
+      .eq('subject_id', subjectId)
+      .eq('recipient_email', recipientEmail);
+
+    if (error) {
+      console.error('Error removing subject permission:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Unexpected error removing share:', error);
     return false;
   }
 };

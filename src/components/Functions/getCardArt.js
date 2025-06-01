@@ -14,27 +14,25 @@ export const getCardArtAssets = () => {
   ];
 };
 
+// Memoize the card arts object since it never changes
+const cardArts = {
+  leaves: {
+    image: `url(${Leaves})`,
+  },
+  rainbow: {
+    image: `url(${Rainbow})`,
+  },
+  stars: {
+    image: `url(${Stars})`,
+  },
+  cat: {
+    image: `url(${Cat})`,
+  },
+};
+
 export const getCardArt = (cardArt) => {
-  console.log("getting card art");
   if (!cardArt) {
-    return {
-      image: null,
-    };
-  } else {
-    const cardArts = {
-      leaves: {
-        image: `url(${Leaves})`,
-      },
-      rainbow: {
-        image: `url(${Rainbow})`,
-      },
-      stars: {
-        image: `url(${Stars})`,
-      },
-      cat: {
-        image: `url(${Cat})`,
-      },
-    };
-    return cardArts[cardArt] || { image: null };
+    return { image: null };
   }
+  return cardArts[cardArt] || { image: null };
 };
