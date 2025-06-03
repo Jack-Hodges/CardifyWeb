@@ -410,11 +410,11 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 isOpen={isDeleteModalOpen}
                 onFirstAction={() => setIsDeleteModalOpen(false)}
                 onSecondAction={handleConfirmDelete}
-                text="Confirm Delete"
+                text="Confirm Remove"
                 mainText={`Are you sure you want to remove access for ${shareToDelete?.recipient_email}?`}
                 firstActionText="Cancel"
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
-                secondActionText="Delete"
+                secondActionText="Remove"
                 secondActionCol="bg-red-500 hover:bg-red-400"
             />
         </>

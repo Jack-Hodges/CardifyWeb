@@ -59,7 +59,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   const handleShareSubmit = async () => {
     if (!shareEmail) return; // Don't proceed if no email provided
     
-    const success = await saveShare(null, subject.id, shareEmail, shareRole);
+    const success = await saveShare(null, profile.id, subject.id, shareEmail, shareRole);
     if (success) {
       setIsShareModalOpen(false);
       setShareEmail("");

@@ -136,7 +136,7 @@ export const removeSubject = async (subjectId) => {
 };
 
 // Save or update subject share permissions
-export const saveShare = async (id, subjectId, recipientEmail, permission) => {
+export const saveShare = async (id, ownerId, subjectId, recipientEmail, permission) => {
   try {
     if (id) {
       // Update existing permission
@@ -158,6 +158,7 @@ export const saveShare = async (id, subjectId, recipientEmail, permission) => {
       const { error: insertError } = await supabase
         .from('subject_permissions')
         .insert([{
+          owner_id: ownerId,
           subject_id: subjectId,
           recipient_email: recipientEmail,
           permission: permission,
