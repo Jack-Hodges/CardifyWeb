@@ -181,9 +181,9 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         placeholder="Search for a collection"
                     />
                     {showDropdown && (
-                        <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <ul className="absolute z-10 mt-1 w-full bg-gray-800 borderborder-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
                             <li
-                                className="cursor-pointer p-3 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                                className="cursor-pointer p-3 hover:bg-gray-600 text-gray-200"
                                 onClick={handleSelectNone}
                             >
                                 None
@@ -191,7 +191,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                             {filteredCollections.map((collection) => (
                                 <li
                                     key={collection.id}
-                                    className="cursor-pointer p-3 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200"
+                                    className="cursor-pointer p-3 hover:bg-gray-600 text-gray-200"
                                     onClick={() => handleSelectCollection(collection)}
                                 >
                                     {collection.name}
@@ -211,7 +211,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                                 {clickedColor === color ? (
                                     <div
                                         ref={menuRef}
-                                        className="absolute z-20 bg-white dark:bg-gray-700 shadow-md rounded-lg p-2 flex flex-col"
+                                        className="absolute z-20 bg-gray-800 shadow-md rounded-lg p-2 flex flex-col"
                                         style={{ top: '-112px', left: '50%', transform: 'translateX(-50%)' }}
                                     >
                                         {colorIntensities.map((intensity) => (
@@ -228,7 +228,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                                     <button
                                         onClick={() => toggleIntensityMenu(color)}
                                         className={`w-12 h-12 rounded-full ${
-                                            subjectColor && subjectColor.startsWith(color) ? 'ring-4 ring-gray-300 dark:ring-gray-500' : ''
+                                            subjectColor && subjectColor.startsWith(color) ? 'ring-4 ring-gray-400' : ''
                                         } bg-${color}-500`}
                                     />
                                 )}
