@@ -5,12 +5,19 @@ import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { getCardArtAssets } from '../Functions/getCardArt';
 import { saveProfile } from './ProfileManipulation';
+import { getShares, fetchSubjects, removeShare, saveShare } from '../Subject/SubjectManipulation';
 import { Cog } from 'lucide-react';
+import Modal from '../Modal/Modal';
 
-function Modal({ isOpen, onClose, mainText, logout }) {
+function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const { theme, profile } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [shareToDelete, setShareToDelete] = useState(null);
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const [shares, setShares] = useState([]);
     const themeAssets = getThemeAssets();
     const {color, primaryColor} = theme;
 
@@ -101,138 +108,317 @@ function Modal({ isOpen, onClose, mainText, logout }) {
         }
     };
 
+    const handleSharesClick = async () => {
+        try {
+            const sharesData = await getShares(profile.id);
+            const subjectsData = await fetchSubjects(profile.id, profile.email);
+            
+            // Create a map of subject IDs to names
+            const subjectMap = subjectsData.reduce((acc, subject) => {
+                acc[subject.id] = subject.name;
+                return acc;
+            }, {});
+
+            // Add subject names to the shares data
+            const sharesWithNames = sharesData.map(share => ({
+                ...share,
+                subjectName: subjectMap[share.subject_id] || 'Unknown Subject'
+            }));
+
+            setShares(sharesWithNames);
+            setIsSharesModalOpen(true);
+        } catch (error) {
+            console.error('Error fetching shares:', error);
+        }
+    };
+
+    // Group shares by subject
+    const groupedShares = shares.reduce((acc, share) => {
+        const subjectName = share.subjectName;
+        if (!acc[subjectName]) {
+            acc[subjectName] = [];
+        }
+        acc[subjectName].push(share);
+        return acc;
+    }, {});
+
+    const handleDeleteClick = (share) => {
+        setShareToDelete(share);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (shareToDelete) {
+            try {
+                const success = await removeShare(shareToDelete.subject_id, shareToDelete.recipient_email);
+                if (success) {
+                    // Remove the deleted share from the state
+                    setShares(shares.filter(share => 
+                        !(share.subject_id === shareToDelete.subject_id && 
+                          share.recipient_email === shareToDelete.recipient_email)
+                    ));
+                }
+            } catch (error) {
+                console.error('Error removing share:', error);
+            }
+        }
+        setIsDeleteModalOpen(false);
+        setShareToDelete(null);
+    };
+
+    const handlePermissionChange = async (share, newPermission) => {
+        try {
+            const success = await saveShare(share.id, share.subject_id, share.recipient_email, newPermission);
+            if (success) {
+                // Update the share in the state
+                setShares(shares.map(s => 
+                    s.id === share.id ? { ...s, permission: newPermission } : s
+                ));
+            }
+        } catch (error) {
+            console.error('Error updating permission:', error);
+        }
+        setActiveDropdown(null);
+    };
+
+    const sharesList = Object.entries(groupedShares).map(([subjectName, subjectShares]) => (
+        <div key={subjectName} className="mb-4 p-3 bg-white/10 rounded-lg">
+            <h3 className="text-lg font-semibold text-white mb-2">{subjectName}</h3>
+            <div className="space-y-2">
+                {subjectShares.map((share, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                        <span className="text-gray-300">{share.recipient_email}</span>
+                        <div className="flex items-center space-x-4">
+                            <div className="relative permission-dropdown">
+                                <button 
+                                    onClick={() => setActiveDropdown(activeDropdown === share.id ? null : share.id)}
+                                    className="text-blue-400 hover:text-blue-300 capitalize transition-colors flex items-center"
+                                >
+                                    {share.permission}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                    </svg>
+                                </button>
+                                {activeDropdown === share.id && (
+                                    <div className="absolute right-0 mt-1 w-32 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handlePermissionChange(share, 'viewer');
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg"
+                                        >
+                                            Viewer
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handlePermissionChange(share, 'editor');
+                                            }}
+                                            className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg"
+                                        >
+                                            Editor
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            <button 
+                                onClick={() => handleDeleteClick(share)}
+                                className="text-red-400 hover:text-red-300 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    ));
+
+    // Add click outside handler to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (activeDropdown && !event.target.closest('.permission-dropdown')) {
+                setActiveDropdown(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [activeDropdown]);
+
     if (!isVisible && !isClosing) return null;
 
-    return ReactDOM.createPortal(
-        <div
-            className={`fixed p-3 sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
-                isClosing ? 'opacity-0' : 'opacity-100'
-            }`}
-            onClick={handleOnClose}
-        >
-            <div
-                className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
-                onClick={handleOnClose}
-            ></div>
+    return (
+        <>
+            {ReactDOM.createPortal(
+                <div
+                    className={`fixed p-3 sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+                        isClosing ? 'opacity-0' : 'opacity-100'
+                    }`}
+                    onClick={handleOnClose}
+                >
+                    <div
+                        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+                        onClick={handleOnClose}
+                    ></div>
 
-            <div
-                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
-                    isClosing ? 'animate-pop-down' : 'animate-pop-up'
-                }`}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex flex-col h-full">
-                    {/* Header - Fixed */}
-                    <div className="flex justify-between items-center mb-6">
-                        <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
-                        <div className="flex space-x-2">
-                            <div className="hidden sm:block">
-                                <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                    <div
+                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
+                            isClosing ? 'animate-pop-down' : 'animate-pop-up'
+                        }`}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex flex-col h-full">
+                            {/* Header - Fixed */}
+                            <div className="flex justify-between items-center mb-6">
+                                <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                                <div className="flex space-x-2">
+                                    <div className="hidden sm:block">
+                                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                                    </div>
+                                    <div className="block sm:hidden">
+                                        <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
+                                    </div>
+                                    <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
+                                    <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
+                                </div>
                             </div>
-                            <div className="block sm:hidden">
-                                <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
-                            </div>
-                            <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
-                            <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
-                        </div>
-                    </div>
 
-                    {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto pr-2">
-                        {/* Theme Assets Grid */}
-                        <div className="mt-4 mb-6 overflow-x-auto">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-white text-lg">Themes</span>
-                            </div>
-                            <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                {themeAssets.map((asset) => {
-                                    const isSelected = theme.name === asset.name.toLowerCase();
-                                     
-                                    return (
-                                        <div 
-                                            key={asset.name}
-                                            className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                            onClick={() => handleThemeSelect(asset.name)}
-                                        >
-                                            {isSelected && (
-                                                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                    {checkmark}
+                            {/* Scrollable Content */}
+                            <div className="flex-1 overflow-y-auto pr-2">
+                                {/* Theme Assets Grid */}
+                                <div className="mt-4 mb-6 overflow-x-auto">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-white text-lg">Themes</span>
+                                    </div>
+                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                                        {themeAssets.map((asset) => {
+                                            const isSelected = theme.name === asset.name.toLowerCase();
+                                             
+                                            return (
+                                                <div 
+                                                    key={asset.name}
+                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                                    onClick={() => handleThemeSelect(asset.name)}
+                                                >
+                                                    {isSelected && (
+                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                                            {checkmark}
+                                                        </div>
+                                                    )}
+                                                    <div 
+                                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                        style={{ backgroundImage: `url(${asset.url})` }}
+                                                    />
+                                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                        {asset.name}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div 
-                                                className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                style={{ backgroundImage: `url(${asset.url})` }}
-                                            />
-                                            <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                {asset.name}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
 
-                        {/* Card Art Grid */}
-                        <div className="mt-4 mb-6 overflow-x-auto">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-white text-lg">Card Art</span>
-                            </div>
-                            <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                {getCardArtAssets().map((asset) => {
-                                    const isSelected = profile.card_art === asset.name.toLowerCase();
-                                     
-                                    return (
-                                        <div 
-                                            key={asset.name}
-                                            className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                            onClick={() => handleCardArtSelect(asset.name)}
-                                        >
-                                            {isSelected && (
-                                                <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                    {checkmark}
+                                {/* Card Art Grid */}
+                                <div className="mt-4 mb-6 overflow-x-auto">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-white text-lg">Card Art</span>
+                                    </div>
+                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                                        {getCardArtAssets().map((asset) => {
+                                            const isSelected = profile.card_art === asset.name.toLowerCase();
+                                             
+                                            return (
+                                                <div 
+                                                    key={asset.name}
+                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                                    onClick={() => handleCardArtSelect(asset.name)}
+                                                >
+                                                    {isSelected && (
+                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                                            {checkmark}
+                                                        </div>
+                                                    )}
+                                                    <div 
+                                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                        style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
+                                                    />
+                                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                        {asset.name}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div 
-                                                className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
-                                            />
-                                            <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                {asset.name}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
 
-                        {/* Card Count Progress Bar */}
-                        <div className="mb-6">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-white text-lg">Card Count</span>
-                                <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                                {/* Card Count Progress Bar */}
+                                <div className="mb-6">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-white text-lg">Card Count</span>
+                                        <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+                                            style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
+                                    {mainText}
+                                </p>
                             </div>
-                            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
-                                    style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
+
+                            {/* Footer - Fixed */}
+                            <div className="mt-auto pt-4 flex flex-col space-y-2">
+                                <BackgroundButton 
+                                    text="View Subject Shares" 
+                                    bgColor="bg-purple-500 hover:bg-purple-400" 
+                                    onClick={handleSharesClick}
                                 />
+                                <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
                             </div>
                         </div>
-
-                        <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
-                            {mainText}
-                        </p>
                     </div>
-
-                    {/* Footer - Fixed */}
-                    <div className="mt-auto pt-4">
-                        <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
+                </div>,
+                document.body
+            )}
+            <Modal
+                isOpen={isSharesModalOpen}
+                onFirstAction={() => setIsSharesModalOpen(false)}
+                text="Subject Shares"
+                mainText={
+                    <div className="max-h-[60vh] overflow-y-auto">
+                        {sharesList.length > 0 ? sharesList : (
+                            <p className="text-gray-400">No subjects are currently shared.</p>
+                        )}
                     </div>
-                </div>
-            </div>
-        </div>,
-        document.body
+                }
+                firstActionText="Close"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionText=""
+                secondActionCol=""
+            />
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onFirstAction={() => setIsDeleteModalOpen(false)}
+                onSecondAction={handleConfirmDelete}
+                text="Confirm Delete"
+                mainText={`Are you sure you want to remove access for ${shareToDelete?.recipient_email}?`}
+                firstActionText="Cancel"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionText="Delete"
+                secondActionCol="bg-red-500 hover:bg-red-400"
+            />
+        </>
     );
 }
 
-export default Modal;
+export default ProfileModal;

@@ -140,14 +140,15 @@ export const saveShare = async (id, subjectId, recipientEmail, permission) => {
   try {
     if (id) {
       // Update existing permission
+      console.log("Updating share for subject:", subjectId, "and recipient:", recipientEmail, "with permission:", permission);
       const { error: updateError } = await supabase
         .from('subject_permissions')
         .update({ 
           permission: permission,
-          updated_at: new Date().toISOString()
         })
         .eq('id', id);
 
+        console.log("Completed");
       if (updateError) {
         console.error('Error updating subject permission:', updateError);
         return false;
@@ -194,5 +195,25 @@ export const removeShare = async (subjectId, recipientEmail) => {
   } catch (error) {
     console.error('Unexpected error removing share:', error);
     return false;
+  }
+};
+
+// Get all shares for subjects owned by a specific user
+export const getShares = async (userId) => {
+  try {
+    const { data, error } = await supabase
+      .from('subject_permissions')
+      .select('*')
+      .eq('owner_id', userId)
+
+    if (error) {
+      console.error('Error fetching subject shares:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Unexpected error fetching subject shares:', error);
+    return [];
   }
 };
