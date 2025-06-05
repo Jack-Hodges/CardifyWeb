@@ -18,6 +18,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [shares, setShares] = useState([]);
+    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+    const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
     const themeAssets = getThemeAssets();
     const {color, primaryColor} = theme;
 
@@ -268,7 +270,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     ></div>
 
                     <div
-                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
+                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-3/4 transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                             isClosing ? 'animate-pop-down' : 'animate-pop-up'
                         }`}
                         onClick={(e) => e.stopPropagation()}
@@ -276,7 +278,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                         <div className="flex flex-col h-full">
                             {/* Header - Fixed */}
                             <div className="flex justify-between items-center mb-6">
-                                <span className={`text-white text-3xl font-semibold`}>Hey {profile.first_name}</span>
+                                <span className={`text-white text-4xl font-semibold`}>Hey {profile.first_name}</span>
                                 <div className="flex space-x-2">
                                     <div className="hidden sm:block">
                                         <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
@@ -291,76 +293,56 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
 
                             {/* Scrollable Content */}
                             <div className="flex-1 overflow-y-auto pr-2">
-                                {/* Theme Assets Grid */}
-                                <div className="mt-4 mb-6 overflow-x-auto">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white text-lg">Themes</span>
-                                    </div>
-                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                        {themeAssets.map((asset) => {
-                                            const isSelected = theme.name === asset.name.toLowerCase();
-                                             
-                                            return (
+                                {/* Theme and Card Art Assets Grid */}
+                                <h1 className='text-white text-2xl font-semibold'>Customisation</h1>
+                                <div className='flex gap-4'>
+                                    <div className="mt-4 mb-6">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-white text-lg">Theme</span>
+                                        </div>
+                                        <div className="flex justify-center">
+                                            <div 
+                                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                                onClick={() => setIsThemeModalOpen(true)}
+                                            >
                                                 <div 
-                                                    key={asset.name}
-                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                                    onClick={() => handleThemeSelect(asset.name)}
-                                                >
-                                                    {isSelected && (
-                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                            {checkmark}
-                                                        </div>
-                                                    )}
-                                                    <div 
-                                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                        style={{ backgroundImage: `url(${asset.url})` }}
-                                                    />
-                                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                        {asset.name}
-                                                    </p>
-                                                </div>
-                                            );
-                                        })}
+                                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                    style={{ backgroundImage: `url(${themeAssets.find(asset => asset.name.toLowerCase() === theme.name)?.url})` }}
+                                                />
+                                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                    {themeAssets.find(asset => asset.name.toLowerCase() === theme.name)?.name}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Card Art Grid */}
-                                <div className="mt-4 mb-6 overflow-x-auto">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white text-lg">Card Art</span>
-                                    </div>
-                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                        {getCardArtAssets().map((asset) => {
-                                            const isSelected = profile.card_art === asset.name.toLowerCase();
-                                             
-                                            return (
+                                    {/* Card Art Grid */}
+                                    <div className="mt-4 mb-6">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-white text-lg">Card Art</span>
+                                        </div>
+                                        <div className="flex justify-center">
+                                            <div 
+                                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                                onClick={() => setIsCardArtModalOpen(true)}
+                                            >
                                                 <div 
-                                                    key={asset.name}
-                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                                    onClick={() => handleCardArtSelect(asset.name)}
-                                                >
-                                                    {isSelected && (
-                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                            {checkmark}
-                                                        </div>
-                                                    )}
-                                                    <div 
-                                                        className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                        style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
-                                                    />
-                                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                        {asset.name}
-                                                    </p>
-                                                </div>
-                                            );
-                                        })}
+                                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                                    style={{ backgroundImage: getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.url ? `url(${getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.url})` : 'none' }}
+                                                />
+                                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                                    {getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.name}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                                
 
                                 {/* Card Count Progress Bar */}
                                 <div className="mb-6">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white text-lg">Card Count</span>
+                                        <span className="text-white text-2xl font-semibold">Card Count</span>
                                         <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
                                     </div>
                                     <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -376,14 +358,18 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                 </p>
                             </div>
 
-                            {/* Footer - Fixed */}
-                            <div className="mt-auto pt-4 flex flex-col space-y-2">
+                            {/* Logout and card share buttons */}
+                            <div className="flex gap-2">
                                 <BackgroundButton 
                                     text="View Subject Shares" 
                                     bgColor="bg-purple-500 hover:bg-purple-400" 
                                     onClick={handleSharesClick}
                                 />
-                                <BackgroundButton text="Logout" bgColor="bg-red-500 hover:bg-red-400" onClick={logout} />
+                                <BackgroundButton 
+                                    text="Logout" 
+                                    bgColor="bg-red-500 hover:bg-red-400" 
+                                    onClick={logout} 
+                                />
                             </div>
                         </div>
                     </div>
@@ -405,6 +391,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText=""
                 secondActionCol=""
+                width="w-1/3"
             />
             <Modal
                 isOpen={isDeleteModalOpen}
@@ -416,6 +403,70 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText="Remove"
                 secondActionCol="bg-red-500 hover:bg-red-400"
+            />
+            <Modal
+                isOpen={isThemeModalOpen}
+                onFirstAction={() => setIsThemeModalOpen(false)}
+                text="Select Theme"
+                mainText={
+                    <div className="grid grid-rows-3 grid-cols-5 gap-4 overflow-y-auto max-h-[60vh]">
+                        {themeAssets.map((asset) => (
+                            <div 
+                                key={asset.name}
+                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                onClick={() => {
+                                    handleThemeSelect(asset.name);
+                                    setIsThemeModalOpen(false);
+                                }}
+                            >
+                                <div 
+                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                    style={{ backgroundImage: `url(${asset.url})` }}
+                                />
+                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                    {asset.name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                }
+                width="w-1/2"
+                firstActionText="Close"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionText=""
+                secondActionCol=""
+            />
+            <Modal
+                isOpen={isCardArtModalOpen}
+                onFirstAction={() => setIsCardArtModalOpen(false)}
+                text="Select Card Art"
+                mainText={
+                    <div className="grid grid-rows-3 grid-cols-5 gap-4 overflow-y-auto max-h-[60vh]">
+                        {getCardArtAssets().map((asset) => (
+                            <div 
+                                key={asset.name}
+                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                onClick={() => {
+                                    handleCardArtSelect(asset.name);
+                                    setIsCardArtModalOpen(false);
+                                }}
+                            >
+                                <div 
+                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
+                                    style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
+                                />
+                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                    {asset.name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                }
+                width="w-1/2"
+                firstActionText="Close"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionText=""
+                secondActionCol=""
             />
         </>
     );

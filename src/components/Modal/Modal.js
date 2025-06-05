@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 
-function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'bg-gray-500 hover:bg-gray-400', secondActionCol = 'bg-red-500 hover:bg-red-400', titleCol = 'text-red-500'}) {
+function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'bg-gray-500 hover:bg-gray-400', secondActionCol = 'bg-red-500 hover:bg-red-400', titleCol = 'text-white', width = 'w-3/4'}) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
     const [isClosing, setIsClosing] = useState(false); // State to track if the modal is closing
 
@@ -53,7 +53,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-3/4 max-w-md transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
+                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
