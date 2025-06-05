@@ -15,6 +15,10 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+    const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
+    const [isNameModalOpen, setIsNameModalOpen] = useState(false);
+    const [newName, setNewName] = useState('');
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [shares, setShares] = useState([]);
@@ -53,6 +57,12 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
           document.documentElement.style.setProperty('--theme-border-color', color);
         }
       }, [theme, color]);
+
+    useEffect(() => {
+        if (profile?.first_name) {
+            setNewName(profile.first_name);
+        }
+    }, [profile]);
 
     const handleOnClose = (event) => {
         onClose();
@@ -105,6 +115,23 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             }
         } else {
             alert('This feature is only available to Pro users.');
+        }
+    };
+
+    const handleSaveName = async () => {
+        if (newName.trim() === '') return;
+        try {
+            await saveProfile(
+                profile.id,
+                newName,
+                profile.theme,
+                profile.sort_preference,
+                profile.card_art
+            );
+            setIsNameModalOpen(false);
+            window.location.reload();
+        } catch (error) {
+            console.error('Error updating name:', error);
         }
     };
 
@@ -268,7 +295,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     ></div>
 
                     <div
-                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/5 sm:h-4/5 transform transition-all duration-300 ease-in-out ${
+                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-4/5 sm:h-[90%] transform transition-all duration-300 ease-in-out ${
                             isClosing ? 'animate-pop-down' : 'animate-pop-up'
                         }`}
                         onClick={(e) => e.stopPropagation()}
@@ -284,76 +311,63 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                     <div className="block sm:hidden">
                                         <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
                                     </div>
-                                    <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
+                                    <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => setIsNameModalOpen(true)} />
                                     <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                                 </div>
                             </div>
 
                             {/* Scrollable Content */}
                             <div className="flex-1 overflow-y-auto pr-2">
-                                {/* Theme Assets Grid */}
-                                <div className="mt-4 mb-6 overflow-x-auto">
+                                {/* Theme Display */}
+                                <div className="mt-4 mb-6">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white text-lg">Themes</span>
+                                        <span className="text-white text-lg">Theme</span>
                                     </div>
-                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                        {themeAssets.map((asset) => {
-                                            const isSelected = theme.name === asset.name.toLowerCase();
-                                             
+                                    <div className="my-2">
+                                        {(() => {
+                                            const selected = themeAssets.find(a => theme.name === a.name.toLowerCase());
                                             return (
-                                                <div 
-                                                    key={asset.name}
-                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                                    onClick={() => handleThemeSelect(asset.name)}
+                                                <div
+                                                    className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                                    onClick={() => setIsThemeModalOpen(true)}
                                                 >
-                                                    {isSelected && (
-                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                            {checkmark}
-                                                        </div>
-                                                    )}
-                                                    <div 
+                                                    <div
                                                         className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                        style={{ backgroundImage: `url(${asset.url})` }}
+                                                        style={{ backgroundImage: `url(${selected?.url})` }}
                                                     />
                                                     <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                        {asset.name}
+                                                        {selected?.name}
                                                     </p>
                                                 </div>
                                             );
-                                        })}
+                                        })()}
                                     </div>
                                 </div>
 
-                                {/* Card Art Grid */}
-                                <div className="mt-4 mb-6 overflow-x-auto">
+                                {/* Card Art Display */}
+                                <div className="mt-4 mb-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-white text-lg">Card Art</span>
                                     </div>
-                                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
-                                        {getCardArtAssets().map((asset) => {
-                                            const isSelected = profile.card_art === asset.name.toLowerCase();
-                                             
+                                    <div className="my-2">
+                                        {(() => {
+                                            const assets = getCardArtAssets();
+                                            const selected = assets.find(a => profile.card_art === a.name.toLowerCase());
                                             return (
-                                                <div 
-                                                    key={asset.name}
-                                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
-                                                    onClick={() => handleCardArtSelect(asset.name)}
+                                                <div
+                                                    className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                                    onClick={() => setIsCardArtModalOpen(true)}
                                                 >
-                                                    {isSelected && (
-                                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
-                                                            {checkmark}
-                                                        </div>
-                                                    )}
-                                                    <div 
+                                                    <div
                                                         className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                        style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
+                                                        style={{ backgroundImage: selected?.url ? `url(${selected.url})` : 'none' }}
                                                     />
                                                     <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                        {asset.name}
+                                                        {selected?.name}
                                                     </p>
                                                 </div>
                                             );
-                                        })}
+                                        })()}
                                     </div>
                                 </div>
 
@@ -405,6 +419,86 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText=""
                 secondActionCol=""
+            />
+            <Modal
+                isOpen={isThemeModalOpen}
+                onFirstAction={() => setIsThemeModalOpen(false)}
+                text="Select Theme"
+                mainText={
+                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                        {themeAssets.map((asset) => {
+                            const isSelected = theme.name === asset.name.toLowerCase();
+                            return (
+                                <div
+                                    key={asset.name}
+                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                    onClick={() => { handleThemeSelect(asset.name); setIsThemeModalOpen(false); }}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                            {checkmark}
+                                        </div>
+                                    )}
+                                    <div className="h-24 w-full rounded-md mb-2 bg-cover bg-center" style={{ backgroundImage: `url(${asset.url})` }} />
+                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">{asset.name}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                }
+                firstActionText="Close"
+                secondActionText=""
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionCol=""
+            />
+            <Modal
+                isOpen={isCardArtModalOpen}
+                onFirstAction={() => setIsCardArtModalOpen(false)}
+                text="Select Card Art"
+                mainText={
+                    <div className="grid grid-rows-2 auto-cols-max grid-flow-col gap-4 min-w-min my-2">
+                        {getCardArtAssets().map((asset) => {
+                            const isSelected = profile.card_art === asset.name.toLowerCase();
+                            return (
+                                <div
+                                    key={asset.name}
+                                    className={`background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200`}
+                                    onClick={() => { handleCardArtSelect(asset.name); setIsCardArtModalOpen(false); }}
+                                >
+                                    {isSelected && (
+                                        <div className="absolute -top-2 -right-2 bg-blue-500 rounded-full p-1 text-white z-10">
+                                            {checkmark}
+                                        </div>
+                                    )}
+                                    <div className="h-24 w-full rounded-md mb-2 bg-cover bg-center" style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }} />
+                                    <p className="text-sm text-center text-gray-600 dark:text-gray-300">{asset.name}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                }
+                firstActionText="Close"
+                secondActionText=""
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionCol=""
+            />
+            <Modal
+                isOpen={isNameModalOpen}
+                onFirstAction={() => setIsNameModalOpen(false)}
+                onSecondAction={handleSaveName}
+                text="Edit Display Name"
+                mainText={
+                    <input
+                        type="text"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        className="w-full p-2 rounded bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/40"
+                    />
+                }
+                firstActionText="Cancel"
+                secondActionText="Save"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionCol="bg-blue-500 hover:bg-blue-400"
             />
             <Modal
                 isOpen={isDeleteModalOpen}
