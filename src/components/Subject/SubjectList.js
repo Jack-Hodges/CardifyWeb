@@ -136,17 +136,19 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   {subjects.length > 0 ? (
                     sortedCombinedList.map((item) => {
                       if (item.type === 'subject') {
-                        return (
-                          <SubjectRow
-                            key={`subject-${item.id}`}
-                            subject={item}
-                            page={page}
-                            onClose={onClose}
-                            themeShadow={'background-shadow-new'}
-                            onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
-                            onDelete={() => setConfirmDeleteSubject(item)}
-                          />
-                        );
+                        if (item.permission != 'viewer') {
+                          return (
+                            <SubjectRow
+                              key={`subject-${item.id}`}
+                              subject={item}
+                              page={page}
+                              onClose={onClose}
+                              themeShadow={'background-shadow-new'}
+                              onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
+                              onDelete={() => setConfirmDeleteSubject(item)}
+                            />
+                          );
+                        }
                       } else if (item.type === 'collection') {
                         return (
                           <CollectionRow 

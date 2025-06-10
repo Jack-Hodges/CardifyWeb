@@ -293,7 +293,7 @@ function Welcome() {
             {isSignUp ? "Sign Up" : "Sign In"}
           </h2>
 
-          <div className="flex space-x-4 mt-4">
+          {/* <div className="flex space-x-4 mt-4">
             <BackgroundButton 
               text="Google"
               image={GoogleSVG}
@@ -308,7 +308,7 @@ function Welcome() {
               wWidth="w-full"
               bgColor={'bg-red-500 hover:bg-red-400'}
             />
-          </div>
+          </div> */}
 
           <div className="mt-8">
             <p className="text-gray-600 dark:text-gray-200">
@@ -407,7 +407,7 @@ function FancyInput({ type, value, onChange }) {
       value={value}
       onChange={onChange}
       className="w-full px-4 py-2 text-left rounded-full bg-gray-500 text-white
-                 focus:outline-none background-shadow background-focus"
+                 focus:outline-none background-shadow-new background-focus"
     />
   );
 }

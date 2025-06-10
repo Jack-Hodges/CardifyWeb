@@ -103,7 +103,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 // Reload the page to apply the new card art
                 window.location.reload();
             } catch (error) {
-                console.error('Error updating card art:', error);
+                console.error('Error updating subject art:', error);
             }
         } else {
             alert('This feature is only available to Pro users.');
@@ -319,7 +319,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                     {/* Card Art Grid */}
                                     <div className="mt-4 mb-6">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-white text-lg">Card Art</span>
+                                            <span className="text-white text-lg">Subject Art</span>
                                         </div>
                                         <div className="flex justify-center">
                                             <div 
@@ -409,7 +409,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 onFirstAction={() => setIsThemeModalOpen(false)}
                 text="Select Theme"
                 mainText={
-                    <div className="grid grid-rows-3 grid-cols-5 gap-4 overflow-y-auto max-h-[60vh]">
+                    <div className="grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
                         {themeAssets.map((asset) => (
                             <div 
                                 key={asset.name}
@@ -430,7 +430,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                         ))}
                     </div>
                 }
-                width="w-1/2"
+                width="w-2/3 h-[80%]"
                 firstActionText="Close"
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText=""
@@ -439,9 +439,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             <Modal
                 isOpen={isCardArtModalOpen}
                 onFirstAction={() => setIsCardArtModalOpen(false)}
-                text="Select Card Art"
+                text="Select Subject Art"
                 mainText={
-                    <div className="grid grid-rows-3 grid-cols-5 gap-4 overflow-y-auto max-h-[60vh]">
+                    <div className="grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
                         {getCardArtAssets().map((asset) => (
                             <div 
                                 key={asset.name}
@@ -462,7 +462,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                         ))}
                     </div>
                 }
-                width="w-1/2"
+                width="w-2/3 h-[80%]"
                 firstActionText="Close"
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText=""
