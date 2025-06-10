@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
 import SubjectList from '../../components/Subject/SubjectList'; // Make sure this import is correct
+import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 
 // Helper function to shuffle an array
 const shuffleArray = (array) => {
@@ -196,15 +197,11 @@ function Memory() {
             {!subject ? (
                 // No subject selected section
                 <div className="flex flex-col justify-center items-center h-full w-full">
-                    <p className={`${textColor} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
-                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton 
-                            text="Select a subject to practice" 
-                            bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-                            onClick={handleOpenSubjectListModal} 
-                            wWidth='w-full sm:w-auto'
-                        />
-                    </div>
+                    <NoSelectionModal
+                        text="No subject selected"
+                        text1="Select a subject to practice"
+                        action1={handleOpenSubjectListModal}
+                    />
 
                     <SubjectList 
                         isOpen={isSubjectListModalOpen} 

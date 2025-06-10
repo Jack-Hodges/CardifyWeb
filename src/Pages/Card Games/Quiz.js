@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import Ad from '../../components/Advertisement/Ad';
 import { EditableMathField } from 'react-mathquill';
+import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 
 function Quiz() {
   // State variables
@@ -339,33 +340,17 @@ function Quiz() {
             ) : (
               <div className="flex flex-col justify-center items-center w-full h-full">
                 {subject ? (
-                  <div>
-                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
-                      {subject.name} has no flashcards
-                    </p>
-                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                      <BackgroundButton
-                        text={`Add Flashcards to ${subject.name}`}
-                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-                        onClick={handleSwitchToCreate}
-                        wWidth="w-full sm:w-auto"
-                      />
-                    </div>
-                  </div>
+                  <NoSelectionModal
+                    text={`${subject.name} has no flashcards`}
+                    text1={`Add Flashcards to ${subject.name}`}
+                    action1={handleSwitchToCreate}
+                  />
                 ) : (
-                  <div>
-                    <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
-                      No subject selected
-                    </p>
-                    <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                      <BackgroundButton
-                        text="Select a subject to practice"
-                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-                        onClick={() => setIsSubjectListModalOpen(true)}
-                        wWidth="w-full sm:w-auto"
-                      />
-                    </div>
-                  </div>
+                  <NoSelectionModal
+                    text="No subject selected"
+                    text1="Select a subject to practice"
+                    action1={() => setIsSubjectListModalOpen(true)}
+                  />
                 )}
               </div>
             )}

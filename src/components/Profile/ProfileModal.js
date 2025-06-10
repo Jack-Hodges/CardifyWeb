@@ -7,7 +7,7 @@ import { getCardArtAssets } from '../Functions/getCardArt';
 import { saveProfile } from './ProfileManipulation';
 import { getShares, fetchSubjects, removeShare, saveShare } from '../Subject/SubjectManipulation';
 import { Cog } from 'lucide-react';
-import Modal from '../Modal/Modal';
+import Modal from '../Modals/Modal';
 
 function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const { theme, profile } = useUser();

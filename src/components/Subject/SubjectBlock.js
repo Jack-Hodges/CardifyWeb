@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getCardArt } from "../Functions/getCardArt";
 import { useUser } from "../../UserContext";
 import { Share } from "lucide-react";
-import Modal from "../Modal/Modal";
+import Modal from "../Modals/Modal";
 import { saveShare, removeShare } from "./SubjectManipulation";
 
 function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {

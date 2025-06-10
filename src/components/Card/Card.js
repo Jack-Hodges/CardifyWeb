@@ -6,7 +6,7 @@ import rehypeRaw from 'rehype-raw';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
-import Modal from '../Modal/Modal';
+import Modal from '../Modals/Modal';
 
 import { Trash2, RefreshCw } from 'lucide-react';
 

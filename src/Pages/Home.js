@@ -7,7 +7,7 @@ import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
-import CustomModal from "../components/Modal/CustomModal";
+import CustomModal from "../components/Modals/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
 import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
 

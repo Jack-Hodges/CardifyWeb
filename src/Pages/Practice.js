@@ -9,8 +9,9 @@ import BackgroundButton from '../components/Elements/BackgroundButton';
 import SubjectList from '../components/Subject/SubjectList';
 import { useNavigate } from 'react-router-dom';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
-import Modal from '../components/Modal/Modal';
+import Modal from '../components/Modals/Modal';
 import confetti from "canvas-confetti"; // Import the confetti library
+import NoSelectionModal from '../components/Modals/NoSelectionModal';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -202,21 +203,18 @@ function FlashcardQuiz() {
                 />
               ) : (
                 <div className="flex flex-col justify-center items-center w-full h-full">
-                  {subject ? (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => navigate('/create', { state: { subject } })} wWidth='w-full sm:w-auto'/>
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={() => setIsSubjectListModalOpen(true)} wWidth='w-full sm:w-auto'/>
-                      </div>
-                    </div>
-                  )}
+                {subject ? (
+                  <NoSelectionModal
+                    text={`${subject.name} has no flashcards`}
+                    text1={`Add Flashcards to ${subject.name}`}
+                    action1={() => navigate('/create', { state: { subject } })}
+                  /> 
+                ): (
+                  <NoSelectionModal
+                    text="No subject selected"
+                    text1="Select a subject to practice"
+                    action1={() => setIsSubjectListModalOpen(true)}
+                  />)}
                 </div>
               )}
 

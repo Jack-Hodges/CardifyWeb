@@ -10,11 +10,12 @@ import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
-import CustomModal from "../components/Modal/CustomModal";
+import CustomModal from "../components/Modals/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
 import ImportModal from '../components/Card/ImportModal';
 import { ToastContainer, toast } from 'react-toastify';
+import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Create() {
@@ -253,35 +254,13 @@ function Create() {
                 </div>
               </div>
             ) : (
-              <div>
-                <p 
-                  className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}
-                >
-                  No subject selected
-                </p>
-                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton
-                    text="Add Cards to Subject"
-                    bgColor={
-                      theme 
-                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
-                        : "bg-orange-500 hover:bg-orange-400"
-                    }
-                    onClick={handleOpenSubjectListModal}
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-                  />
-                  <BackgroundButton
-                    text="Create New Subject"
-                    bgColor={
-                      theme 
-                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
-                        : "bg-purple-500 hover:bg-purple-400"
-                    }
-                    onClick={handleCreateNewSubject}
-                    wWidth="w-full sm:w-auto"
-                  />
-                </div>
-              </div>
+              <NoSelectionModal
+                text="No subject selected"
+                text1="Add Cards to Subject"
+                text2="Create New Subject"
+                action1={handleOpenSubjectListModal}
+                action2={handleCreateNewSubject}
+              />
             )}
           </div>
         )}
