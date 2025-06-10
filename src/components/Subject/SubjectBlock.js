@@ -115,10 +115,25 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         <div style={backgroundStyle} />
         {!shared && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
-            <div onClick={handleShareClick}>
+            <div 
+              className="relative"
+              onMouseEnter={() => setHoveredIcon('share')}
+              onMouseLeave={() => setHoveredIcon(null)}
+              onClick={handleShareClick}
+            >
               <Share className="w-7 h-7 text-white mt-[-8px]" style={{ filter: cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none" }} />
+              {hoveredIcon === 'share' && (
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
+                  Share
+                </div>
+              )}
             </div>
-            <div onClick={handleTogglePin}>
+            <div 
+              className="relative"
+              onMouseEnter={() => setHoveredIcon('pin')}
+              onMouseLeave={() => setHoveredIcon(null)}
+              onClick={handleTogglePin}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 version="1.1"
@@ -133,6 +148,11 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
                   strokeWidth="5"
                 />
               </svg>
+              {hoveredIcon === 'pin' && (
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
+                  {subjectPinned ? 'Unpin' : 'Pin'}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -262,6 +282,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         onFirstAction={() => setIsShareModalOpen(false)}
         onSecondAction={handleShareSubmit}
         text="Share Subject"
+        width="w-1/3"
         mainText={
           <div className="w-full space-y-4">
             <input

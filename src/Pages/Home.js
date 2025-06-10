@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import { useEffect, useState, useRef } from "react";
-import { fetchSubjects } from "../components/Subject/SubjectManipulation";
+import { fetchSubjects, saveSubject } from "../components/Subject/SubjectManipulation";
 import getColors from "../components/Functions/getColors";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
@@ -138,6 +138,20 @@ function Home() {
     const goToDashboard = () => {
         navigate('/dashboard');
     }
+
+    const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
+      const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
+      if (data && !id) {
+        setSubjects([...subjects, ...data]);
+      } else {
+        const updatedSubjects = subjects.map((subject) =>
+          subject.id === id
+            ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned }
+            : subject
+        );
+        setSubjects(updatedSubjects);
+      }
+    };
   
   const Cards = (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">
@@ -164,9 +178,9 @@ function Home() {
           <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
             <div className="mx-5">
               <div className="flex justify-between">
-                <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>Welcome back, {profile.first_name}!</p>
+                <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>Hey, {profile.first_name}!</p>
               </div>
-              <p className={`font-normal ${shadow ? 'drop-shadow-custom' : ''}`}>🔥 99 days</p>
+              {/* <p className={`font-normal ${shadow ? 'drop-shadow-custom' : ''}`}>🔥 99 days</p> */}
             </div>
 
             {subjects.filter(subject => subject.up_to_index !== null && subject.user_id === profile.id).length > 0 && (
@@ -218,6 +232,7 @@ function Home() {
                         bgCol={subject.bgCol}
                         subject={subject}
                         user={user}
+                        onSave={handleSaveSubject}
                         home
                       />
                     </div>
@@ -241,6 +256,7 @@ function Home() {
                       bgCol={subject.bgCol}
                       subject={subject}
                       user={user}
+                      onSave={handleSaveSubject}
                       home
                     />
                   </div>
