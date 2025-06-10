@@ -374,6 +374,7 @@ function Dashboard() {
         onFirstAction={() => setIsDeleteModalOpen(false)}
         onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
         text="Delete Subject"
+        width="w-1/3"
         mainText="This will also delete all cards associated with the subject."
         firstActionText="Cancel"
         secondActionText="Delete"
@@ -385,6 +386,7 @@ function Dashboard() {
         onFirstAction={() => setIsCollectionDeleteModalOpen(false)}
         onSecondAction={() => handleRemoveCollection(collectionToDelete.id)}
         text="Delete Collection"
+        width="w-1/3"
         mainText="This will NOT delete the subjects associated with the collection."
         firstActionText="Cancel"
         secondActionText="Delete"

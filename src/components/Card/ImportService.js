@@ -73,6 +73,31 @@ const parseCSV = async (file) => {
   });
 };
 
+export const parseCSVString = async (text) => {
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      complete: (results) => {
+        try {
+          const cards = results.data
+            .filter(row => row.length >= 2 && row[0] && row[1])
+            .map(row => ({
+              question: row[0].trim(),
+              answer: row[1].trim(),
+              frontMode: 0,
+              backMode: 0
+            }));
+          validateCards(cards);
+          resolve(cards);
+        } catch (error) {
+          reject(new Error('Invalid CSV format'));
+        }
+      },
+      error: () => reject(new Error('Error parsing CSV')),
+      header: false
+    });
+  });
+};
+
 const parseTXT = async (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
