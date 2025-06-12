@@ -342,22 +342,37 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                 
 
                                 {/* Card Count Progress Bar */}
-                                <div className="mb-6">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-white text-2xl font-semibold">Card Count</span>
-                                        <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                                <div className="flex gap-8 w-full">
+                                    <div className="mb-6 w-full">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-white text-2xl font-semibold">Card Count</span>
+                                            <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+                                                style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
-                                            style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
-                                        />
+                                    <div className="mb-6 w-full">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-white text-2xl font-semibold">Generation Limit</span>
+                                            <span className="text-white text-sm">{profile.generation_count || 0}/{profile.pro ? '60' : '20'}</span>
+                                        </div>
+                                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                                            <div 
+                                                className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
+                                                style={{ width: `${Math.min((profile.generation_count || 0) / (profile.pro ? 60 : 20) * 100, 100)}%` }}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
+                                
 
-                                <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
+                                {/* <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
                                     {mainText}
-                                </p>
+                                </p> */}
                             </div>
 
                             {/* Logout and card share buttons */}
