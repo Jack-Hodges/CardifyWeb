@@ -253,7 +253,8 @@ function Dashboard() {
         profile.first_name,
         profile.theme,
         sortPreferenceMap[newSort],
-        profile.card_art
+        profile.card_art,
+        profile.generation_count
       );
     }
   };

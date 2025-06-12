@@ -1,6 +1,7 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import FlashcardPDFExport from '../Functions/flashcardPDFExport';
 import { useUser } from '../../UserContext';
+import { saveProfile } from '../Profile/ProfileManipulation';
 import { ArrowLeft, ArrowRight, Sparkles, Upload } from 'lucide-react';
 import ImportModal from '../Modals/ImportModal';
 import GenerateModal from '../Modals/GenerateModal';
@@ -20,7 +21,7 @@ function CardControls({
     onUpsertCard,
     subject
 }) {
-    const { theme } = useUser();
+    const { theme, profile } = useUser();
     const { shadow, primaryColor, secondaryColor } = theme;
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
     const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
@@ -46,6 +47,15 @@ function CardControls({
                 await onUpsertCard(card);
             }
 
+            await saveProfile(
+                profile.id,
+                profile.first_name,
+                profile.theme,
+                profile.sort_preference,
+                profile.card_art,
+                profile.generation_count + cardsToImport.length
+            );
+
             toast.success(`Successfully imported ${cardsToImport.length} cards`);
         } catch (error) {
             toast.error('Error importing cards: ' + error.message);
@@ -54,6 +64,13 @@ function CardControls({
 
     const handleGenerate = async (count, topic) => {
         try {
+            // Check if user has exceeded their daily limit
+            const dailyLimit = profile.pro ? 60 : 20;
+            if (profile.generation_count + count > dailyLimit) {
+                toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today.`);
+                return;
+            }
+
             const response = await fetch('/api/flashcardGenerate', {
                 method: 'POST',
                 headers: {
@@ -81,7 +98,18 @@ function CardControls({
                 await onUpsertCard(card);
             }
 
+            // Update the generation count
+            await saveProfile(
+                profile.id,
+                profile.first_name,
+                profile.theme,
+                profile.sort_preference,
+                profile.card_art,
+                profile.generation_count + cards.length
+            );
+
             toast.success(`Successfully generated ${cards.length} cards about ${topic}`);
+            setIsGenerateModalOpen(false);
         } catch (error) {
             toast.error('Error generating cards: ' + error.message);
         }

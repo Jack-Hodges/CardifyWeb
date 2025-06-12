@@ -77,7 +77,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     profile.first_name,
                     themeKey,
                     profile.sort_preference,
-                    profile.card_art
+                    profile.card_art,
+                    profile.generation_count
                 );
                 // Reload the page to apply the new theme
                 window.location.reload();
@@ -98,7 +99,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     profile.first_name,
                     profile.theme,
                     profile.sort_preference,
-                    cardArtKey
+                    cardArtKey,
+                    profile.generation_count
                 );
                 // Reload the page to apply the new card art
                 window.location.reload();
