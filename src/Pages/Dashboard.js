@@ -16,22 +16,28 @@ import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
 import DashboardImage from '../images/tutorial/Dashboard.png';
 import { ChevronDown, Search } from 'lucide-react';
+import useModals from '../hooks/useModals';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
   const [collections, setCollections] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
   const [editingCollection, setEditingCollection] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isCollectionDeleteModalOpen, setIsCollectionDeleteModalOpen] = useState(false);
   const [subjectToDelete, setSubjectToDelete] = useState(null);
   const [collectionToDelete, setCollectionToDelete] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSort, setSelectedSort] = useState('Most Cards');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollection, setSelectedCollection] = useState(null);
+
+  const { modals, openModal, closeModal } = useModals({
+    addSubject:        false,
+    editSubject:       false,
+    deleteSubject:     false,
+    addCollection:     false,
+    editCollection:    false,
+    deleteCollection:  false,
+  });
 
   const [dashboardPopUp, setDashboardPopUp] = useState(false);
   const mounted = useRef(false);
@@ -96,22 +102,18 @@ function Dashboard() {
       );
       setSubjects(updatedSubjects);
     }
-    setIsModalOpen(false);
+    closeModal('addSubject');
+    closeModal('editSubject');
   };
 
   const handleAddSubject = () => {
     setEditingSubject(null);
-    setIsModalOpen(true);
+    openModal('addSubject');
   };
 
   const handleEditSubject = (subject) => {
     setEditingSubject(subject);
-    setIsModalOpen(true);
-  };
-
-  const confirmDeleteSubject = (subject) => {
-    setSubjectToDelete(subject);
-    setIsDeleteModalOpen(true);
+    openModal('editSubject');
   };
 
   const handleRemoveSubject = async (subjectId) => {
@@ -119,38 +121,32 @@ function Dashboard() {
     if (success) {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
     }
-    setIsDeleteModalOpen(false);
+    closeModal('deleteSubject');
   };
 
   // Collections
   const handleAddCollection = () => {
     setEditingCollection(null);
-    setIsCollectionModalOpen(true);
+    openModal('addCollection');
   };
 
   const handleEditCollection = (collection) => {
     setEditingCollection(collection);
-    setIsCollectionModalOpen(true);
+    openModal('editCollection');
   };
 
   const handleSaveCollection = async (id, userId, collectionName) => {
     const data = await saveCollection(id, userId, collectionName);
     if (data && !id) {
-      // Add new collection to the collections array
       setCollections([...collections, ...data]);
     } else {
-      // Update the existing collection in the collections array
       const updatedCollections = collections.map((collection) =>
         collection.id === id ? { ...collection, name: collectionName } : collection
       );
       setCollections(updatedCollections);
     }
-    setIsCollectionModalOpen(false);
-  };
-
-  const confirmDeleteCollection = (collection) => {
-    setCollectionToDelete(collection);
-    setIsCollectionDeleteModalOpen(true);
+    closeModal('addCollection');
+    closeModal('editCollection');
   };
 
   const handleRemoveCollection = async (collectionId) => {
@@ -158,7 +154,7 @@ function Dashboard() {
     if (success) {
       setCollections(collections.filter((collection) => collection.id !== collectionId));
     }
-    setIsCollectionDeleteModalOpen(false);
+    closeModal('deleteCollection');
   };
 
   // Apply search and sorting to subjects and collections
@@ -296,9 +292,15 @@ function Dashboard() {
                     isExpanded={selectedCollection === collection.id}
                     onClick={() => handleCollectionClick(collection.id)}
                     onEditSubject={handleEditSubject}
-                    onRemoveSubject={confirmDeleteSubject}
+                    onRemoveSubject={(subject) => {
+                      setSubjectToDelete(subject);
+                      openModal('deleteSubject');
+                    }}
                     onEditCollection={handleEditCollection}
-                    onRemoveCollection={confirmDeleteCollection}
+                    onRemoveCollection={(collection) => {
+                      setCollectionToDelete(collection);
+                      openModal('deleteCollection');
+                    }}
                     onSaveSubject={handleSaveSubject}
                   />
                 ))}
@@ -311,7 +313,10 @@ function Dashboard() {
                     user={user}
                     onSave={handleSaveSubject}
                     onEdit={() => handleEditSubject(subject)}
-                    onRemoveSubject={() => confirmDeleteSubject(subject)}
+                    onRemoveSubject={() => {
+                      setSubjectToDelete(subject);
+                      openModal('deleteSubject');
+                    }}
                   />
                 ))}
               </div>
@@ -330,7 +335,10 @@ function Dashboard() {
                     user={user}
                     onSave={handleSaveSubject}
                     onEdit={() => handleEditSubject(subject)}
-                    onRemoveSubject={() => confirmDeleteSubject(subject)}
+                    onRemoveSubject={() => {
+                      setSubjectToDelete(subject);
+                      openModal('deleteSubject');
+                    }}
                     shared={true}
                   />
                 ))}
@@ -360,18 +368,21 @@ function Dashboard() {
 
       {/* Add/Edit Subject Modal */}
       <AddSubject
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={modals.addSubject || modals.editSubject}
+        onClose={() => {
+          closeModal('addSubject');
+          closeModal('editSubject');
+        }}
         onSave={handleSaveSubject}
-        subject={editingSubject}    // Passes editingSubject to the modal
+        subject={editingSubject}
         text={editingSubject ? 'Edit Subject' : 'Add New Subject'}
         user={user}
       />
 
       {/* Delete Confirmation Modal - Subject */}
       <Modal
-        isOpen={isDeleteModalOpen}
-        onFirstAction={() => setIsDeleteModalOpen(false)}
+        isOpen={modals.deleteSubject}
+        onFirstAction={() => closeModal('deleteSubject')}
         onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
         text="Delete Subject"
         width="w-1/3"
@@ -382,8 +393,8 @@ function Dashboard() {
 
       {/* Delete Confirmation Modal - Collection */}
       <Modal
-        isOpen={isCollectionDeleteModalOpen}
-        onFirstAction={() => setIsCollectionDeleteModalOpen(false)}
+        isOpen={modals.deleteCollection}
+        onFirstAction={() => closeModal('deleteCollection')}
         onSecondAction={() => handleRemoveCollection(collectionToDelete.id)}
         text="Delete Collection"
         width="w-1/3"
@@ -393,11 +404,14 @@ function Dashboard() {
       />
 
       <AddCollection 
-        isOpen={isCollectionModalOpen}
+        isOpen={modals.addCollection || modals.editCollection}
         user={user}
         collection={editingCollection}
         onSave={handleSaveCollection}
-        onClose={() => setIsCollectionModalOpen(false)}
+        onClose={() => {
+          closeModal('addCollection');
+          closeModal('editCollection');
+        }}
         text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
       />
 

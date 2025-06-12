@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Upload, X, Check, AlertTriangle } from 'lucide-react';
 import { useUser } from '../../UserContext';
-import { parseImportFile } from './ImportService';
+import { parseImportFile } from '../Card/ImportService';
 import BackgroundButton from '../Elements/BackgroundButton';
 
 function ImportModal({ isOpen, onClose, onImport, subject }) {

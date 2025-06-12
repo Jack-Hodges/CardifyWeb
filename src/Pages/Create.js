@@ -13,7 +13,7 @@ import SubjectList from '../components/Subject/SubjectList';
 import CustomModal from "../components/Modals/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
-import ImportModal from '../components/Card/ImportModal';
+import ImportModal from '../components/Modals/ImportModal';
 import { ToastContainer, toast } from 'react-toastify';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import 'react-toastify/dist/ReactToastify.css';

@@ -159,6 +159,26 @@ const parseXLSX = async (file) => {
   });
 };
 
+export const parseGeneratedFlashcards = (text) => {
+  try {
+    const lines = text.split('\n').filter(line => line.trim());
+    const cards = lines.map(line => {
+      const [question, answer] = line.split('|').map(part => part.trim());
+      return {
+        question,
+        answer,
+        frontMode: 0,
+        backMode: 0
+      };
+    });
+    
+    validateCards(cards);
+    return cards;
+  } catch (error) {
+    throw new Error(`Error parsing generated flashcards: ${error.message}`);
+  }
+};
+
 const validateCards = (cards) => {
   if (!Array.isArray(cards) || cards.length === 0) {
     throw new Error('No valid cards found in file');
