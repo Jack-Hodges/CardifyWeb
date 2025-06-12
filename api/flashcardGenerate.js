@@ -30,7 +30,7 @@ Make sure that you ONLY generate ${count} flashcards.`;
 
         console.log('Sending request to OpenAI...');
         const response = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4.1-nano",
             messages: [
                 { role: "user", content: prompt }
             ]
