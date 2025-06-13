@@ -13,6 +13,7 @@ import PracticeVideo from '../videos/Practice.webm';
 import DashboardVideo from '../videos/Dashboard.webm';
 import CreateVideo from '../videos/Create.webm';
 import HomeVideo from '../videos/Home.webm';
+import GenerateVideo from '../videos/Generate.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -80,11 +81,11 @@ function Welcome() {
     {
       title: "Generate",
       bullets: [
-        "Express yourself with a variety of themes and subject art",
-        "Light and Dark modes easily adapt to your preferences",
-        "More customisation coming soon"
+        "Easily generate flashcards when you are stuck",
+        "Use in built generation, or import your own generated flashcards from a CSV, Excel, or other file",
+        "More AI capabilities coming soon"
       ],
-      video: ThemeVideo
+      video: GenerateVideo
     },
   ];
 
