@@ -261,7 +261,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         <>
             {ReactDOM.createPortal(
                 <div
-                    className={`fixed p-3 sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+                    className={`fixed sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
                         isClosing ? 'opacity-0' : 'opacity-100'
                     }`}
                     onClick={handleOnClose}
@@ -272,7 +272,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     ></div>
 
                     <div
-                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 w-3/4 transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
+                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 w-full sm:w-3/4 h-full sm:h-auto transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                             isClosing ? 'animate-pop-down' : 'animate-pop-up'
                         }`}
                         onClick={(e) => e.stopPropagation()}
@@ -342,7 +342,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                 
 
                                 {/* Card Count Progress Bar */}
-                                <div className="flex gap-8 w-full">
+                                <div className="flex flex-col sm:flex-row gap-8 w-full">
                                     <div className="mb-6 w-full">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-white text-2xl font-semibold">Card Count</span>
@@ -376,15 +376,16 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             </div>
 
                             {/* Logout and card share buttons */}
-                            <div className="flex gap-2">
+                            <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
                                 <BackgroundButton 
                                     text="View Subject Shares" 
                                     bgColor="bg-purple-500 hover:bg-purple-400" 
-                                    onClick={handleSharesClick}
-                                />
+                                    wWidth='w-full' 
+                                    onClick={handleSharesClick} />
                                 <BackgroundButton 
                                     text="Logout" 
                                     bgColor="bg-red-500 hover:bg-red-400" 
+                                    wWidth='w-full mt-2 sm:mt-0' 
                                     onClick={logout} 
                                 />
                             </div>
@@ -408,7 +409,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-gray-500 hover:bg-gray-400"
                 secondActionText=""
                 secondActionCol=""
-                width="w-1/3"
+                width="w-full h-full sm:h-auto sm:w-2/3"
             />
             <Modal
                 isOpen={isDeleteModalOpen}
@@ -426,7 +427,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 onFirstAction={() => setIsThemeModalOpen(false)}
                 text="Select Theme"
                 mainText={
-                    <div className="grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
+                    <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(90vh-12rem)] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
                         {themeAssets.map((asset) => (
                             <div 
                                 key={asset.name}
@@ -447,9 +448,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                         ))}
                     </div>
                 }
-                width="w-2/3 h-[80%]"
+                width="w-full sm:w-2/3 h-full sm:h-[80%]"
                 firstActionText="Close"
-                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                firstActionCol="bg-red-500 hover:bg-red-400"
                 secondActionText=""
                 secondActionCol=""
             />
@@ -458,7 +459,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 onFirstAction={() => setIsCardArtModalOpen(false)}
                 text="Select Subject Art"
                 mainText={
-                    <div className="grid lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
+                    <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(90vh-12rem)] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
                         {getCardArtAssets().map((asset) => (
                             <div 
                                 key={asset.name}
@@ -479,9 +480,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                         ))}
                     </div>
                 }
-                width="w-2/3 h-[80%]"
+                width="w-full sm:w-2/3 h-full sm:h-[80%]"
                 firstActionText="Close"
-                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                firstActionCol="bg-red-500 hover:bg-red-400"
                 secondActionText=""
                 secondActionCol=""
             />

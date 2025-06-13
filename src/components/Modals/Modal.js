@@ -53,7 +53,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
+                className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
@@ -67,7 +67,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
                 </p>
 
                 {/* Action Buttons */}
-                <div className="block sm:flex sm:justify-end sm:space-x-4 items-center mx-auto w-full">
+                <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
                     <BackgroundButton text={firstActionText} bgColor={firstActionCol} wWidth='w-full' onClick={(e) => handleFirstAction(e)} />
                     <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
                 </div>

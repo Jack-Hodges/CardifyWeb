@@ -282,7 +282,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         onFirstAction={() => setIsShareModalOpen(false)}
         onSecondAction={handleShareSubmit}
         text="Share Subject"
-        width="w-1/3"
+        width="w-full h-full sm:w-2/3 sm:h-auto"
         mainText={
           <div className="w-full space-y-4">
             <input

@@ -202,12 +202,12 @@ function EditModal({
     >
       <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={(e) => e.stopPropagation()} />
       <div
-        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
+        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-full sm:w-3/4 sm:max-w-2xl h-full sm:h-auto transform transition-all duration-300 ease-in-out ${
           isClosing ? 'animate-pop-down' : 'animate-pop-up'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-3xl font-bold mb-6 text-white/90">{text}</h2>
+        <h2 className="mt-20 sm:mt-0 text-3xl font-bold mb-6 text-white/90">{text}</h2>
 
         {/* Front (Question) */}
         <div className="mb-6">
@@ -265,14 +265,18 @@ function EditModal({
           <label htmlFor="answer" className="block text-lg font-medium mb-2 text-white/90">
             Answer
           </label>
-          <div className="mb-2 flex space-x-2 overflow-x-auto">
-            <TextButton text={<b>B</b>} handleClick={handleBoldClick} mode={backMode} modeText="back" />
-            <TextButton text={<i>I</i>} handleClick={handleItalicClick} mode={backMode} modeText="back" />
-            <TextButton text={<u>U</u>} handleClick={handleUnderlineClick} mode={backMode} modeText="back" />
-            <EditButton mode={backMode} setMode={setBackMode} svg={<Text />} text="Text" val={0} extend />
-            <EditButton mode={backMode} setMode={setBackMode} svg={<Calculator />} text="Math" val={1} extend />
-            <EditButton mode={backMode} setMode={setBackMode} svg={<Image />} text="Image" val={2} />
-            <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} />
+          <div className="mb-2 block sm:flex overflow-x-auto">
+            <div className="flex space-x-2">
+              <TextButton text={<b>B</b>} handleClick={handleBoldClick} mode={backMode} modeText="back" />
+              <TextButton text={<i>I</i>} handleClick={handleItalicClick} mode={backMode} modeText="back" />
+              <TextButton text={<u>U</u>} handleClick={handleUnderlineClick} mode={backMode} modeText="back" />
+            </div>
+            <div className="flex space-x-2 mt-2 sm:mt-0">
+              <EditButton mode={backMode} setMode={setBackMode} svg={<Text />} text="Text" val={0} extend />
+              <EditButton mode={backMode} setMode={setBackMode} svg={<Calculator />} text="Math" val={1} extend />
+              <EditButton mode={backMode} setMode={setBackMode} svg={<Image />} text="Image" val={2} />
+              <EditButton mode={backMode} setMode={setBackMode} svg={<Brush />} text="Draw" val={3} />
+            </div>
           </div>
           {backMode === 1 && (
             <div className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors h-24">
@@ -326,10 +330,11 @@ function EditModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-4">
-          <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={handleClose} />
-          <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSave} />
+        <div className="absolute sm:relative bottom-4 left-0 right-0 sm:bottom-0 flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
+          <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" wWidth='w-[90%]' onClick={handleClose} />
+          <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-[90%] mt-2 sm:mt-0' onClick={handleSave} />
         </div>
+
       </div>
 
       {/* Drawing Popup */}

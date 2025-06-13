@@ -211,7 +211,7 @@ function Home() {
                 <JumpButton text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
                 <JumpButton text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
                 <JumpButton text="Type" img={<BookText size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/>
+                {/* <JumpButton text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/> */}
               </div>
             </div>
 

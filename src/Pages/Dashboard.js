@@ -386,7 +386,7 @@ function Dashboard() {
         onFirstAction={() => closeModal('deleteSubject')}
         onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
         text="Delete Subject"
-        width="w-1/3"
+        width="w-full sm:w-2/3 h-full sm:h-auto"
         mainText="This will also delete all cards associated with the subject."
         firstActionText="Cancel"
         secondActionText="Delete"

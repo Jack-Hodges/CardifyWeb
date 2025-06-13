@@ -16,7 +16,7 @@ function GenerateModal({ isOpen, onClose, onGenerate }) {
             onSecondAction={handleGenerate}
             text="Generate Flashcards"
             mainText={
-                <div className="space-y-4">
+                <div className="space-y-4 mt-20 sm:mt-0">
                     <div>
                         <label className="block text-sm font-medium text-gray-200 mb-2">
                             Number of Cards
@@ -47,8 +47,10 @@ function GenerateModal({ isOpen, onClose, onGenerate }) {
                 </div>
             }
             firstActionText="Cancel"
+            firstActionCol="bg-red-500 hover:bg-red-400"
             secondActionText="Generate"
             secondActionCol="bg-blue-500 hover:bg-blue-400"
+            width="w-full h-full sm:w-2/3 sm:h-auto"
         />
     );
 }

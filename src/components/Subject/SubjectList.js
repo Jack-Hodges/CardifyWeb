@@ -89,7 +89,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-[90%] sm:w-4/5 max-w-lg h-4/5 sm:h-[70%] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col">
+          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-full sm:w-4/5 max-w-lg h-full sm:h-[70%] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col">
             {selectedCollection ? (
               <CollectionView 
                 collection={selectedCollection} 

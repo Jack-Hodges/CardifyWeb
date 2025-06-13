@@ -147,7 +147,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
             <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
-            <div className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
+            <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
                 <h2 className="text-3xl font-bold mb-6 text-white">
                     {subject ? "Edit Subject" : text}
                 </h2>
@@ -237,9 +237,9 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                     </div>
                 </div>
 
-                <div className="flex justify-end space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" onClick={handleClose} />
-                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSave} />
+                <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
+                    <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" wWidth='w-full' onClick={handleClose} />
+                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full mt-2 sm:mt-0' onClick={handleSave} />
                 </div>
             </div>
         </div>,

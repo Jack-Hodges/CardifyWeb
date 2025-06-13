@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Upload, X, Check, AlertTriangle } from 'lucide-react';
 import { useUser } from '../../UserContext';
-import { parseImportFile } from '../Card/ImportService';
+import { parseImportFile } from './ImportService';
 import BackgroundButton from '../Elements/BackgroundButton';
 
 function ImportModal({ isOpen, onClose, onImport, subject }) {
@@ -44,7 +44,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
         >
           <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose} />
           <div
-            className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-full h-full sm:w-2/3 sm:h-auto transform transition-all duration-300 ease-in-out ${
+            className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-[90%] sm:w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
               isClosing ? 'animate-pop-down' : 'animate-pop-up'
             }`}
             onClick={(e) => e.stopPropagation()}
@@ -107,20 +107,18 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                <BackgroundButton 
-                  text="Cancel" 
-                  bgColor={`bg-red-500 hover:bg-red-400`} 
-                  wWidth='w-full' 
-                  onClick={handleClose} 
-                />
-                <BackgroundButton 
-                  text={`Import ${previewCards.length > 0 ? `(${previewCards.length})` : ''}`} 
-                  bgColor={`bg-green-500 hover:bg-green-400`} 
-                  wWidth='w-full mt-2 sm:mt-0' 
-                  onClick={handleImport}
-                  disabled={previewCards.length === 0} 
-                />
+            <div className="flex justify-end space-x-4">
+              <BackgroundButton
+                text="Cancel"
+                bgColor={`bg-red-500 hover:bg-red-400`}
+                onClick={handleClose}
+              />
+              <BackgroundButton
+                text={`Import ${previewCards.length > 0 ? `(${previewCards.length})` : ''}`}
+                bgColor={`bg-green-500 hover:bg-green-400`}
+                onClick={handleImport}
+                disabled={previewCards.length === 0}
+              />
             </div>
 
             {/* Card Limit Dialog */}

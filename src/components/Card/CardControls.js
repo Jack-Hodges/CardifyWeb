@@ -123,20 +123,40 @@ function CardControls({
                     <div>
                         <FlashcardPDFExport flashcards={cards} />
                     </div>
-                    <BackgroundButton 
-                        text="Import" 
-                        image={<Upload />}
-                        flip={true}
-                        bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
-                        onClick={() => setIsImportModalOpen(true)}
-                    />
-                    <BackgroundButton 
-                        text="Generate" 
-                        image={<Sparkles />}
-                        flip={true}
-                        bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
-                        onClick={() => setIsGenerateModalOpen(true)}
-                    />
+                    <div className="hidden sm:block">
+                        <BackgroundButton 
+                            text="Import" 
+                            image={<Upload />}
+                            flip={true}
+                            bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
+                            onClick={() => setIsImportModalOpen(true)}
+                        />
+                    </div>
+                    <div className="block sm:hidden">
+                        <BackgroundButton 
+                            image={<Upload />}
+                            flip={true}
+                            bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
+                            onClick={() => setIsImportModalOpen(true)}
+                        />
+                    </div>
+                    <div className="hidden sm:block">
+                        <BackgroundButton 
+                            text="Generate" 
+                            image={<Sparkles />}
+                            flip={true}
+                            bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
+                            onClick={() => setIsGenerateModalOpen(true)}
+                        />
+                    </div>
+                    <div className="block sm:hidden">
+                        <BackgroundButton 
+                            image={<Sparkles />}
+                            flip={true}
+                            bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
+                            onClick={() => setIsGenerateModalOpen(true)}
+                        />
+                    </div>
                 </div>
             )}
             
