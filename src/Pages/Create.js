@@ -14,8 +14,11 @@ import CustomModal from "../components/Modals/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
 import ImportModal from '../components/Modals/ImportModal';
+import GenerateModal from '../components/Modals/GenerateModal';
 import { ToastContainer, toast } from 'react-toastify';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
+import { saveProfile } from '../components/Profile/ProfileManipulation';
+import { parseGeneratedFlashcards } from '../components/Card/ImportService';
 import 'react-toastify/dist/ReactToastify.css';
 
 function Create() {
@@ -26,12 +29,10 @@ function Create() {
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSort, setSelectedSort] = useState('5');
-  const [generateTerm, setGenerateTerm] = useState('');
   const [createPopUp, setCreatePopUp] = useState(false);
-  const [generateFlash, setGenerateFlash] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -132,6 +133,59 @@ function Create() {
     setIsModalOpen(true);
   };
 
+  const handleGenerate = async (count, topic) => {
+    try {
+      // Check if user has exceeded their daily limit
+      const dailyLimit = profile.pro ? 60 : 20;
+      if (profile.generation_count + count > dailyLimit) {
+        toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today.`);
+        return;
+      }
+
+      const response = await fetch('/api/flashcardGenerate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ count, topic })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate flashcards');
+      }
+
+      const text = await response.text();
+      const cards = parseGeneratedFlashcards(text);
+      
+      // Add subject_id and user_id to each card
+      const cardsToImport = cards.map(card => ({
+        ...card,
+        subject_id: subject.id,
+        user_id: subject.user_id
+      }));
+
+      // Import each card
+      for (const card of cardsToImport) {
+        await handleUpsertCard(card);
+      }
+
+      // Update the generation count
+      await saveProfile(
+        profile.id,
+        profile.first_name,
+        profile.theme,
+        profile.sort_preference,
+        profile.card_art,
+        profile.generation_count + cards.length
+      );
+
+      toast.success(`Successfully generated ${cards.length} cards about ${topic}`);
+      setIsGenerateModalOpen(false);
+    } catch (error) {
+      toast.error('Error generating cards: ' + error.message);
+    }
+  };
+
   return (
     <div 
       className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
@@ -180,7 +234,7 @@ function Create() {
                   themeSecondary={secondaryColor}
                   themeTertiary={tertiaryColor}
                   cards={cards}
-                  generateClick={() => setGenerateFlash(true)}
+                  generateClick={() => setIsGenerateModalOpen(true)}
                   onUpsertCard={handleUpsertCard}
                   subject={subject}
                 />
@@ -240,6 +294,16 @@ function Create() {
                     }
                     onClick={() => setIsImportModalOpen(true)}
                     wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                  />
+                  <BackgroundButton
+                    text="Generate Flashcards"
+                    bgColor={
+                      theme 
+                        ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` 
+                        : "bg-orange-500 hover:bg-orange-400"
+                    }
+                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                    onClick={() => setIsGenerateModalOpen(true)}
                   />
                   <BackgroundButton
                     text="Create New Subject"
@@ -331,54 +395,10 @@ function Create() {
         onFirstAction={handleDismissPopup}
       />
 
-      {/* Popup for generating flashcards (not changed) */}
-      <CustomModal 
-        isOpen={generateFlash}
-        content={
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-green-500">Cardify Generate</h1>
-            <div className="w-full h-12 flex items-center justify-center p-2 rounded-lg space-x-4 mt-10">
-              <p className="text-xl">Generate</p>
-              <div className="relative group">
-                <select
-                  value={selectedSort}
-                  onChange={(e) => setSelectedSort(e.target.value)}
-                  className={`border-2 border-[rgba(3,15,64,1)] rounded-full pl-2 pr-8 background-shadow-new background-hover ${secondaryColor.bgClass} ${secondaryColor.hoverClass} text-white font-bold focus:outline-none h-10 cursor-pointer appearance-none w-full transition-colors duration-300`}
-                >
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="5">5</option>
-                  <option value="10">10</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none transition-transform duration-300 sm:group-hover:translate-x-1 sm:group-hover:translate-y-1">
-                  <svg
-                    className="w-5 h-5 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-
-              <p className="text-xl">{`${selectedSort === "1" ? 'card about' : 'cards about'}`}</p>
-
-              <div className="flex gap-2 items-center w-[58%] sm:w-1/4">
-                <input
-                  type="text"
-                  value={generateTerm}
-                  onChange={(e) => setGenerateTerm(e.target.value)}
-                  className={`w-full h-10 px-4 py-2 text-left rounded-full ${secondaryColor.bgClass} ${textClass} background-shadow-new background-focus focus:outline-none placeholder-gray-200`}
-                  placeholder="Enter topic..."
-                />
-              </div>
-            </div>
-          </div>
-        }
-        firstActionText={'Got it!'}
-        firstActionCol="bg-green-500 hover:bg-green-400"
-        onFirstAction={() => setGenerateFlash(false)}
+      <GenerateModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onGenerate={handleGenerate}
       />
 
       <ToastContainer position="top-center" autoClose={3000} />

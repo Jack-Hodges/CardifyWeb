@@ -25,10 +25,19 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
+            // Reset fields when opening modal for a new subject
+            if (!subject) {
+                setLocalSubjectName('');
+                setLocalSubjectColor('red');
+                setSubjectIntensity(500);
+                setSelectedCollection('None');
+                setSelectedCollectionId(null);
+                setClickedColor(null);
+            }
         } else if (!isClosing) {
             setIsVisible(false);
         }
-    }, [isOpen, isClosing]);
+    }, [isOpen, isClosing, subject]);
 
     useEffect(() => {
         if (subject) {
