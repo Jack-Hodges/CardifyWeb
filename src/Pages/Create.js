@@ -309,21 +309,11 @@ function Create() {
                     text="Generate Flashcards"
                     bgColor={
                       theme 
-                        ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` 
-                        : "bg-orange-500 hover:bg-orange-400"
-                    }
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-                    onClick={() => setIsGenerateModalOpen(true)}
-                  />
-                  <BackgroundButton
-                    text="Create New Subject"
-                    bgColor={
-                      theme 
                         ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
                         : "bg-purple-500 hover:bg-purple-400"
                     }
-                    onClick={handleCreateNewSubject}
                     wWidth="w-full sm:w-auto"
+                    onClick={() => setIsGenerateModalOpen(true)}
                   />
                 </div>
               </div>
