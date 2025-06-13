@@ -76,7 +76,16 @@ function Welcome() {
         "More customisation coming soon"
       ],
       video: ThemeVideo
-    }
+    },
+    {
+      title: "Generate",
+      bullets: [
+        "Express yourself with a variety of themes and subject art",
+        "Light and Dark modes easily adapt to your preferences",
+        "More customisation coming soon"
+      ],
+      video: ThemeVideo
+    },
   ];
 
   const nextFeature = () => {
