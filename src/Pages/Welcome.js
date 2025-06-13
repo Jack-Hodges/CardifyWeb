@@ -8,7 +8,7 @@ import WelcomeMobile from '../images/Logos/CardifyText.png';
 
 import BackgroundTitle from '../images/TitleBackground.png';
 
-import ThemeVideo from '../videos/title/themes.webm';
+// import ThemeVideo from '../videos/title/themes.webm';
 import PracticeVideo from '../videos/title/practice.webm';
 import DashboardVideo from '../videos/title/dashboard.webm';
 import CreateVideo from '../videos/title/create.webm';
@@ -75,7 +75,7 @@ function Welcome() {
         "Light and Dark modes easily adapt to your preferences",
         "More customisation coming soon"
       ],
-      video: ThemeVideo
+      video: DashboardVideo
     },
     {
       title: "Generate",
