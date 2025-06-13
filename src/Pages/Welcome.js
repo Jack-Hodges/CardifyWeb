@@ -8,11 +8,11 @@ import WelcomeMobile from '../images/Logos/CardifyText.png';
 
 import BackgroundTitle from '../images/TitleBackground.png';
 
-import ThemeVideo from '../videos/title/Themes.webm';
-import PracticeVideo from '../videos/title/Practice.webm';
-import DashboardVideo from '../videos/title/Dashboard.webm';
-import CreateVideo from '../videos/title/Create.webm';
-import HomeVideo from '../videos/title/Home.webm';
+import ThemeVideo from '../videos/Themes.webm';
+import PracticeVideo from '../videos/Practice.webm';
+import DashboardVideo from '../videos/Dashboard.webm';
+import CreateVideo from '../videos/Create.webm';
+import HomeVideo from '../videos/Home.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
