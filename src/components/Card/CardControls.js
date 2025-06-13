@@ -19,12 +19,14 @@ function CardControls({
     cards,
     generateClick,
     onUpsertCard,
-    subject
+    subject,
+    isGenerateModalOpen,
+    setIsGenerateModalOpen,
+    isGenerating
 }) {
     const { theme, profile } = useUser();
     const { shadow, primaryColor, secondaryColor } = theme;
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-    const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
 
     // Conditional button for the next action
     const nextButton = currentCardIndex === totalCards && !create ? (
@@ -62,59 +64,6 @@ function CardControls({
         }
     };
 
-    const handleGenerate = async (count, topic) => {
-        try {
-            // Check if user has exceeded their daily limit
-            const dailyLimit = profile.pro ? 60 : 20;
-            if (profile.generation_count + count > dailyLimit) {
-                toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today.`);
-                return;
-            }
-
-            const response = await fetch('/api/flashcardGenerate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ count, topic })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to generate flashcards');
-            }
-
-            const text = await response.text();
-            const cards = parseGeneratedFlashcards(text);
-            
-            // Add subject_id and user_id to each card
-            const cardsToImport = cards.map(card => ({
-                ...card,
-                subject_id: subject.id,
-                user_id: subject.user_id
-            }));
-
-            // Import each card
-            for (const card of cardsToImport) {
-                await onUpsertCard(card);
-            }
-
-            // Update the generation count
-            await saveProfile(
-                profile.id,
-                profile.first_name,
-                profile.theme,
-                profile.sort_preference,
-                profile.card_art,
-                profile.generation_count + cards.length
-            );
-
-            toast.success(`Successfully generated ${cards.length} cards about ${topic}`);
-            setIsGenerateModalOpen(false);
-        } catch (error) {
-            toast.error('Error generating cards: ' + error.message);
-        }
-    };
-
     return (
         <div className={`w-full h-12 flex items-center ${create ? 'justify-between' : 'justify-end'}`}>
             {/* Show these buttons only if `create` is true */}
@@ -146,7 +95,7 @@ function CardControls({
                             image={<Sparkles />}
                             flip={true}
                             bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
-                            onClick={() => setIsGenerateModalOpen(true)}
+                            onClick={generateClick}
                         />
                     </div>
                     <div className="block sm:hidden">
@@ -154,7 +103,7 @@ function CardControls({
                             image={<Sparkles />}
                             flip={true}
                             bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`} 
-                            onClick={() => setIsGenerateModalOpen(true)}
+                            onClick={generateClick}
                         />
                     </div>
                 </div>
@@ -188,7 +137,8 @@ function CardControls({
             <GenerateModal
                 isOpen={isGenerateModalOpen}
                 onClose={() => setIsGenerateModalOpen(false)}
-                onGenerate={handleGenerate}
+                onGenerate={onUpsertCard}
+                isGenerating={isGenerating}
             />
         </div>
     );

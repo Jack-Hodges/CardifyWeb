@@ -32,11 +32,14 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
     }
 
     const handleSecondAction = () => {
-        onSecondAction();
-        handleClose();
+        // Only allow second action if the button is not disabled
+        if (!secondActionCol.includes('cursor-not-allowed')) {
+            onSecondAction();
+            handleClose();
+        }
     }
 
-    if (!isVisible && !isClosing) return null; // If the modal is not visible and not closing, return nothing
+    if (!isVisible && !isClosing) return null;
 
     return ReactDOM.createPortal(
         <div

@@ -33,6 +33,7 @@ function Create() {
   const [loading, setLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -135,10 +136,13 @@ function Create() {
 
   const handleGenerate = async (count, topic) => {
     try {
+      setIsGenerating(true);
       // Check if user has exceeded their daily limit
       const dailyLimit = profile.pro ? 60 : 20;
       if (profile.generation_count + count > dailyLimit) {
         toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today.`);
+        setIsGenerating(false);
+        setIsGenerateModalOpen(false);
         return;
       }
 
@@ -183,6 +187,9 @@ function Create() {
       setIsGenerateModalOpen(false);
     } catch (error) {
       toast.error('Error generating cards: ' + error.message);
+      setIsGenerateModalOpen(false);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -237,6 +244,9 @@ function Create() {
                   generateClick={() => setIsGenerateModalOpen(true)}
                   onUpsertCard={handleUpsertCard}
                   subject={subject}
+                  isGenerateModalOpen={isGenerateModalOpen}
+                  setIsGenerateModalOpen={setIsGenerateModalOpen}
+                  isGenerating={isGenerating}
                 />
             </div>
 
@@ -399,6 +409,7 @@ function Create() {
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
         onGenerate={handleGenerate}
+        isGenerating={isGenerating}
       />
 
       <ToastContainer position="top-center" autoClose={3000} />

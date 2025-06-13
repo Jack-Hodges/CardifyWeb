@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import supabase from "../supabaseClient"; 
 import { useNavigate } from "react-router-dom"; 
 import BackgroundButton from "../components/Elements/BackgroundButton";
@@ -8,10 +8,11 @@ import WelcomeMobile from '../images/Logos/CardifyText.png';
 
 import BackgroundTitle from '../images/TitleBackground.png';
 
-import ThemeVideo from '../videos/title/Themes.webm';
-import PracticeVideo from '../videos/title/Quiz.webm';
-import OrganiseVideo from '../videos/title/Organise.webm';
-import CreateVideo from '../videos/title/Create.webm';
+import ThemeVideo from '../videos/title/themes.webm';
+import PracticeVideo from '../videos/title/practice.webm';
+import DashboardVideo from '../videos/title/dashboard.webm';
+import CreateVideo from '../videos/title/create.webm';
+import HomeVideo from '../videos/title/home.webm';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -32,38 +33,47 @@ function Welcome() {
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
     {
+      title: "Layout",
+      bullets: [
+        "Fun and easy to use interface",
+        "Quickly resume your practice from where you left off with In Progress and Pinned subjects",
+        "Jump in to a variety of practice modes, including quizzes, memory and more"
+      ],
+      video: HomeVideo
+    },
+    {
       title: "Create",
       bullets: [
-        "Design beautiful flashcards with rich media",
-        "Custom themes and layouts",
-        "Easy-to-use interface"
+        "Easily design flashcards with text, mathematical equations, images, and drawings",
+        "Upload your own existing flashcards, or generate flashcards with AI, and export as PDF",
+        "Share your subjects with your friends to collaborate"
       ],
       video: CreateVideo
     },
     {
       title: "Practice",
       bullets: [
-        "Smart quiz system",
-        "Progress tracking",
-        "Instant feedback"
+        "Practice your flashcards with Practice, Memory, Quiz, Scramble and Type",
+        "Race against yourself to improve your scores",
+        "Use the game modes to test your knowledge"
       ],
       video: PracticeVideo
     },
     {
       title: "Organize",
       bullets: [
-        "Collections and folders",
-        "Easy navigation",
-        "Quick search"
+        "Use Subjects to organise your flashcards",
+        "Collections are used to group subjects together",
+        "Quick search and filter to find your subjects"
       ],
-      video: OrganiseVideo
+      video: DashboardVideo
     },
     {
       title: "Themes",
       bullets: [
-        "Customizable interface",
-        "Dark and light modes",
-        "Personalized study environment"
+        "Express yourself with a variety of themes and subject art",
+        "Light and Dark modes easily adapt to your preferences",
+        "More customisation coming soon"
       ],
       video: ThemeVideo
     }
@@ -203,8 +213,8 @@ function Welcome() {
           <div className="relative w-[80vw] h-[60vh]">
             {/* Feature Content */}
             <div className="flex items-center gap-8">
-              <div className="w-1/2 h-full bg-black rounded-lg flex items-center justify-center">
-                <p className="text-white text-lg">Video Placeholder</p>
+              <div className="w-1/2 h-full rounded-lg overflow-hidden">
+                <HoverVideo videoSrc={features[currentFeature].video} />
               </div>
               <div className="w-1/2">
                 <h3 className="text-4xl sm:text-5xl font-bold text-gray-800">{features[currentFeature].title}</h3>
@@ -412,44 +422,32 @@ function FancyInput({ type, value, onChange }) {
   );
 }
 
-// function HoverVideo({ videoSrc }) {
-//   const videoRef = useRef(null);
+function HoverVideo({ videoSrc }) {
+  const videoRef = useRef(null);
 
-//   const handleMouseEnter = async () => {
-//     try {
-//       const playPromise = videoRef.current.play();
-//       if (playPromise !== undefined) {
-//         await playPromise;
-//       }
-//     } catch (error) {
-//       console.error("Error attempting to play:", error);
-//     }
-//   };
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      // Reset the video to the beginning
+      video.currentTime = 0;
+      // Play the video
+      video.play().catch(error => {
+        console.error("Error attempting to play:", error);
+      });
+    }
+  }, [videoSrc]); // Add videoSrc as a dependency
 
-//   const handleMouseLeave = () => {
-//     try {
-//       videoRef.current.pause();
-//     } catch (error) {
-//       console.error("Error attempting to pause:", error);
-//     }
-//   };
-
-//   return (
-//     <div
-//       onMouseEnter={handleMouseEnter}
-//       onMouseLeave={handleMouseLeave}
-//       className="relative cursor-pointer rounded-lg overflow-hidden"
-//     >
-//       <video
-//         ref={videoRef}
-//         src={videoSrc}
-//         loop
-//         muted
-//         playsInline
-//         preload="auto"
-//         autoPlay={false}
-//         className="w-full h-full object-cover"
-//       />
-//     </div>
-//   );
-// }
+  return (
+    <div className="relative rounded-lg overflow-hidden">
+      <video
+        ref={videoRef}
+        src={videoSrc}
+        loop
+        muted
+        playsInline
+        preload="auto"
+        className="w-full h-full object-cover"
+      />
+    </div>
+  );
+}
