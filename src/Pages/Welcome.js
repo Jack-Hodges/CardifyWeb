@@ -5,7 +5,7 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
-
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import BackgroundTitle from '../images/TitleBackground.png';
 
 import ThemeVideo from '../videos/Themes.webm';
@@ -222,11 +222,40 @@ function Welcome() {
           
           <div className="relative w-[80vw] h-[60vh]">
             {/* Feature Content */}
-            <div className="flex items-center gap-8">
-              <div className="w-1/2 h-full rounded-lg overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center gap-8">
+              {/* Features video */}
+              <div className="w-full sm:w-1/2 h-full rounded-lg overflow-hidden">
                 <HoverVideo videoSrc={features[currentFeature].video} />
               </div>
-              <div className="w-1/2">
+
+              {/* Mobile arrows */}
+              <div className="sm:hidden flex items-center gap-2 mt-[-5%] mb-[-5%]">
+                <BackgroundButton
+                  onClick={prevFeature}
+                  image={<ChevronLeft/>}
+                  bgColor="bg-green-500 hover:bg-green-400"
+                />
+                <BackgroundButton
+                  onClick={nextFeature}
+                  image={<ChevronRight/>}
+                  bgColor="bg-green-500 hover:bg-green-400"
+                />
+              </div>
+
+              <div className="flex sm:hidden gap-2">
+              {features.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentFeature(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    index === currentFeature ? 'bg-gray-800' : 'bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
+              
+              {/* Features text */}
+              <div className="w-full sm:w-1/2 mb-10 sm:mb-0">
                 <h3 className="text-4xl sm:text-5xl font-bold text-gray-800">{features[currentFeature].title}</h3>
                 <ul className="text-gray-600 text-lg space-y-2 mt-4">
                   {features[currentFeature].bullets.map((bullet, index) => (
@@ -240,25 +269,26 @@ function Welcome() {
             </div>
 
             {/* Navigation Arrows */}
-            <button 
-              onClick={prevFeature}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button 
-              onClick={nextFeature}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            <div className="hidden sm:block">
+              <div className="absolute left-[-50px] top-1/2 -translate-y-1/2">
+                <BackgroundButton
+                  onClick={prevFeature}
+                  image={<ChevronLeft/>}
+                  bgColor="bg-green-500 hover:bg-green-400"
+                />
+              </div>
 
+              <div className="absolute right-[-50px] top-1/2 -translate-y-1/2">
+                <BackgroundButton
+                  onClick={nextFeature}
+                  image={<ChevronRight/>}
+                  bgColor="bg-green-500 hover:bg-green-400"
+                />
+              </div>
+            </div>
+            
             {/* Dots Navigation */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            <div className="hidden sm:flex absolute bottom-20 left-1/2 -translate-x-1/2 gap-2">
               {features.map((_, index) => (
                 <button
                   key={index}
