@@ -6,8 +6,13 @@ import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import BackgroundTitle from '../images/TitleBackground.png';
 
+// Images
+import TopLeftMac from '../images/title/TopLeftMac.png';
+import TopRightMac from '../images/title/TopRightMac.png';
+import BottomLeftMac from '../images/title/BottomLeftMac.png';
+
+// Videos
 import ThemeVideo from '../videos/Themes.webm';
 import PracticeVideo from '../videos/Practice.webm';
 import DashboardVideo from '../videos/Dashboard.webm';
@@ -207,7 +212,9 @@ function Welcome() {
   
         {/* Welcome Section */}
         <div className="h-[100dvh] flex flex-col items-center justify-center">
-          <img src={BackgroundTitle} alt="Assortment of Cardify images on devices" className="absolute w-full h-[100dvh]"/>
+          <img src={TopLeftMac} alt="Mac with Cardify open" className="absolute top-5 left-5 w-96"/>
+          <img src={TopRightMac} alt="Mac with Cardify open" className="absolute top-5 right-5 w-96 hidden md:block"/>
+          <img src={BottomLeftMac} alt="Mac with Cardify open" className="absolute top-[30%] left-1/4 w-96"/>
           <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4 dark:text-gray-300">
             Cardify
           </h1>
