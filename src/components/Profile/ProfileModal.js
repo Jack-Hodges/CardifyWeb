@@ -15,6 +15,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [newFirstName, setNewFirstName] = useState('');
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [shares, setShares] = useState([]);
@@ -255,6 +257,29 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         };
     }, [activeDropdown]);
 
+    const handleEditClick = () => {
+        setNewFirstName(profile.first_name);
+        setIsEditModalOpen(true);
+    };
+
+    const handleSaveEdit = async () => {
+        try {
+            await saveProfile(
+                profile.id,
+                newFirstName,
+                profile.theme,
+                profile.sort_preference,
+                profile.card_art,
+                profile.generation_count
+            );
+            // Reload the page to apply the changes
+            window.location.reload();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+        }
+        setIsEditModalOpen(false);
+    };
+
     if (!isVisible && !isClosing) return null;
 
     return (
@@ -282,13 +307,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             <div className="flex justify-between items-center mb-6">
                                 <span className={`text-white text-4xl font-semibold`}>Hey {profile.first_name}</span>
                                 <div className="flex space-x-2">
-                                    <div className="hidden sm:block">
-                                        <BackgroundButton text={profile.pro ? 'Manage Subscription' : 'Upgrade to Pro'} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
-                                    </div>
-                                    <div className="block sm:hidden">
-                                        <BackgroundButton image={<Cog />} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}/>
-                                    </div>
-                                    <BackgroundButton image={edit} bgColor="bg-blue-500 hover:bg-blue-400" onClick={() => alert('Edit button clicked')} />
+                                    <BackgroundButton image={<Cog />} bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
                                     <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                                 </div>
                             </div>
@@ -485,6 +504,44 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-red-500 hover:bg-red-400"
                 secondActionText=""
                 secondActionCol=""
+            />
+            <Modal
+                isOpen={isEditModalOpen}
+                onFirstAction={() => setIsEditModalOpen(false)}
+                onSecondAction={handleSaveEdit}
+                text="Settings"
+                mainText={
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-2">
+                                First Name
+                            </label>
+                            <input
+                                type="text"
+                                id="firstName"
+                                value={newFirstName}
+                                onChange={(e) => setNewFirstName(e.target.value)}
+                                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+                                placeholder="Enter your first name"
+                            />
+                            <p className="mt-4">You are currently on the {profile.pro ? 'Pro' : 'Free'} plan.</p>
+                            {profile.pro ? (
+                                <BackgroundButton text="Cancel Subscription" bgColor="bg-red-500 hover:bg-red-400" onClick={() => {}} />
+                            ) : (
+                                <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={() => {}} />
+                            )}
+
+                            <p className="mt-4">Permanently delete your account</p>
+                            <BackgroundButton text="Delete Account" bgColor="bg-red-500 hover:bg-red-400" onClick={() => {}} />
+                            
+                        </div>
+                    </div>
+                }
+                width="w-full sm:w-2/3 h-full sm:h-auto"
+                firstActionText="Cancel"
+                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                secondActionText="Save"
+                secondActionCol="bg-blue-500 hover:bg-blue-400"
             />
         </>
     );
