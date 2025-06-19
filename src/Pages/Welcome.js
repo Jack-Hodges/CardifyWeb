@@ -34,7 +34,7 @@ function Welcome() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
-  const { user, setUser } = useUser();
+  const { user, setUser, startSignUpProcess } = useUser();
 
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
@@ -127,6 +127,10 @@ function Welcome() {
         toast.error("Please enter your first name");
         return;
       }
+      
+      // Mark that sign-up process has started
+      startSignUpProcess();
+      
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         if (error.message.includes("already registered")) {

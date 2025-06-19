@@ -47,6 +47,7 @@ export const UserProvider = ({ children }) => {
   const [popupStates, setPopupStates] = useState({});
   const [popupStatesLoaded, setPopupStatesLoaded] = useState(false); // New state
   const [loading, setLoading] = useState(true);
+  const [isSignUpProcess, setIsSignUpProcess] = useState(false); // Track sign-up process
 
   // Memoize the theme calculation
   const theme = useMemo(() => {
@@ -85,12 +86,22 @@ export const UserProvider = ({ children }) => {
         setProfile(userProfile);
         setPopupStates(userProfile.popup_states || {});  // Initialize popup states
         setPopupStatesLoaded(true);  // Mark popup states as loaded
+        setIsSignUpProcess(false); // Clear sign-up flag when profile is found
+      } else {
+        // No profile found for the given user ID - redirect to login page
+        // But only if we're not in the sign-up process
+        if (!isSignUpProcess) {
+          console.warn('No profile found for the given user ID. Redirecting to login page.');
+          await logout();
+          window.location.href = '/';
+        }
       }
     } else {
       setUser(null);
       setProfile(null);
       setPopupStates({});
       setPopupStatesLoaded(false);  // Reset state
+      setIsSignUpProcess(false); // Clear sign-up flag
     }
 
     setLoading(false);
@@ -147,12 +158,24 @@ export const UserProvider = ({ children }) => {
           setProfile(userProfile);
           setPopupStates(userProfile?.popup_states || {});
           setPopupStatesLoaded(true);  // Mark popup states as loaded
+          
+          // If no profile is found, redirect to login page
+          // But only if we're not in the sign-up process
+          if (!userProfile && !isSignUpProcess) {
+            console.warn('No profile found for the given user ID. Redirecting to login page.');
+            logout().then(() => {
+              window.location.href = '/';
+            });
+          } else if (userProfile) {
+            setIsSignUpProcess(false); // Clear sign-up flag when profile is found
+          }
         });
       } else {
         setUser(null);
         setProfile(null);
         setPopupStates({});
         setPopupStatesLoaded(false);  // Reset on logout
+        setIsSignUpProcess(false); // Clear sign-up flag
       }
     });
 
@@ -160,6 +183,11 @@ export const UserProvider = ({ children }) => {
       authListener.subscription.unsubscribe();
     };
   }, []);
+
+  // Function to mark that sign-up process has started
+  const startSignUpProcess = () => {
+    setIsSignUpProcess(true);
+  };
 
   return (
     <UserContext.Provider
@@ -174,6 +202,7 @@ export const UserProvider = ({ children }) => {
         getUser,
         logout,
         updatePopupState,
+        startSignUpProcess,
       }}
     >
       {children}
