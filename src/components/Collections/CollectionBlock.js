@@ -112,7 +112,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         </div>
 
                         {/* Grid for subjects */}
-                        <div className="flex flex-col overflow-y-auto h-[calc(100%-4rem)] sm:h-[calc(100%-4rem)] sm:grid sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 2xl:grid-rows-3 p-4 gap-4">
+                        <div className="flex flex-col overflow-y-auto h-[calc(100%-4rem)] sm:h-[calc(100%-4rem)] sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 2xl:grid-rows-3 p-4 gap-4">
                             {subjects.map((subject) => (
                                 <SubjectBlock
                                     key={subject.id}

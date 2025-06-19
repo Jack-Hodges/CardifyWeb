@@ -70,14 +70,17 @@ const FlashcardPDFExport = ({ flashcards }) => {
       <div className="hidden">
         <div ref={contentRef}>
           {chunkedFlashcards.map((chunk, pageIndex) => (
-            <div key={`page-${pageIndex}`} className="mb-8">
+            <React.Fragment key={`page-${pageIndex}`}>
               {/* Questions page */}
-              <div className="grid grid-cols-2 gap-4 p-4">
+              <div className="grid grid-cols-2 gap-4 p-4 mt-8">
                 {chunk.map((card, index) => (
                   <div
                     key={`q-${index}`}
-                    className="aspect-[3/2] bg-gray-50 p-5 rounded-2xl flex items-center justify-center"
+                    className="aspect-[3/2] bg-gray-50 p-5 rounded-2xl flex items-center justify-center relative"
                   >
+                    <p className={`absolute top-0 font-bold text-2xl mt-2 text-blue-500`}>
+                      Question
+                    </p>
                     {card.frontMode === 1 ? (
                       <div className="text-gray-700 font-bold text-center w-full">
                         <EditableMathField
@@ -95,17 +98,19 @@ const FlashcardPDFExport = ({ flashcards }) => {
                         />
                       </div>
                     ) : (
-                      <ReactMarkdown
-                        rehypePlugins={[rehypeRaw]}
-                        allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
-                        unwrapDisallowed={true}
-                        components={{
-                          u: ({ node, ...props }) => <u {...props} />,
-                        }}
-                        className={`${getMarkdownFontSizeClass(card.question)} text-gray-700 font-bold text-center`}
-                      >
-                        {card.question}
-                      </ReactMarkdown>
+                      <div className="text-gray-700 font-bold text-center w-full">
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+                          unwrapDisallowed={true}
+                          components={{
+                            u: ({ node, ...props }) => <u {...props} />,
+                          }}
+                          className={`${getMarkdownFontSizeClass(card.question)} text-gray-700 font-bold text-center`}
+                        >
+                          {card.question}
+                        </ReactMarkdown>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -115,7 +120,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
               <div className="break-after-page"></div>
 
               {/* Answers page */}
-              <div className="grid grid-cols-2 gap-4 p-4">
+              <div className="grid grid-cols-2 gap-4 p-4 mt-8">
                 {chunk.map((card, index) => (
                   <div
                     key={`a-${index}`}
@@ -141,23 +146,27 @@ const FlashcardPDFExport = ({ flashcards }) => {
                         />
                       </div>
                     ) : card.image_url ? (
-                      <img
-                        src={card.image_url}
-                        alt="Answer"
-                        className="max-w-full max-h-[85%] object-contain"
-                      />
+                      <div className="text-gray-700 font-bold text-center w-full flex items-center justify-center">
+                        <img
+                          src={card.image_url}
+                          alt="Answer"
+                          className="max-w-full max-h-[85%] object-contain"
+                        />
+                      </div>
                     ) : (
-                      <ReactMarkdown
-                        rehypePlugins={[rehypeRaw]}
-                        allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
-                        unwrapDisallowed={true}
-                        components={{
-                          u: ({ node, ...props }) => <u {...props} />,
-                        }}
-                        className={`${getMarkdownFontSizeClass(card.answer)} text-gray-700 font-bold text-center`}
-                      >
-                        {card.answer}
-                      </ReactMarkdown>
+                      <div className="text-gray-700 font-bold text-center w-full">
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+                          unwrapDisallowed={true}
+                          components={{
+                            u: ({ node, ...props }) => <u {...props} />,
+                          }}
+                          className={`${getMarkdownFontSizeClass(card.answer)} text-gray-700 font-bold text-center`}
+                        >
+                          {card.answer}
+                        </ReactMarkdown>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -167,7 +176,7 @@ const FlashcardPDFExport = ({ flashcards }) => {
               {pageIndex < chunkedFlashcards.length - 1 && (
                 <div className="break-after-page"></div>
               )}
-            </div>
+            </React.Fragment>
           ))}
         </div>
       </div>
