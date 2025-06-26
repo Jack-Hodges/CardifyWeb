@@ -13,6 +13,7 @@ import TopLeftMac from '../images/title/TopLeftMac.png';
 import TopRightMac from '../images/title/TopRightMac.png';
 import BottomLeftMac from '../images/title/BottomLeftMac.png';
 import CardifyImage from '../images/title/CardifyImage.png';
+import CardifyLogo from '../images/Logos/CardifyLogoOfficial.png';
 import TopLeftBlob from '../images/title/TopLeftBlob.png';
 import BottomLeftBlob from '../images/title/BottomLeftBlob.png';
 
@@ -215,7 +216,7 @@ function Welcome() {
   if (!showLogin) {
     return (
       // Changed container styles:
-      <div className="relative overflow-y-auto flex flex-col">
+      <div className="relative flex flex-col">
         <ToastContainer position="top-center" autoClose={3000} />
   
         <div className="fixed top-4 right-4 z-50">
@@ -244,9 +245,15 @@ function Welcome() {
         <div className="h-[100dvh] flex flex-col sm:flex-row">
           {/* Word Section */}
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
-            <h1 className="absolute top-0 left-3 text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
-              Cardify
-            </h1>
+            <div className="hidden sm:block absolute top-0 left-3">
+              <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
+                Cardify
+              </h1>
+            </div>
+            <div className="block sm:hidden absolute top-0 left-0">
+              <img src={CardifyLogo} alt="Cardify Logo" className="w-20" />
+            </div>
+            
             <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
               Study Smarter.
             </h2>
