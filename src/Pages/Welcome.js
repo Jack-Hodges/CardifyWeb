@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import supabase from "../supabaseClient"; 
 import { useNavigate } from "react-router-dom"; 
 import BackgroundButton from "../components/Elements/BackgroundButton";
+import MultiButton from "../components/Elements/MultiButton";
 import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
@@ -11,6 +12,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TopLeftMac from '../images/title/TopLeftMac.png';
 import TopRightMac from '../images/title/TopRightMac.png';
 import BottomLeftMac from '../images/title/BottomLeftMac.png';
+import CardifyImage from '../images/title/CardifyImage.png';
+import TopLeftBlob from '../images/title/TopLeftBlob.png';
+import BottomLeftBlob from '../images/title/BottomLeftBlob.png';
 
 // Videos
 import ThemeVideo from '../videos/Themes.webm';
@@ -66,7 +70,7 @@ function Welcome() {
       video: PracticeVideo
     },
     {
-      title: "Organize",
+      title: "Organise",
       bullets: [
         "Use Subjects to organise your flashcards",
         "Collections are used to group subjects together",
@@ -100,6 +104,14 @@ function Welcome() {
 
   const prevFeature = () => {
     setCurrentFeature((prev) => (prev - 1 + features.length) % features.length);
+  };
+
+  // Scroll to features section
+  const scrollToFeatures = () => {
+    const featuresSection = document.querySelector('.features-section');
+    if (featuresSection) {
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   // If user is already logged in, redirect to home
@@ -207,15 +219,60 @@ function Welcome() {
         <ToastContainer position="top-center" autoClose={3000} />
   
         <div className="fixed top-4 right-4 z-50">
-          <BackgroundButton
-            text="Get Started"
-            bgColor="bg-green-500 hover:bg-green-400"
-            onClick={() => setShowLogin(true)}
+          <MultiButton
+            buttons={[
+              {
+                text: "Learn More",
+                onClick: scrollToFeatures
+              },
+              {
+                text: "Sign Up",
+                onClick: () => {
+                  setShowLogin(true);
+                  setIsSignUp(true);
+                }
+              },
+              {
+                text: "Login",
+                onClick: () => setShowLogin(true)
+              },
+            ]}
           />
         </div>
   
         {/* Welcome Section */}
-        <div className="h-[100dvh] flex flex-col items-center justify-center">
+        <div className="h-[100dvh] flex flex-col sm:flex-row">
+          {/* Word Section */}
+          <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
+            <h1 className="absolute top-0 left-3 text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
+              Cardify
+            </h1>
+            <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
+              Study Smarter.
+            </h2>
+            <h3 className="text-2xl mt-4 w-2/3">
+              Create and customise your flashcards in a way that works for you.
+            </h3>
+            <div className="mt-4">
+              <BackgroundButton
+                text="Get Started"
+                onClick={() => setShowLogin(true)}
+                bgColor="bg-purple-500 hover:bg-purple-400"
+                wWidth="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-center w-full sm:w-1/2 sm:ml-[-5%]">
+            <img src={CardifyImage} alt="Illustration" className="w-2/3 sm:w-full sm:h-full object-contain" />
+            {/* <img src={TopLeftBlob} alt="Illustration" className="absolute top-1/2 left-0 w-full z-0" />
+            <img src={BottomLeftBlob} alt="Illustration" className="absolute bottom-0 left-0 w-full z-0" /> */}
+          </div>
+          
+        </div>
+
+
+        {/* <div className="h-[100dvh] flex flex-col items-center justify-center">
           <img src={TopLeftMac} alt="Mac with Cardify open" className="absolute top-5 left-5 w-96"/>
           <img src={TopRightMac} alt="Mac with Cardify open" className="absolute top-5 right-5 w-96 hidden md:block"/>
           <img src={BottomLeftMac} alt="Mac with Cardify open" className="absolute top-[30%] left-1/4 w-96"/>
@@ -223,12 +280,12 @@ function Welcome() {
             Cardify
           </h1>
           <h2 className="text-2xl text-gray-600 dark:text-gray-200">
-            Your all-in-one study solution
+            Your all in one study solution
           </h2>
-        </div>
+        </div> */}
   
         {/* Features Section */}
-        <div className="min-h-screen flex flex-col items-center py-20">
+        <div className="features-section min-h-screen flex flex-col items-center py-20">
           <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 mb-16">Features</h2>
           
           <div className="relative w-[80vw] h-[60vh]">
