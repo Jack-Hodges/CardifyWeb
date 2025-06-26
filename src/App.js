@@ -11,13 +11,30 @@ import Type from './Pages/Card Games/Type';
 import Match from './Pages/Card Games/Match';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useUser } from './UserContext';
+import { useEffect } from 'react';
 
 function App() {
 
   const { theme } = useUser();
 
+  useEffect(() => {
+    // Force iOS to hide navigation bar on scroll
+    const handleTouchStart = () => {
+      // This helps trigger iOS navigation bar hiding behavior
+      window.scrollTo(0, 1);
+      setTimeout(() => window.scrollTo(0, 0), 100);
+    };
+
+    // Add a one-time touch listener to trigger navigation bar hiding
+    document.addEventListener('touchstart', handleTouchStart, { once: true });
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+    };
+  }, []);
+
   return (
-    <div className="w-screen h-full overflow-y-auto bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen overflow-y-auto bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '', height: '100vh' }}>
       <Router>
         {/* MenuBar will be rendered on all pages */}
 
