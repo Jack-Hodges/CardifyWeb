@@ -154,7 +154,7 @@ function Dash() {
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 h-screen overflow-auto">
+        <div className="relative z-10 min-h-screen overflow-auto pb-20">
             <TitleBar text="Dash" />
 
             {/* If no subject or no cards, show the snippet */}

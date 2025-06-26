@@ -202,10 +202,10 @@ function Create() {
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 h-screen overflow-auto">
+        <div className="relative z-10 min-h-screen overflow-auto pb-20">
       <TitleBar text="Create" user={user}/>
 
-      <div className="block lg:flex w-full h-full">
+      <div className="block lg:flex w-screen h-screen">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">

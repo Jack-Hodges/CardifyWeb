@@ -268,7 +268,7 @@ function Dashboard() {
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 h-screen overflow-auto">
+      <div className="relative z-10 min-h-screen overflow-auto pb-20">
         {/* Header Section */}
         <TitleBar text="Dashboard" user={user}
         content={

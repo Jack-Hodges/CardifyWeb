@@ -328,9 +328,9 @@ const DragDropGame = () => {
       
             {/* Scrolling content */}
       <div 
-        className="relative z-10 h-screen overflow-auto"
+        className="relative z-10 min-h-screen overflow-auto pb-20"
         onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
+        onMouseUp={handleMouseUp}
       >
       <TitleBar text="Scramble" />
       {loading ? (

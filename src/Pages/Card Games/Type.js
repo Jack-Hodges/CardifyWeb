@@ -149,7 +149,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 h-screen overflow-auto">
+          <div className="relative z-10 min-h-screen overflow-auto pb-20">
             <TitleBar text="Type" />
           <div className="flex flex-col justify-center items-center h-full p-4">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
@@ -198,7 +198,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 h-screen overflow-auto">
+          <div className="relative z-10 min-h-screen overflow-auto pb-20">
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}

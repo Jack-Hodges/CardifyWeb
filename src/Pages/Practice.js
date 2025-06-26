@@ -164,10 +164,10 @@ function FlashcardQuiz() {
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 h-screen overflow-auto">
+      <div className="relative z-10 min-h-screen overflow-auto pb-20">
         <TitleBar text="Practice" />
 
-      <div className="flex w-full h-full">
+      <div className="flex w-screen h-screen">
 
         {!finished ? (
           <div className="w-full sm:w-4/5 h-[90%] sm:h-full flex flex-col mt-5 mx-auto">

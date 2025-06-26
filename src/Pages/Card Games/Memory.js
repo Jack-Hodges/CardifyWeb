@@ -199,7 +199,7 @@ function Memory() {
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 h-screen overflow-auto flex flex-col">
+        <div className="relative z-10 min-h-screen overflow-auto flex flex-col pb-20">
             <TitleBar text="Memory" />
 
             {!subject ? (
@@ -221,7 +221,7 @@ function Memory() {
             ) : (
                 <div className="relative flex-1">
                     <div 
-                        className={`grid grid-cols-2 sm:grid-cols-5 sm:grid-rows-2 gap-4 w-full h-full p-4 transition-opacity duration-1000 
+                        className={`grid grid-cols-2 sm:grid-cols-5 sm:grid-rows-2 gap-4 w-[100vw] h-[90vh] p-4 transition-opacity duration-1000 
                             ${showCards ? 'opacity-100' : 'opacity-0'}`}
                         style={{ display: showCards ? 'grid' : 'none' }}
                     >
