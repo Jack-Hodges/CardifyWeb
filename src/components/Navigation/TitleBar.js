@@ -46,7 +46,7 @@ function TitleBar( { text, content, home = false }) {
   var firstImg = images[text] || null;
 
   return (
-    <div className="flex justify-between px-4 my-2">
+    <div className="flex justify-between px-4 mb-2 pt-2">
       {/* Drop Down Navigation */}
       <div className="relative inline-block text-left z-50 ">
         {/* Use BackgroundButton as the main button */}

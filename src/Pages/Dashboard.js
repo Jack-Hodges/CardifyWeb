@@ -260,9 +260,17 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen overflow-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '', height: '100vh' }}>
-      {/* Header Section */}
-      <TitleBar text="Dashboard" user={user}
+    <div className="w-screen h-screen relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : '' }}
+      ></div>
+      
+      {/* Scrolling content */}
+      <div className="relative z-10 h-screen overflow-auto">
+        {/* Header Section */}
+        <TitleBar text="Dashboard" user={user}
         content={
           <div className="block">
             <AddBar text="Add" addSub={handleAddSubject} addCol={handleAddCollection}/>
@@ -442,6 +450,7 @@ function Dashboard() {
         firstActionCol={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
         onFirstAction={handleDismissPopup}
       />
+      </div>
     </div>
   );
 }

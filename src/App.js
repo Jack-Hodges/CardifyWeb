@@ -18,15 +18,17 @@ function App() {
   const { theme } = useUser();
 
   useEffect(() => {
-    // Force iOS to hide navigation bar on scroll
+    // Force iOS to hide navigation bar on scroll by triggering document scroll
     const handleTouchStart = () => {
-      // This helps trigger iOS navigation bar hiding behavior
-      window.scrollTo(0, 1);
-      setTimeout(() => window.scrollTo(0, 0), 100);
+      // Trigger a small scroll to enable iOS navigation bar hiding
+      setTimeout(() => {
+        window.scrollTo(0, 1);
+        setTimeout(() => window.scrollTo(0, 0), 50);
+      }, 100);
     };
 
     // Add a one-time touch listener to trigger navigation bar hiding
-    document.addEventListener('touchstart', handleTouchStart, { once: true });
+    document.addEventListener('touchstart', handleTouchStart, { once: true, passive: true });
 
     return () => {
       document.removeEventListener('touchstart', handleTouchStart);
@@ -34,7 +36,7 @@ function App() {
   }, []);
 
   return (
-    <div className="w-screen overflow-y-auto bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '', height: '100vh' }}>
+    <div className="w-screen h-screen bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
       <Router>
         {/* MenuBar will be rendered on all pages */}
 

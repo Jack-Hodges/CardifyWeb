@@ -319,10 +319,19 @@ const DragDropGame = () => {
   );
 
   return (
-    <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-    >
+    <div className="w-screen h-screen relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : ''}}
+      ></div>
+      
+            {/* Scrolling content */}
+      <div 
+        className="relative z-10 h-screen overflow-auto"
+        onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+      >
       <TitleBar text="Scramble" />
       {loading ? (
         <div className="flex items-center justify-center h-64">
@@ -412,7 +421,7 @@ const DragDropGame = () => {
         user={user}
         page='scramble'
       />
-
+      </div>
     </div>
   );
 };

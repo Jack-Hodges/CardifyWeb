@@ -1,18 +1,27 @@
+/* Universal reset to eliminate gaps */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   padding: 0;
-  height: 100%;
   background-size: cover;
   width: 100%;
+  height: 100%;
+  /* Enable iOS navigation bar hiding */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-  /* Enable iOS navigation bar hiding */
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: none;
 }
 
 code {
@@ -23,9 +32,9 @@ code {
 html {
   margin: 0;
   padding: 0;
-  height: 100%;
   background-size: cover;
   width: 100%;
+  height: 100%;
   /* Enable iOS navigation bar hiding */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
@@ -37,17 +46,46 @@ html {
 #root {
   width: 100%;
   height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  /* Enable iOS navigation bar hiding - no overflow container here */
   -webkit-overflow-scrolling: touch;
-  /* Enable iOS navigation bar hiding */
   overscroll-behavior: none;
   position: relative;
+}
+
+/* Ensure page containers start from top */
+.w-screen {
+  position: relative;
+  top: 0;
 }
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Targeted fixes to ensure no gaps at top of page */
+.page-container {
+  margin: 0;
+  padding: 0;
+  position: relative;
+  top: 0;
+}
+
+/* Fixed background for all page containers - removed fixed attachment */
+.bg-screen {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Ensure minimum height for scrollable content */
+.scrollable-content {
+  min-height: 100vh;
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 

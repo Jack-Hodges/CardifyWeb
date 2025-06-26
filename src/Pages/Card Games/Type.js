@@ -141,8 +141,16 @@ function Type() {
 
     if (finished) {
       return (
-        <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
-          <TitleBar text="Type" />
+        <div className="w-screen h-screen relative">
+          {/* Fixed background */}
+          <div 
+            className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+            style={{ backgroundImage: theme ? theme.image : ''}}
+          ></div>
+          
+          {/* Scrolling content */}
+          <div className="relative z-10 h-screen overflow-auto">
+            <TitleBar text="Type" />
           <div className="flex flex-col justify-center items-center h-full p-4">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
             <p className={`${theme ? theme.textClass : 'textColor'} font-bold text-2xl mb-10 ${shadow ? 'drop-shadow-custom' : ''}`}>Session Complete!</p>
@@ -176,12 +184,21 @@ function Type() {
               />
             </div>
           </div>
+          </div>
         </div>
       );
     }
 
     return (
-        <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+        <div className="w-screen h-screen relative">
+          {/* Fixed background */}
+          <div 
+            className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+            style={{ backgroundImage: theme ? theme.image : ''}}
+          ></div>
+          
+          {/* Scrolling content */}
+          <div className="relative z-10 h-screen overflow-auto">
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
@@ -353,6 +370,7 @@ function Type() {
               user={user}
               page='type'
             />
+        </div>
         </div>
     );
 }

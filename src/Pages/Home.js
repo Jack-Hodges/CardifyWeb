@@ -163,12 +163,19 @@ function Home() {
   );
 
   return (
-    <div className="w-screen h-screen overflow-auto bg-cover bg-screen relative" style={{ backgroundImage: theme ? theme.image : 'none' }}>
+          <div className="w-screen h-screen relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : 'none' }}
+      ></div>
+      
       {/* Overlay gradient */}
-      <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-0 pointer-events-none' : ''}`}></div>
+      <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-5 pointer-events-none' : ''}`}></div>
 
-      <div className="relative z-10">
-        <div className="mt-2 mb-2">
+      {/* Scrolling content */}
+      <div className="relative z-10 h-screen overflow-auto">
+        <div>
           <TitleBar text="Home" user={user} home={true}/>
         </div>
 

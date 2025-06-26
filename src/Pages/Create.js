@@ -193,11 +193,16 @@ function Create() {
     }
   };
 
-  return (
-    <div 
-      className="w-screen h-screen bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
-      style={{ backgroundImage: theme ? theme.image : ''}}
-    >
+      return (
+      <div className="w-screen h-screen relative">
+        {/* Fixed background */}
+        <div 
+          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{ backgroundImage: theme ? theme.image : ''}}
+        ></div>
+        
+        {/* Scrolling content */}
+        <div className="relative z-10 h-screen overflow-auto">
       <TitleBar text="Create" user={user}/>
 
       <div className="block lg:flex w-full h-full">
@@ -403,6 +408,7 @@ function Create() {
       />
 
       <ToastContainer position="top-center" autoClose={3000} />
+      </div>
     </div>
   );
 }

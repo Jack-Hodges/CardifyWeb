@@ -156,8 +156,16 @@ function FlashcardQuiz() {
   };
 
   return (
-    <div className="w-screen h-screen bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
-      <TitleBar text="Practice" />
+    <div className="w-screen h-screen relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : ''}}
+      ></div>
+      
+      {/* Scrolling content */}
+      <div className="relative z-10 h-screen overflow-auto">
+        <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
 
@@ -261,6 +269,7 @@ function FlashcardQuiz() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

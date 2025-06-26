@@ -146,7 +146,15 @@ function Dash() {
     }
 
     return (
-        <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+                                                                       <div className="w-screen h-screen relative">
+        {/* Fixed background */}
+        <div 
+          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{ backgroundImage: theme ? theme.image : ''}}
+        ></div>
+        
+        {/* Scrolling content */}
+        <div className="relative z-10 h-screen overflow-auto">
             <TitleBar text="Dash" />
 
             {/* If no subject or no cards, show the snippet */}
@@ -236,6 +244,7 @@ function Dash() {
               user={user}
               page='dash'
             />
+        </div>
         </div>
     );
 }

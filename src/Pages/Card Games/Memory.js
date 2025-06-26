@@ -191,7 +191,15 @@ function Memory() {
     }
 
     return (
-        <div className="w-screen h-screen flex flex-col overflow-auto bg-cover bg-screen" style={{ backgroundImage: image }}>
+                                   <div className="w-screen h-screen relative">
+        {/* Fixed background */}
+        <div 
+          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{ backgroundImage: image }}
+        ></div>
+        
+        {/* Scrolling content */}
+        <div className="relative z-10 h-screen overflow-auto flex flex-col">
             <TitleBar text="Memory" />
 
             {!subject ? (
@@ -277,6 +285,7 @@ function Memory() {
                     />
                 </div>
             )}
+        </div>
         </div>
     );
 }
