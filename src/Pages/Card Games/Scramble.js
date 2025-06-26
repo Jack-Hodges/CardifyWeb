@@ -319,7 +319,7 @@ const DragDropGame = () => {
   );
 
   return (
-    <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}
+    <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >

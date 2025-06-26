@@ -141,7 +141,7 @@ function Type() {
 
     if (finished) {
       return (
-        <div className="w-screen h-[100dvh] overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+        <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
           <TitleBar text="Type" />
           <div className="flex flex-col justify-center items-center h-full p-4">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
@@ -181,7 +181,7 @@ function Type() {
     }
 
     return (
-        <div className="w-screen h-[100dvh] overflow-y-none bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
+        <div className="w-screen h-screen overflow-y-auto bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : ''}}>
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
@@ -203,7 +203,7 @@ function Type() {
                 </div>
             ) : (
                 // Game area
-                <div className="flex flex-col items-center justify-center p-4 w-full h-[100dvh]">
+                <div className="flex flex-col items-center justify-center p-4 w-full h-screen">
                     <div className="w-full h-2/3 flex flex-col items-center">
                         {!showAnswer ? (
                             <div className="w-4/5 mb-8 h-full transition-transform duration-500 ease-in-out">

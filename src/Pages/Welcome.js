@@ -242,7 +242,7 @@ function Welcome() {
         </div>
   
         {/* Welcome Section */}
-        <div className="h-[100dvh] flex flex-col sm:flex-row">
+        <div className="h-screen flex flex-col sm:flex-row">
           {/* Word Section */}
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
             <div className="hidden sm:block absolute top-0 left-3">

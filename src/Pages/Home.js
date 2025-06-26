@@ -163,7 +163,7 @@ function Home() {
   );
 
   return (
-    <div className="w-screen h-[100dvh] overflow-auto bg-cover bg-screen relative" style={{ backgroundImage: theme ? theme.image : 'none' }}>
+    <div className="w-screen h-screen overflow-auto bg-cover bg-screen relative" style={{ backgroundImage: theme ? theme.image : 'none' }}>
       {/* Overlay gradient */}
       <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-0 pointer-events-none' : ''}`}></div>
 

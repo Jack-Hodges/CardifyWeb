@@ -195,7 +195,7 @@ function Create() {
 
   return (
     <div 
-      className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
+      className="w-screen h-screen bg-cover bg-screen overflow-y-scroll lg:overflow-y-hidden" 
       style={{ backgroundImage: theme ? theme.image : ''}}
     >
       <TitleBar text="Create" user={user}/>

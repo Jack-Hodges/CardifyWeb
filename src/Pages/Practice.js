@@ -156,7 +156,7 @@ function FlashcardQuiz() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
+    <div className="w-screen h-screen bg-cover bg-screen overflow-y-auto" style={{ backgroundImage: theme ? theme.image : ''}}>
       <TitleBar text="Practice" />
 
       <div className="flex w-full h-full">
