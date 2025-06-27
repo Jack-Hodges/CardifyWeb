@@ -223,7 +223,7 @@ function Type() {
                 <div className="flex flex-col items-center justify-center p-4 w-full h-screen">
                     <div className="w-full h-2/3 flex flex-col items-center">
                         {!showAnswer ? (
-                            <div className="w-4/5 mb-8 h-full transition-transform duration-500 ease-in-out">
+                            <div className="w-full sm:w-4/5 mb-8 h-full transition-transform duration-500 ease-in-out">
                                 <Card 
                                     card={filteredCards[currentCardIndex]} 
                                     flipped={false}
@@ -233,7 +233,7 @@ function Type() {
                                 />
                             </div>
                         ) : (
-                            <div className="w-full h-[93%] flex gap-4 ml-10 mr-10 transition-opacity duration-500 ease-in-out">
+                            <div className="w-full h-[93%] flex flex-col sm:flex-row gap-4 ml-10 mr-10 transition-opacity duration-500 ease-in-out">
                                 <div className="relative h-4/5 w-full flex background-shadow-new bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl items-center justify-center">
                                     <h1 className="absolute top-0 font-bold text-2xl mt-2 text-yellow-500">Answer</h1>
                                     {filteredCards[currentCardIndex].backMode === 1 ? (

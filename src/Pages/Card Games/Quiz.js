@@ -176,8 +176,16 @@ function Quiz() {
   }
 
   return (
-    <div className="relative w-screen h-[100vh] overflow-y-none bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
-      <TitleBar text="Quiz" />
+    <div className="w-screen h-screen relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : '' }}
+      ></div>
+      
+      {/* Scrolling content */}
+      <div className="relative z-10 min-h-screen overflow-auto pb-20">
+        <TitleBar text="Quiz" />
       <div className="block sm:flex w-full h-full">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
@@ -190,7 +198,7 @@ function Quiz() {
         ) : cards.length >= 4 ? (
           !finished ? (
             <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-4/5 min-h-[40vh] h-4/5 sm:w-3/5 sm:h-1/4 mt-5 px-5">
+              <div className="mx-auto w-[100vw] min-h-[40vh] h-[40vh] sm:w-[60vw] sm:h-[25vh] mt-5 px-5">
                 <Card
                   card={cards[currentCardIndex]}
                   edit={false}
@@ -198,7 +206,7 @@ function Quiz() {
                   themeShadow={'background-shadow-new'}
                 />
               </div>
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 w-[90%] h-[calc(100%-2rem)] mx-auto gap-4 mt-4 mb-24">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 mx-auto w-[90vw] gap-4 mt-4">
                 {randomizedOptions[currentCardIndex]?.map((option, index) => {
                   // Determine the mode for the current card using the same logic:
                   const mode = cards[currentCardIndex].frontMode === 1 || cards[currentCardIndex].backMode === 1
@@ -220,12 +228,13 @@ function Quiz() {
                   );
                 })}
               </div>
-              <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-4 p-4">
+              <div className="flex justify-center gap-4 p-4">
                 <BackgroundButton
                   text="Previous Card"
                   bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
                   wWidth="w-40"
                   onClick={goToPreviousCard}
+                  disabled={currentCardIndex === 0}
                 />
                 <BackgroundButton
                   text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
@@ -357,6 +366,7 @@ function Quiz() {
           </div>
         )}
       </div>
+      </div>
       <SubjectList
         isOpen={isSubjectListModalOpen}
         onClose={() => setIsSubjectListModalOpen(false)}
@@ -408,7 +418,7 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
 
   return (
     <div
-      className={`w-full h-[calc(100%-1rem)] ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-4 text-center flex items-center justify-center font-bold textColor`}
+      className={`w-full h-auto sm:h-[20vh] ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-4 text-center flex items-center justify-center font-bold textColor`}
       onClick={onClick}
     >
       <div className="w-full h-full overflow-hidden flex items-center justify-center">
