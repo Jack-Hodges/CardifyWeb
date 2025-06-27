@@ -185,6 +185,7 @@ const DragDropGame = () => {
   const handleStartDrag = (event, area, chunk) => {
     // Prevent default to stop scroll/selection
     event.preventDefault();
+    event.stopPropagation();
     
     const { clientX, clientY } = getEventCoordinates(event);
     const target = event.currentTarget; // Use currentTarget for better reliability
@@ -201,6 +202,7 @@ const DragDropGame = () => {
     if (event.type === 'touchstart') {
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
       document.addEventListener('touchend', handleTouchEnd, { passive: false });
+      document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
     } else {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -307,6 +309,7 @@ const DragDropGame = () => {
     document.removeEventListener('mouseup', handleMouseUp);
     document.removeEventListener('touchmove', handleTouchMove);
     document.removeEventListener('touchend', handleTouchEnd);
+    document.removeEventListener('touchcancel', handleTouchEnd);
   };
 
   const finalizeDrop = () => {
@@ -365,7 +368,7 @@ const DragDropGame = () => {
       onMouseDown={(e) => handleStartDrag(e, area, chunk)}
       onTouchStart={(e) => handleStartDrag(e, area, chunk)}
       className={`
-        ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
+        ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
         rounded bg-white shadow-sm border border-gray-200 text-gray-700 
         cursor-pointer inline-flex items-center justify-center text-center
         ${isMobile ? 'active:bg-gray-50 active:scale-95' : 'hover:bg-gray-50'}
@@ -376,10 +379,10 @@ const DragDropGame = () => {
         WebkitUserSelect: 'none',
         userSelect: 'none',
         WebkitTouchCallout: 'none',
-        touchAction: 'none'
+        touchAction: 'manipulation'
       }}
     >
-      <ReactMarkdown className="pointer-events-none">{chunk.content}</ReactMarkdown>
+      <ReactMarkdown className="pointer-events-none text-xs">{chunk.content}</ReactMarkdown>
     </div>
   );
 
@@ -466,156 +469,167 @@ const DragDropGame = () => {
   };
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-screen relative overflow-hidden">
       {/* Fixed background */}
       <div 
         className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
         style={{ backgroundImage: theme ? theme.image : ''}}
       ></div>
       
-      {/* Scrolling content */}
+      {/* Fixed height content - no scrolling */}
       <div 
-        className="relative z-10 min-h-screen overflow-auto pb-20"
+        className="relative z-10 h-full flex flex-col"
         onMouseMove={!isMobile ? handleMouseMove : undefined}
         onMouseUp={!isMobile ? handleMouseUp : undefined}
         style={{ 
-          overscrollBehavior: 'contain', // Prevent pull-to-refresh on mobile
-          touchAction: dragging ? 'none' : 'auto'
+          touchAction: dragging ? 'none' : 'manipulation',
+          overscrollBehavior: 'none'
         }}
       >
-        <TitleBar text="Scramble" />
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-gray-600">Loading cards...</div>
-          </div>
-        ) : !cards.length ? (
-          <div className="flex flex-col justify-center items-center w-full h-full">
-            {subject ? (
-              <NoSelectionModal
-                text={`${subject.name} has no flashcards`}
-                text1={`Add Flashcards to ${subject.name}`}
-                action1={handleSwitchToCreate}
-              />
-            ) : (
-              <NoSelectionModal
-                text="No subject selected"
-                text1="Select a subject to practice"
-                action1={handleOpenSubjectListModal}
-              />
-            )}
-          </div>
-        ) : (
-          <div className={`${isMobile ? 'p-3' : 'p-4'}`}>
-            <div className={`mb-4 ${isMobile ? 'flex-col space-y-3' : 'flex justify-between items-center'}`}>
-              <h2 className={`${isMobile ? 'text-lg text-center' : 'text-xl'} font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
-                Card {currentCardIndex + 1} of {cards.length}
-              </h2>
-              <div className={`${isMobile ? 'flex justify-center' : ''} space-x-2`}>
-                <BackgroundButton 
-                  text="Previous Card" 
-                  bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} 
-                  disabled={currentCardIndex === 0} 
-                  wWidth={isMobile ? "w-32" : "w-40"} 
-                  onClick={() => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}
-                />
-                <BackgroundButton 
-                  text="Next Card" 
-                  bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} 
-                  disabled={currentCardIndex === cards.length - 1} 
-                  wWidth={isMobile ? "w-32" : "w-40"} 
-                  onClick={() => setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1))}
-                />
-              </div>
+        <div className="flex-shrink-0">
+          <TitleBar text="Scramble" />
+        </div>
+        
+        <div className="flex-1 flex flex-col min-h-0">
+          {loading ? (
+            <div className="flex items-center justify-center flex-1">
+              <div className="text-lg text-gray-600">Loading cards...</div>
             </div>
+          ) : !cards.length ? (
+            <div className="flex flex-col justify-center items-center flex-1">
+              {subject ? (
+                <NoSelectionModal
+                  text={`${subject.name} has no flashcards`}
+                  text1={`Add Flashcards to ${subject.name}`}
+                  action1={handleSwitchToCreate}
+                />
+              ) : (
+                <NoSelectionModal
+                  text="No subject selected"
+                  text1="Select a subject to practice"
+                  action1={handleOpenSubjectListModal}
+                />
+              )}
+            </div>
+          ) : (
+            <div className={`flex-1 flex flex-col ${isMobile ? 'p-2' : 'p-4'} min-h-0 overflow-hidden`}>
+              <div className={`flex-shrink-0 ${isMobile ? 'mb-2' : 'mb-4'} ${isMobile ? 'flex-col space-y-2' : 'flex justify-between items-center'}`}>
+                <h2 className={`${isMobile ? 'text-base text-center' : 'text-xl'} font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
+                  Card {currentCardIndex + 1} of {cards.length}
+                </h2>
+                <div className={`${isMobile ? 'flex justify-center' : ''} space-x-2`}>
+                  <BackgroundButton 
+                    text="Previous" 
+                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} 
+                    disabled={currentCardIndex === 0} 
+                    wWidth={isMobile ? "w-28" : "w-32"} 
+                    onClick={() => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}
+                  />
+                  <BackgroundButton 
+                    text="Next" 
+                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} 
+                    disabled={currentCardIndex === cards.length - 1} 
+                    wWidth={isMobile ? "w-28" : "w-32"} 
+                    onClick={() => setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1))}
+                  />
+                </div>
+              </div>
 
-            <div className={`flex flex-col ${isMobile ? 'space-y-6' : 'space-y-4'}`}>
-              <DropArea id="question" items={questionArea} title="Question" theme={theme}/>
-              <DropArea id="answer" items={answerArea} title="Answer" theme={theme}/>
+              <div className={`flex-1 flex flex-col ${isMobile ? 'space-y-2' : 'space-y-3'} min-h-0 overflow-hidden`}>
+                <div className="flex-shrink-0">
+                  <DropArea id="question" items={questionArea} title="Question" theme={theme}/>
+                </div>
+                <div className="flex-shrink-0">
+                  <DropArea id="answer" items={answerArea} title="Answer" theme={theme}/>
+                </div>
 
-              <div id="drop-area-available">
-                <h3 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold py-2 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
-                  {isMobile ? 'Tap and drag the blocks' : 'Drag the blocks'}
-                </h3>
-                <div className={`
-                  ${isMobile ? 'px-4 py-4 min-h-[80px]' : 'px-4 py-2 min-h-14'} 
-                  rounded-lg border-2 border-dashed 
-                  ${activeDropArea === 'available' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} 
-                  flex flex-wrap gap-2 relative transition-all duration-200
-                `}>
-                  {availableChunks.map((chunk, index) => (
-                    <React.Fragment key={chunk.id}>
-                      {activeDropArea === 'available' && dropPosition === index && draggedItem && (
+                <div className="flex-1 min-h-0">
+                  <div id="drop-area-available">
+                    <h3 className={`${isMobile ? 'text-lg' : 'text-lg'} font-semibold py-1 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
+                      {isMobile ? 'Tap and drag the blocks' : 'Drag the blocks'}
+                    </h3>
+                    <div className={`
+                      ${isMobile ? 'px-3 py-3 min-h-[60px]' : 'px-4 py-2 min-h-14'} 
+                      rounded-lg border-2 border-dashed 
+                      ${activeDropArea === 'available' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} 
+                      flex flex-wrap gap-2 relative transition-all duration-200 h-full overflow-y-auto
+                    `}>
+                      {availableChunks.map((chunk, index) => (
+                        <React.Fragment key={chunk.id}>
+                          {activeDropArea === 'available' && dropPosition === index && draggedItem && (
+                            <div className={`
+                              ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
+                              rounded border-2 ${theme ? borderCol : 'border-blue-500'} bg-blue-100
+                              inline-flex items-center justify-center text-center opacity-75
+                            `}>
+                              <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+                            </div>
+                          )}
+                          <ChunkItem chunk={chunk} area="available" />
+                        </React.Fragment>
+                      ))}
+                      {activeDropArea === 'available' && dropPosition === availableChunks.length && draggedItem && (
                         <div className={`
-                          ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
-                          rounded border-2 ${theme ? borderCol : 'border-blue-500'} bg-blue-100
+                          ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
+                          rounded border-2 border-blue-500 bg-blue-100
                           inline-flex items-center justify-center text-center opacity-75
                         `}>
                           <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
                         </div>
                       )}
-                      <ChunkItem chunk={chunk} area="available" />
-                    </React.Fragment>
-                  ))}
-                  {activeDropArea === 'available' && dropPosition === availableChunks.length && draggedItem && (
-                    <div className={`
-                      ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
-                      rounded border-2 border-blue-500 bg-blue-100
-                      inline-flex items-center justify-center text-center opacity-75
-                    `}>
-                      <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+                      {availableChunks.length === 0 && !draggedItem && (
+                        <div className={`
+                          ${isMobile ? 'text-sm py-3' : 'text-sm py-2'} 
+                          text-gray-400 italic text-center w-full
+                        `}>
+                          All blocks have been placed!
+                        </div>
+                      )}
                     </div>
-                  )}
-                  {availableChunks.length === 0 && !draggedItem && (
-                    <div className={`
-                      ${isMobile ? 'text-base py-4' : 'text-sm py-2'} 
-                      text-gray-400 italic text-center w-full
-                    `}>
-                      All blocks have been placed!
+                  </div>
+                </div>
+
+                {/* Check Answer and Reset Buttons */}
+                <div className={`flex-shrink-0 flex ${isMobile ? 'justify-center' : 'justify-start'} pt-2`}>
+                  {!isChecked ? (
+                    <BackgroundButton
+                      text="Check Answer"
+                      bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-blue-600 hover:bg-blue-500"}
+                      onClick={checkAnswer}
+                      disabled={questionArea.length === 0 && answerArea.length === 0}
+                    />
+                  ) : (
+                    <div className={`flex ${isMobile ? 'flex-col space-y-2 items-center' : 'flex-row space-x-3 items-center'}`}>
+                      <BackgroundButton
+                        text="Reset"
+                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-gray-600 hover:bg-gray-500"}
+                        wWidth={isMobile ? "w-32" : "w-32"}
+                        onClick={resetAnswer}
+                      />
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Check Answer and Reset Buttons */}
-              <div className={`flex ${isMobile ? 'justify-center' : 'justify-start'} pt-4`}>
-                {!isChecked ? (
-                  <BackgroundButton
-                    text="Check Answer"
-                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-blue-600 hover:bg-blue-500"}
-                    onClick={checkAnswer}
-                    disabled={questionArea.length === 0 && answerArea.length === 0}
-                  />
-                ) : (
-                  <div className={`flex ${isMobile ? 'flex-col space-y-2 items-center' : 'flex-row space-x-3 items-center'}`}>
-                    <BackgroundButton
-                      text="Reset"
-                      bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-gray-600 hover:bg-gray-500"}
-                      wWidth={isMobile ? "w-full max-w-xs" : "w-32"}
-                      onClick={resetAnswer}
-                    />
-                  </div>
-                )}
-              </div>
             </div>
+          )}
+        </div>
 
-            {dragging && draggedItem && (
-              <div
-                ref={dragItemRef}
-                className={`
-                  fixed pointer-events-none z-[9999]
-                  ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
-                  rounded bg-white shadow-xl border-2 border-blue-500
-                  inline-flex items-center justify-center text-center
-                  opacity-90 transform scale-105
-                `}
-                style={{
-                  left: '-9999px',
-                  top: '-9999px',
-                }}
-              >
-                <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
-              </div>
-            )}
+        {dragging && draggedItem && (
+          <div
+            ref={dragItemRef}
+            className={`
+              fixed pointer-events-none z-[9999]
+              ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
+              rounded bg-white shadow-xl border-2 border-blue-500
+              inline-flex items-center justify-center text-center
+              opacity-90 transform scale-105
+            `}
+            style={{
+              left: '-9999px',
+              top: '-9999px',
+            }}
+          >
+            <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
           </div>
         )}
 
