@@ -6,6 +6,7 @@ console.log('ENV STRIPE_SECRET_KEY:', !!process.env.STRIPE_SECRET_KEY);
 console.log('ENV STRIPE_PRICE_ID:', process.env.STRIPE_PRICE_ID);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+console.log('Stripe instance created');
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 export default async function handler(req, res) {
