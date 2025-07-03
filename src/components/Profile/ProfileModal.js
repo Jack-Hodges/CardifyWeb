@@ -10,7 +10,7 @@ import { Cog } from 'lucide-react';
 import Modal from '../Modals/Modal';
 
 function ProfileModal({ isOpen, onClose, mainText, logout }) {
-    const { theme, profile } = useUser();
+    const { theme, profile, upgradeToPro, manageBilling } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
@@ -526,9 +526,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             />
                             <p className="mt-4">You are currently on the {profile.pro ? 'Pro' : 'Free'} plan.</p>
                             {profile.pro ? (
-                                <BackgroundButton text="Cancel Subscription" bgColor="bg-red-500 hover:bg-red-400" onClick={() => {}} />
+                                <BackgroundButton text="Manage Billing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={manageBilling} />
                             ) : (
-                                <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={() => {}} />
+                                <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={upgradeToPro} />
                             )}
 
                             <p className="mt-4">Permanently delete your account</p>
