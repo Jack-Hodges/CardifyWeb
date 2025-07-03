@@ -50,39 +50,73 @@ async function handleCheckoutSessionCompleted(session) {
   try {
     const userId = session.metadata?.userId;
     const customerId = session.customer;
-    console.log('Handling checkout.session.completed for userId:', userId, 'customerId:', customerId);
+    console.log('=== CHECKOUT SESSION COMPLETED ===');
+    console.log('userId:', userId);
+    console.log('customerId:', customerId);
+    console.log('session mode:', session.mode);
+    console.log('session status:', session.status);
+    
     if (!userId || !customerId) {
-      console.log('Missing userId or customerId in session metadata.');
+      console.log('❌ Missing userId or customerId in session metadata.');
       return;
     }
 
     // Get the customer's active subscription
-    const subscriptions = await stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 1 });
+    console.log('🔍 Looking for subscriptions for customer:', customerId);
+    const subscriptions = await stripe.subscriptions.list({ 
+      customer: customerId, 
+      status: 'all', 
+      limit: 10  // Increased limit to see more
+    });
+    
+    console.log('📊 Found subscriptions:', subscriptions.data.length);
+    subscriptions.data.forEach((sub, index) => {
+      console.log(`  Subscription ${index + 1}:`, {
+        id: sub.id,
+        status: sub.status,
+        current_period_end: new Date(sub.current_period_end * 1000).toISOString()
+      });
+    });
+    
     const subscription = subscriptions.data[0];
     if (!subscription) {
-      console.log('No subscription found for customer:', customerId);
+      console.log('❌ No subscription found for customer:', customerId);
       return;
     }
+    
     const isActive = subscription.status === 'active';
     const periodEnd = new Date(subscription.current_period_end * 1000);
+    
+    console.log('📋 Subscription details:');
+    console.log('  - ID:', subscription.id);
+    console.log('  - Status:', subscription.status);
+    console.log('  - Is Active:', isActive);
+    console.log('  - Period End:', periodEnd.toISOString());
 
     // Update the user's profile in Supabase
-    const { error } = await supabase
+    console.log('💾 Updating user profile for userId:', userId);
+    const updateData = {
+      pro: isActive,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscription.id,
+      subscription_period_end: periodEnd.toISOString(),
+    };
+    console.log('📝 Update data:', updateData);
+    
+    const { data, error } = await supabase
       .from('profiles')
-      .update({
-        pro: isActive,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscription.id,
-        subscription_period_end: periodEnd.toISOString(),
-      })
-      .eq('id', userId);
+      .update(updateData)
+      .eq('id', userId)
+      .select();  // Added select to see what was updated
+      
     if (error) {
-      console.error('Error updating user profile after checkout.session.completed:', error);
+      console.error('❌ Error updating user profile:', error);
     } else {
-      console.log('User profile updated to pro after checkout.session.completed:', userId);
+      console.log('✅ User profile updated successfully!');
+      console.log('📄 Updated profile data:', data);
     }
   } catch (err) {
-    console.error('Error in handleCheckoutSessionCompleted:', err);
+    console.error('💥 Error in handleCheckoutSessionCompleted:', err);
   }
 }
 
