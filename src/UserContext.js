@@ -189,6 +189,55 @@ export const UserProvider = ({ children }) => {
     setIsSignUpProcess(true);
   };
 
+  // Subscription functions
+  const upgradeToPro = async () => {
+    if (!user?.id) {
+      console.error('No user logged in');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error upgrading to pro:', error);
+    }
+  };
+
+  const manageBilling = async () => {
+    if (!user?.id) {
+      console.error('No user logged in');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-billing-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to access billing portal');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error accessing billing portal:', error);
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -203,6 +252,8 @@ export const UserProvider = ({ children }) => {
         logout,
         updatePopupState,
         startSignUpProcess,
+        upgradeToPro,
+        manageBilling,
       }}
     >
       {children}

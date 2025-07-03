@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
+    "@stripe/stripe-js": "^7.4.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.45.3",
@@ -20,6 +21,7 @@
     "lucide-react": "^0.460.0",
     "lucide-solid": "^0.511.0",
     "mathquill": "^0.10.1-a",
+    "micro": "^10.0.1",
     "node": "^23.7.0",
     "openai": "^5.3.0",
     "papaparse": "^5.5.3",
@@ -42,6 +44,7 @@
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",
     "remark-math": "^6.0.0",
+    "stripe": "^18.3.0",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
