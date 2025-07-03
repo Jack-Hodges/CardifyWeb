@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 console.log('Starting create-checkout-session API');
 console.log('ENV STRIPE_SECRET_KEY:', !!process.env.STRIPE_SECRET_KEY);
 console.log('ENV SUPABASE_URL:', !!process.env.SUPABASE_URL);
-console.log('ENV SUPABASE_SERVICE_KEY:', !!process.env.SUPABASE_SERVICE_KEY);
 console.log('ENV STRIPE_PRICE_ID:', process.env.STRIPE_PRICE_ID);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
