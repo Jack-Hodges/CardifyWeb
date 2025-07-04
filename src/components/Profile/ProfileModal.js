@@ -16,6 +16,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isUnlimitedProModalOpen, setIsUnlimitedProModalOpen] = useState(false);
     const [newFirstName, setNewFirstName] = useState('');
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
@@ -280,6 +281,15 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         setIsEditModalOpen(false);
     };
 
+    const handleManageBillingClick = () => {
+        // Check if user has pro but no subscription_period_end (unlimited pro)
+        if (profile.pro && !profile.subscription_period_end) {
+            setIsUnlimitedProModalOpen(true);
+        } else {
+            manageBilling();
+        }
+    };
+
     if (!isVisible && !isClosing) return null;
 
     return (
@@ -307,7 +317,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             <div className="flex justify-between items-center mb-6">
                                 <span className={`text-white text-4xl font-semibold`}>Hey {profile.first_name}</span>
                                 <div className="flex space-x-2">
-                                    <BackgroundButton image={<Cog />} bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                                    <BackgroundButton image={<Cog />} text="Settings" flip={true}bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
                                     <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                                 </div>
                             </div>
@@ -425,9 +435,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                     </div>
                 }
                 firstActionText="Close"
-                firstActionCol="bg-gray-500 hover:bg-gray-400"
-                secondActionText=""
-                secondActionCol=""
+                firstActionCol="bg-red-500 hover:bg-red-400"
                 width="w-full h-full sm:h-auto sm:w-2/3"
             />
             <Modal
@@ -526,7 +534,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             />
                             <p className="mt-4">You are currently on the {profile.pro ? 'Pro' : 'Free'} plan.</p>
                             {profile.pro ? (
-                                <BackgroundButton text="Manage Billing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={manageBilling} />
+                                <BackgroundButton text="Manage Billing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleManageBillingClick} />
                             ) : (
                                 <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={upgradeToPro} />
                             )}
@@ -539,9 +547,23 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 }
                 width="w-full sm:w-2/3 h-full sm:h-auto"
                 firstActionText="Cancel"
-                firstActionCol="bg-gray-500 hover:bg-gray-400"
+                firstActionCol="bg-red-500 hover:bg-red-400"
                 secondActionText="Save"
                 secondActionCol="bg-blue-500 hover:bg-blue-400"
+            />
+            <Modal
+                isOpen={isUnlimitedProModalOpen}
+                onFirstAction={() => setIsUnlimitedProModalOpen(false)}
+                text="Unlimited Pro"
+                mainText={
+                    <div className="space-y-4">
+                        <p className="text-gray-300">You have unlimited Pro access and do not require a payment method.</p>
+                        <p className="text-gray-300">Enjoy all Pro features without any billing concerns!</p>
+                    </div>
+                }
+                width="w-full sm:w-2/3 h-full sm:h-auto"
+                firstActionText="Great!"
+                firstActionCol="bg-green-500 hover:bg-green-400"
             />
         </>
     );

@@ -140,7 +140,7 @@ function Create() {
       // Check if user has exceeded their daily limit
       const dailyLimit = profile.pro ? 60 : 20;
       if (profile.generation_count + count > dailyLimit) {
-        toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today.`);
+        toast.error(`Daily limit exceeded. You can generate ${dailyLimit - profile.generation_count} more cards today. Generation resets at 12am Australian Eastern Time.`);
         setIsGenerating(false);
         setIsGenerateModalOpen(false);
         return;
