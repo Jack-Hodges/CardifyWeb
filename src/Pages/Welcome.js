@@ -242,7 +242,7 @@ function Welcome() {
         </div>
   
         {/* Welcome Section */}
-                                     <div className="h-screen flex flex-col sm:flex-row">
+        <div className="h-screen flex flex-col sm:flex-row">
           {/* Word Section */}
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
             <div className="hidden sm:block absolute top-0 left-3">
@@ -436,8 +436,8 @@ function Welcome() {
           </div> */}
 
           <div className="mt-8">
-            <p className="text-gray-600 dark:text-gray-200">
-              {isSignUp ? "Sign up with your email address" : "Sign in with your email address"}
+            <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
+              {isSignUp ? "Sign ups are currently disabled. Please stay tuned for more information!" : "Sign in with your email address"}
             </p>
 
             {/* First Name Input */}
