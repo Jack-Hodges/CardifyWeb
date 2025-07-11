@@ -525,10 +525,15 @@ function ControlSection({
 
         {/* Search Container */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
+          className={`relative transition-all duration-300 ease-in-out ${
             activeSection === 'search' ? 'w-4/5' : 'w-10'
           }`}
         >
+          <div
+            className={`absolute inset-0 rounded-full backdrop-blur-md bg-black/20 pointer-events-none transition-opacity duration-300 ${
+              activeSection === 'search' ? 'opacity-100' : 'opacity-0'
+            }`}
+          ></div>
           {activeSection === 'search' ? (
             // Expanded search: full input.
             <input

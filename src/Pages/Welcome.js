@@ -39,7 +39,7 @@ function Welcome() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
-  const { user, setUser, startSignUpProcess } = useUser();
+  const { user, setUser, startSignUpProcess, theme } = useUser();
 
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
@@ -215,9 +215,13 @@ function Welcome() {
   // If showLogin is false, display the simple welcome page
   if (!showLogin) {
     return (
-      // Changed container styles:
-      <div className="relative flex flex-col">
-        <ToastContainer position="top-center" autoClose={3000} />
+      <div className="w-screen h-screen relative">
+        <div
+          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{ backgroundImage: theme ? theme.image : '' }}
+        ></div>
+        <div className="relative z-10 min-h-screen overflow-auto flex flex-col">
+          <ToastContainer position="top-center" autoClose={3000} />
   
         <div className="fixed top-4 right-4 z-50">
           <MultiButton
@@ -376,14 +380,20 @@ function Welcome() {
             </div>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   // If showLogin is true, show the sign-in/sign-up component
   return (
-    <div className="min-h-screen block sm:flex">
-      <ToastContainer position="top-center" autoClose={3000} />
+    <div className="w-screen h-screen relative">
+      <div
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{ backgroundImage: theme ? theme.image : '' }}
+      ></div>
+      <div className="relative z-10 min-h-screen overflow-auto block sm:flex">
+        <ToastContainer position="top-center" autoClose={3000} />
 
       {/* Top bar container */}
       <div className="absolute top-4 w-full flex items-center justify-between px-4 z-50">
