@@ -257,17 +257,18 @@ function Welcome() {
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
             <div className="hidden sm:block absolute top-0 left-3">
               <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
-                Cardify
+                Cardify <span className="text-gray-500 dark:text-gray-400 text-xl sm:text-3xl">beta</span>
               </h1>
             </div>
-            <div className="block sm:hidden absolute top-0 left-0">
+            <div className="flex justify-center items-center sm:hidden absolute top-0 left-0">
               <img src={CardifyLogo} alt="Cardify Logo" className="w-20" />
+              <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">beta</p>
             </div>
             
             <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
               Study Smarter.
             </h2>
-            <h3 className="text-2xl mt-4 w-2/3 text-gray-600 dark:text-gray-400">
+            <h3 className="text-2xl mt-4 w-[95%] text-center sm:text-left sm:w-2/3 text-gray-600 dark:text-gray-400">
               Create and customise your flashcards in a way that works for you.
             </h3>
             <div className="mt-4">
@@ -302,7 +303,7 @@ function Welcome() {
         </div> */}
   
         {/* Features Section */}
-        <div className="features-section min-h-screen flex flex-col items-center py-20">
+        <div className="features-section min-h-screen flex flex-col items-center py-20 bg-[#f1ebe0] dark:bg-gray-800">
           <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 mb-16">Features</h2>
           
           <div className="relative w-[80vw] h-[60vh]">
@@ -456,9 +457,9 @@ function Welcome() {
           </div> */}
 
           <div className="mt-8">
-            <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
+            {/* <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
               {isSignUp ? "Sign ups are currently disabled. Please stay tuned for more information!" : "Sign in with your email address"}
-            </p>
+            </p> */}
 
             {/* First Name Input */}
             {isSignUp && (
