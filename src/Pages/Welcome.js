@@ -39,7 +39,7 @@ function Welcome() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
-  const { user, setUser, startSignUpProcess } = useUser();
+  const { user, setUser, startSignUpProcess, theme } = useUser();
 
   const [currentFeature, setCurrentFeature] = useState(0);
   const features = [
@@ -114,6 +114,8 @@ function Welcome() {
       featuresSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+
 
   // If user is already logged in, redirect to home
   if (user) {
@@ -215,9 +217,17 @@ function Welcome() {
   // If showLogin is false, display the simple welcome page
   if (!showLogin) {
     return (
-      // Changed container styles:
-      <div className="relative flex flex-col">
-        <ToastContainer position="top-center" autoClose={3000} />
+      <div className="w-screen h-screen relative">
+        <div
+          className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+          style={{ 
+            backgroundImage: theme.image,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        ></div>
+        <div className="relative z-10 min-h-screen flex flex-col">
+          <ToastContainer position="top-center" autoClose={3000} />
   
         <div className="fixed top-4 right-4 z-50">
           <MultiButton
@@ -242,22 +252,23 @@ function Welcome() {
         </div>
   
         {/* Welcome Section */}
-        <div className="h-screen flex flex-col sm:flex-row">
+        <div className="h-screen flex flex-col sm:flex-row bg-[#f1ebe0] dark:bg-gray-800">
           {/* Word Section */}
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
             <div className="hidden sm:block absolute top-0 left-3">
               <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
-                Cardify
+                Cardify <span className="text-gray-500 dark:text-gray-400 text-xl sm:text-3xl">beta</span>
               </h1>
             </div>
-            <div className="block sm:hidden absolute top-0 left-0">
+            <div className="flex justify-center items-center sm:hidden absolute top-0 left-0">
               <img src={CardifyLogo} alt="Cardify Logo" className="w-20" />
+              <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">beta</p>
             </div>
             
             <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
               Study Smarter.
             </h2>
-            <h3 className="text-2xl mt-4 w-2/3">
+            <h3 className="text-2xl mt-4 w-[95%] text-center sm:text-left sm:w-2/3 text-gray-600 dark:text-gray-400">
               Create and customise your flashcards in a way that works for you.
             </h3>
             <div className="mt-4">
@@ -292,7 +303,7 @@ function Welcome() {
         </div> */}
   
         {/* Features Section */}
-        <div className="features-section min-h-screen flex flex-col items-center py-20">
+        <div className="features-section min-h-screen flex flex-col items-center py-20 bg-[#f1ebe0] dark:bg-gray-800">
           <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 mb-16">Features</h2>
           
           <div className="relative w-[80vw] h-[60vh]">
@@ -331,8 +342,8 @@ function Welcome() {
               
               {/* Features text */}
               <div className="w-full sm:w-1/2 mb-10 sm:mb-0">
-                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800">{features[currentFeature].title}</h3>
-                <ul className="text-gray-600 text-lg space-y-2 mt-4">
+                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-200">{features[currentFeature].title}</h3>
+                <ul className="text-gray-600 dark:text-gray-400 text-lg space-y-2 mt-4">
                   {features[currentFeature].bullets.map((bullet, index) => (
                     <li key={index} className="flex items-start">
                       <span className="mr-2">•</span>
@@ -376,14 +387,24 @@ function Welcome() {
             </div>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   // If showLogin is true, show the sign-in/sign-up component
   return (
-    <div className="min-h-screen block sm:flex">
-      <ToastContainer position="top-center" autoClose={3000} />
+    <div className="w-screen h-screen relative">
+      <div
+        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        style={{ 
+          backgroundImage: theme.image,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      ></div>
+      <div className="relative z-10 min-h-screen block sm:flex">
+        <ToastContainer position="top-center" autoClose={3000} />
 
       {/* Top bar container */}
       <div className="absolute top-4 w-full flex items-center justify-between px-4 z-50">
@@ -436,9 +457,9 @@ function Welcome() {
           </div> */}
 
           <div className="mt-8">
-            <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
+            {/* <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
               {isSignUp ? "Sign ups are currently disabled. Please stay tuned for more information!" : "Sign in with your email address"}
-            </p>
+            </p> */}
 
             {/* First Name Input */}
             {isSignUp && (
@@ -515,6 +536,7 @@ function Welcome() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

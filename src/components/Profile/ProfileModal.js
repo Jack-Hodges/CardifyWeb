@@ -317,7 +317,12 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                             <div className="flex justify-between items-center mb-6">
                                 <span className={`text-white text-4xl font-semibold`}>Hey {profile.first_name}</span>
                                 <div className="flex space-x-2">
-                                    <BackgroundButton image={<Cog />} text="Settings" flip={true}bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                                    <div className="block sm:hidden">
+                                        <BackgroundButton image={<Cog />} bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <BackgroundButton image={<Cog />} text="Settings" flip={true}bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                                    </div>
                                     <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                                 </div>
                             </div>
@@ -454,11 +459,11 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 onFirstAction={() => setIsThemeModalOpen(false)}
                 text="Select Theme"
                 mainText={
-                    <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(90vh-12rem)] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[80vh] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2 justify-items-center">
                         {themeAssets.map((asset) => (
                             <div 
                                 key={asset.name}
-                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-4/5 sm:w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
                                 onClick={() => {
                                     handleThemeSelect(asset.name);
                                     setIsThemeModalOpen(false);
@@ -486,11 +491,11 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 onFirstAction={() => setIsCardArtModalOpen(false)}
                 text="Select Subject Art"
                 mainText={
-                    <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[calc(90vh-12rem)] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[80vh] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2 justify-items-center">
                         {getCardArtAssets().map((asset) => (
                             <div 
                                 key={asset.name}
-                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-4/5 sm:w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
                                 onClick={() => {
                                     handleCardArtSelect(asset.name);
                                     setIsCardArtModalOpen(false);

@@ -36,7 +36,12 @@ function App() {
   }, []);
 
   return (
-    <div className="w-screen h-screen bg-[#f1ebe0] dark:bg-gray-800 bg-cover bg-screen" style={{ backgroundImage: theme ? theme.image : '' }}>
+    <div 
+      className="w-screen min-h-screen dark:bg-gray-800"
+      style={{ 
+        backgroundColor: 'transparent'
+      }}
+    >
       <Router>
         {/* MenuBar will be rendered on all pages */}
 

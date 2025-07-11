@@ -261,14 +261,18 @@ function Dashboard() {
 
   return (
     <div className="w-screen h-screen relative">
-      {/* Fixed background */}
+      {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: theme ? theme.image : '' }}
+        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        style={{ 
+          backgroundImage: theme.image,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen overflow-auto pb-20">
+      <div className="relative z-10 min-h-screen pb-20">
         {/* Header Section */}
         <TitleBar text="Dashboard" user={user}
         content={
@@ -525,10 +529,15 @@ function ControlSection({
 
         {/* Search Container */}
         <div
-          className={`transition-all duration-300 ease-in-out ${
+          className={`relative transition-all duration-300 ease-in-out ${
             activeSection === 'search' ? 'w-4/5' : 'w-10'
           }`}
         >
+          <div
+            className={`absolute inset-0 rounded-full backdrop-blur-md bg-black/20 pointer-events-none transition-opacity duration-300 ${
+              activeSection === 'search' ? 'opacity-100' : 'opacity-0'
+            }`}
+          ></div>
           {activeSection === 'search' ? (
             // Expanded search: full input.
             <input

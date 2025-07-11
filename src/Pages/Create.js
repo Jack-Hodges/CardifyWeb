@@ -195,14 +195,18 @@ function Create() {
 
       return (
       <div className="w-screen h-screen relative">
-        {/* Fixed background */}
+        {/* Fixed background - ensure it covers entire viewport */}
         <div 
-          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-          style={{ backgroundImage: theme ? theme.image : ''}}
+          className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+          style={{ 
+            backgroundImage: theme.image,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 min-h-screen overflow-auto pb-20">
+        <div className="relative z-10 min-h-screen pb-20">
       <TitleBar text="Create" user={user}/>
 
       <div className="block lg:flex w-screen h-screen">
