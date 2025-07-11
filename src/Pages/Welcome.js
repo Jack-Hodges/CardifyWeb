@@ -115,6 +115,8 @@ function Welcome() {
     }
   };
 
+
+
   // If user is already logged in, redirect to home
   if (user) {
     navigate('/home');
@@ -250,7 +252,7 @@ function Welcome() {
         </div>
   
         {/* Welcome Section */}
-        <div className="h-screen flex flex-col sm:flex-row">
+        <div className="h-screen flex flex-col sm:flex-row bg-[#f1ebe0] dark:bg-gray-800">
           {/* Word Section */}
           <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
             <div className="hidden sm:block absolute top-0 left-3">
@@ -265,7 +267,7 @@ function Welcome() {
             <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
               Study Smarter.
             </h2>
-            <h3 className="text-2xl mt-4 w-2/3">
+            <h3 className="text-2xl mt-4 w-2/3 text-gray-600 dark:text-gray-400">
               Create and customise your flashcards in a way that works for you.
             </h3>
             <div className="mt-4">
@@ -339,8 +341,8 @@ function Welcome() {
               
               {/* Features text */}
               <div className="w-full sm:w-1/2 mb-10 sm:mb-0">
-                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800">{features[currentFeature].title}</h3>
-                <ul className="text-gray-600 text-lg space-y-2 mt-4">
+                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-200">{features[currentFeature].title}</h3>
+                <ul className="text-gray-600 dark:text-gray-400 text-lg space-y-2 mt-4">
                   {features[currentFeature].bullets.map((bullet, index) => (
                     <li key={index} className="flex items-start">
                       <span className="mr-2">•</span>

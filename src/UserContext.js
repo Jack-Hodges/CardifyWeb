@@ -49,6 +49,14 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isSignUpProcess, setIsSignUpProcess] = useState(false); // Track sign-up process
 
+  // State to track color scheme changes for default theme
+  const [colorScheme, setColorScheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
   // Memoize the theme calculation
   const theme = useMemo(() => {
     if (!profile?.theme) {
@@ -56,7 +64,7 @@ export const UserProvider = ({ children }) => {
     }
     const userTheme = getTheme(profile.theme); // Synchronous call
     return resolveThemeColors(userTheme);
-  }, [profile?.theme]);
+  }, [profile?.theme, colorScheme]); // Add colorScheme as dependency
 
   // Update CSS variables whenever the theme changes
   useEffect(() => {
@@ -151,6 +159,14 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     getUser();
 
+    // Listen for color scheme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleColorSchemeChange = (e) => {
+      setColorScheme(e.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', handleColorSchemeChange);
+
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         fetchProfile(session.user.id).then(userProfile => {
@@ -181,12 +197,18 @@ export const UserProvider = ({ children }) => {
 
     return () => {
       authListener.subscription.unsubscribe();
+      mediaQuery.removeEventListener('change', handleColorSchemeChange);
     };
   }, []);
 
   // Function to mark that sign-up process has started
   const startSignUpProcess = () => {
     setIsSignUpProcess(true);
+  };
+
+  // Function to manually toggle color scheme
+  const toggleColorScheme = () => {
+    setColorScheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
   // Subscription functions
@@ -254,6 +276,8 @@ export const UserProvider = ({ children }) => {
         startSignUpProcess,
         upgradeToPro,
         manageBilling,
+        toggleColorScheme,
+        colorScheme,
       }}
     >
       {children}

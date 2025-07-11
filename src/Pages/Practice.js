@@ -190,7 +190,7 @@ function FlashcardQuiz() {
                 }}
                 text="Continue where you left off?"
                 mainText={`You were up to card ${subject?.up_to_index + 1}. Would you like to continue from there?`}
-                width="w-1/3"
+                width="w-[95%] sm:w-1/3 "
                 firstActionText="No, start over"
                 secondActionText="Yes, continue"
                 firstActionCol={"bg-gray-500 hover:bg-gray-400"}

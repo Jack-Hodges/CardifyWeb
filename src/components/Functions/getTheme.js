@@ -15,8 +15,17 @@ import Space1 from '../../images/backgrounds/Space1.jpg'
 
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
+  // Get current color scheme for default theme preview
+  let defaultPreview = Default;
+  if (typeof window !== 'undefined') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    defaultPreview = prefersDark 
+      ? 'linear-gradient(135deg, #1f2937 0%, #111827 100%)'
+      : '#f1ebe0';
+  }
+
   return [
-    { name: 'Default', url: Default },
+    { name: 'Default', url: defaultPreview },
     { name: 'Beach', url: Beach },
     { name: 'Beach 2', url: Beach2},
     { name: 'Forest', url: Forest },
@@ -33,17 +42,52 @@ export const getThemeAssets = () => {
   ];
 };
 
-// Default theme object
-const defaultTheme = {
-  name: "default",
-  image: `url(${Default})`,
-  color: 'rgba(3,15,64,1)',
-  textClass: 'textColor',
-  primary: ['green', 500],
-  secondary: ['purple', 500],
-  tertiary: ['orange', 500],
-  border: ['green', 500],
-  shadow: false,
+// Default theme object with dynamic light/dark mode
+const getDefaultTheme = (manualColorScheme = null) => {
+  // Check if we're in a browser environment
+  if (typeof window !== 'undefined') {
+    // Use manual color scheme if provided, otherwise check system preference
+    const isDark = manualColorScheme ? manualColorScheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (isDark) {
+      return {
+        name: "default",
+        image: 'linear-gradient(135deg, #1f2937 0%, #111827 100%)', // Dark gradient
+        color: 'rgba(56,57,59,1)',
+        textClass: 'text-gray-200',
+        primary: ['green', 500],
+        secondary: ['purple', 500],
+        tertiary: ['orange', 500],
+        border: ['green', 500],
+        shadow: false,
+      };
+    } else {
+      return {
+        name: "default",
+        image: '#f1ebe0', // Solid cream color
+        color: 'rgba(3,15,64,1)',
+        textClass: 'text-gray-700',
+        primary: ['green', 500],
+        secondary: ['purple', 500],
+        tertiary: ['orange', 500],
+        border: ['green', 500],
+        shadow: false,
+      };
+    }
+  }
+  
+  // Fallback for SSR or when window is not available
+  return {
+    name: "default",
+    image: `url(${Default})`,
+    color: 'rgba(3,15,64,1)',
+    textClass: 'textColor',
+    primary: ['green', 500],
+    secondary: ['purple', 500],
+    tertiary: ['orange', 500],
+    border: ['green', 500],
+    shadow: false,
+  };
 };
 
 // Memoize the themes object since it never changes
@@ -193,9 +237,9 @@ const themes = {
   },
 };
 
-export const getTheme = (theme) => {
+export const getTheme = (theme, manualColorScheme = null) => {
   if (!theme) {
-    return defaultTheme;
+    return getDefaultTheme(manualColorScheme);
   }
-  return themes[theme] || defaultTheme;
+  return themes[theme] || getDefaultTheme(manualColorScheme);
 };
