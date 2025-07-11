@@ -470,10 +470,14 @@ const DragDropGame = () => {
 
   return (
     <div className="w-screen h-screen relative overflow-hidden">
-      {/* Fixed background */}
+      {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: theme.image }}
+        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        style={{ 
+          backgroundImage: theme.image,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       ></div>
       
       {/* Fixed height content - no scrolling */}

@@ -217,10 +217,14 @@ function Welcome() {
     return (
       <div className="w-screen h-screen relative">
         <div
-          className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-          style={{ backgroundImage: theme.image }}
+          className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+          style={{ 
+            backgroundImage: theme.image,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
         ></div>
-        <div className="relative z-10 min-h-screen overflow-auto flex flex-col">
+        <div className="relative z-10 min-h-screen flex flex-col">
           <ToastContainer position="top-center" autoClose={3000} />
   
         <div className="fixed top-4 right-4 z-50">
@@ -389,10 +393,14 @@ function Welcome() {
   return (
     <div className="w-screen h-screen relative">
       <div
-        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-        style={{ backgroundImage: theme.image }}
+        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        style={{ 
+          backgroundImage: theme.image,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       ></div>
-      <div className="relative z-10 min-h-screen overflow-auto block sm:flex">
+      <div className="relative z-10 min-h-screen block sm:flex">
         <ToastContainer position="top-center" autoClose={3000} />
 
       {/* Top bar container */}
