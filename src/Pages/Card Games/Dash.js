@@ -150,11 +150,11 @@ function Dash() {
         {/* Fixed background */}
         <div 
           className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-          style={{ backgroundImage: theme ? theme.image : ''}}
+          style={{ backgroundImage: theme.image }}
         ></div>
         
-        {/* Scrolling content */}
-        <div className="relative z-10 min-h-screen overflow-auto pb-20">
+                  {/* Scrolling content */}
+          <div className="relative z-10 min-h-screen overflow-auto pb-20">
             <TitleBar text="Dash" />
 
             {/* If no subject or no cards, show the snippet */}

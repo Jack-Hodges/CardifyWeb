@@ -36,7 +36,7 @@ export const getThemeAssets = () => {
 // Default theme object
 const defaultTheme = {
   name: "default",
-  image: Default,
+  image: `url(${Default})`,
   color: 'rgba(3,15,64,1)',
   textClass: 'textColor',
   primary: ['green', 500],

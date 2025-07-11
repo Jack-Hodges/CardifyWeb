@@ -145,7 +145,7 @@ function Type() {
           {/* Fixed background */}
           <div 
             className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-            style={{ backgroundImage: theme ? theme.image : ''}}
+            style={{ backgroundImage: theme.image }}
           ></div>
           
           {/* Scrolling content */}
@@ -194,7 +194,7 @@ function Type() {
           {/* Fixed background */}
           <div 
             className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-            style={{ backgroundImage: theme ? theme.image : ''}}
+            style={{ backgroundImage: theme.image }}
           ></div>
           
           {/* Scrolling content */}
