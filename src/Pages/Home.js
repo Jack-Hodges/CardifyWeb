@@ -174,7 +174,7 @@ function Home() {
       <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-5 pointer-events-none' : ''}`}></div>
 
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen overflow-auto pb-20">
+      <div className="relative z-10 min-h-screen pb-20">
         <div>
           <TitleBar text="Home" user={user} home={true}/>
         </div>
