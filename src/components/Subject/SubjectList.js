@@ -16,7 +16,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState(null);
-    const { theme } = useUser();
+    const { theme, profile } = useUser();
     const { secondaryColor } = theme;
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
     const [sortBy, setSortBy] = useState('Most Cards');
@@ -24,7 +24,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
     const handleRemove = async (id) => {
       await removeSubject(id);
-      const refreshed = await fetchSubjects(user.id);
+      const refreshed = await fetchSubjects(user, profile);
       setSubjects(refreshed);
     };
 
@@ -33,7 +33,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
             if (user?.id) {
                 setLoading(true);
                 const [subjectsData, collectionsData] = await Promise.all([
-                    fetchSubjects(user.id, user.email),
+                    fetchSubjects(user, profile),
                     fetchCollections(user.id)
                 ]);
                 setSubjects(subjectsData);
@@ -188,7 +188,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                 false // pinned default
               );
               // reload list
-              const refreshed = await fetchSubjects(user.id);
+              const refreshed = await fetchSubjects(user, profile);
               setSubjects(refreshed);
               setIsAddOpen(false);
             }}

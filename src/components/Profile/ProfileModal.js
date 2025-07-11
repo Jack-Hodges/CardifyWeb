@@ -10,7 +10,7 @@ import { Cog } from 'lucide-react';
 import Modal from '../Modals/Modal';
 
 function ProfileModal({ isOpen, onClose, mainText, logout }) {
-    const { theme, profile, upgradeToPro, manageBilling } = useUser();
+    const { theme, profile, upgradeToPro, manageBilling, user } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
@@ -118,7 +118,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const handleSharesClick = async () => {
         try {
             const sharesData = await getShares(profile.id);
-            const subjectsData = await fetchSubjects(profile.id, profile.email);
+            const subjectsData = await fetchSubjects(user, profile);
             
             // Create a map of subject IDs to names
             const subjectMap = subjectsData.reduce((acc, subject) => {

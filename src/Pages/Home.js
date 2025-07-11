@@ -111,7 +111,7 @@ function Home() {
       const loadSubjects = async () => {
         setLoading(true);
         try {
-          const subjectsData = await fetchSubjects(user.id, user.email);
+          const subjectsData = await fetchSubjects(user, profile);
           setSubjects(subjectsData);
         } catch (error) {
           console.error(error);

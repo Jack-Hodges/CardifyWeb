@@ -1,13 +1,13 @@
 import supabase from '../../supabaseClient';
 
 // Fetch subjects
-export const fetchSubjects = async (userId, userEmail) => {
+export const fetchSubjects = async (user, profile = null) => {
   try {
     // Fetch user's own subjects
     const { data: ownSubjects, error: ownError } = await supabase
       .from('subjects')
       .select('*')
-      .eq('user_id', userId);
+      .eq('user_id', user.id);
 
     if (ownError) {
       console.error('Error fetching own subjects:', ownError);
@@ -18,7 +18,7 @@ export const fetchSubjects = async (userId, userEmail) => {
     const { data: permissions, error: permissionsError } = await supabase
       .from('subject_permissions')
       .select('subject_id, permission')
-      .eq('recipient_email', userEmail);
+      .eq('recipient_email', user.email);
 
     if (permissionsError) {
       console.error('Error fetching subject permissions:', permissionsError);
@@ -48,11 +48,28 @@ export const fetchSubjects = async (userId, userEmail) => {
       }
     }
 
+    
+
     // Combine own subjects with shared subjects
-    const allSubjects = [
+    let allSubjects = [
       ...(ownSubjects || []),
       ...sharedSubjects
     ];
+
+    // Check if user needs tutorial subject (tutorial_subject is false)
+    if (profile && profile.tutorial_subject === false) {
+      // Fetch the tutorial subject with ID 136
+      const { data: tutorialSubject, error: tutorialError } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('id', 136)
+        .single();
+
+      if (!tutorialError && tutorialSubject) {
+        // Add tutorial subject to the beginning of the list
+        allSubjects = [tutorialSubject, ...allSubjects];
+      }
+    }
 
     return allSubjects;
   } catch (error) {

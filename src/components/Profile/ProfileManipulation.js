@@ -24,13 +24,26 @@ export const fetchProfile = async (userId) => {
   }
 };
 
-export const saveProfile = async (id, firstName, theme, sort_preference = 0, card_art = 'none', generation_count = 0) => {
+export const saveProfile = async (id, firstName, theme, sort_preference = 0, card_art = 'none', generation_count = 0, tutorial_subject = null) => {
   try {
     if (id) {
       // Update existing profile
+      const updateData = { 
+        first_name: firstName, 
+        theme: theme, 
+        sort_preference: sort_preference, 
+        card_art: card_art, 
+        generation_count: generation_count 
+      };
+      
+      // Only include tutorial_subject in update if it's provided
+      if (tutorial_subject !== null) {
+        updateData.tutorial_subject = tutorial_subject;
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
-        .update( { first_name: firstName, theme: theme, sort_preference: sort_preference, card_art: card_art, generation_count: generation_count } )
+        .update(updateData)
         .eq('id', id)
         .select();
 
@@ -42,9 +55,21 @@ export const saveProfile = async (id, firstName, theme, sort_preference = 0, car
       return data?.[0] || null;
     } else {
       // Insert new profile
+      const insertData = { 
+        id: id, 
+        first_name: firstName, 
+        theme: theme, 
+        sort_preference: sort_preference 
+      };
+      
+      // Only include tutorial_subject in insert if it's provided
+      if (tutorial_subject !== null) {
+        insertData.tutorial_subject = tutorial_subject;
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
-        .insert([{ id: id, first_name: firstName, theme: theme, sort_preference: sort_preference }])
+        .insert([insertData])
         .select();
 
       if (error) {

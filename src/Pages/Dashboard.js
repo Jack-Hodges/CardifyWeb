@@ -71,7 +71,7 @@ function Dashboard() {
       const loadData = async () => {
         setLoading(true);
         const [subjectsData, collectionsData] = await Promise.all([
-          fetchSubjects(user.id, user.email),
+          fetchSubjects(user, profile),
           fetchCollections(user.id),
         ]);
         setSubjects(subjectsData);
@@ -120,6 +120,19 @@ function Dashboard() {
     const success = await removeSubject(subjectId);
     if (success) {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
+      
+      // If the deleted subject is ID 136, update the user's profile to set tutorial_subject as true
+      if (subjectId === 136 && profile) {
+        await saveProfile(
+          profile.id,
+          profile.first_name,
+          profile.theme,
+          profile.sort_preference,
+          profile.card_art,
+          profile.generation_count,
+          true
+        );
+      }
     }
     closeModal('deleteSubject');
   };
@@ -162,8 +175,8 @@ function Dashboard() {
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Split subjects into personal and shared
-  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id);
+  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id == 136);
+  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id != 136);
 
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {
