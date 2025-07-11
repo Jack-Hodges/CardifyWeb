@@ -110,7 +110,9 @@ function Match() {
         <div 
           className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
           style={{ 
-            backgroundImage: theme.image,
+            background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
+              ? theme.image 
+              : `url(${theme.image})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}

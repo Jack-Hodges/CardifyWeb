@@ -220,11 +220,13 @@ function Welcome() {
       <div className="w-screen h-screen relative">
         <div
           className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
-          style={{ 
-            backgroundImage: theme.image,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
+                  style={{ 
+          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
+            ? theme.image 
+            : `url(${theme.image})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
         ></div>
         <div className="relative z-10 min-h-screen flex flex-col">
           <ToastContainer position="top-center" autoClose={3000} />
@@ -398,7 +400,9 @@ function Welcome() {
       <div
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{ 
-          backgroundImage: theme.image,
+          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
+            ? theme.image 
+            : `url(${theme.image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
