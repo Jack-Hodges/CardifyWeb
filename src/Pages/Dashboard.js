@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation';
+import { fetchSubjects, saveSubject, removeSubject, saveStudyHubSubject } from '../components/Subject/SubjectManipulation';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
@@ -90,20 +90,27 @@ function Dashboard() {
 };
 
   // Subject
-  const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
-    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
+  const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned, studyhubVisibility) => {
+    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned, studyhubVisibility);
     if (data && !id) {
       setSubjects([...subjects, ...data]);
     } else {
       const updatedSubjects = subjects.map((subject) =>
         subject.id === id
-          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned }
+          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned, published: studyhubVisibility }
           : subject
       );
       setSubjects(updatedSubjects);
     }
     closeModal('addSubject');
     closeModal('editSubject');
+  };
+
+  const handleSaveStudyHubSubject = async (id, subjectName, subjectColor, subjectIntensity) => {
+    const data = await saveStudyHubSubject(id, user.id, subjectColor, subjectIntensity);
+    if (data && !id) {
+      setSubjects([...subjects, ...data]);
+    }
   };
 
   const handleAddSubject = () => {
@@ -354,7 +361,7 @@ function Dashboard() {
                     key={subject.id}
                     subject={subject}
                     user={user}
-                    onSave={handleSaveSubject}
+                    onSave={editingSubject?.studyhub ? handleSaveStudyHubSubject : handleSaveSubject}
                     onEdit={() => handleEditSubject(subject)}
                     onRemoveSubject={() => {
                       setSubjectToDelete(subject);
@@ -376,7 +383,7 @@ function Dashboard() {
                     key={subject.id}
                     subject={subject}
                     user={user}
-                    onSave={handleSaveSubject}
+                    onSave={editingSubject?.studyhub ? handleSaveStudyHubSubject : handleSaveSubject}
                     onEdit={() => handleEditSubject(subject)}
                     onRemoveSubject={() => {
                       setSubjectToDelete(subject);
@@ -399,7 +406,7 @@ function Dashboard() {
                     key={subject.id}
                     subject={subject}
                     user={user}
-                    onSave={handleSaveSubject}
+                    onSave={editingSubject?.studyhub ? handleSaveStudyHubSubject : handleSaveSubject}
                     onEdit={() => handleEditSubject(subject)}
                     onRemoveSubject={() => {
                       setSubjectToDelete(subject);
@@ -440,10 +447,11 @@ function Dashboard() {
           closeModal('addSubject');
           closeModal('editSubject');
         }}
-        onSave={handleSaveSubject}
+        onSave={editingSubject?.studyhub ? handleSaveStudyHubSubject : handleSaveSubject}
         subject={editingSubject}
         text={editingSubject ? 'Edit Subject' : 'Add New Subject'}
         user={user}
+        studyhub={editingSubject?.studyhub}
       />
 
       {/* Delete Confirmation Modal - Subject */}

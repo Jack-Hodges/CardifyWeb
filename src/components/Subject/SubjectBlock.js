@@ -78,9 +78,12 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   };
 
   // Memoize color calculation based on subject's color info
+  // For StudyHub subjects, use subject.colour and subject.intensity; otherwise use subject.colourText and subject.colourIntensity
+  const colorValue = studyhub ? subject.colour : subject.colourText;
+  const intensityValue = studyhub ? subject.intensity : subject.colourIntensity;
   const colors = useMemo(
-    () => getColors([subject.colourText, subject.colourIntensity]),
-    [subject.colourText, subject.colourIntensity]
+    () => getColors([colorValue, intensityValue]),
+    [colorValue, intensityValue]
   );
 
   // Memoize the card art value

@@ -5,7 +5,7 @@ import { fetchCollections } from '../Collections/CollectionManipulation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
+function AddSubject({ isOpen, onClose, onSave, subject, text, user, studyhub = false }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
@@ -17,6 +17,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [selectedCollection, setSelectedCollection] = useState('None');
     const [selectedCollectionId, setSelectedCollectionId] = useState(null);
     const [clickedColor, setClickedColor] = useState(null);
+    const [studyhubVisibility, setStudyhubVisibility] = useState(false); // false = private, true = public
     const menuRef = useRef(null);
 
     const colorOptions = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'slate', 'rose', 'pink', 'fuchsia', 'purple', 'violet', 'indigo', 'blue', 'sky'];
@@ -88,6 +89,17 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         };
     }, [clickedColor]);
 
+    useEffect(() => {
+        if (isOpen) {
+            // If editing a subject with a published property, set it; otherwise default to false (private)
+            if (subject && typeof subject.published === 'boolean') {
+                setStudyhubVisibility(subject.published);
+            } else {
+                setStudyhubVisibility(false);
+            }
+        }
+    }, [isOpen, subject]);
+
     const handleClose = () => {
         setIsClosing(true);
         setTimeout(() => {
@@ -98,9 +110,12 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     };
 
     const handleSave = () => {
-        console.log(subjectColor);
         if (subjectName !== '') {
-            onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
+            if (!studyhub) {
+                onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId, subject?.pinned, studyhubVisibility);
+            } else {
+                onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
+            }
             handleClose();
         } else {
             toast.warning("Please add a subject name");
@@ -173,42 +188,88 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
                         placeholder="Enter the subject name here"
                         required
+                        disabled={studyhub}
                     />
                 </div>
 
-                <div className="mb-6 relative">
-                    <label htmlFor="collectionDropdown" className="block text-lg font-medium mb-2 text-white/90">
-                        Subject Collection
-                    </label>
-                    <input
-                        id="collectionDropdown"
-                        type="text"
-                        value={selectedCollection}
-                        onChange={handleCollectionSearch}
-                        onClick={() => setShowDropdown(true)}
-                        className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
-                        placeholder="Search for a collection"
-                    />
-                    {showDropdown && (
-                        <ul className="absolute z-10 mt-1 w-full bg-gray-800 borderborder-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                            <li
-                                className="cursor-pointer p-3 hover:bg-gray-600 text-gray-200"
-                                onClick={handleSelectNone}
-                            >
-                                None
-                            </li>
-                            {filteredCollections.map((collection) => (
+                {!studyhub && (
+                    <div className="mb-6 relative">
+                        <label htmlFor="collectionDropdown" className="block text-lg font-medium mb-2 text-white/90">
+                            Subject Collection
+                        </label>
+                        <input
+                            id="collectionDropdown"
+                            type="text"
+                            value={selectedCollection}
+                            onChange={handleCollectionSearch}
+                            onClick={() => setShowDropdown(true)}
+                            className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
+                            placeholder="Search for a collection"
+                        />
+                        {showDropdown && (
+                            <ul className="absolute z-10 mt-1 w-full bg-gray-800 borderborder-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
                                 <li
-                                    key={collection.id}
                                     className="cursor-pointer p-3 hover:bg-gray-600 text-gray-200"
-                                    onClick={() => handleSelectCollection(collection)}
+                                    onClick={handleSelectNone}
                                 >
-                                    {collection.name}
+                                    None
                                 </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                                {filteredCollections.map((collection) => (
+                                    <li
+                                        key={collection.id}
+                                        className="cursor-pointer p-3 hover:bg-gray-600 text-gray-200"
+                                        onClick={() => handleSelectCollection(collection)}
+                                    >
+                                        {collection.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
+
+                {/* Publish to StudyHub */}
+                {!studyhub && (
+                    <div className="mb-6">
+                        <label className="block text-lg font-medium mb-2 text-white/90">
+                        Subject Visibility
+                        </label>
+                        <div className="flex gap-4">
+                        {/* Custom radio for Private */}
+                        <button
+                            type="button"
+                            onClick={() => setStudyhubVisibility(false)}
+                            className={`flex items-center px-4 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400
+                            ${studyhubVisibility === false ? 'border-blue-500 bg-black/30' : 'border-white/20 bg-black/20'}
+                            `}
+                            aria-pressed={studyhubVisibility === false}
+                        >
+                            <span className={`w-5 h-5 mr-2 flex items-center justify-center rounded-full border transition-colors
+                            ${studyhubVisibility === false ? 'border-blue-500 bg-blue-500' : 'border-white/40 bg-transparent'}`}
+                            >
+                            {studyhubVisibility === false && <span className="w-2.5 h-2.5 bg-white rounded-full block" />}
+                            </span>
+                            <span className="text-white/90 select-none">Private</span>
+                        </button>
+                        {/* Custom radio for Public */}
+                        <button
+                            type="button"
+                            onClick={() => setStudyhubVisibility(true)}
+                            className={`flex items-center px-4 py-2 rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400
+                            ${studyhubVisibility === true ? 'border-blue-500 bg-black/30' : 'border-white/20 bg-black/20'}
+                            `}
+                            aria-pressed={studyhubVisibility === true}
+                        >
+                            <span className={`w-5 h-5 mr-2 flex items-center justify-center rounded-full border transition-colors
+                            ${studyhubVisibility === true ? 'border-blue-500 bg-blue-500' : 'border-white/40 bg-transparent'}`}
+                            >
+                            {studyhubVisibility === true && <span className="w-2.5 h-2.5 bg-white rounded-full block" />}
+                            </span>
+                            <span className="text-white/90 select-none">Public</span>
+                        </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="mb-6">
                     <label className="block text-lg font-medium mb-2 text-white/90">

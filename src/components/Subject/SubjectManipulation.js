@@ -50,17 +50,15 @@ export const fetchSubjects = async (user, profile = null) => {
 
     // Fetch studyhub subjects for this user (subject ids in store_subjects)
     let studyhubSubjects = [];
-    console.log("Fetching studyhub subjects for user:", user.id);
     const { data: storeSubjectIds, error: storeSubjectsError } = await supabase
       .from('store_subjects')
-      .select('subject_id')
+      .select('subject_id, colour, intensity')
       .eq('owner_id', user.id);
 
     let studyhubIds = [];
     if (storeSubjectsError) {
       console.error('Error fetching store_subjects:', storeSubjectsError);
     } else if (storeSubjectIds && storeSubjectIds.length > 0) {
-      console.log("Store subject ids:", storeSubjectIds);
       studyhubIds = storeSubjectIds.map(row => row.subject_id);
       const { data: fetchedStudyhubSubjects, error: studyhubError } = await supabase
         .from('subjects')
@@ -69,7 +67,16 @@ export const fetchSubjects = async (user, profile = null) => {
       if (studyhubError) {
         console.error('Error fetching studyhub subjects:', studyhubError);
       } else {
-        studyhubSubjects = (fetchedStudyhubSubjects || []).map(subject => ({ ...subject, studyhub: true }));
+        // Merge the color/intensity from store_subjects into the subject
+        studyhubSubjects = (fetchedStudyhubSubjects || []).map(subject => {
+          const storeEntry = storeSubjectIds.find(row => row.subject_id === subject.id);
+          return {
+            ...subject,
+            colour: storeEntry?.colour,         // Use StudyHub colour
+            intensity: storeEntry?.intensity,   // Use StudyHub intensity
+            studyhub: true
+          };
+        });
       }
     }
 
@@ -116,19 +123,20 @@ export const fetchSubjects = async (user, profile = null) => {
 };
 
 // Add or update subject
-export const saveSubject = async (id, subjectName, subjectColor, subjectIntensity, userId, upToIndex = null, collectionId = null, pinned = false) => {
+export const saveSubject = async (id, subjectName, subjectColor, subjectIntensity, userId, upToIndex = null, collectionId = null, pinned = false, studyhubVisibility) => {
+
   try {
     if (id) {
       // Update existing subject
       await supabase
         .from('subjects')
-        .update({ name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, up_to_index: upToIndex, collection_id: collectionId, pinned: pinned }) // Ensure collection_id is included
+        .update({ name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, up_to_index: upToIndex, collection_id: collectionId, pinned: pinned, published: studyhubVisibility }) // Ensure collection_id is included
         .eq('id', id);
     } else {
       // Insert new subject
       const { data, error } = await supabase
         .from('subjects')
-        .insert([{ user_id: userId, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, flashcard_count: 0, up_to_index: upToIndex, collection_id: collectionId }]) // Ensure collection_id is included
+        .insert([{ user_id: userId, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, flashcard_count: 0, up_to_index: upToIndex, collection_id: collectionId, published: studyhubVisibility }]) // Ensure collection_id is included
         .select();
       if (error) {
         console.error('Error adding new subject:', error);
@@ -138,6 +146,23 @@ export const saveSubject = async (id, subjectName, subjectColor, subjectIntensit
     }
   } catch (error) {
     console.error('Error saving subject:', error);
+  }
+};
+
+export const saveStudyHubSubject = async (id, userId, subjectColor, subjectIntensity) => {
+  try {
+    if (id) {
+      // Update existing subject
+      await supabase
+        .from('store_subjects')
+        .update({colour: subjectColor, intensity: subjectIntensity})
+        .eq('subject_id', id)
+        .eq('owner_id', userId);
+    } else {
+      console.error('Error saving studyhub subject: No id provided');
+    }
+  } catch (error) {
+    console.error('Error saving studyhub subject:', error);
   }
 };
 
@@ -194,7 +219,6 @@ export const saveShare = async (id, ownerId, subjectId, recipientEmail, permissi
   try {
     if (id) {
       // Update existing permission
-      console.log("Updating share for subject:", subjectId, "and recipient:", recipientEmail, "with permission:", permission);
       const { error: updateError } = await supabase
         .from('subject_permissions')
         .update({ 
@@ -202,7 +226,6 @@ export const saveShare = async (id, ownerId, subjectId, recipientEmail, permissi
         })
         .eq('id', id);
 
-        console.log("Completed");
       if (updateError) {
         console.error('Error updating subject permission:', updateError);
         return false;
@@ -233,7 +256,6 @@ export const saveShare = async (id, ownerId, subjectId, recipientEmail, permissi
 
 // Remove subject share permission
 export const removeShare = async (subjectId, recipientEmail) => {
-  console.log("Removing share for subject:", subjectId, "and recipient:", recipientEmail);
   try {
     const { error } = await supabase
       .from('subject_permissions')
