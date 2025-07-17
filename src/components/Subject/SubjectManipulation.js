@@ -48,13 +48,50 @@ export const fetchSubjects = async (user, profile = null) => {
       }
     }
 
-    
+    // Fetch studyhub subjects for this user (subject ids in store_subjects)
+    let studyhubSubjects = [];
+    console.log("Fetching studyhub subjects for user:", user.id);
+    const { data: storeSubjectIds, error: storeSubjectsError } = await supabase
+      .from('store_subjects')
+      .select('subject_id')
+      .eq('owner_id', user.id);
 
-    // Combine own subjects with shared subjects
+    let studyhubIds = [];
+    if (storeSubjectsError) {
+      console.error('Error fetching store_subjects:', storeSubjectsError);
+    } else if (storeSubjectIds && storeSubjectIds.length > 0) {
+      console.log("Store subject ids:", storeSubjectIds);
+      studyhubIds = storeSubjectIds.map(row => row.subject_id);
+      const { data: fetchedStudyhubSubjects, error: studyhubError } = await supabase
+        .from('subjects')
+        .select('*')
+        .in('id', studyhubIds);
+      if (studyhubError) {
+        console.error('Error fetching studyhub subjects:', studyhubError);
+      } else {
+        studyhubSubjects = (fetchedStudyhubSubjects || []).map(subject => ({ ...subject, studyhub: true }));
+      }
+    }
+
+    // Remove StudyHub subjects from sharedSubjects
+    if (studyhubIds.length > 0) {
+      sharedSubjects = sharedSubjects.filter(subject => !studyhubIds.includes(subject.id));
+    }
+
+    // Combine own subjects, shared subjects, and studyhub subjects
     let allSubjects = [
       ...(ownSubjects || []),
-      ...sharedSubjects
+      ...sharedSubjects,
+      ...studyhubSubjects
     ];
+
+    // Remove duplicate subjects by id
+    const seen = new Set();
+    allSubjects = allSubjects.filter(subject => {
+      if (seen.has(subject.id)) return false;
+      seen.add(subject.id);
+      return true;
+    });
 
     // Check if user needs tutorial subject (tutorial_subject is false)
     if (profile && profile.tutorial_subject === false) {

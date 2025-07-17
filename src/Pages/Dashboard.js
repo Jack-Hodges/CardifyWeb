@@ -176,7 +176,7 @@ function Dashboard() {
 
   // Split subjects into personal and shared
   const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id == 136);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id != 136);
+  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id != 136 && subject.studyhub !== true);
 
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {
@@ -232,6 +232,21 @@ function Dashboard() {
 
   // Sort shared subjects
   const sortedSharedSubjects = [...sharedSubjects].sort((a, b) => {
+    if (selectedSort === 'Alphabetical') {
+      return a.name.localeCompare(b.name);
+    } else if (selectedSort === 'Most Cards') {
+      const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
+      return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+    } else if (selectedSort === 'Date Created (Newest)') {
+      return new Date(b.created_at) - new Date(a.created_at);
+    } else if (selectedSort === 'Date Created (Oldest)') {
+      return new Date(a.created_at) - new Date(b.created_at);
+    }
+    return 0;
+  });
+
+  const studyHubSubjects = sortedSubjects.filter(subject => subject.studyhub === true);
+  const sortedStudyHubSubjects = [...studyHubSubjects].sort((a, b) => {
     if (selectedSort === 'Alphabetical') {
       return a.name.localeCompare(b.name);
     } else if (selectedSort === 'Most Cards') {
@@ -367,6 +382,30 @@ function Dashboard() {
                       setSubjectToDelete(subject);
                       openModal('deleteSubject');
                     }}
+                    shared={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* StudyHub Subjects Section */}
+          {sortedStudyHubSubjects.length > 0 && (
+            <div>
+              <h2 className={`text-2xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>StudyHub</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {sortedStudyHubSubjects.map((subject) => (
+                  <SubjectBlock
+                    key={subject.id}
+                    subject={subject}
+                    user={user}
+                    onSave={handleSaveSubject}
+                    onEdit={() => handleEditSubject(subject)}
+                    onRemoveSubject={() => {
+                      setSubjectToDelete(subject);
+                      openModal('deleteSubject');
+                    }}
+                    studyhub={true}
                     shared={true}
                   />
                 ))}
