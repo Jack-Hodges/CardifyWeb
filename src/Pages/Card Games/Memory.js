@@ -27,7 +27,7 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, secondaryColor, tertiaryColor, image, shadow } = theme;
+    const { textColor, secondaryColor, tertiaryColor, image } = theme;
     const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards

@@ -40,7 +40,7 @@ function Create() {
   const { subject } = location.state || {};
 
   const { user, theme, popupStates, updatePopupState, profile } = useUser();
-  const { primaryColor, secondaryColor, tertiaryColor, shadow, textClass } = theme;
+  const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
 
   // Tutorial popup logic (won't refetch cards when window focus changes)

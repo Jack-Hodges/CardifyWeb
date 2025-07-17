@@ -3,7 +3,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 
 export default function StudyHub() {
     const { user, theme } = useUser();
-    const { secondaryColor, shadow, primaryColor, textClass } = theme;  // Get the secondary color
+    const { shadow } = theme;  // Get the secondary color
 
     return (
         <div className="w-screen h-screen relative">
