@@ -9,6 +9,7 @@ import Scramble from './Pages/Card Games/Scramble';
 import Dash from './Pages/Card Games/Dash';
 import Type from './Pages/Card Games/Type';
 import Match from './Pages/Card Games/Match';
+import StudyHub from './Pages/StudyHub';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useUser } from './UserContext';
 import { useEffect } from 'react';
@@ -58,6 +59,7 @@ function App() {
           <Route path="/dash" element={<Dash />} />
           <Route path="/type" element={<Type />} />
           <Route path="/match" element={<Match />} />
+          <Route path="/studyhub" element={<StudyHub />} />
         </Routes>
       </Router>
     </div>

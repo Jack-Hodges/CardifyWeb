@@ -2,7 +2,7 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
-import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
+import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog, School } from 'lucide-react';
 
 function TitleBar( { text, content, home = false }) {
 
@@ -41,6 +41,7 @@ function TitleBar( { text, content, home = false }) {
     Memory: Cards,
     Type: <BookText />,
     Match: <BrainCog />,
+    StudyHub: <School />,
   };
   
   var firstImg = images[text] || null;
@@ -81,6 +82,7 @@ function TitleBar( { text, content, home = false }) {
             <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Create" img={<BadgePlus />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Practice" img={<CirclePlay />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="StudyHub" img={<School />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Quiz" img={<NotebookText />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
