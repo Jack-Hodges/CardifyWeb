@@ -294,3 +294,31 @@ export const getShares = async (userId) => {
     return [];
   }
 };
+
+// Fetch published subjects with pagination for StudyHub
+export const fetchPublishedSubjects = async (pageNum = 0, searchQuery = '', pageSize = 20) => {
+  try {
+    let query = supabase
+      .from('subjects')
+      .select('*')
+      .eq('published', true)
+      .order('created_at', { ascending: false });
+
+    if (searchQuery) {
+      query = query.ilike('name', `%${searchQuery}%`);
+    }
+
+    const { data, error } = await query
+      .range(pageNum * pageSize, (pageNum + 1) * pageSize - 1);
+
+    if (error) {
+      console.error('Error fetching published subjects:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Unexpected error fetching published subjects:', error);
+    return [];
+  }
+};

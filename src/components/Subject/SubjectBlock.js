@@ -3,11 +3,11 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCardArt } from "../Functions/getCardArt";
 import { useUser } from "../../UserContext";
-import { Share } from "lucide-react";
+import { Share, CircleArrowDown, Eye } from "lucide-react";
 import Modal from "../Modals/Modal";
 import { saveShare, removeShare } from "./SubjectManipulation";
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false, studyhub = false }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false, studyhub = false, onStudyHub = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -174,27 +174,29 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
             } gap-4 w-full opacity-1 sm:opacity-0 justify-items-center sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300`}
           >
             {/* Play button */}
-            <SubjectButton
-              img={
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="size-10"
-                  filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              }
-              setHoveredIcon={setHoveredIcon}
-              hoveredIcon={hoveredIcon}
-              tooltipText="Practice"
-              onClick={handlePracticeClick}
-            />
+            {!onStudyHub && (
+              <SubjectButton
+                img={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="size-10"
+                    filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+                setHoveredIcon={setHoveredIcon}
+                hoveredIcon={hoveredIcon}
+                tooltipText="Practice"
+                onClick={handlePracticeClick}
+              />
+            )}
 
             {(!shared || subject.permission === 'editor') && (
               <SubjectButton
@@ -289,13 +291,33 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {shared && (
+            {shared && !onStudyHub && (
               <SubjectButton
                 img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out-icon lucide-log-out" filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
                 setHoveredIcon={setHoveredIcon}
                 hoveredIcon={hoveredIcon}
                 tooltipText="Leave"
                 onClick={() => setIsLeaveModalOpen(true)}
+              />
+            )}
+
+            {onStudyHub && (
+              <SubjectButton
+                img={<Eye width={38} height={38} className="mt-[0.1rem]" />}
+                setHoveredIcon={setHoveredIcon}
+                hoveredIcon={hoveredIcon}
+                tooltipText="View"
+                onClick={handleCreateClick}
+              />
+            )}
+
+            {onStudyHub && (
+              <SubjectButton
+                img={<CircleArrowDown width={38} height={38} className="mt-[0.1rem]" />}
+                setHoveredIcon={setHoveredIcon}
+                hoveredIcon={hoveredIcon}
+                tooltipText="Add to Dashboard"
+                onClick={handleCreateClick}
               />
             )}
           </div>
@@ -375,7 +397,7 @@ function SubjectButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onClick 
     >
       {img}
       {hoveredIcon === lowerCase && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
+        <div className="absolute w-auto -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
           {tooltipText}
         </div>
       )}
