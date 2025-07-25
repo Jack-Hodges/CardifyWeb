@@ -12,6 +12,7 @@ import { saveSubject } from '../components/Subject/SubjectManipulation';
 import Modal from '../components/Modals/Modal';
 import confetti from "canvas-confetti"; // Import the confetti library
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
+import { Helmet } from 'react-helmet-async';
 
 function FlashcardQuiz() {
   const [cards, setCards] = useState([]);
@@ -157,6 +158,17 @@ function FlashcardQuiz() {
 
   return (
     <div className="w-screen h-screen relative">
+      <Helmet>
+        <title>Practice Flashcards - Cardify | Study & Review Your Cards</title>
+        <meta name="description" content="Practice your custom flashcards with interactive review sessions. Track your progress and master your study materials with Cardify's practice mode." />
+        <meta name="keywords" content="practice flashcards, study session, flashcard review, interactive learning, study progress tracking" />
+        <link rel="canonical" href="https://cardify.app/practice" />
+        <meta property="og:title" content="Practice Flashcards - Cardify" />
+        <meta property="og:description" content="Practice your custom flashcards with interactive review sessions and progress tracking." />
+        <meta property="og:url" content="https://cardify.app/practice" />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
