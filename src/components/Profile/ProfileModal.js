@@ -72,7 +72,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     }
 
     const handleThemeSelect = async (themeName) => {
-        if (profile.pro) {
+        // if (profile.pro) {
             try {
                 const themeKey = themeName.toLowerCase().replaceAll(' ', '');
                 await saveProfile(
@@ -88,13 +88,13 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             } catch (error) {
                 console.error('Error updating theme:', error);
             }
-        } else {
-            alert('This feature is only available to Pro users.');
-        }
+        // } else {
+        //     alert('This feature is only available to Pro users.');
+        // }
     };
 
     const handleCardArtSelect = async (cardArtName) => {
-        if (profile.pro) {
+        // if (profile.pro) {
             try {
                 const cardArtKey = cardArtName.toLowerCase();
                 await saveProfile(
@@ -110,9 +110,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             } catch (error) {
                 console.error('Error updating subject art:', error);
             }
-        } else {
-            alert('This feature is only available to Pro users.');
-        }
+        // } else {
+        //     alert('This feature is only available to Pro users.');
+        // }
     };
 
     const handleSharesClick = async () => {
@@ -538,11 +538,12 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                 placeholder="Enter your first name"
                             />
                             <p className="mt-4">You are currently on the {profile.pro ? 'Pro' : 'Free'} plan.</p>
-                            {profile.pro ? (
+                            <p>Cardify is in beta. We currently have a limited number of Pro users. If you would like to upgrade to Pro, please contact us at <a href="mailto:hello@flashcardify.app" className="text-blue-500 hover:text-blue-400">hello@flashcardify.app</a>.</p>
+                            {/* {profile.pro ? (
                                 <BackgroundButton text="Manage Billing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleManageBillingClick} />
                             ) : (
                                 <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={upgradeToPro} />
-                            )}
+                            )} */}
 
                             <p className="mt-4">Permanently delete your account</p>
                             <BackgroundButton text="Delete Account" bgColor="bg-red-500 hover:bg-red-400" onClick={() => {}} />
