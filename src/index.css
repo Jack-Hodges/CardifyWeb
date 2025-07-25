@@ -52,7 +52,7 @@ html {
 
 #root {
   width: 100%;
-  min-height: 100vh; /* Minimum height to allow scrolling */
+  min-height: calc(100vh + 100px); /* Minimum height to allow scrolling */
   margin: 0;
   padding: 0;
   /* Enable iOS navigation bar hiding - this container must be scrollable */
