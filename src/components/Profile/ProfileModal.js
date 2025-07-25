@@ -72,7 +72,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     }
 
     const handleThemeSelect = async (themeName) => {
-        if (profile.pro) {
+        // if (profile.pro) {
             try {
                 const themeKey = themeName.toLowerCase().replaceAll(' ', '');
                 await saveProfile(
@@ -88,13 +88,13 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             } catch (error) {
                 console.error('Error updating theme:', error);
             }
-        } else {
-            alert('This feature is only available to Pro users.');
-        }
+        // } else {
+        //     alert('This feature is only available to Pro users.');
+        // }
     };
 
     const handleCardArtSelect = async (cardArtName) => {
-        if (profile.pro) {
+        // if (profile.pro) {
             try {
                 const cardArtKey = cardArtName.toLowerCase();
                 await saveProfile(
@@ -110,9 +110,9 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             } catch (error) {
                 console.error('Error updating subject art:', error);
             }
-        } else {
-            alert('This feature is only available to Pro users.');
-        }
+        // } else {
+        //     alert('This feature is only available to Pro users.');
+        // }
     };
 
     const handleSharesClick = async () => {
