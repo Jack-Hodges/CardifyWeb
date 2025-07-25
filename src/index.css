@@ -12,7 +12,7 @@ body {
   padding: 0;
   background-size: cover;
   width: 100%;
-  height: 100%;
+  min-height: 100%; /* Changed from height to min-height to allow growth */
   background-color: #f1ebe0;
   /* Enable iOS navigation bar hiding */
   -webkit-overflow-scrolling: touch;
@@ -38,7 +38,7 @@ html {
   padding: 0;
   background-size: cover;
   width: 100%;
-  height: 100%;
+  min-height: 100%; /* Changed from height to min-height to allow growth */
   /* Enable iOS navigation bar hiding */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
@@ -52,7 +52,7 @@ html {
 
 #root {
   width: 100%;
-  min-height: calc(100vh + 100px); /* Minimum height to allow scrolling */
+  min-height: calc(100vh + 200px); /* Much taller to ensure scrollable overflow */
   margin: 0;
   padding: 0;
   /* Enable iOS navigation bar hiding - this container must be scrollable */
@@ -90,7 +90,7 @@ html {
 
 /* Ensure minimum height for scrollable content */
 .scrollable-content {
-  min-height: calc(100vh + 50px); /* Slightly taller than viewport to enable scrolling */
+  min-height: calc(100vh + 200px); /* Much taller than viewport to enable scrolling */
   background: transparent;
   position: relative;
   z-index: 1;
@@ -125,7 +125,7 @@ html {
   }
   
   .min-h-screen-scrollable {
-    min-height: calc(100vh + 100px); /* Taller than viewport to enable Safari bar hiding */
+    min-height: calc(100vh + 200px); /* Much taller than viewport to ensure Safari bar hiding */
   }
   
   .container-scrollable {
