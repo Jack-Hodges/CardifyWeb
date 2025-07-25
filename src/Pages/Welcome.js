@@ -7,6 +7,7 @@ import { useUser } from '../UserContext';
 import WelcomeImage from '../images/Logos/WelcomeImage.png';
 import WelcomeMobile from '../images/Logos/CardifyText.png';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 // Images
 import TopLeftMac from '../images/title/TopLeftMac.png';
@@ -218,6 +219,47 @@ function Welcome() {
   if (!showLogin) {
     return (
       <div className="w-screen h-screen relative">
+        <Helmet>
+          <title>Cardify - Smart Flashcard Study App | Create & Practice Custom Flashcards</title>
+          <meta name="description" content="Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation. Study smarter with Cardify." />
+          <meta name="keywords" content="flashcards, study app, learning, education, quiz, memory games, AI flashcards, math equations, custom study materials, practice tests" />
+          <link rel="canonical" href="https://cardify.app" />
+          
+          {/* Open Graph / Facebook */}
+          <meta property="og:title" content="Cardify - Smart Flashcard Study App" />
+          <meta property="og:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
+          <meta property="og:image" content="https://cardify.app/logo512.png" />
+          <meta property="og:url" content="https://cardify.app" />
+          <meta property="og:type" content="website" />
+          
+          {/* Twitter */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="Cardify - Smart Flashcard Study App" />
+          <meta name="twitter:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
+          <meta name="twitter:image" content="https://cardify.app/logo512.png" />
+          
+          {/* Additional Structured Data */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              "name": "Cardify - Smart Flashcard Study App",
+              "description": "Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.",
+              "url": "https://cardify.app",
+              "mainEntity": {
+                "@type": "SoftwareApplication",
+                "name": "Cardify",
+                "applicationCategory": "EducationalApplication",
+                "offers": {
+                  "@type": "Offer",
+                  "price": "0",
+                  "priceCurrency": "USD"
+                }
+              }
+            })}
+          </script>
+        </Helmet>
+        
         <div
           className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
                   style={{ 
@@ -284,7 +326,7 @@ function Welcome() {
           </div>
 
           <div className="flex justify-center w-full sm:w-1/2 sm:ml-[-5%]">
-            <img src={CardifyImage} alt="Illustration" className="w-2/3 sm:w-full sm:h-full object-contain" />
+            <img src={CardifyImage} alt="Students using Cardify app to study with custom flashcards" className="w-2/3 sm:w-full sm:h-full object-contain" />
             {/* <img src={TopLeftBlob} alt="Illustration" className="absolute top-1/2 left-0 w-full z-0" />
             <img src={BottomLeftBlob} alt="Illustration" className="absolute bottom-0 left-0 w-full z-0" /> */}
           </div>
@@ -397,6 +439,14 @@ function Welcome() {
   // If showLogin is true, show the sign-in/sign-up component
   return (
     <div className="w-screen h-screen relative">
+      <Helmet>
+        <title>{isSignUp ? 'Sign Up - Cardify | Join Smart Flashcard Study App' : 'Sign In - Cardify | Access Your Flashcards'}</title>
+        <meta name="description" content={isSignUp ? 'Create your free Cardify account to start making custom flashcards with AI-powered generation, practice modes, and progress tracking.' : 'Sign in to your Cardify account to access your custom flashcards, practice sessions, and study progress.'} />
+        <meta property="og:title" content={isSignUp ? 'Sign Up - Cardify' : 'Sign In - Cardify'} />
+        <meta property="og:description" content={isSignUp ? 'Create your free account to start making custom flashcards' : 'Sign in to access your flashcards and study progress'} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+      
       <div
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0 bg-[#f1ebe0] dark:bg-gray-800"
       ></div>
@@ -420,12 +470,12 @@ function Welcome() {
       <div className="w-full sm:w-1/2 flex items-center justify-center">
         <img 
           src={WelcomeImage} 
-          alt="Illustration" 
+          alt="Cardify app interface showing flashcard creation and study features" 
           className="hidden sm:block object-contain w-full sm:mt-[-20%]" 
         />
         <img
           src={WelcomeMobile}
-          alt="Illustration"
+          alt="Cardify logo - Smart flashcard study app"
           className="block sm:hidden object-contain w-full mt-24 mb-10"
         />
       </div>

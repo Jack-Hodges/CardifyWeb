@@ -10,6 +10,7 @@ import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modals/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
 import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 // Loading component
 function HomeLoading() {
@@ -164,6 +165,16 @@ function Home() {
 
   return (
     <div className="w-screen h-screen relative">
+             <Helmet>
+         <title>Home - Cardify | Your Personal Study Dashboard</title>
+         <meta name="description" content="Access your personalized study dashboard with progress tracking, pinned subjects, and quick access to all your flashcard collections. Continue your learning journey with Cardify." />
+         <meta name="keywords" content="study dashboard, flashcard progress, learning tracker, study organization, personalized learning" />
+         <link rel="canonical" href="https://cardify.app/home" />
+         <meta property="og:title" content="Home - Cardify Home" />
+         <meta property="og:description" content="Your personalized study dashboard with progress tracking and quick access to all your flashcards." />
+         <meta property="og:url" content="https://cardify.app/home" />
+         <meta name="robots" content="noindex, nofollow" />
+       </Helmet>
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"

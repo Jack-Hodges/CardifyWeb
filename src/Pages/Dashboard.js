@@ -17,6 +17,7 @@ import { saveCollection } from '../components/Collections/CollectionManipulation
 import DashboardImage from '../images/tutorial/Dashboard.png';
 import { ChevronDown, Search } from 'lucide-react';
 import useModals from '../hooks/useModals';
+import { Helmet } from 'react-helmet-async';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -274,6 +275,16 @@ function Dashboard() {
 
   return (
     <div className="w-screen h-screen relative">
+      <Helmet>
+        <title>Dashboard - Cardify | Manage Your Flashcard Collections</title>
+        <meta name="description" content="Organise and manage all your flashcard subjects and collections in one place. Create, edit, search, and sort your study materials with Cardify's comprehensive dashboard." />
+        <meta name="keywords" content="flashcard dashboard, study organization, flashcard management, study collections, learning materials organization" />
+        <link rel="canonical" href="https://cardify.app/dashboard" />
+        <meta property="og:title" content="Dashboard - Cardify" />
+        <meta property="og:description" content="Organize and manage all your flashcard subjects and collections in one comprehensive dashboard." />
+        <meta property="og:url" content="https://cardify.app/dashboard" />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"

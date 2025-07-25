@@ -1,6 +1,9 @@
 {
   "short_name": "Cardify",
-  "name": "Cardify - Flashcard App",
+  "name": "Cardify - Smart Flashcard Study App",
+  "description": "Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation. Study smarter with Cardify.",
+  "categories": ["education", "productivity", "lifestyle"],
+  "lang": "en",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +13,21 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "maskable any"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "maskable any"
     }
   ],
   "start_url": ".",
-  "display": "fullscreen",
+  "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#f1ebe0",
-  "background_color": "#f1ebe0"
+  "background_color": "#f1ebe0",
+  "scope": "/",
+  "id": "cardify-flashcard-app"
 }
