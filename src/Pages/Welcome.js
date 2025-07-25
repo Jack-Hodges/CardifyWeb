@@ -398,14 +398,7 @@ function Welcome() {
   return (
     <div className="w-screen h-screen relative">
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{ 
-          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
-            ? theme.image 
-            : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
+        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0 bg-[#f1ebe0] dark:bg-gray-800"
       ></div>
       <div className="relative z-10 min-h-screen block sm:flex">
         <ToastContainer position="top-center" autoClose={3000} />
