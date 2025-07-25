@@ -194,7 +194,7 @@ function Create() {
   };
 
       return (
-          <div className="w-screen h-screen-dynamic relative">
+          <div className="w-screen container-scrollable relative">
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
@@ -208,10 +208,10 @@ function Create() {
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 min-h-screen-dynamic pb-20">
+        <div className="relative z-10 min-h-screen-scrollable pb-20">
       <TitleBar text="Create" user={user}/>
 
-      <div className="block lg:flex w-screen h-screen-dynamic">
+      <div className="block lg:flex w-screen min-h-screen">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">

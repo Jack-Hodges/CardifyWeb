@@ -146,7 +146,7 @@ function Dash() {
     }
 
     return (
-          <div className="w-screen h-screen-dynamic relative">
+          <div className="w-screen container-scrollable relative">
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
@@ -160,7 +160,7 @@ function Dash() {
         ></div>
         
               {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen-dynamic pb-20">
+      <div className="relative z-10 min-h-screen-scrollable pb-20">
             <TitleBar text="Dash" />
 
             {/* If no subject or no cards, show the snippet */}

@@ -469,7 +469,7 @@ const DragDropGame = () => {
   };
 
   return (
-    <div className="w-screen h-screen-dynamic relative overflow-hidden">
+    <div className="w-screen container-scrollable relative overflow-hidden">
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
         className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"

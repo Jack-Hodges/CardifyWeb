@@ -141,7 +141,7 @@ function Type() {
 
     if (finished) {
       return (
-        <div className="w-screen h-screen-dynamic relative">
+        <div className="w-screen container-scrollable relative">
           {/* Fixed background - ensure it covers entire viewport */}
           <div 
             className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
@@ -155,7 +155,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 min-h-screen-dynamic pb-20">
+          <div className="relative z-10 min-h-screen-scrollable pb-20">
             <TitleBar text="Type" />
           <div className="flex flex-col justify-center items-center h-full p-4">
             <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
@@ -196,7 +196,7 @@ function Type() {
     }
 
     return (
-        <div className="w-screen h-screen-dynamic relative">
+        <div className="w-screen container-scrollable relative">
           {/* Fixed background - ensure it covers entire viewport */}
           <div 
             className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
@@ -210,7 +210,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 min-h-screen-dynamic pb-20">
+          <div className="relative z-10 min-h-screen-scrollable pb-20">
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
