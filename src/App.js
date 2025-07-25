@@ -37,7 +37,7 @@ function App() {
 
   return (
     <div 
-      className="w-screen min-h-screen dark:bg-gray-800"
+      className="w-screen min-h-screen-dynamic dark:bg-gray-800"
       style={{ 
         backgroundColor: 'transparent'
       }}

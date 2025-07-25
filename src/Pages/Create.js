@@ -194,10 +194,10 @@ function Create() {
   };
 
       return (
-      <div className="w-screen h-screen relative">
-        {/* Fixed background - ensure it covers entire viewport */}
-        <div 
-          className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+          <div className="w-screen h-screen-dynamic relative">
+      {/* Fixed background - ensure it covers entire viewport */}
+      <div 
+        className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
                   style={{ 
           background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
             ? theme.image 
@@ -208,10 +208,10 @@ function Create() {
         ></div>
         
         {/* Scrolling content */}
-        <div className="relative z-10 min-h-screen pb-20">
+        <div className="relative z-10 min-h-screen-dynamic pb-20">
       <TitleBar text="Create" user={user}/>
 
-      <div className="block lg:flex w-screen h-screen">
+      <div className="block lg:flex w-screen h-screen-dynamic">
         {loading ? (
           <div className="flex w-full h-full justify-center items-center">
             <div className="animate-pulse space-y-4 w-[70%] h-full">

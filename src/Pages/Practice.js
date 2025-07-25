@@ -156,10 +156,10 @@ function FlashcardQuiz() {
   };
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-screen-dynamic relative">
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="fixed inset-0 w-screen h-screen-dynamic bg-cover bg-center bg-no-repeat z-0"
         style={{ 
           background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
             ? theme.image 
@@ -170,10 +170,10 @@ function FlashcardQuiz() {
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen pb-20">
+      <div className="relative z-10 min-h-screen-dynamic pb-20">
         <TitleBar text="Practice" />
 
-      <div className="flex w-screen h-screen">
+      <div className="flex w-screen h-screen-dynamic">
 
         {!finished ? (
           <div className="w-full sm:w-4/5 h-[90%] sm:h-full flex flex-col mt-5 mx-auto">
