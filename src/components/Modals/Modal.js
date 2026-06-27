@@ -15,6 +15,21 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
         }
     }, [isOpen, isClosing]);
 
+    // Close on Escape and lock background scroll while the modal is open
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && onFirstAction) onFirstAction();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isOpen, onFirstAction]);
+
     const handleClose = (event) => {
         if (event) {
             event.stopPropagation(); // Only stop propagation if event exists
@@ -56,7 +71,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
+                className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-2xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
