@@ -22,7 +22,6 @@
     "lucide-solid": "^0.511.0",
     "mathquill": "^0.10.1-a",
     "micro": "^10.0.1",
-    "node": "^23.7.0",
     "openai": "^5.3.0",
     "papaparse": "^5.5.3",
     "pica": "^9.0.1",
@@ -84,5 +83,8 @@
   "main": "tailwind.config.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "24.x"
+  }
 }
