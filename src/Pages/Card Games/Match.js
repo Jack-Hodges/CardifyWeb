@@ -11,7 +11,7 @@ import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 function Match() {
     const [cards, setCards] = useState([]); 
-    const [timeLeft, setTimeLeft] = useState(60);
+    const [timeLeft] = useState(60);
     const [score, setScore] = useState(0);
     const [currentCard, setCurrentCard] = useState(null);
     const [options, setOptions] = useState([]);
@@ -35,29 +35,19 @@ function Match() {
         navigate('/create', { state: { subject } });
     };
 
-    // Function to get random cards excluding the current card
-    const getRandomCards = (currentCard, count) => {
-        const availableCards = cards.filter(card => card.id !== currentCard.id);
-        const shuffled = [...availableCards].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
-    };
-
-    // Function to set up a new round
     const setupNewRound = useCallback(() => {
-        if (cards.length < 4) return; // Need at least 4 cards for the game
+        if (cards.length < 4) return;
 
-        // Select a random card as the current card
         const randomIndex = Math.floor(Math.random() * cards.length);
         const newCurrentCard = cards[randomIndex];
         setCurrentCard(newCurrentCard);
 
-        // Get 2 random wrong answers
-        const wrongOptions = getRandomCards(newCurrentCard, 2);
-        
-        // Combine correct and wrong answers and shuffle them
+        const availableCards = cards.filter(card => card.id !== newCurrentCard.id);
+        const wrongOptions = [...availableCards].sort(() => 0.5 - Math.random()).slice(0, 2);
+
         const allOptions = [...wrongOptions, newCurrentCard]
             .sort(() => 0.5 - Math.random());
-        
+
         setOptions(allOptions);
         setSelectedOption(null);
         setIsCorrect(null);

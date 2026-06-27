@@ -14,8 +14,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const fileInputRef = useRef(null);
   const modalRootRef = useRef(null);
-  const { theme, profile } = useUser();
-  const { shadow } = theme;
+  const { profile } = useUser();
 
   useEffect(() => {
     if (isOpen) {
@@ -173,6 +172,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
         }
       };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- portal re-renders when modal state/content changes
   }, [isVisible, isClosing, previewCards, error, loading, showLimitDialog]);
 
   const handleClose = () => {

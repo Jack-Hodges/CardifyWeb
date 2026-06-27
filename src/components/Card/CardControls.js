@@ -7,7 +7,6 @@ import ImportModal from '../Modals/ImportModal';
 import GenerateModal from '../Modals/GenerateModal';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import { parseGeneratedFlashcards } from './ImportService';
 
 function CardControls({ 
     currentCardIndex, 

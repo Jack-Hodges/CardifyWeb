@@ -164,7 +164,6 @@ export const sortCardsById = (cards) => {
 export const upsertCard = async (card, imageFile) => {
   try {
     let newImageUrl = card.image_url || null;
-    let isNewCard = !card.id; // Track if this is a new card
 
     // 1) If a new image file is provided, delete the old image (if one exists) and then upload the new image.
     if (imageFile) {
@@ -193,7 +192,7 @@ export const upsertCard = async (card, imageFile) => {
         const fileName = `${uuidv4()}.${ext}`;
 
         // Upload the WebP blob to the "FlashcardImages" bucket.
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('FlashcardImages')
           .upload(fileName, blob, { contentType: `image/${ext}` });
 

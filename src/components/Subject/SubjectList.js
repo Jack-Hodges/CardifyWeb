@@ -6,7 +6,7 @@ import { fetchCollections } from '../Collections/CollectionManipulation';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import AddSubject from '../Subject/AddSubject';
-import { X, Plus, MoreVertical, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { X, Plus, MoreVertical, ArrowUpDown } from 'lucide-react';
 
 function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const navigate = useNavigate();
@@ -43,7 +43,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
         };
 
         loadData();
-    }, [user]);
+    }, [user, profile]);
 
     const goToDashboard = () => {
         navigate('/dashboard');
@@ -136,7 +136,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   {subjects.length > 0 ? (
                     sortedCombinedList.map((item) => {
                       if (item.type === 'subject') {
-                        if (item.permission != 'viewer') {
+                        if (item.permission !== 'viewer') {
                           return (
                             <SubjectRow
                               key={`subject-${item.id}`}

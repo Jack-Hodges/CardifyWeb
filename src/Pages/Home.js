@@ -9,7 +9,7 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modals/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 // Loading component
@@ -124,7 +124,7 @@ function Home() {
       loadSubjects();
       mounted.current = true;
     }
-  }, [getUser, user]);
+  }, [getUser, user, profile]);
 
     const handleDismissPopup = () => {
         setHomePopUp(false);
