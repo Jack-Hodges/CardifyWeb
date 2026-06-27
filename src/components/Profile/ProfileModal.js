@@ -10,7 +10,7 @@ import { Cog } from 'lucide-react';
 import Modal from '../Modals/Modal';
 
 function ProfileModal({ isOpen, onClose, mainText, logout }) {
-    const { theme, profile, upgradeToPro, manageBilling, user } = useUser();
+    const { theme, profile, user } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
@@ -24,24 +24,11 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
     const themeAssets = getThemeAssets();
-    const {color, primaryColor} = theme;
+    const {color} = theme;
 
     const cross = (
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-    );
-
-    const edit = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-        </svg>
-    );
-
-    const checkmark = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
-            <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
         </svg>
     );
 
@@ -279,15 +266,6 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             console.error('Error updating profile:', error);
         }
         setIsEditModalOpen(false);
-    };
-
-    const handleManageBillingClick = () => {
-        // Check if user has pro but no subscription_period_end (unlimited pro)
-        if (profile.pro && !profile.subscription_period_end) {
-            setIsUnlimitedProModalOpen(true);
-        } else {
-            manageBilling();
-        }
     };
 
     if (!isVisible && !isClosing) return null;

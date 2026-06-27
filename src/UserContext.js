@@ -64,7 +64,7 @@ export const UserProvider = ({ children }) => {
     }
     const userTheme = getTheme(profile.theme); // Synchronous call
     return resolveThemeColors(userTheme);
-  }, [profile?.theme, colorScheme]); // Add colorScheme as dependency
+  }, [profile?.theme]);
 
   // Update CSS variables whenever the theme changes
   useEffect(() => {
@@ -199,6 +199,7 @@ export const UserProvider = ({ children }) => {
       authListener.subscription.unsubscribe();
       mediaQuery.removeEventListener('change', handleColorSchemeChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only auth and color-scheme listeners
   }, []);
 
   // Function to mark that sign-up process has started

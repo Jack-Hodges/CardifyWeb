@@ -10,12 +10,9 @@ import Dash from './Pages/Card Games/Dash';
 import Type from './Pages/Card Games/Type';
 import Match from './Pages/Card Games/Match';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { useUser } from './UserContext';
 import { useEffect } from 'react';
 
 function App() {
-
-  const { theme } = useUser();
 
   useEffect(() => {
     // Force iOS to hide navigation bar on scroll by triggering document scroll

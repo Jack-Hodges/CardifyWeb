@@ -83,7 +83,7 @@ function Dashboard() {
       loadData();
       mounted.current = true;
     }
-  }, [user, userLoading, navigate, popupStates?.dashboard_popup, profile?.sort_preference]);
+  }, [user, userLoading, navigate, popupStates?.dashboard_popup, profile, profile?.sort_preference]);
 
   const handleDismissPopup = () => {
     setDashboardPopUp(false); 
@@ -176,8 +176,8 @@ function Dashboard() {
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Split subjects into personal and shared
-  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id == 136);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id != 136);
+  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id === 136);
+  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id !== 136);
 
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {

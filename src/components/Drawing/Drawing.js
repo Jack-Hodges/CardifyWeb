@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef } from 'react'
+import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
 import {
   Brush,
   Eraser,
@@ -25,7 +25,7 @@ const Drawing = forwardRef((props, ref) => {
   const [brushSize, setBrushSize] = useState(10)
   const [eraserSize, setEraserSize] = useState(10)
   const [brushColor, setBrushColor] = useState('#000000')
-  const [showBrushSettings, setShowBrushSettings] = useState(false)
+  const [, setShowBrushSettings] = useState(false)
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
   const [showCursor, setShowCursor] = useState(false)
   const [showSketchPicker, setShowSketchPicker] = useState(false)
@@ -61,7 +61,7 @@ const Drawing = forwardRef((props, ref) => {
     }
   }
 
-  // Initialize drawing canvas (runs only once)
+  // Initialize drawing canvas once on mount
   useEffect(() => {
     const canvas = drawingCanvasRef.current
     canvas.width = window.innerWidth * 2
@@ -80,6 +80,7 @@ const Drawing = forwardRef((props, ref) => {
     // Save initial (blank) state for undo
     const initialState = context.getImageData(0, 0, canvas.width, canvas.height)
     undoStack.current.push(initialState)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only canvas setup
   }, [])
 
   useEffect(() => {
@@ -222,20 +223,7 @@ const Drawing = forwardRef((props, ref) => {
     a.click()
   }
 
-  useEffect(() => {
-    const canvas = imageCanvasRef.current
-    canvas.width = window.innerWidth * 2
-    canvas.height = window.innerHeight * 2
-    canvas.style.width = `${window.innerWidth}px`
-    canvas.style.height = `100dvh`
-    canvas.style.touchAction = 'none'
-    const ctx = canvas.getContext('2d')
-    ctx.scale(2, 2)
-    imageContextRef.current = ctx
-    drawImages()
-  }, [images, selectedImageId])
-
-  const drawImages = () => {
+  const drawImages = useCallback(() => {
     const canvas = imageCanvasRef.current
     const ctx = imageContextRef.current
     if (!ctx) return
@@ -263,7 +251,20 @@ const Drawing = forwardRef((props, ref) => {
       }
       ctx.restore()
     })
-  }
+  }, [images, selectedImageId])
+
+  useEffect(() => {
+    const canvas = imageCanvasRef.current
+    canvas.width = window.innerWidth * 2
+    canvas.height = window.innerHeight * 2
+    canvas.style.width = `${window.innerWidth}px`
+    canvas.style.height = `100dvh`
+    canvas.style.touchAction = 'none'
+    const ctx = canvas.getContext('2d')
+    ctx.scale(2, 2)
+    imageContextRef.current = ctx
+    drawImages()
+  }, [drawImages])
 
   const fileInputRef = useRef(null)
   const handleImageUpload = (e) => {
