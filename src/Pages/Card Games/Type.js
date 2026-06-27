@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import confetti from 'canvas-confetti';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
@@ -11,6 +10,8 @@ import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
 import { EditableMathField, addStyles } from 'react-mathquill';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import GameComplete from '../../components/Elements/GameComplete';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 addStyles();
 
 function Type() {
@@ -87,18 +88,6 @@ function Type() {
         setShowAnswer(false);
     }, [cards]);
 
-    // Trigger confetti when finished becomes true
-    useEffect(() => {
-      if (finished) {
-        confetti({
-          particleCount: 300,
-          spread: 100,
-          origin: { y: 0.5 },
-          gravity: 0.9,
-        });
-      }
-    }, [finished]);
-
     const handleAnswerSubmit = () => {
         if (!filteredCards[currentCardIndex]) return;
         setShowAnswer(true);
@@ -157,39 +146,33 @@ function Type() {
           {/* Scrolling content */}
           <div className="relative z-10 min-h-screen pb-20">
             <TitleBar text="Type" />
-          <div className="flex flex-col justify-center items-center h-full p-4">
-            <h1 className="text-9xl font-bold text-green-500 mb-10">🎉</h1>
-            <p className={`${theme ? theme.textClass : 'textColor'} font-bold text-2xl mb-10 ${shadow ? 'drop-shadow-custom' : ''}`}>Session Complete!</p>
-            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-2 ${shadow ? 'drop-shadow-custom' : ''}`}>{correctCount} Correct</p>
-            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-2 ${shadow ? 'drop-shadow-custom' : ''}`}>{incorrectCount} Incorrect</p>
-            <p className={`${theme ? theme.textClass : 'textColor'} text-xl mb-5 ${shadow ? 'drop-shadow-custom' : ''}`}>{skippedCount} Skipped</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <BackgroundButton
-                text="Back to Home"
-                bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-                onClick={() => navigate('/home')}
-              />
-              <BackgroundButton
-                text={`Review ${subject?.name} Again`}
-                bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : 'bg-purple-500 hover:bg-purple-400'}
-                onClick={() => {
-                  setFinished(false);
-                  // Reset counts
-                  setCorrectCount(0);
-                  setIncorrectCount(0);
-                  setSkippedCount(0);
-                  setProcessedCount(0);
-                  // Reshuffle and reset cards
-                  const nonImage = cards.filter(card => card.backMode !== 3);
-                  const reshuffled = shuffleCards(nonImage);
-                  setFilteredCards(reshuffled);
-                  setCurrentCardIndex(0);
-                  setUserAnswer('');
-                  setShowAnswer(false);
-                }}
-              />
-            </div>
-          </div>
+            <GameComplete
+              title="Session Complete!"
+              primaryText="Back to Home"
+              onPrimary={() => navigate('/home')}
+              secondaryText={`Review ${subject?.name} Again`}
+              onSecondary={() => {
+                setFinished(false);
+                // Reset counts
+                setCorrectCount(0);
+                setIncorrectCount(0);
+                setSkippedCount(0);
+                setProcessedCount(0);
+                // Reshuffle and reset cards
+                const nonImage = cards.filter(card => card.backMode !== 3);
+                const reshuffled = shuffleCards(nonImage);
+                setFilteredCards(reshuffled);
+                setCurrentCardIndex(0);
+                setUserAnswer('');
+                setShowAnswer(false);
+              }}
+            >
+              <div className={`${theme ? theme.textClass : 'textColor'} text-xl font-semibold space-y-2 ${shadow ? 'drop-shadow-custom' : ''}`}>
+                <p>{correctCount} Correct</p>
+                <p>{incorrectCount} Incorrect</p>
+                <p>{skippedCount} Skipped</p>
+              </div>
+            </GameComplete>
           </div>
         </div>
       );
@@ -215,21 +198,23 @@ function Type() {
 
             {/* If no subject or no cards, show the snippet */}
             {(!subject || (filteredCards && filteredCards.length === 0)) ? (
-                <div className="flex flex-col justify-center items-center w-full h-full">
+                <PageEmptyState>
                   {subject ? (
                     <NoSelectionModal
                       text={`${subject.name} has no flashcards`}
+                      subtext="Add some flashcards to this subject to start playing Type."
                       text1={`Add Flashcards to ${subject.name}`}
                       action1={handleSwitchToCreate}
                     />
                   ) : (
                     <NoSelectionModal
                       text="No subject selected"
+                      subtext="Pick a subject to start playing Type."
                       text1="Select a subject to practice"
                       action1={handleOpenSubjectListModal}
                     />
                   )}
-                </div>
+                </PageEmptyState>
             ) : (
                 // Game area
                 <div className="flex flex-col items-center justify-center p-4 w-full h-screen">

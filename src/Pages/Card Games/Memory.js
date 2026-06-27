@@ -3,13 +3,15 @@ import { useUser } from '../../UserContext';
 import { useLocation } from 'react-router-dom';
 import { fetchCards } from "../../components/Card/CardManipulation";
 import ReactMarkdown from 'react-markdown';
-import BackgroundButton from '../../components/Elements/BackgroundButton';
 import { useNavigate } from 'react-router-dom';
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
 import SubjectList from '../../components/Subject/SubjectList'; // Make sure this import is correct
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import GameComplete from '../../components/Elements/GameComplete';
+import LoadingSpinner from '../../components/Elements/LoadingSpinner';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 // Helper function to shuffle an array
 const shuffleArray = (array) => {
@@ -27,7 +29,6 @@ function Memory() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, secondaryColor, tertiaryColor, image, shadow } = theme;
     const navigate = useNavigate();
 
     const [allCards, setAllCards] = useState([]); // Store all cards
@@ -181,15 +182,6 @@ function Memory() {
         }
     };
 
-    // Render logic
-    if (loading) {
-        return (
-            <div className="w-screen h-screen flex items-center justify-center bg-cover bg-screen" style={{ backgroundImage: image }}>
-                <p>Loading...</p>
-            </div>
-        );
-    }
-
     return (
       <div className="w-screen h-screen relative">
         {/* Fixed background - ensure it covers entire viewport */}
@@ -208,11 +200,13 @@ function Memory() {
         <div className="relative z-10 min-h-screen flex flex-col pb-20">
             <TitleBar text="Memory" />
 
-            {!subject ? (
-                // No subject selected section
-                <div className="flex flex-col justify-center items-center h-full w-full">
+            {loading ? (
+                <LoadingSpinner text="Shuffling cards..." />
+            ) : !subject ? (
+                <PageEmptyState>
                     <NoSelectionModal
                         text="No subject selected"
+                        subtext="Pick a subject to start playing Memory."
                         text1="Select a subject to practice"
                         action1={handleOpenSubjectListModal}
                     />
@@ -223,7 +217,7 @@ function Memory() {
                         user={user}
                         page='memory'
                     />
-                </div>
+                </PageEmptyState>
             ) : (
                 <div className="relative flex-1">
                     <div 
@@ -252,34 +246,13 @@ function Memory() {
 
                     {gameCompleted && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="p-8 text-center transform transition-all duration-500 scale-100">
-                                <h2 className={`text-4xl font-bold drop-shadow-custom ${textColor} mb-6`}>
-                                    🎉 Congratulations! 🎉
-                                </h2>
-                                <p className={`text-2xl mb-6 font-bold drop-shadow-custom ${textColor}`}>
-                                    You finished in {formatTime(timer)}!
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <BackgroundButton 
-                                        text="Back to Home" 
-                                        bgColor={
-                                            theme 
-                                              ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` 
-                                              : "bg-orange-500 hover:bg-orange-400"
-                                          }
-                                        onClick={handleSwitchToHome} 
-                                    />
-                                    <BackgroundButton 
-                                        text={`Review ${subject.name} Again`} 
-                                        bgColor={
-                                            theme 
-                                              ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` 
-                                              : "bg-purple-500 hover:bg-purple-400"
-                                          }
-                                        onClick={() => window.location.reload()} 
-                                    />
-                                </div>
-                            </div>
+                            <GameComplete
+                                title={`You finished in ${formatTime(timer)}!`}
+                                primaryText="Back to Home"
+                                onPrimary={handleSwitchToHome}
+                                secondaryText={`Review ${subject.name} Again`}
+                                onSecondary={() => window.location.reload()}
+                            />
                         </div>
                     )}
 

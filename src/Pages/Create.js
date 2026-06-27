@@ -17,6 +17,7 @@ import ImportModal from '../components/Modals/ImportModal';
 import GenerateModal from '../components/Modals/GenerateModal';
 import { ToastContainer, toast } from 'react-toastify';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
+import PageEmptyState from '../components/Elements/PageEmptyState';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { parseGeneratedFlashcards } from '../components/Card/ImportService';
 import 'react-toastify/dist/ReactToastify.css';
@@ -225,13 +226,13 @@ function Create() {
 
       <div className="block lg:flex w-screen h-screen">
         {loading ? (
-          <div className="flex w-full h-full justify-center items-center">
-            <div className="animate-pulse space-y-4 w-[70%] h-full">
+          <PageEmptyState>
+            <div className="animate-pulse space-y-4 w-full max-w-2xl">
               <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg"></div>
               <div className="bg-gray-300 dark:bg-gray-600 h-12 w-3/4 rounded"></div>
               <div className="bg-gray-300 dark:bg-gray-600 h-12 w-1/2 rounded"></div>
             </div>
-          </div>
+          </PageEmptyState>
         ) : cards.length > 0 ? (
           <>
             <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
@@ -295,19 +296,18 @@ function Create() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
+          <PageEmptyState>
             {subject ? (
-              <div className="flex flex-col justify-center items-center gap-4">
+              <div className="flex flex-col justify-center items-center gap-4 max-w-2xl">
                 <p 
-                  className={`${theme ? theme.textClass : 'text-gray-500'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}
+                  className={`${theme ? theme.textClass : 'text-gray-500'} text-3xl sm:text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}
                 >
                   {subject.name} has no flashcards
                 </p>
-                <p className={`${theme ? theme.textClass : 'textColor'} text-2xl font-semibold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>This subject is currently empty, click the button below to add a card.
-                  <br></br>You can add a text, math, image, or drawing card.
-                  <br></br>Cards can be exported to a PDF to study on paper.
+                <p className={`${theme ? theme.textClass : 'textColor'} text-lg sm:text-xl font-medium text-center opacity-90 ${shadow ? 'drop-shadow-custom' : ''}`}>
+                  This subject is currently empty. Add a text, math, image, or drawing card — or import and generate cards in bulk.
                 </p>
-                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-auto">
+                <div className="flex flex-col sm:flex-row gap-3 mt-3 w-full sm:w-auto items-center justify-center">
                   <BackgroundButton
                     text={`Add Card to ${subject.name}`}
                     bgColor={
@@ -316,7 +316,7 @@ function Create() {
                         : "bg-orange-500 hover:bg-orange-400"
                     }
                     onClick={handleOpenAddCardModal}
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                    wWidth="w-full sm:w-auto"
                   />
                   <BackgroundButton
                     text="Import Cards"
@@ -326,7 +326,7 @@ function Create() {
                         : "bg-orange-500 hover:bg-orange-400"
                     }
                     onClick={() => setIsImportModalOpen(true)}
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+                    wWidth="w-full sm:w-auto"
                   />
                   <BackgroundButton
                     text="Generate Flashcards"
@@ -343,13 +343,14 @@ function Create() {
             ) : (
               <NoSelectionModal
                 text="No subject selected"
+                subtext="Choose an existing subject or create a new one to start adding cards."
                 text1="Add Cards to Subject"
                 text2="Create New Subject"
                 action1={handleOpenSubjectListModal}
                 action2={handleCreateNewSubject}
               />
             )}
-          </div>
+          </PageEmptyState>
         )}
       </div>
 

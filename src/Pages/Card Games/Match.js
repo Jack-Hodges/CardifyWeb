@@ -5,8 +5,9 @@ import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
-import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
+import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 function Match() {
     const [cards, setCards] = useState([]); 
@@ -22,7 +23,7 @@ function Match() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { shadow, secondaryColor } = theme;
+    const { shadow } = theme;
 
     const navigate = useNavigate();
 
@@ -124,35 +125,23 @@ function Match() {
 
             {/* If no subject or no cards, show the snippet */}
             {(!subject || (cards && cards.length < 4)) ? (
-                <div className="flex flex-col justify-center items-center w-full h-full">
+                <PageEmptyState>
                   {subject ? (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>
-                        {cards.length < 4 ? 'Need at least 4 flashcards to play' : 'No subject selected'}
-                      </p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton 
-                          text={cards.length < 4 ? `Add More Flashcards to ${subject.name}` : "Select a subject to practice"} 
-                          bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} 
-                          onClick={cards.length < 4 ? handleSwitchToCreate : handleOpenSubjectListModal} 
-                          wWidth='w-full sm:w-auto'
-                        />
-                      </div>
-                    </div>
+                    <NoSelectionModal
+                      text="Need at least 4 flashcards to play"
+                      subtext={`Add more cards to ${subject.name} to start a Match game.`}
+                      text1={`Add More Flashcards to ${subject.name}`}
+                      action1={handleSwitchToCreate}
+                    />
                   ) : (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton 
-                          text="Select a subject to practice" 
-                          bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} 
-                          onClick={handleOpenSubjectListModal} 
-                          wWidth='w-full sm:w-auto'
-                        />
-                      </div>
-                    </div>
+                    <NoSelectionModal
+                      text="No subject selected"
+                      subtext="Pick a subject to start playing Match."
+                      text1="Select a subject to practice"
+                      action1={handleOpenSubjectListModal}
+                    />
                   )}
-                </div>
+                </PageEmptyState>
             ) : (
                 // Game area
                 <div className="flex flex-col items-center p-4">

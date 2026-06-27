@@ -11,6 +11,8 @@ import rehypeRaw from 'rehype-raw';
 import Ad from '../../components/Advertisement/Ad';
 import { EditableMathField } from 'react-mathquill';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import GameComplete from '../../components/Elements/GameComplete';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 function Quiz() {
   // State variables
@@ -265,45 +267,36 @@ function Quiz() {
             </div>
           ) : (
             !showAd ? (
-              <div className="w-full h-full flex flex-col items-center justify-center">
-                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
-                  {message}
-                </h2>
-                <p className={`text-7xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>
+              <GameComplete
+                title={message}
+                primaryText="Back to Home"
+                onPrimary={() => {
+                  if (profile.pro) {
+                    navigate('/home');
+                  } else {
+                    setLeaveAd("Home");
+                    setShowAd(true);
+                  }
+                }}
+                secondaryText={`Try ${subject.name} again`}
+                onSecondary={() => {
+                  if (profile.pro) {
+                    setFinished(false);
+                    setCurrentCardIndex(0);
+                    setSelectedAnswers({});
+                    randomizeOptions(cards);
+                  } else {
+                    setLeaveAd("Retry Quiz");
+                    setShowAd(true);
+                  }
+                }}
+              >
+                <p className={`text-7xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>
                   {percentage.toFixed(0)}%
                 </p>
-                <div className="flex gap-4 mt-4">
-                  <BackgroundButton
-                      text="Back to Home"
-                      bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                      onClick={() => {
-                        if (profile.pro) {
-                          navigate('/home');
-                        } else {
-                          setLeaveAd("Home");
-                          setShowAd(true);
-                        }
-                      }}
-                    />
-                  <BackgroundButton
-                    text={`Try ${subject.name} again`}
-                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-green-500 hover:bg-green-400"}
-                    onClick={() => {
-                      if (profile.pro) {
-                        setFinished(false);
-                        setCurrentCardIndex(0);
-                        setSelectedAnswers({});
-                        randomizeOptions(cards);
-                      } else {
-                        setLeaveAd("Retry Quiz");
-                        setShowAd(true);
-                      }
-                    }}
-                  />
-                </div>
-              </div>
+              </GameComplete>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center">
+              <PageEmptyState>
                 <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
                   Advertisement
                 </h2>
@@ -324,52 +317,29 @@ function Quiz() {
                     }
                   }}
                 />
-              </div>
+              </PageEmptyState>
             )
           )
         ) : (
-          <div className="flex flex-col justify-center items-center w-full h-full mt-[-5%]">
+          <PageEmptyState>
             {subject ? (
-              <div className="flex flex-col justify-center items-center gap-4">
-                <p className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>
-                  {subject.name} does not have enough cards.
-                </p>
-                <p className={`${theme ? theme.textClass : 'textColor'} ${shadow ? 'drop-shadow-custom' : ''}`}>
-                  At least 4 cards are required to start a quiz
-                </p>
-                <div className="block sm:flex gap-4 mt-5 mx-4 sm:mx-0">
-                  <BackgroundButton
-                    text="Choose a different subject"
-                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
-                    onClick={() => setIsSubjectListModalOpen(true)}
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-                  />
-                  <BackgroundButton
-                    text={`Add cards to ${subject.name}`}
-                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                    onClick={handleSwitchToCreate}
-                    wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-                  />
-                </div>
-              </div>
+              <NoSelectionModal
+                text={`${subject.name} doesn't have enough cards`}
+                subtext="At least 4 cards are required to start a quiz."
+                text1="Choose a different subject"
+                action1={() => setIsSubjectListModalOpen(true)}
+                text2={`Add cards to ${subject.name}`}
+                action2={handleSwitchToCreate}
+              />
             ) : (
-              <div className="flex flex-col justify-center items-center w-full h-full">
-                {subject ? (
-                  <NoSelectionModal
-                    text={`${subject.name} has no flashcards`}
-                    text1={`Add Flashcards to ${subject.name}`}
-                    action1={handleSwitchToCreate}
-                  />
-                ) : (
-                  <NoSelectionModal
-                    text="No subject selected"
-                    text1="Select a subject to practice"
-                    action1={() => setIsSubjectListModalOpen(true)}
-                  />
-                )}
-              </div>
+              <NoSelectionModal
+                text="No subject selected"
+                subtext="Pick a subject to start the quiz."
+                text1="Select a subject to practice"
+                action1={() => setIsSubjectListModalOpen(true)}
+              />
             )}
-          </div>
+          </PageEmptyState>
         )}
       </div>
       </div>

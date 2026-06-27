@@ -7,6 +7,8 @@ import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import LoadingSpinner from '../../components/Elements/LoadingSpinner';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
@@ -498,25 +500,25 @@ const DragDropGame = () => {
         
         <div className="flex-1 flex flex-col min-h-0">
           {loading ? (
-            <div className="flex items-center justify-center flex-1">
-              <div className="text-lg text-gray-600">Loading cards...</div>
-            </div>
+            <LoadingSpinner text="Loading cards..." />
           ) : !cards.length ? (
-            <div className="flex flex-col justify-center items-center flex-1">
+            <PageEmptyState>
               {subject ? (
                 <NoSelectionModal
                   text={`${subject.name} has no flashcards`}
+                  subtext="Add some flashcards to this subject to start playing Scramble."
                   text1={`Add Flashcards to ${subject.name}`}
                   action1={handleSwitchToCreate}
                 />
               ) : (
                 <NoSelectionModal
                   text="No subject selected"
+                  subtext="Pick a subject to start playing Scramble."
                   text1="Select a subject to practice"
                   action1={handleOpenSubjectListModal}
                 />
               )}
-            </div>
+            </PageEmptyState>
           ) : (
             <div className={`flex-1 flex flex-col ${isMobile ? 'p-2' : 'p-4'} min-h-0 overflow-hidden`}>
               <div className={`flex-shrink-0 ${isMobile ? 'mb-2' : 'mb-4'} ${isMobile ? 'flex-col space-y-2' : 'flex justify-between items-center'}`}>

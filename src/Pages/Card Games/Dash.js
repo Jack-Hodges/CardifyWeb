@@ -5,8 +5,10 @@ import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
-import BackgroundButton from '../../components/Elements/BackgroundButton'; // Ensure this is correctly imported
 import SubjectList from '../../components/Subject/SubjectList'; // If you need subject selection
+import NoSelectionModal from '../../components/Modals/NoSelectionModal';
+import GameComplete from '../../components/Elements/GameComplete';
+import PageEmptyState from '../../components/Elements/PageEmptyState';
 // Make sure you have functions handleSwitchToCreate and handleOpenSubjectListModal defined,
 // and also ensure secondaryColor is defined from your theme context just like in Practice.
 
@@ -23,7 +25,7 @@ function Dash() {
     const location = useLocation();
     const { subject } = location.state || {};
     const { user, getUser, theme } = useUser();
-    const { textColor, shadow, secondaryColor } = theme;
+    const { textColor, shadow } = theme;
 
     const navigate = useNavigate();
 
@@ -165,23 +167,31 @@ function Dash() {
 
             {/* If no subject or no cards, show the snippet */}
             {(!subject || (cards && cards.length === 0)) ? (
-                <div className="flex flex-col justify-center items-center w-full h-full">
+                <PageEmptyState>
                   {subject ? (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>{subject.name} has no flashcards</p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text={`Add Flashcards to ${subject.name}`} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleSwitchToCreate} wWidth='w-full sm:w-auto'/>
-                      </div>
-                    </div>
+                    <NoSelectionModal
+                      text={`${subject.name} has no flashcards`}
+                      subtext="Add some cards to this subject to start playing Dash."
+                      text1={`Add Flashcards to ${subject.name}`}
+                      action1={handleSwitchToCreate}
+                    />
                   ) : (
-                    <div>
-                      <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>No subject selected</p>
-                      <div className="block sm:flex justify-center gap-4 mt-5 mx-4 sm:mx-auto">
-                        <BackgroundButton text="Select a subject to practice" bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'} onClick={handleOpenSubjectListModal} wWidth='w-full sm:w-auto'/>
-                      </div>
-                    </div>
+                    <NoSelectionModal
+                      text="No subject selected"
+                      subtext="Pick a subject to start playing Dash."
+                      text1="Select a subject to practice"
+                      action1={handleOpenSubjectListModal}
+                    />
                   )}
-                </div>
+                </PageEmptyState>
+            ) : gameOver ? (
+                <GameComplete
+                  title={`Time's up! Final score: ${score}`}
+                  primaryText="Back to Home"
+                  onPrimary={() => navigate('/home')}
+                  secondaryText={`Play ${subject.name} again`}
+                  onSecondary={() => window.location.reload()}
+                />
             ) : (
                 // Otherwise, show the game area
                 <React.Fragment>
@@ -225,21 +235,6 @@ function Dash() {
                             </div>
                         )}
 
-                        {/* Game Over Overlay */}
-                        {gameOver && (
-                            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                                <div className="bg-white p-6 rounded-lg text-center">
-                                    <h2 className="text-2xl font-bold mb-4">Game Over!</h2>
-                                    <p className="text-xl">Final Score: {score}</p>
-                                    <button 
-                                        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                                        onClick={() => window.location.reload()}
-                                    >
-                                        Play Again
-                                    </button>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </React.Fragment>
             )}
