@@ -30,18 +30,6 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onFirstAction]);
 
-    const handleClose = (event) => {
-        if (event) {
-            event.stopPropagation();
-        }
-        if (isClosing) return;
-        setIsClosing(true);
-        setTimeout(() => {
-            setIsVisible(false);
-            setIsClosing(false);
-        }, 300);
-    };
-
     const handleFirstAction = () => {
         if (isClosing) return;
         setIsClosing(true);
