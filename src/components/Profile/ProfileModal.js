@@ -27,8 +27,8 @@ function GlassPanel({ isOpen, onClose, title, subtitle, icon, children, footer, 
         if (isClosing) return;
         setIsClosing(true);
         setTimeout(() => {
-            setIsClosing(false);
             setIsVisible(false);
+            setIsClosing(false);
             onClose();
         }, 300);
     };
@@ -39,15 +39,9 @@ function GlassPanel({ isOpen, onClose, title, subtitle, icon, children, footer, 
             setIsClosing(false);
             return;
         }
-        if (isVisible && !isClosing) {
-            setIsClosing(true);
-            const timeout = setTimeout(() => {
-                setIsClosing(false);
-                setIsVisible(false);
-            }, 300);
-            return () => clearTimeout(timeout);
-        }
-    }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+        setIsVisible(false);
+        setIsClosing(false);
+    }, [isOpen]);
 
     useBodyScrollLock(isVisible || isClosing);
 
@@ -132,10 +126,12 @@ function ProfileModal({ isOpen, onClose, logout }) {
     useEffect(() => {
         if (isOpen) {
             setIsVisible(true);
-        } else if (!isClosing) {
+            setIsClosing(false);
+        } else {
             setIsVisible(false);
+            setIsClosing(false);
         }
-    }, [isOpen, isClosing]);
+    }, [isOpen]);
 
     useBodyScrollLock(isVisible || isClosing);
 
@@ -146,14 +142,15 @@ function ProfileModal({ isOpen, onClose, logout }) {
     }, [theme, color]);
 
     const handleOnClose = (event) => {
-        onClose();
         if (event) {
             event.stopPropagation();
         }
+        if (isClosing) return;
         setIsClosing(true);
         setTimeout(() => {
-            setIsClosing(false);
             setIsVisible(false);
+            setIsClosing(false);
+            onClose();
         }, 300);
     };
 
@@ -670,13 +667,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 subtitle="Update your account details"
                 icon={<Cog size={22} className="text-white/90 shrink-0" />}
                 footer={
-                    <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-                        <BackgroundButton
-                            text="Cancel"
-                            bgColor="bg-gray-500 hover:bg-gray-400"
-                            wWidth="w-full sm:w-auto"
-                            onClick={() => setIsEditModalOpen(false)}
-                        />
+                    <div className="flex sm:justify-end">
                         <BackgroundButton
                             text="Save changes"
                             bgColor="bg-blue-500 hover:bg-blue-400"

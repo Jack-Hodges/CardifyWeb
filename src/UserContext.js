@@ -212,53 +212,13 @@ export const UserProvider = ({ children }) => {
     setColorScheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Subscription functions
+  // Subscription helpers (Stripe temporarily disabled)
   const upgradeToPro = async () => {
-    if (!user?.id) {
-      console.error('No user logged in');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error upgrading to pro:', error);
-    }
+    console.info('Stripe checkout is disabled. Contact hello@flashcardify.app for Pro.');
   };
 
   const manageBilling = async () => {
-    if (!user?.id) {
-      console.error('No user logged in');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/create-billing-portal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to access billing portal');
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error accessing billing portal:', error);
-    }
+    console.info('Stripe billing portal is disabled.');
   };
 
   return (

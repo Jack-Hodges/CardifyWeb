@@ -14,7 +14,6 @@ import CustomModal from "../components/Modals/CustomModal";
 import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
 import ImportModal from '../components/Modals/ImportModal';
-import GenerateModal from '../components/Modals/GenerateModal';
 import { ToastContainer, toast } from 'react-toastify';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
@@ -157,7 +156,16 @@ function Create() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate flashcards');
+        let detail = 'Failed to generate flashcards';
+        try {
+          const errBody = await response.json();
+          if (errBody?.error) detail = errBody.error;
+        } catch {
+          if (response.status === 404) {
+            detail = 'Generate API not reachable. Run `npm run server` on port 3001 for local development.';
+          }
+        }
+        throw new Error(detail);
       }
 
       const text = await response.text();
@@ -196,7 +204,7 @@ function Create() {
   };
 
         return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-[100dvh] relative overflow-hidden">
       <Helmet>
         <title>Create Flashcards - Cardify | Design Custom Study Cards</title>
         <meta name="description" content="Create custom flashcards with text, mathematical equations, images, and drawings. Use AI-powered generation, import from files, or design from scratch. Export to PDF when ready." />
@@ -220,11 +228,11 @@ function Create() {
         }}
       ></div>
         
-        {/* Scrolling content */}
-        <div className="relative z-10 min-h-screen pb-20">
+      <div className="relative z-10 h-full flex flex-col overflow-hidden">
       <TitleBar text="Create" user={user}/>
 
-      <div className="block lg:flex w-screen h-screen">
+      <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+      <div className="block lg:flex w-full h-auto lg:h-full lg:min-h-0">
         {loading ? (
           <PageEmptyState>
             <div className="animate-pulse space-y-4 w-full max-w-2xl">
@@ -266,6 +274,7 @@ function Create() {
                   themeTertiary={tertiaryColor}
                   cards={cards}
                   generateClick={() => setIsGenerateModalOpen(true)}
+                  onGenerate={handleGenerate}
                   onUpsertCard={handleUpsertCard}
                   subject={subject}
                   isGenerateModalOpen={isGenerateModalOpen}
@@ -419,14 +428,8 @@ function Create() {
         onFirstAction={handleDismissPopup}
       />
 
-      <GenerateModal
-        isOpen={isGenerateModalOpen}
-        onClose={() => setIsGenerateModalOpen(false)}
-        onGenerate={handleGenerate}
-        isGenerating={isGenerating}
-      />
-
       <ToastContainer position="top-center" autoClose={3000} />
+      </div>
       </div>
     </div>
   );

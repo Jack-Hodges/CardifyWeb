@@ -1,15 +1,47 @@
+import ReactDOM from 'react-dom';
 import BackgroundButton from "../Elements/BackgroundButton";
 import getColors from "../Functions/getColors";
 import SubjectBlock from "../Subject/SubjectBlock";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Pencil, FolderOpen } from "lucide-react";
 import useBodyScrollLock from "../../hooks/useBodyScrollLock";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
-    useBodyScrollLock(isExpanded);
+    useEffect(() => {
+        if (isExpanded) {
+            setIsVisible(true);
+            setIsClosing(false);
+            return;
+        }
+        setIsVisible(false);
+        setIsClosing(false);
+    }, [isExpanded]);
+
+    useBodyScrollLock(isVisible || isClosing);
+
+    useEffect(() => {
+        if (!isVisible) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') handleClose();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleClose = () => {
+        if (isClosing) return;
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsVisible(false);
+            setIsClosing(false);
+            onClick?.();
+        }, 300);
+    };
 
     return (
         <>
@@ -73,16 +105,19 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 </div>
             </div>
 
-            {isExpanded && (
+            {(isVisible || isClosing) && ReactDOM.createPortal(
                 <div
-                    className="fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6"
-                    onClick={onClick}
+                    className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
+                        isClosing ? 'opacity-0' : 'opacity-100'
+                    }`}
                 >
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClick} />
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
                     <div
-                        className="relative w-full sm:w-[95%] h-full sm:h-[90%] overflow-hidden flex flex-col
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] overflow-hidden flex flex-col
                             bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
-                            sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30"
+                            sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                            transform transition-all duration-300 ease-in-out
+                            ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
@@ -107,7 +142,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                     <BackgroundButton
                                         image={<X size={20} strokeWidth={3} />}
                                         bgColor="bg-red-500 hover:bg-red-400"
-                                        onClick={onClick}
+                                        onClick={handleClose}
                                     />
                                 </div>
                             </div>
@@ -138,7 +173,8 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                             )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

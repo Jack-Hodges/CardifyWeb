@@ -4,8 +4,9 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Check } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
+import ConfirmModal from '../Modals/ConfirmModal';
 
 const COLOR_OPTIONS = [
     'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan',
@@ -143,6 +144,7 @@ function ShadeScrubber({ color, intensity, onChange }) {
 function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const [showUnsavedConfirm, setShowUnsavedConfirm] = useState(false);
     const [subjectName, setLocalSubjectName] = useState(subject?.name || '');
     const [subjectColor, setLocalSubjectColor] = useState(subject?.colourText ?? 'red');
     const [subjectIntensity, setSubjectIntensity] = useState(subject?.colourIntensity || DEFAULT_INTENSITY);
@@ -152,46 +154,67 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const [selectedCollection, setSelectedCollection] = useState('None');
     const [selectedCollectionId, setSelectedCollectionId] = useState(null);
     const [tuningColor, setTuningColor] = useState(null);
+    const snapshotRef = useRef(null);
 
     useBodyScrollLock(isVisible || isClosing);
 
     useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-            if (!subject) {
-                setLocalSubjectName('');
-                setLocalSubjectColor('red');
-                setSubjectIntensity(DEFAULT_INTENSITY);
-                setSelectedCollection('None');
-                setSelectedCollectionId(null);
-                setTuningColor(null);
-            } else {
-                setTuningColor(subject.colourText || null);
-            }
-        } else if (!isClosing) {
+        if (!isOpen) {
             setIsVisible(false);
+            setIsClosing(false);
+            setShowUnsavedConfirm(false);
+            return;
         }
-    }, [isOpen, isClosing, subject]);
+        setIsVisible(true);
+        setIsClosing(false);
+        setShowUnsavedConfirm(false);
+    }, [isOpen]);
 
     useEffect(() => {
-        if (subject) {
-            setLocalSubjectName(subject.name);
-            setLocalSubjectColor(subject.colourText);
+        if (!isOpen) return;
+
+        if (!subject) {
+            setLocalSubjectName('');
+            setLocalSubjectColor('red');
+            setSubjectIntensity(DEFAULT_INTENSITY);
+            setSelectedCollection('None');
+            setSelectedCollectionId(null);
+            setTuningColor(null);
+            snapshotRef.current = {
+                name: '',
+                color: 'red',
+                intensity: DEFAULT_INTENSITY,
+                collectionId: null,
+            };
+        } else {
+            setLocalSubjectName(subject.name || '');
+            setLocalSubjectColor(subject.colourText ?? 'red');
             setSubjectIntensity(subject.colourIntensity || DEFAULT_INTENSITY);
             setTuningColor(subject.colourText || null);
-
-            if (subject.collection_id) {
-                const selected = collections.find((collection) => collection.id === subject.collection_id);
-                if (selected) {
-                    setSelectedCollection(selected.name);
-                    setSelectedCollectionId(selected.id);
-                }
-            } else {
-                setSelectedCollection('None');
-                setSelectedCollectionId(null);
-            }
+            snapshotRef.current = {
+                name: subject.name || '',
+                color: subject.colourText ?? 'red',
+                intensity: subject.colourIntensity || DEFAULT_INTENSITY,
+                collectionId: subject.collection_id ?? null,
+            };
         }
-    }, [subject, collections]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally only on open
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen || !subject) return;
+
+        if (subject.collection_id) {
+            const selected = collections.find((collection) => collection.id === subject.collection_id);
+            if (selected) {
+                setSelectedCollection(selected.name);
+                setSelectedCollectionId(selected.id);
+            }
+        } else {
+            setSelectedCollection('None');
+            setSelectedCollectionId(null);
+        }
+    }, [isOpen, subject, collections]);
 
     useEffect(() => {
         const loadCollections = async () => {
@@ -205,17 +228,54 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         loadCollections();
     }, [user]);
 
+    useEffect(() => {
+        if (!isVisible) return;
+        const onKey = (e) => {
+            if (e.key === 'Escape' && !showUnsavedConfirm) requestClose();
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [isVisible, showUnsavedConfirm]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const isDirty = () => {
+        const snap = snapshotRef.current;
+        if (!snap) return false;
+        return (
+            subjectName !== snap.name ||
+            subjectColor !== snap.color ||
+            subjectIntensity !== snap.intensity ||
+            selectedCollectionId !== snap.collectionId
+        );
+    };
+
     const handleClose = () => {
+        if (isClosing) return;
+        setShowUnsavedConfirm(false);
         setIsClosing(true);
         setTimeout(() => {
+            setIsVisible(false);
             setIsClosing(false);
             onClose();
-            setIsVisible(false);
         }, 300);
+    };
+
+    const requestClose = () => {
+        if (isClosing) return;
+        if (isDirty()) {
+            setShowUnsavedConfirm(true);
+            return;
+        }
+        handleClose();
     };
 
     const handleSave = () => {
         if (subjectName !== '') {
+            snapshotRef.current = {
+                name: subjectName,
+                color: subjectColor,
+                intensity: subjectIntensity,
+                collectionId: selectedCollectionId,
+            };
             onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
             handleClose();
         } else {
@@ -267,11 +327,18 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         <div className="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
             <ToastContainer position="top-center" autoClose={3000} />
 
-            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
+            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={requestClose}></div>
             <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
-                <h2 className="text-3xl font-bold mb-6 text-white">
-                    {subject ? "Edit Subject" : text}
-                </h2>
+                <div className="flex items-start justify-between gap-4 mb-6">
+                    <h2 className="text-3xl font-bold text-white">
+                        {subject ? "Edit Subject" : text}
+                    </h2>
+                    <BackgroundButton
+                        image={<X size={20} strokeWidth={3} />}
+                        bgColor="bg-red-500 hover:bg-red-400"
+                        onClick={requestClose}
+                    />
+                </div>
 
                 <div className="mb-6">
                     <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-white/90">
@@ -368,10 +435,19 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                 </div>
 
                 <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" wWidth='w-full' onClick={handleClose} />
-                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full mt-2 sm:mt-0' onClick={handleSave} />
+                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full' onClick={handleSave} />
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={showUnsavedConfirm}
+                onClose={() => setShowUnsavedConfirm(false)}
+                onConfirm={handleClose}
+                title="Unsaved changes"
+                message="You have unsaved changes. Discard them?"
+                confirmText="Discard"
+                confirmColor="bg-red-500 hover:bg-red-400"
+            />
         </div>,
         document.body
     );
