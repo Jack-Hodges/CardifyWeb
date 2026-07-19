@@ -1,8 +1,5 @@
 import React from 'react';
-// eslint-disable-next-line
-import html2pdf from 'html2pdf.js';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
+import SafeMarkdown from './SafeMarkdown';
 import { EditableMathField } from 'react-mathquill';
 
 const getMarkdownFontSizeClass = (text = '') => {
@@ -59,9 +56,8 @@ export function FlashcardPDFDocument({ flashcards = [], contentRef }) {
                   </div>
                 ) : (
                   <div className="text-gray-700 font-bold text-center w-full">
-                    <ReactMarkdown
-                      rehypePlugins={[rehypeRaw]}
-                      allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+                    <SafeMarkdown
+                                            allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
                       unwrapDisallowed={true}
                       components={{
                         u: ({ node, ...props }) => <u {...props} />,
@@ -69,7 +65,7 @@ export function FlashcardPDFDocument({ flashcards = [], contentRef }) {
                       className={`${getMarkdownFontSizeClass(card.question)} text-gray-700 font-bold text-center`}
                     >
                       {card.question}
-                    </ReactMarkdown>
+                    </SafeMarkdown>
                   </div>
                 )}
               </div>
@@ -113,9 +109,8 @@ export function FlashcardPDFDocument({ flashcards = [], contentRef }) {
                   </div>
                 ) : (
                   <div className="text-gray-700 font-bold text-center w-full">
-                    <ReactMarkdown
-                      rehypePlugins={[rehypeRaw]}
-                      allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
+                    <SafeMarkdown
+                                            allowedElements={['p', 'strong', 'em', 'u', 'i', 'b']}
                       unwrapDisallowed={true}
                       components={{
                         u: ({ node, ...props }) => <u {...props} />,
@@ -123,7 +118,7 @@ export function FlashcardPDFDocument({ flashcards = [], contentRef }) {
                       className={`${getMarkdownFontSizeClass(card.answer)} text-gray-700 font-bold text-center`}
                     >
                       {card.answer}
-                    </ReactMarkdown>
+                    </SafeMarkdown>
                   </div>
                 )}
               </div>
@@ -163,13 +158,14 @@ export function generateFlashcardPDF(element, subjectName = 'flashcards') {
   };
 
   return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      html2pdf()
-        .set(opt)
-        .from(element)
-        .save()
-        .then(resolve)
-        .catch(reject);
+    setTimeout(async () => {
+      try {
+        const html2pdf = (await import('html2pdf.js')).default;
+        await html2pdf().set(opt).from(element).save();
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     }, 400);
   });
 }

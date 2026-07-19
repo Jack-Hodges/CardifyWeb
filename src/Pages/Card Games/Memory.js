@@ -1,17 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
-import { useLocation } from 'react-router-dom';
 import { fetchCards } from "../../components/Card/CardManipulation";
 import ReactMarkdown from 'react-markdown';
-import { useNavigate } from 'react-router-dom';
 
 import CardifyLogo from '../../images/Logos/CardifyLogoNoText.png';
 import TitleBar from '../../components/Navigation/TitleBar';
-import SubjectList from '../../components/Subject/SubjectList'; // Make sure this import is correct
+import SubjectList from '../../components/Subject/SubjectList';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import GameComplete from '../../components/Elements/GameComplete';
 import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 
 // Helper function to shuffle an array
 const shuffleArray = (array) => {
@@ -26,8 +26,7 @@ const formatTime = (seconds) => {
 };
 
 function Memory() {
-    const location = useLocation();
-    const { subject } = location.state || {};
+    const { subject } = useSubjectFromRoute();
     const { user, getUser, theme } = useUser();
     const navigate = useNavigate();
 

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EditableMathField } from 'react-mathquill';
 import { useUser } from '../../UserContext';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
+import SafeMarkdown from '../Functions/SafeMarkdown';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
@@ -186,16 +185,15 @@ function CardContent ({
         />
       </div>
     ) : cardMode === 0 ? (
-        <ReactMarkdown
-          rehypePlugins={[rehypeRaw]}
-          components={{
+        <SafeMarkdown
+                    components={{
             u: ({ node, ...props }) => <u {...props} />,
           }}
           className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
           font-bold ${align}`}
         >
           {content}
-        </ReactMarkdown>
+        </SafeMarkdown>
     ) : imageUrl ? (
       // -------------------------
       // CASE B: back=true AND we have an imageUrl
@@ -205,16 +203,15 @@ function CardContent ({
         className="w-full h-[93%] object-contain"
       />
     ) : (
-        <ReactMarkdown
-          rehypePlugins={[rehypeRaw]}
-          components={{
+        <SafeMarkdown
+                    components={{
             u: ({ node, ...props }) => <u {...props} />,
           }}
           className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
           font-bold ${align}`}
         >
           {content}
-        </ReactMarkdown>
+        </SafeMarkdown>
     )}
 
       {edit && (

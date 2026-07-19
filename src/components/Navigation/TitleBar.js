@@ -2,7 +2,7 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
-import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog } from 'lucide-react';
+import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog, Gauge } from 'lucide-react';
 
 function TitleBar( { text, content, home = false }) {
 
@@ -41,6 +41,7 @@ function TitleBar( { text, content, home = false }) {
     Memory: Cards,
     Type: <BookText />,
     Match: <BrainCog />,
+    Dash: <Gauge />,
   };
   
   var firstImg = images[text] || null;
@@ -86,6 +87,7 @@ function TitleBar( { text, content, home = false }) {
             <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Type" img={<BookText />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Match" img={<BrainCog />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Dash" img={<Gauge />} hoverClass={primaryColor.hoverClass}/>
           </div>
         </div>
         

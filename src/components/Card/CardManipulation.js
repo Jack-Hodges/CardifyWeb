@@ -68,13 +68,16 @@ async function compressAndConvertToBlob(file, maxWidth = 600) {
   });
 }
 
-// Fetches all cards for a given subject.
+// Fetches all cards for a given subject (excludes soft-deleted).
 export const fetchCards = async (subjectId) => {
   try {
     const { data, error } = await supabase
       .from('flashcards')
       .select('*')
-      .eq('subject_id', subjectId);
+      .eq('subject_id', subjectId)
+      .is('deleted_at', null)
+      .order('sort_order', { ascending: true, nullsFirst: false })
+      .order('id', { ascending: true });
 
     if (error) {
       console.error('Error fetching flashcards:', error);
@@ -87,6 +90,7 @@ export const fetchCards = async (subjectId) => {
   }
 };
 
+/** Soft-delete a card; returns the deleted card for undo. */
 export const deleteCard = async (
   cards,
   cardId,
@@ -94,32 +98,9 @@ export const deleteCard = async (
   setCards,
   setCurrentCardIndex
 ) => {
-  // 1. Find the card that is about to be deleted.
   const cardToDelete = cards.find((card) => card.id === cardId);
+  if (!cardToDelete) return null;
 
-  // 2. If an image URL exists, extract the file path and delete the image.
-  if (cardToDelete && cardToDelete.image_url) {
-    // Split by '/FlashcardImages/' to get the file part.
-    const parts = cardToDelete.image_url.split('/FlashcardImages/');
-    if (parts.length > 1) {
-      // parts[1] might start with an extra '/', so remove any leading slashes.
-      let filePath = parts[1].replace(/^\/+/, ''); 
-      // filePath should now be "b0ba536b-1b95-43b9-8950-f0c441a46e0b.webp"
-      
-      // Delete the file from Supabase Storage.
-      const { error: storageError } = await supabase.storage
-        .from('FlashcardImages')
-        .remove(filePath);
-        
-      if (storageError) {
-        console.error('Error deleting image from storage:', storageError);
-      } else {
-        console.log('Image deleted successfully from storage.');
-      }
-    }
-  }
-
-  // 3. Update the UI optimistically by removing the card.
   const updatedCards = cards.filter((card) => card.id !== cardId);
   let newCurrentIndex = currentCardIndex;
   if (currentCardIndex === updatedCards.length) {
@@ -128,31 +109,71 @@ export const deleteCard = async (
   setCards(updatedCards);
   setCurrentCardIndex(Math.max(newCurrentIndex, 0));
 
-  // 4. Delete the card from the database.
   const { error } = await supabase
     .from('flashcards')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', cardId);
 
   if (error) {
-    console.error('Error deleting card from database:', error);
-  } else {
-    // 5. Decrement the flashcard_count in the user's profile
-    const { error: profileError } = await supabase.rpc('decrement_flashcard_count', {
-      user_id: cardToDelete.user_id
-    });
+    console.error('Error soft-deleting card:', error);
+    setCards(cards);
+    setCurrentCardIndex(currentCardIndex);
+    return null;
+  }
 
-    if (profileError) {
-      console.error('Error updating profile flashcard count:', profileError);
-    }
+  const { error: profileError } = await supabase.rpc('decrement_flashcard_count', {
+    user_id: cardToDelete.user_id,
+  });
+  if (profileError) {
+    console.error('Error updating profile flashcard count:', profileError);
+  }
+
+  return cardToDelete;
+};
+
+export const restoreCard = async (card) => {
+  if (!card?.id) return null;
+  const { data, error } = await supabase
+    .from('flashcards')
+    .update({ deleted_at: null })
+    .eq('id', card.id)
+    .select()
+    .single();
+  if (error) {
+    console.error('Error restoring card:', error);
+    return null;
+  }
+  await supabase.rpc('increment_flashcard_count', { user_id: card.user_id });
+  return data;
+};
+
+export const updateCardsSortOrder = async (orderedCards) => {
+  try {
+    await Promise.all(
+      orderedCards.map((card, index) =>
+        supabase
+          .from('flashcards')
+          .update({ sort_order: index + 1 })
+          .eq('id', card.id)
+      )
+    );
+    return true;
+  } catch (error) {
+    console.error('Error updating sort order:', error);
+    return false;
   }
 };
 
 /**
- * Sort an array of cards by ID ascending.
+ * Sort cards by sort_order, then id.
  */
 export const sortCardsById = (cards) => {
-  return cards.sort((a, b) => a.id - b.id);
+  return cards.sort((a, b) => {
+    const ao = a.sort_order ?? a.id;
+    const bo = b.sort_order ?? b.id;
+    if (ao !== bo) return ao - bo;
+    return a.id - b.id;
+  });
 };
 
 /**
@@ -220,6 +241,7 @@ export const upsertCard = async (card, imageFile) => {
       frontMode: card.frontMode,
       backMode: card.backMode,
     };
+    if (card.sort_order != null) payload.sort_order = card.sort_order;
 
     let result = null;
 
@@ -229,6 +251,7 @@ export const upsertCard = async (card, imageFile) => {
         .from('flashcards')
         .update(payload)
         .eq('id', card.id)
+        .is('deleted_at', null)
         .select();
 
       if (error) {
@@ -237,6 +260,17 @@ export const upsertCard = async (card, imageFile) => {
       }
       result = data?.[0] || null;
     } else {
+      if (payload.sort_order == null) {
+        const { data: maxRow } = await supabase
+          .from('flashcards')
+          .select('sort_order')
+          .eq('subject_id', card.subject_id)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        payload.sort_order = (maxRow?.sort_order || 0) + 1;
+      }
       const { data, error } = await supabase
         .from('flashcards')
         .insert([payload])

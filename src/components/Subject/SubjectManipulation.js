@@ -1,5 +1,7 @@
 import supabase from '../../supabaseClient';
 
+const TUTORIAL_SUBJECT_ID = Number(process.env.REACT_APP_TUTORIAL_SUBJECT_ID || 136);
+
 // Fetch subjects
 export const fetchSubjects = async (user, profile = null) => {
   try {
@@ -7,7 +9,8 @@ export const fetchSubjects = async (user, profile = null) => {
     const { data: ownSubjects, error: ownError } = await supabase
       .from('subjects')
       .select('*')
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .is('deleted_at', null);
 
     if (ownError) {
       console.error('Error fetching own subjects:', ownError);
@@ -32,7 +35,8 @@ export const fetchSubjects = async (user, profile = null) => {
       const { data: sharedData, error: sharedError } = await supabase
         .from('subjects')
         .select('*')
-        .in('id', subjectIds);
+        .in('id', subjectIds)
+        .is('deleted_at', null);
       
       if (sharedError) {
         console.error('Error fetching shared subjects:', sharedError);
@@ -42,7 +46,8 @@ export const fetchSubjects = async (user, profile = null) => {
           const permission = permissions.find(p => p.subject_id === subject.id);
           return {
             ...subject,
-            permission: permission?.permission || 'viewer' // Default to viewer if no permission found
+            permission: permission?.permission || 'viewer',
+            isShared: true,
           };
         });
       }
@@ -57,16 +62,15 @@ export const fetchSubjects = async (user, profile = null) => {
     ];
 
     // Check if user needs tutorial subject (tutorial_subject is false)
-    if (profile && profile.tutorial_subject === false) {
-      // Fetch the tutorial subject with ID 136
+    if (profile && profile.tutorial_subject === false && TUTORIAL_SUBJECT_ID) {
       const { data: tutorialSubject, error: tutorialError } = await supabase
         .from('subjects')
         .select('*')
-        .eq('id', 136)
-        .single();
+        .eq('id', TUTORIAL_SUBJECT_ID)
+        .is('deleted_at', null)
+        .maybeSingle();
 
       if (!tutorialError && tutorialSubject) {
-        // Add tutorial subject to the beginning of the list
         allSubjects = [tutorialSubject, ...allSubjects];
       }
     }
@@ -78,20 +82,28 @@ export const fetchSubjects = async (user, profile = null) => {
   }
 };
 
+export { TUTORIAL_SUBJECT_ID };
+
 // Add or update subject
 export const saveSubject = async (id, subjectName, subjectColor, subjectIntensity, userId, upToIndex = null, collectionId = null, pinned = false) => {
   try {
     if (id) {
       // Update existing subject
-      await supabase
+      const { data, error } = await supabase
         .from('subjects')
-        .update({ name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, up_to_index: upToIndex, collection_id: collectionId, pinned: pinned }) // Ensure collection_id is included
-        .eq('id', id);
+        .update({ name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, up_to_index: upToIndex, collection_id: collectionId, pinned: pinned })
+        .eq('id', id)
+        .select();
+      if (error) {
+        console.error('Error updating subject:', error);
+        return;
+      }
+      return data;
     } else {
       // Insert new subject
       const { data, error } = await supabase
         .from('subjects')
-        .insert([{ user_id: userId, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, flashcard_count: 0, up_to_index: upToIndex, collection_id: collectionId }]) // Ensure collection_id is included
+        .insert([{ user_id: userId, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, flashcard_count: 0, up_to_index: upToIndex, collection_id: collectionId }])
         .select();
       if (error) {
         console.error('Error adding new subject:', error);
@@ -104,45 +116,69 @@ export const saveSubject = async (id, subjectName, subjectColor, subjectIntensit
   }
 };
 
-// Delete subject
+/** Only touch up_to_index — used by Practice “In Progress” tracking */
+export const saveSubjectProgress = async (subjectId, upToIndex) => {
+  try {
+    const { data, error } = await supabase
+      .from('subjects')
+      .update({ up_to_index: upToIndex })
+      .eq('id', subjectId)
+      .select('id, up_to_index')
+      .maybeSingle();
+    if (error) {
+      console.error('Error saving subject progress:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Unexpected error saving subject progress:', error);
+    return null;
+  }
+};
+
+// Soft-delete subject (and its cards)
 export const removeSubject = async (subjectId) => {
   try {
-    // First, get the count of cards in this subject
+    const now = new Date().toISOString();
     const { data: cards, error: countError } = await supabase
       .from('flashcards')
       .select('id, user_id')
-      .eq('subject_id', subjectId);
+      .eq('subject_id', subjectId)
+      .is('deleted_at', null);
 
     if (countError) {
       console.error('Error fetching cards for subject:', countError);
       return false;
     }
 
-    // If there are cards, update the user's profile count
     if (cards && cards.length > 0) {
-      const userId = cards[0].user_id; // All cards in a subject belong to the same user
+      const userId = cards[0].user_id;
       const cardCount = cards.length;
 
-      // Decrement the flashcard_count in the user's profile by the number of cards
       const { error: profileError } = await supabase.rpc('decrement_flashcard_count_by', {
         user_id: userId,
-        amount: cardCount
+        amount: cardCount,
       });
 
       if (profileError) {
         console.error('Error updating profile flashcard count:', profileError);
         return false;
       }
+
+      await supabase
+        .from('flashcards')
+        .update({ deleted_at: now })
+        .eq('subject_id', subjectId)
+        .is('deleted_at', null);
     }
 
-    // Now delete the subject (this will cascade delete the cards)
     const { error } = await supabase
       .from('subjects')
-      .delete()
+      .update({ deleted_at: now })
       .eq('id', subjectId);
 
     if (error) {
-      console.error('Error deleting subject:', error);
+      console.error('Error soft-deleting subject:', error);
       return false;
     }
     return true;
@@ -150,6 +186,117 @@ export const removeSubject = async (subjectId) => {
     console.error('Unexpected error deleting subject:', error);
     return false;
   }
+};
+
+export const restoreSubject = async (subjectId) => {
+  try {
+    const { error } = await supabase
+      .from('subjects')
+      .update({ deleted_at: null })
+      .eq('id', subjectId);
+    if (error) {
+      console.error('Error restoring subject:', error);
+      return false;
+    }
+    await supabase
+      .from('flashcards')
+      .update({ deleted_at: null })
+      .eq('subject_id', subjectId);
+    return true;
+  } catch (error) {
+    console.error('Unexpected error restoring subject:', error);
+    return false;
+  }
+};
+
+export const fetchPendingShareInvites = async (email) => {
+  if (!email) return [];
+  const { data, error } = await supabase
+    .from('share_invites')
+    .select('*, subjects(id, name, colourText)')
+    .eq('status', 'pending')
+    .ilike('recipient_email', email);
+  if (error) {
+    console.error('fetchPendingShareInvites', error);
+    return [];
+  }
+  return data || [];
+};
+
+export const respondShareInvite = async (invite, accept, recipientUserId) => {
+  const status = accept ? 'accepted' : 'declined';
+  const { error } = await supabase
+    .from('share_invites')
+    .update({ status })
+    .eq('id', invite.id);
+  if (error) {
+    console.error('respondShareInvite', error);
+    return false;
+  }
+  if (accept) {
+    return saveShare(
+      null,
+      invite.owner_id,
+      invite.subject_id,
+      invite.recipient_email,
+      invite.permission
+    );
+  }
+  return true;
+};
+
+export const createShareInvite = async (ownerId, subjectId, recipientEmail, permission) => {
+  const { data, error } = await supabase
+    .from('share_invites')
+    .insert([{
+      owner_id: ownerId,
+      subject_id: subjectId,
+      recipient_email: recipientEmail,
+      permission,
+      status: 'pending',
+    }])
+    .select()
+    .single();
+  if (error) {
+    console.error('createShareInvite', error);
+    return null;
+  }
+  return data;
+};
+
+export const createOrGetPublicLink = async (subjectId, userId) => {
+  const { data: existing } = await supabase
+    .from('public_subject_links')
+    .select('*')
+    .eq('subject_id', subjectId)
+    .eq('created_by', userId)
+    .is('revoked_at', null)
+    .maybeSingle();
+  if (existing) return existing;
+
+  const token = crypto.randomUUID().replace(/-/g, '');
+  const { data, error } = await supabase
+    .from('public_subject_links')
+    .insert([{ subject_id: subjectId, created_by: userId, token }])
+    .select()
+    .single();
+  if (error) {
+    console.error('createOrGetPublicLink', error);
+    return null;
+  }
+  return data;
+};
+
+export const revokePublicLink = async (linkId) => {
+  const { error } = await supabase
+    .from('public_subject_links')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('id', linkId);
+  if (error) {
+    console.error('revokePublicLink', error);
+    return false;
+  }
+  return true;
 };
 
 // Save or update subject share permissions

@@ -2,29 +2,29 @@ import Create from './Pages/Create';
 import Welcome from './Pages/Welcome';
 import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
-import Memory from './Pages/Card Games/Memory';
 import Home from './Pages/Home';
-import Quiz from './Pages/Card Games/Quiz';
-import Scramble from './Pages/Card Games/Scramble';
-import Dash from './Pages/Card Games/Dash';
-import Type from './Pages/Card Games/Type';
-import Match from './Pages/Card Games/Match';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const Memory = lazy(() => import('./Pages/Card Games/Memory'));
+const Quiz = lazy(() => import('./Pages/Card Games/Quiz'));
+const Scramble = lazy(() => import('./Pages/Card Games/Scramble'));
+const Dash = lazy(() => import('./Pages/Card Games/Dash'));
+const Type = lazy(() => import('./Pages/Card Games/Type'));
+const Match = lazy(() => import('./Pages/Card Games/Match'));
+const PublicStudy = lazy(() => import('./Pages/PublicStudy'));
 
 function App() {
-
   useEffect(() => {
-    // Force iOS to hide navigation bar on scroll by triggering document scroll
     const handleTouchStart = () => {
-      // Trigger a small scroll to enable iOS navigation bar hiding
       setTimeout(() => {
         window.scrollTo(0, 1);
         setTimeout(() => window.scrollTo(0, 0), 50);
       }, 100);
     };
 
-    // Add a one-time touch listener to trigger navigation bar hiding
     document.addEventListener('touchstart', handleTouchStart, { once: true, passive: true });
 
     return () => {
@@ -33,29 +33,44 @@ function App() {
   }, []);
 
   return (
-    <div 
+    <div
       className="w-screen min-h-screen dark:bg-gray-800"
-      style={{ 
-        backgroundColor: 'transparent'
+      style={{
+        backgroundColor: 'transparent',
       }}
     >
       <Router>
-        {/* MenuBar will be rendered on all pages */}
-
-        {/* Define routes for different pages */}
-        <Routes>
-          <Route path="/" element={<Welcome />} /> {/* Default route */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/create" element={<Create />} />
-          <Route path="/practice" element={<Practice />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/memory" element={<Memory />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/scramble" element={<Scramble />} />
-          <Route path="/dash" element={<Dash />} />
-          <Route path="/type" element={<Type />} />
-          <Route path="/match" element={<Match />} />
-        </Routes>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center text-white/80 font-semibold">
+              Loading…
+            </div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/create" element={<Create />} />
+            <Route path="/create/:subjectId" element={<Create />} />
+            <Route path="/practice" element={<Practice />} />
+            <Route path="/practice/:subjectId" element={<Practice />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/memory" element={<Memory />} />
+            <Route path="/memory/:subjectId" element={<Memory />} />
+            <Route path="/quiz" element={<Quiz />} />
+            <Route path="/quiz/:subjectId" element={<Quiz />} />
+            <Route path="/scramble" element={<Scramble />} />
+            <Route path="/scramble/:subjectId" element={<Scramble />} />
+            <Route path="/dash" element={<Dash />} />
+            <Route path="/dash/:subjectId" element={<Dash />} />
+            <Route path="/type" element={<Type />} />
+            <Route path="/type/:subjectId" element={<Type />} />
+            <Route path="/match" element={<Match />} />
+            <Route path="/match/:subjectId" element={<Match />} />
+            <Route path="/study/:token" element={<PublicStudy />} />
+          </Routes>
+        </Suspense>
+        <ToastContainer position="top-center" autoClose={3000} />
       </Router>
     </div>
   );

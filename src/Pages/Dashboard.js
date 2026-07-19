@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import { fetchSubjects, saveSubject, removeSubject } from '../components/Subject/SubjectManipulation';
+import { fetchSubjects, saveSubject, removeSubject, restoreSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
+import { toast } from 'react-toastify';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
@@ -121,9 +122,8 @@ function Dashboard() {
     const success = await removeSubject(subjectId);
     if (success) {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
-      
-      // If the deleted subject is ID 136, update the user's profile to set tutorial_subject as true
-      if (subjectId === 136 && profile) {
+
+      if (subjectId === TUTORIAL_SUBJECT_ID && profile) {
         await saveProfile(
           profile.id,
           profile.first_name,
@@ -134,6 +134,30 @@ function Dashboard() {
           true
         );
       }
+
+      toast.info(
+        ({ closeToast }) => (
+          <div className="flex items-center gap-3">
+            <span>Subject deleted</span>
+            <button
+              type="button"
+              className="underline font-bold"
+              onClick={async () => {
+                const restored = await restoreSubject(subjectId);
+                if (restored) {
+                  const refreshed = await fetchSubjects(user, profile);
+                  setSubjects(refreshed);
+                  toast.success('Subject restored');
+                }
+                closeToast();
+              }}
+            >
+              Undo
+            </button>
+          </div>
+        ),
+        { autoClose: 10000 }
+      );
     }
     closeModal('deleteSubject');
   };
@@ -176,8 +200,8 @@ function Dashboard() {
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Split subjects into personal and shared
-  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id === 136);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id !== 136);
+  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id === TUTORIAL_SUBJECT_ID);
+  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id !== TUTORIAL_SUBJECT_ID);
 
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {
@@ -298,7 +322,7 @@ function Dashboard() {
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen pb-20">
+      <div className="relative z-10 min-h-screen pb-20 px-1 sm:px-0">
         {/* Header Section */}
         <TitleBar text="Dashboard" user={user}
         content={

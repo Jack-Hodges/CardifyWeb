@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchSubjects, saveSubject } from "../components/Subject/SubjectManipulation";
 import getColors from "../components/Functions/getColors";
 import TitleBar from "../components/Navigation/TitleBar";
@@ -9,8 +9,44 @@ import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
 import CustomModal from "../components/Modals/CustomModal";
 import HomeImage from '../images/tutorial/Home.png';
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog, Gauge } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+
+const RAINBOW_JUMP_COLORS = [
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-yellow-500',
+  'bg-green-500',
+  'bg-blue-500',
+  'bg-purple-500',
+];
+
+/** Default theme keeps the rainbow; other themes derive 6 shades from primary/secondary/tertiary. */
+function getJumpInColors(theme) {
+  if (!theme?.name || theme.name === 'default') {
+    return RAINBOW_JUMP_COLORS;
+  }
+
+  const bases = [theme.primary, theme.secondary, theme.tertiary];
+  if (bases.some((entry) => !Array.isArray(entry) || entry.length !== 2)) {
+    return RAINBOW_JUMP_COLORS;
+  }
+
+  const clampIntensity = (value) => Math.min(800, Math.max(300, value));
+  const recipes = [
+    [0, 0],
+    [1, 0],
+    [2, 0],
+    [0, 100],
+    [1, -100],
+    [2, 100],
+  ];
+
+  return recipes.map(([index, delta]) => {
+    const [color, intensity] = bases[index];
+    return `bg-${color}-${clampIntensity(intensity + delta)}`;
+  });
+}
 
 // Loading component
 function HomeLoading() {
@@ -78,12 +114,12 @@ function Home() {
   } = useUser();
   
   const { primaryColor, secondaryColor, textColor, shadow } = theme;
+  const jumpColors = useMemo(() => getJumpInColors(theme), [theme]);
   const [subjects, setSubjects] = useState([]);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [subjectPage, setSubjectPage] = useState('create');
   const [homePopUp, setHomePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
-  const mounted = useRef(false);
   const pinnedSubjects = subjects.filter(subject => subject.pinned && subject.permission == null);
 
   // Redirect unauthenticated users to root path
@@ -100,31 +136,31 @@ function Home() {
     }
   }, [popupStates, popupStatesLoaded, popupStates?.home_popup]);
 
-  // Fetch subjects once when user ID becomes available
+  // Fetch subjects whenever Home is shown (so In Progress stays fresh after Practice)
   useEffect(() => {
     if (!user) {
       getUser();
       return;
     }
 
-    // Only load subjects on initial mount
-    if (!mounted.current) {
-      const loadSubjects = async () => {
-        setLoading(true);
-        try {
-          const subjectsData = await fetchSubjects(user, profile);
-          setSubjects(subjectsData);
-        } catch (error) {
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      
-      loadSubjects();
-      mounted.current = true;
-    }
-  }, [getUser, user, profile]);
+    let cancelled = false;
+    const loadSubjects = async () => {
+      setLoading(true);
+      try {
+        const subjectsData = await fetchSubjects(user, profile);
+        if (!cancelled) setSubjects(subjectsData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadSubjects();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleDismissPopup = () => {
         setHomePopUp(false);
@@ -155,7 +191,7 @@ function Home() {
     };
   
   const Cards = (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-32">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-[100px]">
       <path d="M9.4 7.53333C9.2 7.26667 8.8 7.26667 8.6 7.53333L6.225 10.7C6.09167 10.8778 6.09167 11.1222 6.225 11.3L8.6 14.4667C8.8 14.7333 9.2 14.7333 9.4 14.4667L11.775 11.3C11.9083 11.1222 11.9083 10.8778 11.775 10.7L9.4 7.53333Z"/>
       <path d="M4.09245 5.63868C4.03647 5.5547 4.03647 5.4453 4.09245 5.36133L4.79199 4.31202C4.89094 4.16359 5.10906 4.16359 5.20801 4.31202L5.90755 5.36132C5.96353 5.4453 5.96353 5.5547 5.90755 5.63867L5.20801 6.68798C5.10906 6.83641 4.89094 6.83641 4.79199 6.68798L4.09245 5.63868Z"/>
       <path d="M13.208 15.312C13.1091 15.1636 12.8909 15.1636 12.792 15.312L12.0924 16.3613C12.0365 16.4453 12.0365 16.5547 12.0924 16.6387L12.792 17.688C12.8909 17.8364 13.1091 17.8364 13.208 17.688L13.9075 16.6387C13.9635 16.5547 13.9635 16.4453 13.9075 16.3613L13.208 15.312Z"/>
@@ -201,20 +237,26 @@ function Home() {
         ) : user && profile ? (
           <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
             <div className="mx-5">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-end gap-3">
                 <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>Hey, {profile.first_name}!</p>
+                {(profile.streak_current > 0 || profile.study_minutes_total > 0) && (
+                  <p className={`text-base sm:text-lg font-semibold opacity-90 ${shadow ? 'drop-shadow-custom' : ''}`}>
+                    {profile.streak_current > 0 ? `${profile.streak_current}-day streak` : ''}
+                    {profile.streak_current > 0 && profile.study_minutes_total > 0 ? ' · ' : ''}
+                    {profile.study_minutes_total > 0 ? `${profile.study_minutes_total} min studied` : ''}
+                  </p>
+                )}
               </div>
-              {/* <p className={`font-normal ${shadow ? 'drop-shadow-custom' : ''}`}>🔥 99 days</p> */}
             </div>
 
-            {subjects.filter(subject => subject.up_to_index !== null && subject.user_id === profile.id).length > 0 && (
+            {subjects.filter(subject => subject.up_to_index != null && subject.user_id === (profile?.id || user?.id)).length > 0 && (
               <div>
                 <div className={`flex justify-between ml-5 mr-2 mt-6 mb-3 ${shadow ? 'drop-shadow-custom' : ''}`}>
                   <p>In Progress</p>
                 </div>
                 <div className="flex w-full overflow-x-auto space-x-4 pb-2 scrollbar-hide px-5">
                   {subjects
-                    .filter(subject => subject.up_to_index !== null && subject.user_id === profile.id)
+                    .filter(subject => subject.up_to_index != null && subject.user_id === (profile?.id || user?.id))
                     .slice(0, 4)
                     .map((subject, index) => (
                       <InProgress theme={'background-shadow-new'} key={index} subject={subject} />
@@ -229,13 +271,14 @@ function Home() {
                 <p>Jump In</p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
-                <JumpButton text="Create" img={<BadgePlus size="100"/>} color="text-red-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Practice" img={<CirclePlay size="100"/>} color="text-orange-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Memory" img={Cards} color="text-yellow-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Quiz" img={<NotebookText size="100"/>} color="text-green-400" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Scramble" img={<Shuffle size="100"/>} color="text-blue-500" onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Type" img={<BookText size="100"/>} color="text-purple-500" onClick={handleOpenSubjectListModal}/>
-                {/* <JumpButton text="Match" img={<BrainCog size="100"/>} color="text-pink-500" onClick={handleOpenSubjectListModal}/> */}
+                <JumpButton text="Create" img={<BadgePlus size="100"/>} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Practice" img={<CirclePlay size="100"/>} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Memory" img={Cards} color={jumpColors[2]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Quiz" img={<NotebookText size="100"/>} color={jumpColors[3]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Scramble" img={<Shuffle size="100"/>} color={jumpColors[4]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Type" img={<BookText size="100"/>} color={jumpColors[5]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Match" img={<BrainCog size="100"/>} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Dash" img={<Gauge size="100"/>} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
 
@@ -289,13 +332,8 @@ function Home() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full mt-10 gap-2">
-              <h1 className="mb-5">Let's create your first subject</h1>
-              <div className="flex gap-2 items-center">
-                <p className="text-2xl font-semibold">Click to</p>
-                <BackgroundButton text="go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
-                <p className="text-2xl font-semibold">or click Home in the top left to open the dropdown menu</p>
-              </div>
-              <p className="text-2xl font-semibold">You can use the dropdown menu at any time to navigate around the site</p>
+              <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-center px-4">Create your first subject</h1>
+              <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
             </div>
           )}
 
@@ -342,10 +380,13 @@ export default Home;
 
 function JumpButton( { text, img, color, onClick }) {
   return (
-    <div className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40 bg-white dark:bg-gray-600 rounded-xl background-shadow-new background-hover cursor-pointer ${color}`}
-      onClick={() => onClick(text.toLowerCase())}>
-      {img}
-      <p className="text-2xl sm:text-3xl">{text}</p>
+    <div
+      className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40
+        ${color} text-white rounded-xl background-shadow-new background-hover cursor-pointer`}
+      onClick={() => onClick(text.toLowerCase())}
+    >
+      <div className="text-white [&_svg]:text-white">{img}</div>
+      <p className="text-2xl sm:text-3xl text-white font-bold">{text}</p>
     </div>
   );
 }
@@ -360,7 +401,7 @@ function InProgress({ subject, theme }) {
   const indexToCount = subject.up_to_index + 1;
 
   const navigateClick = () => {
-    navigate('/practice', { state: { subject } });
+    navigate(`/practice/${subject.id}`, { state: { subject } });
   };
 
   const strokeWidth = 6;

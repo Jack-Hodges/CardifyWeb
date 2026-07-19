@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Check, X, Shuffle, HelpCircle, MessageSquare } from 'lucide-react';
 import { fetchCards, sortCardsById } from '../../components/Card/CardManipulation';
 import { useUser } from '../../UserContext';
@@ -10,6 +10,7 @@ import SubjectList from '../../components/Subject/SubjectList';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
@@ -89,8 +90,7 @@ const DragDropGame = () => {
 
   const dragItemRef = useRef(null);
 
-  const location = useLocation();
-  const { subject } = location.state || {};
+  const { subject } = useSubjectFromRoute();
   const { user, getUser, theme } = useUser();
   const { secondaryColor, tertiaryColor } = theme;
 

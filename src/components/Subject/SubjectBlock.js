@@ -5,7 +5,14 @@ import { getCardArt } from "../Functions/getCardArt";
 import { useUser } from "../../UserContext";
 import { Share } from "lucide-react";
 import Modal from "../Modals/Modal";
-import { saveShare, removeShare } from "./SubjectManipulation";
+import {
+  saveShare,
+  removeShare,
+  createShareInvite,
+  createOrGetPublicLink,
+  revokePublicLink,
+} from "./SubjectManipulation";
+import { toast } from 'react-toastify';
 
 function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
@@ -13,10 +20,13 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [shareRole, setShareRole] = useState("viewer"); // Add role state
+  const [publicLink, setPublicLink] = useState(null);
   const navigate = useNavigate();
   const { profile, user } = useUser();
   // Use local state for the pinned status
   const [subjectPinned, setSubjectPinned] = useState(subject?.pinned || false);
+
+  const isSharedSubject = shared || subject?.isShared || Boolean(subject?.permission);
 
   // Set local state when subject prop changes
   useEffect(() => {
@@ -44,11 +54,11 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   };
 
   const handlePracticeClick = () => {
-    navigate("/practice", { state: { subject } }); // Navigate to practice with subject and user
+    navigate(`/practice/${subject.id}`, { state: { subject } });
   };
 
   const handleCreateClick = () => {
-    navigate("/create", { state: { subject } }); // Navigate to CreateCards with subject and user
+    navigate(`/create/${subject.id}`, { state: { subject } });
   };
 
   const handleShareClick = (e) => {
@@ -57,14 +67,45 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   };
 
   const handleShareSubmit = async () => {
-    if (!shareEmail) return; // Don't proceed if no email provided
-    
+    if (!shareEmail) return;
+
+    const invite = await createShareInvite(profile.id, subject.id, shareEmail, shareRole);
+    // Also grant permission directly for backwards compatibility
     const success = await saveShare(null, profile.id, subject.id, shareEmail, shareRole);
-    if (success) {
+    if (invite || success) {
       setIsShareModalOpen(false);
       setShareEmail("");
-      setShareRole("viewer"); // Reset role after sharing
+      setShareRole("viewer");
+      toast.success('Invite sent');
     }
+  };
+
+  const handleCopyPublicLink = async () => {
+    const link = await createOrGetPublicLink(subject.id, profile.id);
+    if (!link) {
+      toast.error('Could not create public link');
+      return;
+    }
+    setPublicLink(link);
+    const url = `${window.location.origin}/study/${link.token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Public study link copied');
+    } catch {
+      toast.info(url);
+    }
+  };
+
+  const handleRevokePublicLink = async () => {
+    if (!publicLink?.id) {
+      const link = await createOrGetPublicLink(subject.id, profile.id);
+      if (!link) return;
+      await revokePublicLink(link.id);
+    } else {
+      await revokePublicLink(publicLink.id);
+    }
+    setPublicLink(null);
+    toast.success('Public link revoked');
   };
 
   const handleLeaveSubject = async () => {
@@ -113,7 +154,14 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         }}
       >
         <div style={backgroundStyle} />
-        {!shared && (
+        {isSharedSubject && (
+          <span
+            className={`absolute top-2 left-3 z-10 text-xs font-bold uppercase tracking-wide text-white ${cardArt.image ? 'drop-shadow-custom' : ''}`}
+          >
+            Shared · {subject.permission || 'viewer'}
+          </span>
+        )}
+        {!isSharedSubject && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
             <div 
               className="relative"
@@ -193,7 +241,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               onClick={handlePracticeClick}
             />
 
-            {(!shared || subject.permission === 'editor') && (
+            {(!isSharedSubject || subject.permission === 'editor') && (
               <SubjectButton
                 img={
                   <svg
@@ -217,7 +265,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {!home && !shared && (
+            {!home && !isSharedSubject && (
               // Edit button
               <SubjectButton
                 img={
@@ -239,7 +287,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {!home && !shared && (
+            {!home && !isSharedSubject && (
               // Delete button
               <SubjectButton
                 img={
@@ -264,7 +312,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {shared && (
+            {isSharedSubject && (
               <SubjectButton
                 img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out-icon lucide-log-out" filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
                 setHoveredIcon={setHoveredIcon}
@@ -313,6 +361,22 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
                 />
                 <span>Editor</span>
               </label>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleCopyPublicLink}
+                className="px-3 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25"
+              >
+                Copy public link
+              </button>
+              <button
+                type="button"
+                onClick={handleRevokePublicLink}
+                className="px-3 py-2 rounded-xl bg-white/10 text-white/80 text-sm font-semibold hover:bg-white/20"
+              >
+                Revoke public link
+              </button>
             </div>
           </div>
         }

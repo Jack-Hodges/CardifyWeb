@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { fetchCards, sortCardsById } from '../../components/Card/CardManipulation';
 import { useUser } from '../../UserContext';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import Card from '../../components/Card/Card';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
+import SafeMarkdown from '../../components/Functions/SafeMarkdown';
 import Ad from '../../components/Advertisement/Ad';
 import { EditableMathField } from 'react-mathquill';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
-import GameComplete from '../../components/Elements/GameComplete';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import SessionSummary from '../../components/Study/SessionSummary';
+import GameSettings from '../../components/Games/GameSettings';
+import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 
 function Quiz() {
   // State variables
+  const [allCards, setAllCards] = useState([]);
   const [cards, setCards] = useState([]);
   // randomizedOptions: each card gets an array of option objects: { mode: number, content: string }
   const [randomizedOptions, setRandomizedOptions] = useState([]);
@@ -27,17 +29,21 @@ function Quiz() {
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [showAd, setShowAd] = useState(false);
   const [leaveAd, setLeaveAd] = useState("Home");
+  const [sessionStartedAt, setSessionStartedAt] = useState(() => Date.now());
+  const [cardCount, setCardCount] = useState(10);
+  const [shuffleOn, setShuffleOn] = useState(true);
+  const [started, setStarted] = useState(false);
 
   // Hooks
   const navigate = useNavigate();
-  const location = useLocation();
-  const { subject } = location.state || {};
+  const { subject } = useSubjectFromRoute();
   const { user, getUser, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   // Navigation function to switch to the create page
   const handleSwitchToCreate = () => {
-    navigate('/create', { state: { subject } });
+    if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
+    else navigate('/create');
   };
 
   // Load cards and generate randomized options
@@ -48,7 +54,9 @@ function Quiz() {
     }
 
     if (!subject) {
+      setAllCards([]);
       setCards([]);
+      setStarted(false);
       setLoading(false);
       return;
     }
@@ -57,14 +65,28 @@ function Quiz() {
       setLoading(true);
       const data = await fetchCards(subject.id);
       sortCardsById(data);
-      setCards(data);
-      setSelectedAnswers({});
-      randomizeOptions(data);
+      setAllCards(data);
+      setCardCount(Math.min(10, data.length || 1));
+      setStarted(false);
+      setFinished(false);
       setLoading(false);
     };
 
     loadCards();
   }, [subject, user, getUser]);
+
+  const handleStart = () => {
+    let pool = [...allCards];
+    if (shuffleOn) pool = [...pool].sort(() => 0.5 - Math.random());
+    pool = pool.slice(0, Math.min(cardCount, pool.length));
+    setCards(pool);
+    setSelectedAnswers({});
+    setCurrentCardIndex(0);
+    randomizeOptions(pool);
+    setSessionStartedAt(Date.now());
+    setFinished(false);
+    setStarted(true);
+  };
 
   // Randomize options for each card.
   // Mode logic:
@@ -203,8 +225,20 @@ function Quiz() {
               <div className="bg-gray-300 dark:bg-gray-600 h-12 w-1/2 rounded"></div>
             </div>
           </div>
-        ) : cards.length >= 4 ? (
-          !finished ? (
+        ) : allCards.length >= 4 ? (
+          !started ? (
+            <PageEmptyState>
+              <GameSettings
+                cardCount={cardCount}
+                setCardCount={setCardCount}
+                maxCards={allCards.length}
+                shuffle={shuffleOn}
+                setShuffle={setShuffleOn}
+                showTimer={false}
+                onStart={handleStart}
+              />
+            </PageEmptyState>
+          ) : !finished ? (
             <div className="w-full h-full flex flex-col">
               <div className="mx-auto w-[100vw] min-h-[40vh] h-[40vh] sm:w-[60vw] sm:h-[25vh] mt-5 px-5">
                 <Card
@@ -267,34 +301,33 @@ function Quiz() {
             </div>
           ) : (
             !showAd ? (
-              <GameComplete
+              <SessionSummary
                 title={message}
-                primaryText="Back to Home"
-                onPrimary={() => {
+                correct={correctCount}
+                incorrect={incorrectCount}
+                cardsSeen={cards.length}
+                durationSec={Math.round((Date.now() - sessionStartedAt) / 1000)}
+                weakCount={incorrectCount}
+                onHome={() => {
                   if (profile.pro) {
                     navigate('/home');
                   } else {
-                    setLeaveAd("Home");
+                    setLeaveAd('Home');
                     setShowAd(true);
                   }
                 }}
-                secondaryText={`Try ${subject.name} again`}
-                onSecondary={() => {
+                onStudyAgain={() => {
                   if (profile.pro) {
                     setFinished(false);
+                    setStarted(false);
                     setCurrentCardIndex(0);
                     setSelectedAnswers({});
-                    randomizeOptions(cards);
                   } else {
-                    setLeaveAd("Retry Quiz");
+                    setLeaveAd('Retry Quiz');
                     setShowAd(true);
                   }
                 }}
-              >
-                <p className={`text-7xl font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'secondaryTextColor'}`}>
-                  {percentage.toFixed(0)}%
-                </p>
-              </GameComplete>
+              />
             ) : (
               <PageEmptyState>
                 <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
@@ -311,9 +344,9 @@ function Quiz() {
                       navigate('/home');
                     } else {
                       setFinished(false);
+                      setStarted(false);
                       setCurrentCardIndex(0);
                       setSelectedAnswers({});
-                      randomizeOptions(cards);
                     }
                   }}
                 />
@@ -420,13 +453,12 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
             }}
           />
         ) : (
-          <ReactMarkdown
-            rehypePlugins={[rehypeRaw]}
-            components={{ u: ({ node, ...props }) => <u {...props} /> }}
+          <SafeMarkdown
+                        components={{ u: ({ node, ...props }) => <u {...props} /> }}
             className={`inline ${getFontSize(optionContent)}`}
           >
             {optionContent}
-          </ReactMarkdown>
+          </SafeMarkdown>
         )}
       </div>
     </div>

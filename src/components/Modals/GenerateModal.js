@@ -33,11 +33,17 @@ function GenerateModal({ isOpen, onClose, onGenerate, isGenerating }) {
 
   const handleClose = () => {
     if (isClosing || isGenerating) return;
+    if (topic.trim() || cardCount !== '5') {
+      const discard = window.confirm('Discard your generate settings?');
+      if (!discard) return;
+    }
     setIsClosing(true);
     setTimeout(() => {
       setIsVisible(false);
       setIsClosing(false);
       onClose();
+      setTopic('');
+      setCardCount('5');
     }, 300);
   };
 

@@ -2,6 +2,8 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
 import { EditableMathField, addStyles } from 'react-mathquill';
 import BackgroundButton from '../Elements/BackgroundButton';
+import CardAssist from './CardAssist';
+import featureFlags from '../../config/featureFlags';
 import { useUser } from '../../UserContext';
 import { Image, Calculator, Text, Brush, X, Layers } from 'lucide-react';
 import Drawing from '../Drawing/Drawing';
@@ -441,6 +443,14 @@ function EditModal({
               </button>
             )}
           </section>
+
+          {featureFlags.aiCardAssist && (
+            <CardAssist
+              question={frontContent}
+              answer={backContent}
+              onApply={(text) => setBackContent(text)}
+            />
+          )}
         </div>
 
         <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">

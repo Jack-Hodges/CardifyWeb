@@ -40,6 +40,10 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
 
   const handleClose = () => {
     if (isClosing) return;
+    if (previewCards.length > 0) {
+      const discard = window.confirm('You have unsaved import preview. Discard it?');
+      if (!discard) return;
+    }
     setIsClosing(true);
     setTimeout(() => {
       setIsVisible(false);

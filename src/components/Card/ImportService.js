@@ -1,5 +1,4 @@
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
 
 export const parseImportFile = async (file) => {
   const fileType = file.name.split('.').pop().toLowerCase();
@@ -130,6 +129,7 @@ const parseTXT = async (file) => {
 };
 
 const parseXLSX = async (file) => {
+  const XLSX = await import('xlsx');
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {

@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
-import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
+import SafeMarkdown from '../../components/Functions/SafeMarkdown';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
@@ -12,6 +11,8 @@ import { EditableMathField, addStyles } from 'react-mathquill';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import GameComplete from '../../components/Elements/GameComplete';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import GameSettings from '../../components/Games/GameSettings';
+import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 addStyles();
 
 function Type() {
@@ -20,18 +21,19 @@ function Type() {
     const [currentCardIndex, setCurrentCardIndex] = useState(0);
     const [userAnswer, setUserAnswer] = useState('');
     const [showAnswer, setShowAnswer] = useState(false);
-    const mounted = useRef(false);
 
     const [correctCount, setCorrectCount] = useState(0);
     const [incorrectCount, setIncorrectCount] = useState(0);
     const [skippedCount, setSkippedCount] = useState(0);
     const [processedCount, setProcessedCount] = useState(0);
     const [finished, setFinished] = useState(false);
+    const [cardCount, setCardCount] = useState(20);
+    const [shuffleOn, setShuffleOn] = useState(true);
+    const [started, setStarted] = useState(false);
 
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
-    const location = useLocation();
-    const { subject } = location.state || {};
+    const { subject } = useSubjectFromRoute();
     const { user, getUser, theme } = useUser();
     const { shadow, secondaryColor, tertiaryColor } = theme;
 
@@ -42,7 +44,8 @@ function Type() {
     };
 
     const handleSwitchToCreate = () => {
-        navigate('/create', { state: { subject } });
+        if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
+        else navigate('/create');
     };
 
     // Fisher-Yates shuffle algorithm
@@ -63,30 +66,36 @@ function Type() {
 
         if (!subject) {
             setCards([]);
+            setStarted(false);
             return;
         }
 
-        // Only load cards on initial mount
-        if (!mounted.current) {
-            const loadCards = async () => {
-                const data = await fetchCards(subject.id);
-                setCards(data);
-            };
+        const loadCards = async () => {
+            const data = await fetchCards(subject.id);
+            setCards(data);
+            setCardCount(Math.min(20, data.filter((c) => c.backMode !== 3).length || 1));
+            setStarted(false);
+            setFinished(false);
+        };
 
-            loadCards();
-            mounted.current = true;
-        }
+        loadCards();
     }, [subject, user, getUser]);
 
-    useEffect(() => {
-        // Filter out image cards and shuffle
-        const nonImageCards = cards.filter(card => card.backMode !== 3);
-        const shuffledCards = shuffleCards(nonImageCards);
-        setFilteredCards(shuffledCards);
+    const handleStart = () => {
+        const nonImageCards = cards.filter((card) => card.backMode !== 3);
+        let pool = shuffleOn ? shuffleCards(nonImageCards) : nonImageCards;
+        pool = pool.slice(0, Math.min(cardCount, pool.length));
+        setFilteredCards(pool);
         setCurrentCardIndex(0);
         setUserAnswer('');
         setShowAnswer(false);
-    }, [cards]);
+        setCorrectCount(0);
+        setIncorrectCount(0);
+        setSkippedCount(0);
+        setProcessedCount(0);
+        setFinished(false);
+        setStarted(true);
+    };
 
     const handleAnswerSubmit = () => {
         if (!filteredCards[currentCardIndex]) return;
@@ -153,6 +162,7 @@ function Type() {
               secondaryText={`Review ${subject?.name} Again`}
               onSecondary={() => {
                 setFinished(false);
+                setStarted(false);
                 // Reset counts
                 setCorrectCount(0);
                 setIncorrectCount(0);
@@ -197,7 +207,7 @@ function Type() {
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
-            {(!subject || (filteredCards && filteredCards.length === 0)) ? (
+            {(!subject || cards.length === 0) ? (
                 <PageEmptyState>
                   {subject ? (
                     <NoSelectionModal
@@ -214,6 +224,18 @@ function Type() {
                       action1={handleOpenSubjectListModal}
                     />
                   )}
+                </PageEmptyState>
+            ) : !started ? (
+                <PageEmptyState>
+                  <GameSettings
+                    cardCount={cardCount}
+                    setCardCount={setCardCount}
+                    maxCards={Math.max(1, cards.filter((c) => c.backMode !== 3).length)}
+                    shuffle={shuffleOn}
+                    setShuffle={setShuffleOn}
+                    showTimer={false}
+                    onStart={handleStart}
+                  />
                 </PageEmptyState>
             ) : (
                 // Game area
@@ -248,16 +270,15 @@ function Type() {
                                             }}
                                         />
                                     ) : (
-                                        <ReactMarkdown
-                                            rehypePlugins={[rehypeRaw]}
-                                            components={{
+                                        <SafeMarkdown
+                                                                                        components={{
                                                 u: ({ node, ...props }) => <u {...props} />,
                                             }}
                                             className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
                                             font-bold text-center`}
                                             >
                                             {filteredCards[currentCardIndex].answer}
-                                        </ReactMarkdown>
+                                        </SafeMarkdown>
                                     )}
                                     
                                 </div>
@@ -278,16 +299,15 @@ function Type() {
                                             }}
                                         />
                                     ) : (
-                                        <ReactMarkdown
-                                            rehypePlugins={[rehypeRaw]}
-                                            components={{
+                                        <SafeMarkdown
+                                                                                        components={{
                                                 u: ({ node, ...props }) => <u {...props} />,
                                             }}
                                             className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
                                             font-bold text-center`}
                                             >
                                             {userAnswer}
-                                        </ReactMarkdown>
+                                        </SafeMarkdown>
                                     )}
                                 </div>
                             </div>

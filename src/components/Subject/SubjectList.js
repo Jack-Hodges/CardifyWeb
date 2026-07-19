@@ -233,7 +233,7 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
       <div className={`relative mb-2 w-[99%]`}>
         <div 
           className={`${subjectCol.bgClass} ${themeShadow} w-full h-16 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-hover`}
-          onClick={() => { navigate(`/${page}`, { state: { subject } }); onClose(); }}
+          onClick={() => { navigate(`/${page}/${subject.id}`, { state: { subject } }); onClose(); }}
         >
           <div className="truncate w-full">
             <p className="text-2xl">{subject.name}</p>

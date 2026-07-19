@@ -5,7 +5,7 @@ import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { getCardArtAssets } from '../Functions/getCardArt';
 import { saveProfile } from './ProfileManipulation';
-import { getShares, fetchSubjects, removeShare, saveShare } from '../Subject/SubjectManipulation';
+import { getShares, fetchSubjects, removeShare, saveShare, fetchPendingShareInvites, respondShareInvite } from '../Subject/SubjectManipulation';
 import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail } from 'lucide-react';
 import Modal from '../Modals/Modal';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
@@ -117,6 +117,8 @@ function ProfileModal({ isOpen, onClose, logout }) {
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [shares, setShares] = useState([]);
+    const [pendingInvites, setPendingInvites] = useState([]);
+    const [isInboxOpen, setIsInboxOpen] = useState(false);
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
     const themeAssets = getThemeAssets();
@@ -212,6 +214,19 @@ function ProfileModal({ isOpen, onClose, logout }) {
         }
     };
 
+    const handleInboxClick = async () => {
+        const invites = await fetchPendingShareInvites(user?.email);
+        setPendingInvites(invites);
+        setIsInboxOpen(true);
+    };
+
+    const handleInviteResponse = async (invite, accept) => {
+        const ok = await respondShareInvite(invite, accept, profile.id);
+        if (ok) {
+            setPendingInvites((prev) => prev.filter((i) => i.id !== invite.id));
+        }
+    };
+
     const groupedShares = shares.reduce((acc, share) => {
         const subjectName = share.subjectName;
         if (!acc[subjectName]) {
@@ -246,7 +261,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
 
     const handlePermissionChange = async (share, newPermission) => {
         try {
-            const success = await saveShare(share.id, share.subject_id, share.recipient_email, newPermission);
+            const success = await saveShare(share.id, share.owner_id, share.subject_id, share.recipient_email, newPermission);
             if (success) {
                 setShares(shares.map(s =>
                     s.id === share.id ? { ...s, permission: newPermission } : s
@@ -502,6 +517,14 @@ function ProfileModal({ isOpen, onClose, logout }) {
                         <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                                 <BackgroundButton
+                                    text="Inbox"
+                                    image={<Share2 size={18} />}
+                                    flip
+                                    bgColor="bg-indigo-500 hover:bg-indigo-400"
+                                    wWidth="w-full"
+                                    onClick={handleInboxClick}
+                                />
+                                <BackgroundButton
                                     text="Shares"
                                     image={<Share2 size={18} />}
                                     flip
@@ -558,6 +581,61 @@ function ProfileModal({ isOpen, onClose, logout }) {
                         <p className="mt-2 text-sm text-white/60 max-w-sm mx-auto">
                             When you share a subject with a friend, they&apos;ll show up here so you can manage access.
                         </p>
+                    </div>
+                )}
+            </GlassPanel>
+
+            <GlassPanel
+                isOpen={isInboxOpen}
+                onClose={() => setIsInboxOpen(false)}
+                title="Share inbox"
+                subtitle="Pending invitations to study with others"
+                icon={<Share2 size={22} className="text-white/90 shrink-0" />}
+                footer={
+                    <div className="flex sm:justify-end">
+                        <BackgroundButton
+                            text="Done"
+                            bgColor="bg-green-500 hover:bg-green-400"
+                            wWidth="w-full sm:w-auto"
+                            onClick={() => setIsInboxOpen(false)}
+                        />
+                    </div>
+                }
+            >
+                {pendingInvites.length > 0 ? (
+                    <div className="space-y-3">
+                        {pendingInvites.map((invite) => (
+                            <div
+                                key={invite.id}
+                                className="rounded-2xl bg-white/10 border border-white/15 px-3.5 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                            >
+                                <div>
+                                    <p className="font-bold text-white">
+                                        {invite.subjects?.name || `Subject #${invite.subject_id}`}
+                                    </p>
+                                    <p className="text-sm text-white/70">
+                                        {invite.permission} access
+                                    </p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <BackgroundButton
+                                        text="Accept"
+                                        bgColor="bg-green-500 hover:bg-green-400"
+                                        onClick={() => handleInviteResponse(invite, true)}
+                                    />
+                                    <BackgroundButton
+                                        text="Decline"
+                                        bgColor="bg-gray-600 hover:bg-gray-500"
+                                        onClick={() => handleInviteResponse(invite, false)}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="py-10 text-center">
+                        <p className="text-lg font-bold text-white">Inbox empty</p>
+                        <p className="mt-2 text-sm text-white/60">No pending share invites.</p>
                     </div>
                 )}
             </GlassPanel>

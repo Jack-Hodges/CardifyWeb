@@ -1,20 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Timer, Zap } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../UserContext';
 import { fetchCards } from '../../components/Card/CardManipulation';
 import ReactMarkdown from 'react-markdown';
 import TitleBar from '../../components/Navigation/TitleBar';
-import SubjectList from '../../components/Subject/SubjectList'; // If you need subject selection
+import SubjectList from '../../components/Subject/SubjectList';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import GameComplete from '../../components/Elements/GameComplete';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
-// Make sure you have functions handleSwitchToCreate and handleOpenSubjectListModal defined,
-// and also ensure secondaryColor is defined from your theme context just like in Practice.
+import GameSettings from '../../components/Games/GameSettings';
+import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 
 function Dash() {
     const [cards, setCards] = useState([]); 
+    const [allCards, setAllCards] = useState([]);
     const [timeLeft, setTimeLeft] = useState(60);
+    const [timerSec, setTimerSec] = useState(60);
+    const [cardCount, setCardCount] = useState(20);
+    const [shuffle, setShuffle] = useState(true);
+    const [started, setStarted] = useState(false);
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [currentTarget, setCurrentTarget] = useState(null);
@@ -22,8 +27,7 @@ function Dash() {
 
     const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
 
-    const location = useLocation();
-    const { subject } = location.state || {};
+    const { subject } = useSubjectFromRoute();
     const { user, getUser, theme } = useUser();
     const { textColor, shadow } = theme;
 
@@ -34,7 +38,8 @@ function Dash() {
     };
 
     const handleSwitchToCreate = () => {
-        navigate('/create', { state: { subject } });
+        if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
+        else navigate('/create');
     };
 
     useEffect(() => {
@@ -45,16 +50,29 @@ function Dash() {
 
         if (!subject) {
             setCards([]);
+            setAllCards([]);
             return;
         }
 
         const loadCards = async () => {
             const data = await fetchCards(subject.id);
-            setCards(data);
+            setAllCards(data);
+            setCardCount(Math.min(20, data.length || 1));
         };
 
         loadCards();
     }, [subject, user, getUser]);
+
+    const handleStart = () => {
+        let pool = [...allCards];
+        if (shuffle) pool = pool.sort(() => 0.5 - Math.random());
+        pool = pool.slice(0, Math.min(cardCount, pool.length));
+        setCards(pool);
+        setTimeLeft(timerSec);
+        setScore(0);
+        setGameOver(false);
+        setStarted(true);
+    };
 
     useEffect(() => {
         if (cards && cards.length > 0) {
@@ -87,7 +105,7 @@ function Dash() {
     }, [currentTarget, cards]);
 
     useEffect(() => {
-        if (gameOver) return;
+        if (!started || gameOver) return;
 
         const spawnInterval = setInterval(() => {
             const newCard = generateFallingCard();
@@ -97,10 +115,10 @@ function Dash() {
         }, 2000);
 
         return () => clearInterval(spawnInterval);
-    }, [generateFallingCard, gameOver]);
+    }, [generateFallingCard, gameOver, started]);
 
     useEffect(() => {
-        if (gameOver) return;
+        if (!started || gameOver) return;
 
         const moveInterval = setInterval(() => {
             setFallingCards(prev => {
@@ -114,10 +132,10 @@ function Dash() {
         }, 50);
 
         return () => clearInterval(moveInterval);
-    }, [gameOver]);
+    }, [gameOver, started]);
 
     useEffect(() => {
-        if (gameOver) return;
+        if (!started || gameOver) return;
 
         const timer = setInterval(() => {
             setTimeLeft(prev => {
@@ -130,7 +148,7 @@ function Dash() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [gameOver]);
+    }, [gameOver, started]);
 
     function handleCardClick(clickedCard) {
         if (gameOver) return;
@@ -166,7 +184,7 @@ function Dash() {
             <TitleBar text="Dash" />
 
             {/* If no subject or no cards, show the snippet */}
-            {(!subject || (cards && cards.length === 0)) ? (
+            {(!subject || (allCards && allCards.length === 0)) ? (
                 <PageEmptyState>
                   {subject ? (
                     <NoSelectionModal
@@ -190,8 +208,25 @@ function Dash() {
                   primaryText="Back to Home"
                   onPrimary={() => navigate('/home')}
                   secondaryText={`Play ${subject.name} again`}
-                  onSecondary={() => window.location.reload()}
+                  onSecondary={() => {
+                    setStarted(false);
+                    setGameOver(false);
+                    setFallingCards([]);
+                  }}
                 />
+            ) : !started ? (
+                <PageEmptyState>
+                  <GameSettings
+                    cardCount={cardCount}
+                    setCardCount={setCardCount}
+                    maxCards={allCards.length}
+                    timerSec={timerSec}
+                    setTimerSec={setTimerSec}
+                    shuffle={shuffle}
+                    setShuffle={setShuffle}
+                    onStart={handleStart}
+                  />
+                </PageEmptyState>
             ) : (
                 // Otherwise, show the game area
                 <React.Fragment>
