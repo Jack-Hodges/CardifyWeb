@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
+import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 
 function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'bg-gray-500 hover:bg-gray-400', secondActionCol = 'bg-red-500 hover:bg-red-400', titleCol = 'text-white', width = 'w-3/4'}) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
@@ -15,19 +16,16 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
         }
     }, [isOpen, isClosing]);
 
-    // Close on Escape and lock background scroll while the modal is open
+    useBodyScrollLock(isVisible || isClosing);
+
+    // Close on Escape
     useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && onFirstAction) onFirstAction();
         };
         document.addEventListener('keydown', handleKeyDown);
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = previousOverflow;
-        };
+        return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onFirstAction]);
 
     const handleClose = (event) => {

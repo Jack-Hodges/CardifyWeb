@@ -1,16 +1,118 @@
 import ReactDOM from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets } from '../Functions/getTheme';
 import { getCardArtAssets } from '../Functions/getCardArt';
 import { saveProfile } from './ProfileManipulation';
 import { getShares, fetchSubjects, removeShare, saveShare } from '../Subject/SubjectManipulation';
-import { Cog } from 'lucide-react';
+import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail } from 'lucide-react';
 import Modal from '../Modals/Modal';
+import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 
-function ProfileModal({ isOpen, onClose, mainText, logout }) {
-    const { theme, profile, user } = useUser();
+function assetBackground(url) {
+    if (!url) return undefined;
+    const value = String(url);
+    if (value.startsWith('url(') || value.startsWith('linear') || value.startsWith('#')) {
+        return value;
+    }
+    return `url(${url})`;
+}
+
+function GlassPanel({ isOpen, onClose, title, subtitle, icon, children, footer, wide = false }) {
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
+
+    const handleClose = () => {
+        if (isClosing) return;
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsClosing(false);
+            setIsVisible(false);
+            onClose();
+        }, 300);
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsVisible(true);
+            setIsClosing(false);
+            return;
+        }
+        if (isVisible && !isClosing) {
+            setIsClosing(true);
+            const timeout = setTimeout(() => {
+                setIsClosing(false);
+                setIsVisible(false);
+            }, 300);
+            return () => clearTimeout(timeout);
+        }
+    }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useBodyScrollLock(isVisible || isClosing);
+
+    useEffect(() => {
+        if (!isVisible) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') handleClose();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    if (!isVisible && !isClosing) return null;
+
+    return ReactDOM.createPortal(
+        <div
+            className={`fixed inset-0 flex items-center justify-center z-[60] p-0 sm:p-6 transition-opacity duration-300 ${
+                isClosing ? 'opacity-0' : 'opacity-100'
+            }`}
+        >
+            <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
+            <div
+                className={`relative w-full ${wide ? 'sm:max-w-4xl' : 'sm:max-w-lg'} h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+                    bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                    sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                    transform transition-all duration-300 ease-in-out
+                    ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                                {icon}
+                                <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">{title}</h2>
+                            </div>
+                            {subtitle && (
+                                <p className="text-sm text-white/60">{subtitle}</p>
+                            )}
+                        </div>
+                        <BackgroundButton
+                            image={<X size={20} strokeWidth={3} />}
+                            bgColor="bg-red-500 hover:bg-red-400"
+                            onClick={handleClose}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
+                    {children}
+                </div>
+
+                {footer && (
+                    <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">
+                        {footer}
+                    </div>
+                )}
+            </div>
+        </div>,
+        document.body
+    );
+}
+
+function ProfileModal({ isOpen, onClose, logout }) {
+    const { theme, profile, user, setProfile } = useUser();
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
     const [isSharesModalOpen, setIsSharesModalOpen] = useState(false);
@@ -24,13 +126,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
     const themeAssets = getThemeAssets();
-    const {color} = theme;
-
-    const cross = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-    );
+    const cardArtAssets = useMemo(() => getCardArtAssets(), []);
+    const { color, secondaryColor } = theme;
 
     useEffect(() => {
         if (isOpen) {
@@ -40,11 +137,13 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         }
     }, [isOpen, isClosing]);
 
+    useBodyScrollLock(isVisible || isClosing);
+
     useEffect(() => {
         if (theme && color) {
-          document.documentElement.style.setProperty('--theme-border-color', color);
+            document.documentElement.style.setProperty('--theme-border-color', color);
         }
-      }, [theme, color]);
+    }, [theme, color]);
 
     const handleOnClose = (event) => {
         onClose();
@@ -56,64 +155,54 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             setIsClosing(false);
             setIsVisible(false);
         }, 300);
-    }
+    };
 
     const handleThemeSelect = async (themeName) => {
-        // if (profile.pro) {
-            try {
-                const themeKey = themeName.toLowerCase().replaceAll(' ', '');
-                await saveProfile(
-                    profile.id,
-                    profile.first_name,
-                    themeKey,
-                    profile.sort_preference,
-                    profile.card_art,
-                    profile.generation_count
-                );
-                // Reload the page to apply the new theme
-                window.location.reload();
-            } catch (error) {
-                console.error('Error updating theme:', error);
-            }
-        // } else {
-        //     alert('This feature is only available to Pro users.');
-        // }
+        try {
+            const themeKey = themeName.toLowerCase().replaceAll(' ', '');
+            const updated = await saveProfile(
+                profile.id,
+                profile.first_name,
+                themeKey,
+                profile.sort_preference,
+                profile.card_art,
+                profile.generation_count
+            );
+            if (updated) setProfile(updated);
+            else setProfile({ ...profile, theme: themeKey });
+        } catch (error) {
+            console.error('Error updating theme:', error);
+        }
     };
 
     const handleCardArtSelect = async (cardArtName) => {
-        // if (profile.pro) {
-            try {
-                const cardArtKey = cardArtName.toLowerCase();
-                await saveProfile(
-                    profile.id,
-                    profile.first_name,
-                    profile.theme,
-                    profile.sort_preference,
-                    cardArtKey,
-                    profile.generation_count
-                );
-                // Reload the page to apply the new card art
-                window.location.reload();
-            } catch (error) {
-                console.error('Error updating subject art:', error);
-            }
-        // } else {
-        //     alert('This feature is only available to Pro users.');
-        // }
+        try {
+            const cardArtKey = cardArtName.toLowerCase();
+            const updated = await saveProfile(
+                profile.id,
+                profile.first_name,
+                profile.theme,
+                profile.sort_preference,
+                cardArtKey,
+                profile.generation_count
+            );
+            if (updated) setProfile(updated);
+            else setProfile({ ...profile, card_art: cardArtKey });
+        } catch (error) {
+            console.error('Error updating subject art:', error);
+        }
     };
 
     const handleSharesClick = async () => {
         try {
             const sharesData = await getShares(profile.id);
             const subjectsData = await fetchSubjects(user, profile);
-            
-            // Create a map of subject IDs to names
+
             const subjectMap = subjectsData.reduce((acc, subject) => {
                 acc[subject.id] = subject.name;
                 return acc;
             }, {});
 
-            // Add subject names to the shares data
             const sharesWithNames = sharesData.map(share => ({
                 ...share,
                 subjectName: subjectMap[share.subject_id] || 'Unknown Subject'
@@ -126,7 +215,6 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         }
     };
 
-    // Group shares by subject
     const groupedShares = shares.reduce((acc, share) => {
         const subjectName = share.subjectName;
         if (!acc[subjectName]) {
@@ -146,9 +234,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
             try {
                 const success = await removeShare(shareToDelete.subject_id, shareToDelete.recipient_email);
                 if (success) {
-                    // Remove the deleted share from the state
-                    setShares(shares.filter(share => 
-                        !(share.subject_id === shareToDelete.subject_id && 
+                    setShares(shares.filter(share =>
+                        !(share.subject_id === shareToDelete.subject_id &&
                           share.recipient_email === shareToDelete.recipient_email)
                     ));
                 }
@@ -164,8 +251,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         try {
             const success = await saveShare(share.id, share.subject_id, share.recipient_email, newPermission);
             if (success) {
-                // Update the share in the state
-                setShares(shares.map(s => 
+                setShares(shares.map(s =>
                     s.id === share.id ? { ...s, permission: newPermission } : s
                 ));
             }
@@ -176,17 +262,23 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
     };
 
     const sharesList = Object.entries(groupedShares).map(([subjectName, subjectShares]) => (
-        <div key={subjectName} className="mb-4 p-3 bg-white/10 rounded-lg">
-            <h3 className="text-lg font-semibold text-white mb-2">{subjectName}</h3>
+        <div key={subjectName}>
+            <h3 className="text-base font-bold text-white mb-2 ml-0.5">{subjectName}</h3>
             <div className="space-y-2">
-                {subjectShares.map((share, index) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-300">{share.recipient_email}</span>
-                        <div className="flex items-center space-x-4">
+                {subjectShares.map((share) => (
+                    <div
+                        key={share.id}
+                        className="flex justify-between items-center gap-3 rounded-2xl bg-white/10 border border-white/15 px-3.5 py-3"
+                    >
+                        <span className="text-sm font-medium text-white/90 truncate min-w-0">
+                            {share.recipient_email}
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0">
                             <div className="relative permission-dropdown">
-                                <button 
+                                <button
+                                    type="button"
                                     onClick={() => setActiveDropdown(activeDropdown === share.id ? null : share.id)}
-                                    className="text-blue-400 hover:text-blue-300 capitalize transition-colors flex items-center"
+                                    className="capitalize flex items-center font-semibold text-white px-3 py-1.5 rounded-full bg-blue-500 background-shadow-new background-hover"
                                 >
                                     {share.permission}
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1">
@@ -194,36 +286,37 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                                     </svg>
                                 </button>
                                 {activeDropdown === share.id && (
-                                    <div className="absolute right-0 mt-1 w-32 bg-gray-800 rounded-lg shadow-lg border border-gray-700 z-50">
+                                    <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
                                         <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handlePermissionChange(share, 'viewer');
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg"
+                                            className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         >
                                             Viewer
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handlePermissionChange(share, 'editor');
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-b-lg"
+                                            className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
                                         >
                                             Editor
                                         </button>
                                     </div>
                                 )}
                             </div>
-                            <button 
+                            <BackgroundButton
+                                image={<X size={16} strokeWidth={3} />}
+                                bgColor="bg-red-500 hover:bg-red-400"
                                 onClick={() => handleDeleteClick(share)}
-                                className="text-red-400 hover:text-red-300 transition-colors"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                </svg>
-                            </button>
+                                wSizing="w-9"
+                                hSizing="h-9"
+                            />
                         </div>
                     </div>
                 ))}
@@ -231,7 +324,6 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
         </div>
     ));
 
-    // Add click outside handler to close dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (activeDropdown && !event.target.closest('.permission-dropdown')) {
@@ -252,7 +344,7 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
 
     const handleSaveEdit = async () => {
         try {
-            await saveProfile(
+            const updated = await saveProfile(
                 profile.id,
                 newFirstName,
                 profile.theme,
@@ -260,8 +352,8 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 profile.card_art,
                 profile.generation_count
             );
-            // Reload the page to apply the changes
-            window.location.reload();
+            if (updated) setProfile(updated);
+            else setProfile({ ...profile, first_name: newFirstName });
         } catch (error) {
             console.error('Error updating profile:', error);
         }
@@ -270,135 +362,171 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
 
     if (!isVisible && !isClosing) return null;
 
+    const cardLimit = profile.pro ? 500 : 100;
+    const genLimit = profile.pro ? 60 : 20;
+    const cardCount = profile.flashcard_count || 0;
+    const genCount = profile.generation_count || 0;
+    const currentThemeAsset = themeAssets.find(asset => asset.name.toLowerCase() === theme.name);
+    const currentCardArt = cardArtAssets.find(asset => asset.name.toLowerCase() === profile.card_art);
+    const initial = profile?.first_name?.charAt(0)?.toUpperCase() || 'U';
+
     return (
         <>
             {ReactDOM.createPortal(
                 <div
-                    className={`fixed sm:p-10 inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+                    className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
                         isClosing ? 'opacity-0' : 'opacity-100'
                     }`}
                     onClick={handleOnClose}
                 >
                     <div
-                        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+                        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                         onClick={handleOnClose}
-                    ></div>
+                    />
 
                     <div
-                        className={`relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 w-full sm:w-3/4 h-full sm:h-auto transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
-                            isClosing ? 'animate-pop-down' : 'animate-pop-up'
-                        }`}
+                        className={`relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+                            bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                            sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                            transform transition-all duration-300 ease-in-out
+                            ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex flex-col h-full">
-                            {/* Header - Fixed */}
-                            <div className="flex justify-between items-center mb-6">
-                                <span className={`text-white text-4xl font-semibold`}>Hey {profile.first_name}</span>
-                                <div className="flex space-x-2">
-                                    <div className="block sm:hidden">
-                                        <BackgroundButton image={<Cog />} bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                        {/* Header */}
+                        <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="flex items-center gap-4 min-w-0">
+                                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shrink-0 ${secondaryColor?.bgClass || 'bg-purple-500'}`}>
+                                        {initial}
                                     </div>
-                                    <div className="hidden sm:block">
-                                        <BackgroundButton image={<Cog />} text="Settings" flip={true}bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleEditClick} />
+                                    <div className="min-w-0">
+                                        <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                                            Hey, {profile.first_name}!
+                                        </h2>
+                                        <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${profile.pro ? 'bg-yellow-500' : 'bg-green-500'}`}>
+                                                {profile.pro ? 'Pro' : 'Free'} plan
+                                            </span>
+                                            <span className="text-sm text-white/60 truncate">
+                                                Your study HQ
+                                            </span>
+                                        </div>
                                     </div>
-                                    <BackgroundButton image={cross} bgColor="bg-red-500 hover:bg-red-400" onClick={handleOnClose} />
                                 </div>
+                                <BackgroundButton
+                                    image={<X size={20} strokeWidth={3} />}
+                                    bgColor="bg-red-500 hover:bg-red-400"
+                                    onClick={handleOnClose}
+                                />
                             </div>
+                        </div>
 
-                            {/* Scrollable Content */}
-                            <div className="flex-1 overflow-y-auto pr-2">
-                                {/* Theme and Card Art Assets Grid */}
-                                <h1 className='text-white text-2xl font-semibold'>Customisation</h1>
-                                <div className='flex gap-4'>
-                                    <div className="mt-4 mb-6">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-white text-lg">Theme</span>
-                                        </div>
-                                        <div className="flex justify-center">
-                                            <div 
-                                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
-                                                onClick={() => setIsThemeModalOpen(true)}
-                                            >
-                                                <div 
-                                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                    style={{ backgroundImage: `url(${themeAssets.find(asset => asset.name.toLowerCase() === theme.name)?.url})` }}
-                                                />
-                                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                    {themeAssets.find(asset => asset.name.toLowerCase() === theme.name)?.name}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Card Art Grid */}
-                                    <div className="mt-4 mb-6">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-white text-lg">Subject Art</span>
-                                        </div>
-                                        <div className="flex justify-center">
-                                            <div 
-                                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
-                                                onClick={() => setIsCardArtModalOpen(true)}
-                                            >
-                                                <div 
-                                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                                    style={{ backgroundImage: getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.url ? `url(${getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.url})` : 'none' }}
-                                                />
-                                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
-                                                    {getCardArtAssets().find(asset => asset.name.toLowerCase() === profile.card_art)?.name}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
+                        {/* Body */}
+                        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-6">
+                            {/* Usage */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Layers size={20} className="text-white/90" />
+                                    <h3 className="text-lg font-bold text-white">Usage</h3>
                                 </div>
-                                
-
-                                {/* Card Count Progress Bar */}
-                                <div className="flex flex-col sm:flex-row gap-8 w-full">
-                                    <div className="mb-6 w-full">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-white text-2xl font-semibold">Card Count</span>
-                                            <span className="text-white text-sm">{profile.flashcard_count || 0}/{profile.pro ? '500' : '100'}</span>
-                                        </div>
-                                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
-                                                style={{ width: `${Math.min((profile.flashcard_count || 0) / (profile.pro ? 500 : 100) * 100, 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="mb-6 w-full">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-white text-2xl font-semibold">Generation Limit</span>
-                                            <span className="text-white text-sm">{profile.generation_count || 0}/{profile.pro ? '60' : '20'}</span>
-                                        </div>
-                                        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-                                            <div 
-                                                className="h-full bg-blue-500 transition-all duration-300 ease-in-out"
-                                                style={{ width: `${Math.min((profile.generation_count || 0) / (profile.pro ? 60 : 20) * 100, 100)}%` }}
-                                            />
-                                        </div>
-                                    </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <UsageStat
+                                        label="Flashcards"
+                                        value={cardCount}
+                                        max={cardLimit}
+                                        barClass="bg-blue-400"
+                                    />
+                                    <UsageStat
+                                        label="AI generations"
+                                        value={genCount}
+                                        max={genLimit}
+                                        barClass="bg-purple-400"
+                                    />
                                 </div>
-                                
+                            </section>
 
-                                {/* <p className="mb-6 text-lg text-gray-500 dark:text-gray-200">
-                                    {mainText}
-                                </p> */}
+                            {/* Customisation */}
+                            <section>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Palette size={20} className="text-white/90" />
+                                    <h3 className="text-lg font-bold text-white">Customise</h3>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsThemeModalOpen(true)}
+                                        className="text-left bg-white dark:bg-gray-700 rounded-2xl p-3 background-shadow-new background-hover cursor-pointer"
+                                    >
+                                        <div
+                                            className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-200 dark:bg-gray-600"
+                                            style={{
+                                                backgroundImage: currentThemeAsset?.url
+                                                    ? (String(currentThemeAsset.url).startsWith('url(') || String(currentThemeAsset.url).startsWith('linear') || String(currentThemeAsset.url).startsWith('#')
+                                                        ? currentThemeAsset.url
+                                                        : `url(${currentThemeAsset.url})`)
+                                                    : undefined,
+                                            }}
+                                        />
+                                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Theme</p>
+                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">
+                                            {currentThemeAsset?.name || 'Default'}
+                                        </p>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCardArtModalOpen(true)}
+                                        className="text-left bg-white dark:bg-gray-700 rounded-2xl p-3 background-shadow-new background-hover cursor-pointer"
+                                    >
+                                        <div
+                                            className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-200 dark:bg-gray-600"
+                                            style={{
+                                                backgroundImage: currentCardArt?.url ? `url(${currentCardArt.url})` : undefined,
+                                            }}
+                                        />
+                                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">Subject art</p>
+                                        <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">
+                                            {currentCardArt?.name || 'None'}
+                                        </p>
+                                    </button>
+                                </div>
+                            </section>
+
+                            {/* Quick tip */}
+                            <div className="flex items-start gap-3 text-white/80">
+                                <Sparkles size={20} className="shrink-0 mt-0.5 text-yellow-300" />
+                                <p className="text-sm font-medium leading-snug">
+                                    Themes and subject art update across your whole study space. Tap a tile above to switch things up.
+                                </p>
                             </div>
+                        </div>
 
-                            {/* Logout and card share buttons */}
-                            <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                                <BackgroundButton 
-                                    text="View Subject Shares" 
-                                    bgColor="bg-purple-500 hover:bg-purple-400" 
-                                    wWidth='w-full' 
-                                    onClick={handleSharesClick} />
-                                <BackgroundButton 
-                                    text="Logout" 
-                                    bgColor="bg-red-500 hover:bg-red-400" 
-                                    wWidth='w-full mt-2 sm:mt-0' 
-                                    onClick={logout} 
+                        {/* Footer actions */}
+                        <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                <BackgroundButton
+                                    text="Shares"
+                                    image={<Share2 size={18} />}
+                                    flip
+                                    bgColor="bg-purple-500 hover:bg-purple-400"
+                                    wWidth="w-full"
+                                    onClick={handleSharesClick}
+                                />
+                                <BackgroundButton
+                                    text="Settings"
+                                    image={<Cog size={18} />}
+                                    flip
+                                    bgColor="bg-blue-500 hover:bg-blue-400"
+                                    wWidth="w-full"
+                                    onClick={handleEditClick}
+                                />
+                                <BackgroundButton
+                                    text="Log out"
+                                    image={<LogOut size={18} />}
+                                    flip
+                                    bgColor="bg-red-500 hover:bg-red-400"
+                                    wWidth="w-full"
+                                    onClick={logout}
                                 />
                             </div>
                         </div>
@@ -406,21 +534,37 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 </div>,
                 document.body
             )}
-            <Modal
+
+            <GlassPanel
                 isOpen={isSharesModalOpen}
-                onFirstAction={() => setIsSharesModalOpen(false)}
-                text="Subject Shares"
-                mainText={
-                    <div className="max-h-[60vh] overflow-y-auto">
-                        {sharesList.length > 0 ? sharesList : (
-                            <p className="text-gray-400">No subjects are currently shared.</p>
-                        )}
+                onClose={() => setIsSharesModalOpen(false)}
+                title="Shares"
+                subtitle="People you've shared subjects with"
+                icon={<Share2 size={22} className="text-white/90 shrink-0" />}
+                footer={
+                    <div className="flex sm:justify-end">
+                        <BackgroundButton
+                            text="Done"
+                            bgColor="bg-green-500 hover:bg-green-400"
+                            wWidth="w-full sm:w-auto"
+                            onClick={() => setIsSharesModalOpen(false)}
+                        />
                     </div>
                 }
-                firstActionText="Close"
-                firstActionCol="bg-red-500 hover:bg-red-400"
-                width="w-full h-full sm:h-auto sm:w-2/3"
-            />
+            >
+                {sharesList.length > 0 ? (
+                    <div className="space-y-6">{sharesList}</div>
+                ) : (
+                    <div className="py-10 text-center">
+                        <Share2 size={36} className="mx-auto mb-3 text-white/40" />
+                        <p className="text-lg font-bold text-white">Nothing shared yet</p>
+                        <p className="mt-2 text-sm text-white/60 max-w-sm mx-auto">
+                            When you share a subject with a friend, they&apos;ll show up here so you can manage access.
+                        </p>
+                    </div>
+                )}
+            </GlassPanel>
+
             <Modal
                 isOpen={isDeleteModalOpen}
                 onFirstAction={() => setIsDeleteModalOpen(false)}
@@ -432,109 +576,162 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 secondActionText="Remove"
                 secondActionCol="bg-red-500 hover:bg-red-400"
             />
-            <Modal
+
+            <GlassPanel
                 isOpen={isThemeModalOpen}
-                onFirstAction={() => setIsThemeModalOpen(false)}
-                text="Select Theme"
-                mainText={
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[80vh] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2 justify-items-center">
-                        {themeAssets.map((asset) => (
-                            <div 
+                onClose={() => setIsThemeModalOpen(false)}
+                title="Themes"
+                subtitle="Pick a vibe for your study space"
+                icon={<Palette size={22} className="text-white/90 shrink-0" />}
+                wide
+            >
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {themeAssets.map((asset) => {
+                        const selected = asset.name.toLowerCase() === theme.name;
+                        return (
+                            <button
+                                type="button"
                                 key={asset.name}
-                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-4/5 sm:w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
+                                    selected ? 'ring-4 ring-green-400' : ''
+                                }`}
                                 onClick={() => {
                                     handleThemeSelect(asset.name);
                                     setIsThemeModalOpen(false);
                                 }}
                             >
-                                <div 
-                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                    style={{ backgroundImage: `url(${asset.url})` }}
+                                <div
+                                    className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-200 dark:bg-gray-600"
+                                    style={{ backgroundImage: assetBackground(asset.url) }}
                                 />
-                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
                                     {asset.name}
                                 </p>
-                            </div>
-                        ))}
-                    </div>
-                }
-                width="w-full sm:w-2/3 h-full sm:h-[80%]"
-                firstActionText="Close"
-                firstActionCol="bg-red-500 hover:bg-red-400"
-                secondActionText=""
-                secondActionCol=""
-            />
-            <Modal
+                                {selected && (
+                                    <p className="text-xs font-semibold text-green-600 dark:text-green-400 px-0.5">
+                                        Current
+                                    </p>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            </GlassPanel>
+
+            <GlassPanel
                 isOpen={isCardArtModalOpen}
-                onFirstAction={() => setIsCardArtModalOpen(false)}
-                text="Select Subject Art"
-                mainText={
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 max-h-[80vh] sm:max-h-[calc(80vh-12rem)] overflow-y-auto p-2 justify-items-center">
-                        {getCardArtAssets().map((asset) => (
-                            <div 
+                onClose={() => setIsCardArtModalOpen(false)}
+                title="Subject art"
+                subtitle="Decorate your subject cards"
+                icon={<ImageIcon size={22} className="text-white/90 shrink-0" />}
+                wide
+            >
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {cardArtAssets.map((asset) => {
+                        const selected = asset.name.toLowerCase() === (profile.card_art || 'none');
+                        return (
+                            <button
+                                type="button"
                                 key={asset.name}
-                                className="background-shadow-new background-hover bg-white dark:bg-gray-800 relative w-4/5 sm:w-40 p-2 rounded-lg border cursor-pointer transition-all duration-200"
+                                className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
+                                    selected ? 'ring-4 ring-purple-400' : ''
+                                }`}
                                 onClick={() => {
                                     handleCardArtSelect(asset.name);
                                     setIsCardArtModalOpen(false);
                                 }}
                             >
-                                <div 
-                                    className="h-24 w-full rounded-md mb-2 bg-cover bg-center"
-                                    style={{ backgroundImage: asset.url ? `url(${asset.url})` : 'none' }}
-                                />
-                                <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+                                <div
+                                    className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-100 dark:bg-gray-600 flex items-center justify-center"
+                                    style={{ backgroundImage: asset.url ? `url(${asset.url})` : undefined }}
+                                >
+                                    {!asset.url && (
+                                        <span className="text-sm font-bold text-gray-400">None</span>
+                                    )}
+                                </div>
+                                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
                                     {asset.name}
                                 </p>
-                            </div>
-                        ))}
-                    </div>
-                }
-                width="w-full sm:w-2/3 h-full sm:h-[80%]"
-                firstActionText="Close"
-                firstActionCol="bg-red-500 hover:bg-red-400"
-                secondActionText=""
-                secondActionCol=""
-            />
-            <Modal
-                isOpen={isEditModalOpen}
-                onFirstAction={() => setIsEditModalOpen(false)}
-                onSecondAction={handleSaveEdit}
-                text="Settings"
-                mainText={
-                    <div className="space-y-4">
-                        <div>
-                            <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-2">
-                                First Name
-                            </label>
-                            <input
-                                type="text"
-                                id="firstName"
-                                value={newFirstName}
-                                onChange={(e) => setNewFirstName(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
-                                placeholder="Enter your first name"
-                            />
-                            <p className="mt-4">You are currently on the {profile.pro ? 'Pro' : 'Free'} plan.</p>
-                            <p>Cardify is in beta. We currently have a limited number of Pro users. If you would like to upgrade to Pro, please contact us at <a href="mailto:hello@flashcardify.app" className="text-blue-500 hover:text-blue-400">hello@flashcardify.app</a>.</p>
-                            {/* {profile.pro ? (
-                                <BackgroundButton text="Manage Billing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleManageBillingClick} />
-                            ) : (
-                                <BackgroundButton text="Upgrade to Pro" bgColor="bg-green-500 hover:bg-green-400" onClick={upgradeToPro} />
-                            )} */}
+                                {selected && (
+                                    <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 px-0.5">
+                                        Current
+                                    </p>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            </GlassPanel>
 
-                            <p className="mt-4">Permanently delete your account</p>
-                            <BackgroundButton text="Delete Account" bgColor="bg-red-500 hover:bg-red-400" onClick={() => {}} />
-                            
-                        </div>
+            <GlassPanel
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title="Settings"
+                subtitle="Update your account details"
+                icon={<Cog size={22} className="text-white/90 shrink-0" />}
+                footer={
+                    <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+                        <BackgroundButton
+                            text="Cancel"
+                            bgColor="bg-gray-500 hover:bg-gray-400"
+                            wWidth="w-full sm:w-auto"
+                            onClick={() => setIsEditModalOpen(false)}
+                        />
+                        <BackgroundButton
+                            text="Save changes"
+                            bgColor="bg-blue-500 hover:bg-blue-400"
+                            wWidth="w-full sm:w-auto"
+                            onClick={handleSaveEdit}
+                        />
                     </div>
                 }
-                width="w-full sm:w-2/3 h-full sm:h-auto"
-                firstActionText="Cancel"
-                firstActionCol="bg-red-500 hover:bg-red-400"
-                secondActionText="Save"
-                secondActionCol="bg-blue-500 hover:bg-blue-400"
-            />
+            >
+                <div className="space-y-6">
+                    <div>
+                        <label htmlFor="firstName" className="block text-sm font-bold text-white/90 mb-2 ml-1">
+                            First name
+                        </label>
+                        <input
+                            type="text"
+                            id="firstName"
+                            value={newFirstName}
+                            onChange={(e) => setNewFirstName(e.target.value)}
+                            className="w-full px-4 py-3 rounded-full bg-white dark:bg-gray-700 text-gray-800 dark:text-white
+                                background-shadow-new background-focus focus:outline-none font-medium
+                                placeholder:text-gray-400"
+                            placeholder="Enter your first name"
+                        />
+                    </div>
+
+                    <div>
+                        <p className="text-sm font-bold text-white/90 mb-2 ml-1">Plan</p>
+                        <p className="text-white font-bold mb-1">
+                            You&apos;re on the {profile.pro ? 'Pro' : 'Free'} plan
+                        </p>
+                        <p className="text-sm text-white/60 leading-relaxed">
+                            Cardify is in beta. Pro spots are limited — if you&apos;d like to upgrade, email{' '}
+                            <a
+                                href="mailto:hello@flashcardify.app"
+                                className="inline-flex items-center gap-1 text-blue-300 hover:text-blue-200 font-semibold underline underline-offset-2"
+                            >
+                                <Mail size={14} />
+                                hello@flashcardify.app
+                            </a>
+                            .
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-sm font-bold text-white/50 mb-2 ml-1">Danger zone</p>
+                        <BackgroundButton
+                            text="Delete account"
+                            bgColor="bg-red-500 hover:bg-red-400"
+                            onClick={() => {}}
+                        />
+                    </div>
+                </div>
+            </GlassPanel>
+
             <Modal
                 isOpen={isUnlimitedProModalOpen}
                 onFirstAction={() => setIsUnlimitedProModalOpen(false)}
@@ -550,6 +747,26 @@ function ProfileModal({ isOpen, onClose, mainText, logout }) {
                 firstActionCol="bg-green-500 hover:bg-green-400"
             />
         </>
+    );
+}
+
+function UsageStat({ label, value, max, barClass }) {
+    const pct = Math.min((value / max) * 100, 100);
+    return (
+        <div className="py-1">
+            <div className="flex justify-between items-baseline mb-2">
+                <span className="text-sm font-bold text-white/90">{label}</span>
+                <span className="text-sm font-bold text-white/60">
+                    {value}/{max}
+                </span>
+            </div>
+            <div className="w-full h-2.5 bg-white/15 rounded-full overflow-hidden">
+                <div
+                    className={`h-full ${barClass} transition-all duration-300 rounded-full`}
+                    style={{ width: `${pct}%` }}
+                />
+            </div>
+        </div>
     );
 }
 

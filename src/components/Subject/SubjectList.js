@@ -7,6 +7,7 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import AddSubject from '../Subject/AddSubject';
 import { X, Plus, MoreVertical, ArrowUpDown } from 'lucide-react';
+import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 
 function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const navigate = useNavigate();
@@ -21,6 +22,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
     const [sortBy, setSortBy] = useState('Most Cards');
     const selectRef = useRef(null);
+
+    useBodyScrollLock(isOpen);
 
     const handleRemove = async (id) => {
       await removeSubject(id);
