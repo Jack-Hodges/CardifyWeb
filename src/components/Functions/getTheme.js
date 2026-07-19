@@ -13,6 +13,23 @@ import PurpleGeometric from '../../images/backgrounds/PurpleGeometric.jpg'
 import Nature1 from '../../images/backgrounds/Nature1.jpg'
 import Space1 from '../../images/backgrounds/Space1.jpg'
 
+/** Ensure a value is a valid CSS background image/color string. */
+export const normalizeBackgroundImage = (value) => {
+  if (value == null || value === '') return '';
+  const v = String(value);
+  if (
+    v.startsWith('url(') ||
+    v.startsWith('linear-gradient') ||
+    v.startsWith('radial-gradient') ||
+    v.startsWith('#') ||
+    v.startsWith('rgb') ||
+    v.startsWith('hsl')
+  ) {
+    return v;
+  }
+  return `url(${v})`;
+};
+
 // Get array of theme assets and their URLs
 export const getThemeAssets = () => {
   // Get current color scheme for default theme preview
@@ -238,8 +255,9 @@ const themes = {
 };
 
 export const getTheme = (theme, manualColorScheme = null) => {
-  if (!theme) {
+  const key = theme ? String(theme).toLowerCase().replaceAll(' ', '') : null;
+  if (!key || key === 'default') {
     return getDefaultTheme(manualColorScheme);
   }
-  return themes[theme] || getDefaultTheme(manualColorScheme);
+  return themes[key] || getDefaultTheme(manualColorScheme);
 };

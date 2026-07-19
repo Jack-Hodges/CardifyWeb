@@ -1,52 +1,70 @@
+import ReactDOM from 'react-dom';
 import BackgroundButton from "../Elements/BackgroundButton";
 import getColors from "../Functions/getColors";
 import SubjectBlock from "../Subject/SubjectBlock";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { X, Pencil, FolderOpen } from "lucide-react";
+import useBodyScrollLock from "../../hooks/useBodyScrollLock";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
-
-    // Memoize theme so it only recalculates if profile.theme changes
-
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
+    const [isVisible, setIsVisible] = useState(false);
+    const [isClosing, setIsClosing] = useState(false);
 
-    const cross = (
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-        </svg>
-    );
+    useEffect(() => {
+        if (isExpanded) {
+            setIsVisible(true);
+            setIsClosing(false);
+            return;
+        }
+        setIsVisible(false);
+        setIsClosing(false);
+    }, [isExpanded]);
 
-    const edit = (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
-            <path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
-            <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />
-        </svg>
-    );
+    useBodyScrollLock(isVisible || isClosing);
+
+    useEffect(() => {
+        if (!isVisible) return;
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') handleClose();
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const handleClose = () => {
+        if (isClosing) return;
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsVisible(false);
+            setIsClosing(false);
+            onClick?.();
+        }, 300);
+    };
 
     return (
         <>
             {/* Closed collection box for the grid */}
-            <div className={`group relative mx-auto w-full h-56 cursor-pointer background-hover backdrop-blur-md rounded-xl background-shadow-new transition duration-300`}
-            onClick={onClick}>
-                {/* Eight squares in the background */}
+            <div
+                className="group relative mx-auto w-full h-56 cursor-pointer background-hover backdrop-blur-md rounded-xl background-shadow-new transition duration-300"
+                onClick={onClick}
+            >
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
                     {subjects.slice(0, 8).map((subject, index) => {
-                        const { bgClass } = getColors([subject.colourText, subject.colourIntensity]); // Get background color class
+                        const { bgClass } = getColors([subject.colourText, subject.colourIntensity]);
                         return (
-                            <div 
-                                key={index} 
-                                className={`rounded-lg ${bgClass}`} // Apply background color
-                            ></div>
+                            <div
+                                key={index}
+                                className={`rounded-lg ${bgClass}`}
+                            />
                         );
                     })}
                 </div>
 
-                {/* Blur effect behind the text */}
-                <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/50 via-black/25 to-transparent backdrop-blur-sm rounded-bl-lg rounded-br-lg"></div>
+                <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-t from-black/50 via-black/25 to-transparent backdrop-blur-sm rounded-bl-lg rounded-br-lg" />
 
-                {/* Text and Icons Section */}
                 <div className="absolute bottom-0 left-0 mb-1 w-full">
-                    {/* Collection name and subject count */}
                     <div className="text-left mb-[-6%] sm:mb-0">
                         <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {collection ? collection.name : 'name'}
@@ -56,10 +74,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         </p>
                     </div>
 
-                    {/* Icons below the text */}
                     <div className="grid grid-cols-4 gap-4 w-full opacity-1 sm:opacity-0 justify-items-center sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300">
-
-                        {/* Edit button */}
                         <div className="col-start-3">
                             <CollectionButton
                                 img={
@@ -74,9 +89,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                 onClick={() => onEditCollection(collection)}
                             />
                         </div>
-                        
 
-                        {/* Delete button */}
                         <CollectionButton
                             img={
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-10">
@@ -86,46 +99,82 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                             setHoveredIcon={setHoveredIcon}
                             hoveredIcon={hoveredIcon}
                             tooltipText="Delete"
-                            onClick={() => onRemoveCollection(collection)} // Pass the function reference instead of invoking it
+                            onClick={() => onRemoveCollection(collection)}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Expanded view overlay */}
-            {isExpanded && (
-                <div 
-                    className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-10 bg-black bg-opacity-50"
-                    onClick={onClick} // Collapse the overlay when clicking on the background
+            {(isVisible || isClosing) && ReactDOM.createPortal(
+                <div
+                    className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
+                        isClosing ? 'opacity-0' : 'opacity-100'
+                    }`}
                 >
-                    <div 
-                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-4 pb-2 shadow-2xl shadow-black/30 border border-white/20 overflow-hidden`}
-                        onClick={(e) => e.stopPropagation()} // Prevent event bubbling when clicking inside the box
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
+                    <div
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] overflow-hidden flex flex-col
+                            bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                            sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                            transform transition-all duration-300 ease-in-out
+                            ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Title and close button */}
-                        <div className="flex w-full justify-between px-2">
-                            <p className="font-bold text-white text-4xl">{collection.name}</p>
-                            <div className="flex gap-2">
-                                <BackgroundButton image={edit} bgColor={'bg-blue-500 hover:bg-blue-400'} onClick={() => onEditCollection(collection)}/>
-                                <BackgroundButton image={cross} bgColor={'bg-red-500 hover:bg-red-400'} onClick={onClick}/>
+                        <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+                            <div className="flex items-start justify-between gap-4">
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <FolderOpen size={22} className="text-white/90 shrink-0" />
+                                        <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                                            {collection.name}
+                                        </h2>
+                                    </div>
+                                    <p className="text-sm text-white/60">
+                                        {subject_count} {subject_count === 1 ? 'subject' : 'subjects'}
+                                    </p>
+                                </div>
+                                <div className="flex gap-2 shrink-0">
+                                    <BackgroundButton
+                                        image={<Pencil size={18} />}
+                                        bgColor="bg-blue-500 hover:bg-blue-400"
+                                        onClick={() => onEditCollection(collection)}
+                                    />
+                                    <BackgroundButton
+                                        image={<X size={20} strokeWidth={3} />}
+                                        bgColor="bg-red-500 hover:bg-red-400"
+                                        onClick={handleClose}
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Grid for subjects */}
-                        <div className="flex flex-col overflow-y-auto h-[calc(100%-4rem)] sm:h-[calc(100%-4rem)] sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 2xl:grid-rows-3 p-4 gap-4">
-                            {subjects.map((subject) => (
-                                <SubjectBlock
-                                    key={subject.id}
-                                    subject={subject}
-                                    user={user}
-                                    onEdit={() => onEditSubject(subject)}  // Pass the onEditSubject function here
-                                    onSave={onSaveSubject}  // Pass the onSaveSubject function here
-                                    onRemoveSubject={() => onRemoveSubject(subject)}  // Handle removal
-                                />
-                            ))}
+                        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
+                            {subjects.length > 0 ? (
+                                <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+                                    {subjects.map((subject) => (
+                                        <SubjectBlock
+                                            key={subject.id}
+                                            subject={subject}
+                                            user={user}
+                                            onEdit={() => onEditSubject(subject)}
+                                            onSave={onSaveSubject}
+                                            onRemoveSubject={() => onRemoveSubject(subject)}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="min-h-[16rem] flex flex-col items-center justify-center text-center px-4">
+                                    <FolderOpen size={40} className="text-white/40 mb-3" />
+                                    <p className="text-xl font-bold text-white">No subjects yet</p>
+                                    <p className="text-sm text-white/60 mt-1 max-w-sm">
+                                        Move subjects into this collection to see them here.
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
@@ -142,8 +191,8 @@ function CollectionButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onCli
             onMouseEnter={() => setHoveredIcon(lowerCase)}
             onMouseLeave={() => setHoveredIcon(null)}
             onClick={(e) => {
-                e.stopPropagation(); // Prevents the click from bubbling to the parent
-                onClick(); // Call the button-specific onClick function
+                e.stopPropagation();
+                onClick();
             }}
         >
             {img}

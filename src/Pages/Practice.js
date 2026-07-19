@@ -144,7 +144,7 @@ function FlashcardQuiz() {
   };
 
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen h-[100dvh] relative overflow-hidden">
       <Helmet>
         <title>Practice Flashcards - Cardify | Study & Review Your Cards</title>
         <meta name="description" content="Practice your custom flashcards with interactive review sessions. Track your progress and master your study materials with Cardify's practice mode." />
@@ -168,10 +168,10 @@ function FlashcardQuiz() {
         }}
       ></div>
       
-      {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen pb-20">
+      <div className="relative z-10 h-full flex flex-col overflow-hidden">
         <TitleBar text="Practice" />
 
+        <div className="flex-1 min-h-0 overflow-y-auto">
         <Modal
           isOpen={isModalOpen}
           onFirstAction={() => {
@@ -262,6 +262,7 @@ function FlashcardQuiz() {
           onClose={() => setIsSubjectListModalOpen(false)}
           user={user}
         />
+        </div>
       </div>
     </div>
   );

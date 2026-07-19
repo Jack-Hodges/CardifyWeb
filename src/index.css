@@ -1,3 +1,8 @@
+:root {
+  --theme-background: #f1ebe0;
+  --theme-border-color: rgba(3, 15, 64, 1);
+}
+
 /* Universal reset to eliminate gaps */
 *,
 *::before,

@@ -6,7 +6,7 @@ import rehypeRaw from 'rehype-raw';
 
 import IconButtons from './IconButtons'; 
 import EditModal from './EditModal';
-import Modal from '../Modals/Modal';
+import ConfirmModal from '../Modals/ConfirmModal';
 
 import { Trash2, RefreshCw } from 'lucide-react';
 
@@ -54,14 +54,12 @@ function Card({
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteCard = (event) => {
-    if (event) event.stopPropagation();
+  const confirmDeleteCard = () => {
     onDeleteCard(cardId);
     setIsDeleteModalOpen(false);
   };
 
-  const cancelDelete = (event) => {
-    if (event) event.stopPropagation();
+  const cancelDelete = () => {
     setIsDeleteModalOpen(false);
   };
 
@@ -123,16 +121,14 @@ function Card({
         handleUpsertCard={onUpsertCard}
       />
 
-      <Modal
+      <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onFirstAction={cancelDelete}
-        onSecondAction={confirmDeleteCard}
-        text={'Delete Flashcard'}
-        mainText={
-          'Are you sure you want to delete this item? This action cannot be undone.'
-        }
-        firstActionText={'Cancel'}
-        secondActionText={'Delete'}
+        onClose={cancelDelete}
+        onConfirm={confirmDeleteCard}
+        title="Delete flashcard"
+        message="Are you sure you want to delete this card? This can't be undone."
+        icon={<Trash2 size={20} />}
+        confirmText="Delete"
       />
     </div>
   );

@@ -1,19 +1,24 @@
 import React, { useState, useRef, useEffect } from "react";
-import supabase from "../supabaseClient"; 
-import { useNavigate } from "react-router-dom"; 
+import supabase from "../supabaseClient";
+import { useNavigate } from "react-router-dom";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import MultiButton from "../components/Elements/MultiButton";
 import { useUser } from '../UserContext';
-import WelcomeImage from '../images/Logos/WelcomeImage.png';
-import WelcomeMobile from '../images/Logos/CardifyText.png';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
+import {
+  BadgePlus,
+  CirclePlay,
+  NotebookText,
+  Shuffle,
+  BookText,
+  Palette,
+  Sparkles,
+  FolderOpen,
+} from 'lucide-react';
 
-// Images
 import CardifyImage from '../images/title/CardifyImage.png';
 import CardifyLogo from '../images/Logos/CardifyLogoOfficial.png';
 
-// Videos
 import ThemeVideo from '../videos/Themes.webm';
 import PracticeVideo from '../videos/Practice.webm';
 import DashboardVideo from '../videos/Dashboard.webm';
@@ -24,86 +29,89 @@ import GenerateVideo from '../videos/Generate.webm';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+const FEATURES = [
+  {
+    id: 'home',
+    eyebrow: 'Your study HQ',
+    title: 'Pick up right where you left off',
+    description:
+      'Pinned subjects, in-progress decks, and one-tap jump-ins keep studying frictionless — so you spend time learning, not hunting for files.',
+    video: HomeVideo,
+    accent: 'bg-green-500',
+    icon: <CirclePlay size={28} strokeWidth={2.5} />,
+  },
+  {
+    id: 'create',
+    eyebrow: 'Make it yours',
+    title: 'Build flashcards your brain actually likes',
+    description:
+      'Mix text, math, images, and drawings on the same card. Import what you already have, or sketch something new — then share subjects with friends.',
+    video: CreateVideo,
+    accent: 'bg-red-400',
+    icon: <BadgePlus size={28} strokeWidth={2.5} />,
+  },
+  {
+    id: 'practice',
+    eyebrow: 'Play to remember',
+    title: 'Five ways to practice. Zero boredom.',
+    description:
+      'Flip through Practice, race Memory, crush Quiz, untangle Scramble, or type it out. Same cards, different games — so review never feels like a chore.',
+    video: PracticeVideo,
+    accent: 'bg-orange-400',
+    icon: <NotebookText size={28} strokeWidth={2.5} />,
+    modes: [
+      { label: 'Practice', color: 'text-red-400', icon: <CirclePlay size={22} /> },
+      { label: 'Memory', color: 'text-yellow-500', icon: <BookText size={22} /> },
+      { label: 'Quiz', color: 'text-green-500', icon: <NotebookText size={22} /> },
+      { label: 'Scramble', color: 'text-blue-500', icon: <Shuffle size={22} /> },
+      { label: 'Type', color: 'text-purple-500', icon: <BookText size={22} /> },
+    ],
+  },
+  {
+    id: 'organise',
+    eyebrow: 'Stay organised',
+    title: 'Subjects and collections that scale with you',
+    description:
+      'Group cards into subjects, nest subjects in collections, then search and sort when your library gets big. Studying stays tidy even when your notes don’t.',
+    video: DashboardVideo,
+    accent: 'bg-blue-500',
+    icon: <FolderOpen size={28} strokeWidth={2.5} />,
+  },
+  {
+    id: 'themes',
+    eyebrow: 'Make it feel like you',
+    title: 'Themes and art that match your vibe',
+    description:
+      'Swap backgrounds, subject art, and light or dark mode. Cardify should feel like your study space — not a generic spreadsheet with flashcards taped on.',
+    video: ThemeVideo,
+    accent: 'bg-fuchsia-500',
+    icon: <Palette size={28} strokeWidth={2.5} />,
+  },
+  {
+    id: 'generate',
+    eyebrow: 'Stuck? Generate.',
+    title: 'AI when you need a head start',
+    description:
+      'Generate a deck from a topic, or drop in a CSV or spreadsheet. Edit anything after — you’re still in control, just faster getting started.',
+    video: GenerateVideo,
+    accent: 'bg-purple-500',
+    icon: <Sparkles size={28} strokeWidth={2.5} />,
+  },
+];
+
 function Welcome() {
   const [showLogin, setShowLogin] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); 
-  const [firstName, setFirstName] = useState(""); 
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
   const { user, setUser, startSignUpProcess, theme } = useUser();
 
-  const [currentFeature, setCurrentFeature] = useState(0);
-  const features = [
-    {
-      title: "Layout",
-      bullets: [
-        "Fun and easy to use interface",
-        "Quickly resume your practice from where you left off with In Progress and Pinned subjects",
-        "Jump in to a variety of practice modes, including quizzes, memory and more"
-      ],
-      video: HomeVideo
-    },
-    {
-      title: "Create",
-      bullets: [
-        "Easily design flashcards with text, mathematical equations, images, and drawings",
-        "Upload your own existing flashcards, or generate flashcards with AI, and export as PDF",
-        "Share your subjects with your friends to collaborate"
-      ],
-      video: CreateVideo
-    },
-    {
-      title: "Practice",
-      bullets: [
-        "Practice your flashcards with Practice, Memory, Quiz, Scramble and Type",
-        "Race against yourself to improve your scores",
-        "Use the game modes to test your knowledge"
-      ],
-      video: PracticeVideo
-    },
-    {
-      title: "Organise",
-      bullets: [
-        "Use Subjects to organise your flashcards",
-        "Collections are used to group subjects together",
-        "Quick search and filter to find your subjects"
-      ],
-      video: DashboardVideo
-    },
-    {
-      title: "Themes",
-      bullets: [
-        "Express yourself with a variety of themes and subject art",
-        "Light and Dark modes easily adapt to your preferences",
-        "More customisation coming soon"
-      ],
-      video: ThemeVideo
-    },
-    {
-      title: "Generate",
-      bullets: [
-        "Easily generate flashcards when you are stuck",
-        "Use in built generation, or import your own generated flashcards from a CSV, Excel, or other file",
-        "More AI capabilities coming soon"
-      ],
-      video: GenerateVideo
-    },
-  ];
-
-  const nextFeature = () => {
-    setCurrentFeature((prev) => (prev + 1) % features.length);
-  };
-
-  const prevFeature = () => {
-    setCurrentFeature((prev) => (prev - 1 + features.length) % features.length);
-  };
-
-  // Scroll to features section
   const scrollToFeatures = () => {
     const featuresSection = document.querySelector('.features-section');
     if (featuresSection) {
@@ -111,23 +119,18 @@ function Welcome() {
     }
   };
 
-
-
-  // If user is already logged in, redirect to home
   if (user) {
     navigate('/home');
   }
 
-  // Toggle between login and sign up
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
     setEmail("");
     setPassword("");
     setConfirmPassword("");
-    setFirstName(""); 
+    setFirstName("");
   };
 
-  // Handle sign-in or sign-up
   const handleAuth = async () => {
     if (isSignUp) {
       if (password !== confirmPassword) {
@@ -138,10 +141,9 @@ function Welcome() {
         toast.error("Please enter your first name");
         return;
       }
-      
-      // Mark that sign-up process has started
+
       startSignUpProcess();
-      
+
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         if (error.message.includes("already registered")) {
@@ -154,10 +156,10 @@ function Welcome() {
         const { user } = data;
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([{ 
-            id: user.id, 
+          .insert([{
+            id: user.id,
             first_name: firstName,
-            theme: 'default'  // Explicitly set default theme
+            theme: 'default'
           }]);
         if (profileError) {
           toast.error(`Error creating profile: ${profileError.message}`);
@@ -177,7 +179,6 @@ function Welcome() {
     }
   };
 
-  // Handle password reset
   const handlePasswordReset = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) {
@@ -188,37 +189,29 @@ function Welcome() {
     }
   };
 
-  // SVG Icons
   const cross = (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="size-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
     </svg>
-  );  
+  );
 
-  // If showLogin is false, display the simple welcome page
   if (!showLogin) {
     return (
-      <div className="w-screen h-screen relative">
+      <div className="w-screen relative overflow-x-hidden">
         <Helmet>
           <title>Cardify - Smart Flashcard Study App | Create & Practice Custom Flashcards</title>
           <meta name="description" content="Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation. Study smarter with Cardify." />
           <meta name="keywords" content="flashcards, study app, learning, education, quiz, memory games, AI flashcards, math equations, custom study materials, practice tests" />
           <link rel="canonical" href="https://cardify.app" />
-          
-          {/* Open Graph / Facebook */}
           <meta property="og:title" content="Cardify - Smart Flashcard Study App" />
           <meta property="og:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
           <meta property="og:image" content="https://cardify.app/logo512.png" />
           <meta property="og:url" content="https://cardify.app" />
           <meta property="og:type" content="website" />
-          
-          {/* Twitter */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="Cardify - Smart Flashcard Study App" />
           <meta name="twitter:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
           <meta name="twitter:image" content="https://cardify.app/logo512.png" />
-          
-          {/* Additional Structured Data */}
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
@@ -239,186 +232,160 @@ function Welcome() {
             })}
           </script>
         </Helmet>
-        
+
         <div
           className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
-                  style={{ 
-          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
-            ? theme.image 
-            : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-        ></div>
-        <div className="relative z-10 min-h-screen flex flex-col">
+          style={{
+            background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
+              ? theme.image
+              : `url(${theme.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+
+        <div className="relative z-10 min-h-screen flex flex-col bg-[#f1ebe0] dark:bg-gray-800">
           <ToastContainer position="top-center" autoClose={3000} />
-  
-        <div className="fixed top-4 right-4 z-50">
-          <MultiButton
-            buttons={[
-              {
-                text: "Learn More",
-                onClick: scrollToFeatures
-              },
-              {
-                text: "Sign Up",
-                onClick: () => {
-                  setShowLogin(true);
-                  setIsSignUp(true);
-                }
-              },
-              {
-                text: "Login",
-                onClick: () => setShowLogin(true)
-              },
-            ]}
-          />
-        </div>
-  
-        {/* Welcome Section */}
-        <div className="h-screen flex flex-col sm:flex-row bg-[#f1ebe0] dark:bg-gray-800">
-          {/* Word Section */}
-          <div className="w-full sm:w-1/2 flex flex-col items-center sm:items-start justify-start sm:justify-center sm:ml-5 z-10 mt-28 sm:mt-0">
-            <div className="hidden sm:block absolute top-0 left-3">
-              <h1 className="text-4xl sm:text-6xl font-bold text-gray-800 my-4 dark:text-gray-300">
-                Cardify <span className="text-gray-500 dark:text-gray-400 text-xl sm:text-3xl">beta</span>
-              </h1>
+
+          <div className="fixed top-4 right-4 z-50">
+            <MultiButton
+              buttons={[
+                {
+                  text: "Features",
+                  onClick: scrollToFeatures
+                },
+                {
+                  text: "Sign Up",
+                  onClick: () => {
+                    setShowLogin(true);
+                    setIsSignUp(true);
+                  }
+                },
+                {
+                  text: "Login",
+                  onClick: () => setShowLogin(true)
+                },
+              ]}
+            />
+          </div>
+
+          {/* Hero — one composition: brand, headline, support, CTA, product image */}
+          <section className="relative min-h-screen flex flex-col sm:flex-row overflow-hidden">
+            <div
+              className="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-green-400/25 blur-3xl animate-welcome-blob"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute bottom-10 right-0 w-80 h-80 rounded-full bg-orange-300/20 blur-3xl animate-welcome-blob-delayed"
+              aria-hidden
+            />
+
+            <div className="relative w-full sm:w-[48%] flex flex-col justify-center px-6 sm:pl-10 sm:pr-4 pt-28 sm:pt-0 pb-8 sm:pb-0 z-10">
+              <div className="flex items-center gap-2 mb-6 sm:mb-8 animate-welcome-rise">
+                <img src={CardifyLogo} alt="" className="w-12 h-12 sm:hidden" />
+                <h1 className="text-5xl sm:text-7xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-none">
+                  Cardify
+                  <span className="ml-2 align-middle text-lg sm:text-2xl font-semibold text-gray-500 dark:text-gray-400">
+                    beta
+                  </span>
+                </h1>
+              </div>
+
+              <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100 leading-tight animate-welcome-rise-delayed">
+                Flashcards that feel like a game.
+              </h2>
+              <p className="mt-4 text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-md animate-welcome-rise-delayed-2">
+                Create, customise, and practice your own decks — with modes that make studying stick.
+              </p>
+
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-welcome-rise-delayed-2">
+                <BackgroundButton
+                  text="Get Started"
+                  onClick={() => setShowLogin(true)}
+                  bgColor="bg-purple-500 hover:bg-purple-400"
+                  wWidth="w-full sm:w-auto"
+                />
+                <BackgroundButton
+                  text="See what’s inside"
+                  onClick={scrollToFeatures}
+                  bgColor="bg-green-500 hover:bg-green-400"
+                  wWidth="w-full sm:w-auto"
+                />
+              </div>
             </div>
-            <div className="flex justify-center items-center sm:hidden absolute top-0 left-0">
-              <img src={CardifyLogo} alt="Cardify Logo" className="w-20" />
-              <p className="text-gray-500 dark:text-gray-400 text-xl font-bold">beta</p>
-            </div>
-            
-            <h2 className="text-6xl sm:text-8xl font-semibold text-gray-800 dark:text-gray-200">
-              Study Smarter.
-            </h2>
-            <h3 className="text-2xl mt-4 w-[95%] text-center sm:text-left sm:w-2/3 text-gray-600 dark:text-gray-400">
-              Create and customise your flashcards in a way that works for you.
-            </h3>
-            <div className="mt-4">
-              <BackgroundButton
-                text="Get Started"
-                onClick={() => setShowLogin(true)}
-                bgColor="bg-purple-500 hover:bg-purple-400"
-                wWidth="w-full"
+
+            <div className="relative w-full sm:w-[52%] flex items-end sm:items-center justify-center sm:justify-end pb-6 sm:pb-0 animate-welcome-float">
+              <img
+                src={CardifyImage}
+                alt="Students using Cardify to study with custom flashcards"
+                className="w-[85%] sm:w-[95%] max-h-[55vh] sm:max-h-[90vh] object-contain drop-shadow-lg"
               />
             </div>
-          </div>
+          </section>
 
-          <div className="flex justify-center w-full sm:w-1/2 sm:ml-[-5%]">
-            <img src={CardifyImage} alt="Students using Cardify app to study with custom flashcards" className="w-2/3 sm:w-full sm:h-full object-contain" />
-            {/* <img src={TopLeftBlob} alt="Illustration" className="absolute top-1/2 left-0 w-full z-0" />
-            <img src={BottomLeftBlob} alt="Illustration" className="absolute bottom-0 left-0 w-full z-0" /> */}
-          </div>
-          
-        </div>
+          {/* Features — scroll story, no carousel */}
+          <section className="features-section relative py-16 sm:py-24 px-5 sm:px-10">
+            <div className="max-w-6xl mx-auto mb-14 sm:mb-20 text-center sm:text-left">
+              <p className="text-sm font-bold uppercase tracking-widest text-green-600 dark:text-green-400 mb-3">
+                What’s inside
+              </p>
+              <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 dark:text-gray-100">
+                Everything you need to study smarter
+              </h2>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl">
+                Scroll through — every feature is built to keep learning playful and organised.
+              </p>
+            </div>
 
-
-        {/* <div className="h-[100dvh] flex flex-col items-center justify-center">
-          <img src={TopLeftMac} alt="Mac with Cardify open" className="absolute top-5 left-5 w-96"/>
-          <img src={TopRightMac} alt="Mac with Cardify open" className="absolute top-5 right-5 w-96 hidden md:block"/>
-          <img src={BottomLeftMac} alt="Mac with Cardify open" className="absolute top-[30%] left-1/4 w-96"/>
-          <h1 className="text-4xl sm:text-8xl font-bold text-gray-800 my-4 dark:text-gray-300">
-            Cardify
-          </h1>
-          <h2 className="text-2xl text-gray-600 dark:text-gray-200">
-            Your all in one study solution
-          </h2>
-        </div> */}
-  
-        {/* Features Section */}
-        <div className="features-section min-h-screen flex flex-col items-center py-20 bg-[#f1ebe0] dark:bg-gray-800">
-          <h2 className="text-4xl sm:text-6xl font-bold text-gray-800 mb-16">Features</h2>
-          
-          <div className="relative w-[80vw] h-[60vh]">
-            {/* Feature Content */}
-            <div className="flex flex-col sm:flex-row items-center gap-8">
-              {/* Features video */}
-              <div className="w-full sm:w-1/2 h-full rounded-lg overflow-hidden">
-                <HoverVideo videoSrc={features[currentFeature].video} />
-              </div>
-
-              {/* Mobile arrows */}
-              <div className="sm:hidden flex items-center gap-2 mt-[-5%] mb-[-5%]">
-                <BackgroundButton
-                  onClick={prevFeature}
-                  image={<ChevronLeft/>}
-                  bgColor="bg-green-500 hover:bg-green-400"
-                />
-                <BackgroundButton
-                  onClick={nextFeature}
-                  image={<ChevronRight/>}
-                  bgColor="bg-green-500 hover:bg-green-400"
-                />
-              </div>
-
-              <div className="flex sm:hidden gap-2">
-              {features.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentFeature(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentFeature ? 'bg-gray-800' : 'bg-gray-400'
-                  }`}
+            <div className="max-w-6xl mx-auto flex flex-col gap-20 sm:gap-28">
+              {FEATURES.map((feature, index) => (
+                <FeatureBand
+                  key={feature.id}
+                  feature={feature}
+                  reverse={index % 2 === 1}
                 />
               ))}
             </div>
-              
-              {/* Features text */}
-              <div className="w-full sm:w-1/2 mb-10 sm:mb-0">
-                <h3 className="text-4xl sm:text-5xl font-bold text-gray-800 dark:text-gray-200">{features[currentFeature].title}</h3>
-                <ul className="text-gray-600 dark:text-gray-400 text-lg space-y-2 mt-4">
-                  {features[currentFeature].bullets.map((bullet, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="mr-2">•</span>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+          </section>
 
-            {/* Navigation Arrows */}
-            <div className="hidden sm:block">
-              <div className="absolute left-[-50px] top-1/2 -translate-y-1/2">
+          {/* Closing CTA */}
+          <section className="relative px-5 sm:px-10 pb-24 pt-8">
+            <div className="max-w-4xl mx-auto text-center bg-white dark:bg-gray-700 background-shadow-new rounded-3xl px-6 py-14 sm:py-16">
+              <h2 className="text-3xl sm:text-5xl font-bold text-gray-800 dark:text-gray-100">
+                Ready to make studying fun?
+              </h2>
+              <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-xl mx-auto">
+                Free to start. Build your first subject in minutes — then practice however you like.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center items-center">
                 <BackgroundButton
-                  onClick={prevFeature}
-                  image={<ChevronLeft/>}
-                  bgColor="bg-green-500 hover:bg-green-400"
+                  text="Create a free account"
+                  onClick={() => {
+                    setShowLogin(true);
+                    setIsSignUp(true);
+                  }}
+                  bgColor="bg-purple-500 hover:bg-purple-400"
+                  wWidth="w-full sm:w-auto"
                 />
-              </div>
-
-              <div className="absolute right-[-50px] top-1/2 -translate-y-1/2">
                 <BackgroundButton
-                  onClick={nextFeature}
-                  image={<ChevronRight/>}
+                  text="I already have an account"
+                  onClick={() => {
+                    setShowLogin(true);
+                    setIsSignUp(false);
+                  }}
                   bgColor="bg-green-500 hover:bg-green-400"
+                  wWidth="w-full sm:w-auto"
                 />
               </div>
             </div>
-            
-            {/* Dots Navigation */}
-            <div className="hidden sm:flex absolute bottom-20 left-1/2 -translate-x-1/2 gap-2">
-              {features.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentFeature(index)}
-                  className={`w-3 h-3 rounded-full transition-colors ${
-                    index === currentFeature ? 'bg-gray-800' : 'bg-gray-400'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+          </section>
         </div>
       </div>
     );
   }
 
-  // If showLogin is true, show the sign-in/sign-up component
   return (
-    <div className="w-screen h-screen relative">
+    <div className="w-screen min-h-screen relative overflow-x-hidden">
       <Helmet>
         <title>{isSignUp ? 'Sign Up - Cardify | Join Smart Flashcard Study App' : 'Sign In - Cardify | Access Your Flashcards'}</title>
         <meta name="description" content={isSignUp ? 'Create your free Cardify account to start making custom flashcards with AI-powered generation, practice modes, and progress tracking.' : 'Sign in to your Cardify account to access your custom flashcards, practice sessions, and study progress.'} />
@@ -426,144 +393,186 @@ function Welcome() {
         <meta property="og:description" content={isSignUp ? 'Create your free account to start making custom flashcards' : 'Sign in to access your flashcards and study progress'} />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      
+
+      <div className="fixed inset-0 z-0 bg-[#f1ebe0] dark:bg-gray-800" />
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0 bg-[#f1ebe0] dark:bg-gray-800"
-      ></div>
-      <div className="relative z-10 min-h-screen block sm:flex">
+        className="pointer-events-none fixed -top-20 -left-16 w-72 h-72 rounded-full bg-green-400/20 blur-3xl z-0"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none fixed bottom-10 -right-10 w-80 h-80 rounded-full bg-purple-300/20 blur-3xl z-0"
+        aria-hidden
+      />
+
+      <div className="relative z-10 min-h-screen flex flex-col">
         <ToastContainer position="top-center" autoClose={3000} />
 
-      {/* Top bar container */}
-      <div className="absolute top-4 w-full flex items-center justify-between px-4 z-50">
-        <BackgroundButton
-          image={cross}
-          bgColor="bg-red-500 hover:bg-red-400"
-          onClick={() => setShowLogin(false)}
-        />
-        <BackgroundButton
-          text={isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-          bgColor="bg-green-500 hover:bg-green-400"
-          onClick={toggleSignUp}
-        />
-      </div>
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-4">
+          <BackgroundButton
+            image={cross}
+            bgColor="bg-red-500 hover:bg-red-400"
+            onClick={() => setShowLogin(false)}
+          />
+          <div className="flex items-center gap-2">
+            <img src={CardifyLogo} alt="" className="w-9 h-9" />
+            <span className="text-xl font-bold text-gray-800 dark:text-gray-100 hidden sm:inline">
+              Cardify
+            </span>
+          </div>
+          <div className="w-10" aria-hidden />
+        </div>
 
-      <div className="w-full sm:w-1/2 flex items-center justify-center">
-        <img 
-          src={WelcomeImage} 
-          alt="Cardify app interface showing flashcard creation and study features" 
-          className="hidden sm:block object-contain w-full sm:mt-[-20%]" 
-        />
-        <img
-          src={WelcomeMobile}
-          alt="Cardify logo - Smart flashcard study app"
-          className="block sm:hidden object-contain w-full mt-24 mb-10"
-        />
-      </div>
-
-      <div className="w-full sm:w-1/2 flex flex-col justify-center relative">
-        <div className="w-[90%] sm:w-4/5 mx-auto sm:p-8">
-          <h2 className="text-3xl font-semibold text-gray-800">
-            {isSignUp ? "Sign Up" : "Sign In"}
-          </h2>
-
-          {/* <div className="flex space-x-4 mt-4">
-            <BackgroundButton 
-              text="Google"
-              image={GoogleSVG}
-              flip
-              wWidth="w-full"
-              bgColor={'bg-red-500 hover:bg-red-400'}
-            />
-            <BackgroundButton
-              text="Apple"
-              image={AppleSVG}
-              flip
-              wWidth="w-full"
-              bgColor={'bg-red-500 hover:bg-red-400'}
-            />
-          </div> */}
-
-          <div className="mt-8">
-            {/* <p className={`${isSignUp ? 'text-red-500' : 'text-gray-600 dark:text-gray-200'}`}>
-              {isSignUp ? "Sign ups are currently disabled. Please stay tuned for more information!" : "Sign in with your email address"}
-            </p> */}
-
-            {/* First Name Input */}
-            {isSignUp && (
-              <div className="mt-4">
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
-                  First Name
-                </label>
-                <FancyInput 
-                  type="text" 
-                  value={firstName} 
-                  onChange={(e) => setFirstName(e.target.value)} 
-                />
+        <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+          <div className="w-full max-w-md">
+            <div className="bg-white dark:bg-gray-700 background-shadow-new rounded-3xl p-6 sm:p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100">
+                  {isSignUp ? 'Create your account' : 'Welcome back'}
+                </h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                  {isSignUp
+                    ? 'Start building decks and practicing in minutes.'
+                    : 'Sign in to pick up where you left off.'}
+                </p>
               </div>
-            )}
 
-            {/* Email Input */}
-            <div className="mt-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
-                Email address
-              </label>
-              <FancyInput 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-              />
-            </div>
-
-            {/* Password Input */}
-            <div className="mt-4">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
-                Password
-              </label>
-              <FancyInput 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-              />
-            </div>
-
-            {/* Confirm Password for Sign Up */}
-            {isSignUp && (
-              <div className="mt-4">
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 ml-4">
-                  Confirm Password
-                </label>
-                <FancyInput
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-            )}
-
-            {/* Forgot Password */}
-            {!isSignUp && (
-              <div className="mt-4 text-right">
-                <button onClick={handlePasswordReset} className="text-blue-500 hover:underline">
-                  Forgot Password?
+              {/* Mode toggle */}
+              <div className="flex p-1 mb-6 rounded-full bg-gray-100 dark:bg-gray-600 border-2 border-[var(--theme-border-color)]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isSignUp) toggleSignUp();
+                  }}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-colors ${
+                    !isSignUp
+                      ? 'bg-green-500 text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                  }`}
+                >
+                  Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isSignUp) toggleSignUp();
+                  }}
+                  className={`flex-1 py-2 rounded-full text-sm font-bold transition-colors ${
+                    isSignUp
+                      ? 'bg-purple-500 text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                  }`}
+                >
+                  Sign Up
                 </button>
               </div>
-            )}
-            {resetEmailSent && (
-              <p className="mt-2 text-green-500">Password reset email sent!</p>
-            )}
 
-            {/* Auth Button */}
-            <div className="mt-6">
-              <BackgroundButton
-                text={isSignUp ? "Sign Up" : "Start Learning"}
-                onClick={handleAuth}
-                bgColor={'bg-blue-500 hover:bg-blue-400'}
-                wWidth="w-full"
-              />
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAuth();
+                }}
+              >
+                {isSignUp && (
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
+                      First name
+                    </label>
+                    <FancyInput
+                      id="firstName"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Your first name"
+                      autoComplete="given-name"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
+                    Email
+                  </label>
+                  <FancyInput
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between ml-3 mb-1">
+                    <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                      Password
+                    </label>
+                    {!isSignUp && (
+                      <button
+                        type="button"
+                        onClick={handlePasswordReset}
+                        className="text-sm font-semibold text-blue-500 hover:text-blue-400"
+                      >
+                        Forgot?
+                      </button>
+                    )}
+                  </div>
+                  <FancyInput
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  />
+                </div>
+
+                {isSignUp && (
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
+                      Confirm password
+                    </label>
+                    <FancyInput
+                      id="confirmPassword"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                )}
+
+                {resetEmailSent && (
+                  <p className="text-sm font-semibold text-green-600 dark:text-green-400 ml-3">
+                    Password reset email sent — check your inbox.
+                  </p>
+                )}
+
+                <div className="pt-2">
+                  <BackgroundButton
+                    text={isSignUp ? 'Create account' : 'Start learning'}
+                    onClick={handleAuth}
+                    bgColor={isSignUp ? 'bg-purple-500 hover:bg-purple-400' : 'bg-green-500 hover:bg-green-400'}
+                    wWidth="w-full"
+                  />
+                </div>
+              </form>
             </div>
+
+            <p className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+              {isSignUp ? 'Already studying with us?' : 'New here?'}{' '}
+              <button
+                type="button"
+                onClick={toggleSignUp}
+                className="font-bold text-gray-800 dark:text-gray-100 underline underline-offset-2"
+              >
+                {isSignUp ? 'Sign in' : 'Create an account'}
+              </button>
+            </p>
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
@@ -571,45 +580,97 @@ function Welcome() {
 
 export default Welcome;
 
-function FancyInput({ type, value, onChange }) {
+function FancyInput({ id, type, value, onChange, placeholder, autoComplete }) {
   return (
     <input
+      id={id}
       type={type}
-      name={type}
-      id={type}
-      placeholder={`Enter ${type}...`}
+      name={id || type}
+      placeholder={placeholder || `Enter ${type}...`}
       value={value}
       onChange={onChange}
-      className="w-full px-4 py-2 text-left rounded-full bg-gray-500 text-white
-                 focus:outline-none background-shadow-new background-focus"
+      autoComplete={autoComplete}
+      className="w-full px-4 py-3 text-left rounded-full bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-white
+                 placeholder:text-gray-400 dark:placeholder:text-gray-300
+                 focus:outline-none background-shadow-new background-focus font-medium"
     />
   );
 }
 
-function HoverVideo({ videoSrc }) {
+function FeatureBand({ feature, reverse }) {
+  return (
+    <article
+      className={`flex flex-col ${reverse ? 'sm:flex-row-reverse' : 'sm:flex-row'} items-center gap-8 sm:gap-12`}
+    >
+      <div className="w-full sm:w-1/2">
+        <div className="relative rounded-2xl overflow-hidden background-shadow-new bg-white dark:bg-gray-700">
+          <ScrollVideo videoSrc={feature.video} />
+        </div>
+      </div>
+
+      <div className="w-full sm:w-1/2">
+        <div className={`inline-flex items-center gap-2 text-white px-3 py-1.5 rounded-full mb-4 ${feature.accent} background-shadow-new`}>
+          {feature.icon}
+          <span className="text-sm font-bold uppercase tracking-wide">{feature.eyebrow}</span>
+        </div>
+        <h3 className="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100 leading-tight">
+          {feature.title}
+        </h3>
+        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+          {feature.description}
+        </p>
+
+        {feature.modes && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {feature.modes.map((mode) => (
+              <div
+                key={mode.label}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-gray-700 background-shadow-new font-bold text-sm ${mode.color}`}
+              >
+                {mode.icon}
+                {mode.label}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
+function ScrollVideo({ videoSrc }) {
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
-      // Reset the video to the beginning
-      video.currentTime = 0;
-      // Play the video
-      video.play().catch(error => {
-        console.error("Error attempting to play:", error);
-      });
-    }
-  }, [videoSrc]); // Add videoSrc as a dependency
+    const container = containerRef.current;
+    if (!video || !container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.35 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [videoSrc]);
 
   return (
-    <div className="relative rounded-lg overflow-hidden">
+    <div ref={containerRef} className="relative aspect-[4/3] sm:aspect-video bg-gray-200 dark:bg-gray-600">
       <video
         ref={videoRef}
         src={videoSrc}
         loop
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         className="w-full h-full object-cover"
       />
     </div>

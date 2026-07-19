@@ -1,9 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { createRoot } from 'react-dom/client';
-import { Upload, X, Check, AlertTriangle } from 'lucide-react';
+import ReactDOM from 'react-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Upload, X, AlertTriangle } from 'lucide-react';
 import { useUser } from '../../UserContext';
 import { parseImportFile } from '../Card/ImportService';
 import BackgroundButton from '../Elements/BackgroundButton';
+import useBodyScrollLock from '../../hooks/useBodyScrollLock';
+import ConfirmModal from './ConfirmModal';
 
 function ImportModal({ isOpen, onClose, onImport, subject }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -13,174 +15,36 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
   const [loading, setLoading] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
   const fileInputRef = useRef(null);
-  const modalRootRef = useRef(null);
   const { profile } = useUser();
+
+  useBodyScrollLock(isVisible || isClosing);
 
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
-    } else if (!isClosing) {
+      setIsClosing(false);
+    } else {
       setIsVisible(false);
+      setIsClosing(false);
     }
-  }, [isOpen, isClosing]);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (isVisible) {
-      // Create modal root element
-      const modalRoot = document.createElement('div');
-      modalRoot.id = 'import-modal-root';
-      document.body.appendChild(modalRoot);
-      modalRootRef.current = modalRoot;
-
-      // Create root and render
-      const root = createRoot(modalRoot);
-      root.render(
-        <div
-          className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
-            isClosing ? 'opacity-0' : 'opacity-100'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose} />
-          <div
-            className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-full h-full sm:w-2/3 sm:h-auto transform transition-all duration-300 ease-in-out ${
-              isClosing ? 'animate-pop-down' : 'animate-pop-up'
-            }`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-3xl font-bold mb-6 text-white/90">Import Flashcards</h2>
-
-            {/* File Upload Section */}
-            <div className="mb-6">
-              <div
-                className="w-full h-32 bg-black/20 backdrop-blur-sm rounded-lg flex flex-col justify-center items-center cursor-pointer border border-white/20 hover:border-white/40 transition-colors"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".json,.csv,.txt,.xlsx"
-                  className="hidden"
-                />
-                <Upload className="w-8 h-8 text-white/90 mb-2" />
-                <p className="text-white/90 text-lg">
-                  {loading ? 'Loading...' : 'Click to select a file'}
-                </p>
-                <p className="text-white/60 text-sm mt-1">
-                  Supported formats: JSON, CSV, TXT, XLSX
-                </p>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-500/20 border border-red-500/40 rounded-lg">
-                <p className="text-red-500">{error}</p>
-              </div>
-            )}
-
-            {/* Preview Section */}
-            {previewCards.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-xl font-semibold text-white/90 mb-4">
-                  Preview ({previewCards.length} cards)
-                </h3>
-                <div className="max-h-60 overflow-y-auto space-y-2">
-                  {previewCards.slice(0, 5).map((card, index) => (
-                    <div
-                      key={index}
-                      className="bg-black/20 backdrop-blur-sm p-3 rounded-lg border border-white/20"
-                    >
-                      <p className="text-white/90 font-semibold">Q: {card.question}</p>
-                      <p className="text-white/70">A: {card.answer}</p>
-                    </div>
-                  ))}
-                  {previewCards.length > 5 && (
-                    <p className="text-white/60 text-center">
-                      ... and {previewCards.length - 5} more cards
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                <BackgroundButton 
-                  text="Cancel" 
-                  bgColor={`bg-red-500 hover:bg-red-400`} 
-                  wWidth='w-full' 
-                  onClick={handleClose} 
-                />
-                <BackgroundButton 
-                  text={`Import ${previewCards.length > 0 ? `(${previewCards.length})` : ''}`} 
-                  bgColor={`bg-green-500 hover:bg-green-400`} 
-                  wWidth='w-full mt-2 sm:mt-0' 
-                  onClick={handleImport}
-                  disabled={previewCards.length === 0} 
-                />
-            </div>
-
-            {/* Card Limit Dialog */}
-            {showLimitDialog && (
-              <div className="fixed inset-0 flex items-center justify-center z-[60]">
-                <div className="absolute inset-0 bg-black bg-opacity-75" onClick={() => setShowLimitDialog(false)} />
-                <div className="relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl border border-white/20 shadow-2xl shadow-black/30 p-8 rounded-lg w-[90%] sm:w-3/4 max-w-2xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <AlertTriangle className="w-8 h-8 text-yellow-500" />
-                    <h3 className="text-2xl font-bold text-white/90">Card Limit Warning</h3>
-                  </div>
-                  <p className="text-white/90 mb-6">
-                    You currently have {profile.flashcard_count} cards. Importing all {previewCards.length} cards would exceed your limit of {profile.pro ? '500' : '100'} cards.
-                    Would you like to import only the first {Math.max(0, (profile.pro ? 500 : 100) - profile.flashcard_count)} cards and discard the rest?
-                  </p>
-                  <div className="flex justify-end space-x-4">
-                    <button
-                      onClick={() => setShowLimitDialog(false)}
-                      className="px-4 py-2 rounded-lg bg-black/20 text-white/90 hover:bg-black/30 transition-colors flex items-center"
-                    >
-                      <X className="w-5 h-5 mr-2" />
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => {
-                        const maxCards = profile.pro ? 500 : 100;
-                        const remainingSpace = maxCards - profile.flashcard_count;
-                        const cardsToImport = previewCards.slice(0, remainingSpace);
-                        onImport(cardsToImport);
-                        handleClose();
-                      }}
-                      className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white transition-colors flex items-center"
-                    >
-                      <Check className="w-5 h-5 mr-2" />
-                      Import Partial
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
-
-      // Cleanup function
-      return () => {
-        root.unmount();
-        if (modalRootRef.current) {
-          document.body.removeChild(modalRootRef.current);
-        }
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- portal re-renders when modal state/content changes
-  }, [isVisible, isClosing, previewCards, error, loading, showLimitDialog]);
+    if (!isVisible) return;
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !showLimitDialog) handleClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isVisible, showLimitDialog]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = () => {
+    if (isClosing) return;
     setIsClosing(true);
     setTimeout(() => {
+      setIsVisible(false);
       setIsClosing(false);
       onClose();
-      setIsVisible(false);
       setPreviewCards([]);
       setError(null);
       setShowLimitDialog(false);
@@ -188,7 +52,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
   };
 
   const handleFileChange = async (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files?.[0];
     if (!file) return;
 
     setLoading(true);
@@ -199,20 +63,26 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
       setPreviewCards(cards);
     } catch (err) {
       setError(err.message);
+      setPreviewCards([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleImport = () => {
+    if (!profile) {
+      setError('Profile is still loading. Try again in a moment.');
+      return;
+    }
+
     const maxCards = profile.pro ? 500 : 100;
     const currentCount = profile.flashcard_count || 0;
-    
+
     if (currentCount >= maxCards) {
       setError(`You've reached your maximum card limit of ${maxCards} cards. ${profile.pro ? '' : 'Upgrade to Pro for up to 500 cards!'}`);
       return;
     }
-    
+
     if (currentCount + previewCards.length > maxCards) {
       setShowLimitDialog(true);
     } else {
@@ -221,7 +91,129 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     }
   };
 
-  return null;
+  const maxCards = profile?.pro ? 500 : 100;
+  const remainingSpace = Math.max(0, maxCards - (profile?.flashcard_count || 0));
+
+  if (!isVisible && !isClosing) return null;
+
+  return ReactDOM.createPortal(
+    <div
+      className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
+        isClosing ? 'opacity-0' : 'opacity-100'
+      }`}
+    >
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
+      <div
+        className={`relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+          bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+          sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+          ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Upload size={22} className="text-white/90 shrink-0" />
+                <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">Import</h2>
+              </div>
+              <p className="text-sm text-white/60">
+                {subject?.name ? `Add cards to ${subject.name}` : 'Bring cards in from a file'}
+              </p>
+            </div>
+            <BackgroundButton
+              image={<X size={20} strokeWidth={3} />}
+              bgColor="bg-red-500 hover:bg-red-400"
+              onClick={handleClose}
+            />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-5">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full min-h-[8rem] rounded-2xl flex flex-col justify-center items-center gap-2
+              bg-white dark:bg-gray-700 background-shadow-new background-hover cursor-pointer px-4 py-6"
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".json,.csv,.txt,.xlsx"
+              className="hidden"
+            />
+            <Upload className="w-8 h-8 text-gray-700 dark:text-white" />
+            <p className="text-lg font-bold text-gray-800 dark:text-white">
+              {loading ? 'Reading file...' : 'Click to select a file'}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              JSON, CSV, TXT, or XLSX
+            </p>
+          </button>
+
+          {error && (
+            <div className="p-4 rounded-2xl bg-red-500/20 border border-red-400/40">
+              <p className="text-red-200 font-medium">{error}</p>
+            </div>
+          )}
+
+          {previewCards.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-white/90 mb-3 ml-1">
+                Preview · {previewCards.length} {previewCards.length === 1 ? 'card' : 'cards'}
+              </h3>
+              <div className="max-h-56 overflow-y-auto space-y-2">
+                {previewCards.slice(0, 5).map((card, index) => (
+                  <div
+                    key={index}
+                    className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3"
+                  >
+                    <p className="text-white font-semibold truncate">Q: {card.question}</p>
+                    <p className="text-white/70 truncate">A: {card.answer}</p>
+                  </div>
+                ))}
+                {previewCards.length > 5 && (
+                  <p className="text-white/50 text-center text-sm py-1">
+                    ...and {previewCards.length - 5} more
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">
+          <div className="flex sm:justify-end">
+            <BackgroundButton
+              text={previewCards.length > 0 ? `Import (${previewCards.length})` : 'Import'}
+              bgColor={previewCards.length === 0 ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-400'}
+              wWidth="w-full sm:w-auto"
+              onClick={handleImport}
+              disabled={previewCards.length === 0}
+            />
+          </div>
+        </div>
+      </div>
+
+      <ConfirmModal
+        isOpen={showLimitDialog}
+        onClose={() => setShowLimitDialog(false)}
+        onConfirm={() => {
+          const cardsToImport = previewCards.slice(0, remainingSpace);
+          onImport(cardsToImport);
+          setShowLimitDialog(false);
+          handleClose();
+        }}
+        title="Card limit warning"
+        icon={<AlertTriangle size={20} />}
+        message={`You have ${profile?.flashcard_count ?? 0} cards. Importing all ${previewCards.length} would exceed your limit of ${maxCards}. Import the first ${remainingSpace} instead?`}
+        confirmText="Import partial"
+        confirmColor="bg-green-500 hover:bg-green-400"
+      />
+    </div>,
+    document.body
+  );
 }
 
-export default ImportModal; 
+export default ImportModal;

@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import supabase from './supabaseClient';
 import { fetchProfile } from './components/Profile/ProfileManipulation';
-import { getTheme } from './components/Functions/getTheme';
+import { getTheme, normalizeBackgroundImage } from './components/Functions/getTheme';
 import getColors from './components/Functions/getColors';
-import Default from './images/backgrounds/Default.jpg';
 
 // Create UserContext
 const UserContext = createContext();
@@ -12,7 +11,7 @@ const UserContext = createContext();
 const resolveThemeColors = (theme) => {
   const defaultTheme = {
     name: "default",
-    image: Default,
+    image: '#f1ebe0',
     color: 'rgba(3,15,64,1)',
     shadowClass: "background-shadow",
     textClass: "text-gray-700 dark:text-gray-200",
@@ -30,6 +29,7 @@ const resolveThemeColors = (theme) => {
 
   return {
     ...resolvedTheme,
+    image: normalizeBackgroundImage(resolvedTheme.image),
     primaryColor: getColors(resolvedTheme.primary),
     secondaryColor: getColors(resolvedTheme.secondary),
     tertiaryColor: getColors(resolvedTheme.tertiary),
@@ -59,16 +59,16 @@ export const UserProvider = ({ children }) => {
 
   // Memoize the theme calculation
   const theme = useMemo(() => {
-    if (!profile?.theme) {
-      return resolveThemeColors(null); // Default theme
-    }
-    const userTheme = getTheme(profile.theme); // Synchronous call
-    return resolveThemeColors(userTheme);
-  }, [profile?.theme]);
+    return resolveThemeColors(getTheme(profile?.theme, colorScheme));
+  }, [profile?.theme, colorScheme]);
 
-  // Update CSS variables whenever the theme changes
+  // Push theme into CSS so pages don't recompute background strings
   useEffect(() => {
-    if (theme && theme.color) {
+    if (!theme) return;
+    if (theme.image) {
+      document.documentElement.style.setProperty('--theme-background', theme.image);
+    }
+    if (theme.color) {
       document.documentElement.style.setProperty('--theme-border-color', theme.color);
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
@@ -212,53 +212,13 @@ export const UserProvider = ({ children }) => {
     setColorScheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 
-  // Subscription functions
+  // Subscription helpers (Stripe temporarily disabled)
   const upgradeToPro = async () => {
-    if (!user?.id) {
-      console.error('No user logged in');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create checkout session');
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error upgrading to pro:', error);
-    }
+    console.info('Stripe checkout is disabled. Contact hello@flashcardify.app for Pro.');
   };
 
   const manageBilling = async () => {
-    if (!user?.id) {
-      console.error('No user logged in');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/create-billing-portal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to access billing portal');
-      }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error('Error accessing billing portal:', error);
-    }
+    console.info('Stripe billing portal is disabled.');
   };
 
   return (
@@ -270,6 +230,7 @@ export const UserProvider = ({ children }) => {
         popupStates,
         popupStatesLoaded,  // Provide this state to the context
         setUser,
+        setProfile,
         loading,
         getUser,
         logout,

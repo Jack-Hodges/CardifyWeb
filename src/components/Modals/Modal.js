@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
+import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 
 function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstActionText, secondActionText, firstActionCol = 'bg-gray-500 hover:bg-gray-400', secondActionCol = 'bg-red-500 hover:bg-red-400', titleCol = 'text-white', width = 'w-3/4'}) {
     const [isVisible, setIsVisible] = useState(false); // State to manage visibility for animations
@@ -9,49 +10,56 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
     // Handle the modal appearing (fade in) when isOpen changes
     useEffect(() => {
         if (isOpen) {
-            setIsVisible(true); // Show modal and trigger the fade-in
-        } else if (!isClosing) {
-            setIsVisible(false); // Hide modal after animation if not closing
+            setIsVisible(true);
+            setIsClosing(false);
+        } else {
+            setIsVisible(false);
+            setIsClosing(false);
         }
-    }, [isOpen, isClosing]);
+    }, [isOpen]);
 
-    // Close on Escape and lock background scroll while the modal is open
+    useBodyScrollLock(isVisible || isClosing);
+
+    // Close on Escape
     useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e) => {
             if (e.key === 'Escape' && onFirstAction) onFirstAction();
         };
         document.addEventListener('keydown', handleKeyDown);
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.body.style.overflow = previousOverflow;
-        };
+        return () => document.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onFirstAction]);
 
     const handleClose = (event) => {
         if (event) {
-            event.stopPropagation(); // Only stop propagation if event exists
+            event.stopPropagation();
         }
-        setIsClosing(true); // Start the closing animation
+        if (isClosing) return;
+        setIsClosing(true);
         setTimeout(() => {
-            setIsClosing(false); // Reset closing state after animation
-            setIsVisible(false); // Hide the modal after it fades out
-        }, 300); // 300ms to match the duration of the closing animation
+            setIsVisible(false);
+            setIsClosing(false);
+        }, 300);
     };
 
     const handleFirstAction = () => {
-        onFirstAction();
-        handleClose();
+        if (isClosing) return;
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsVisible(false);
+            setIsClosing(false);
+            onFirstAction();
+        }, 300);
     }
 
     const handleSecondAction = () => {
-        // Only allow second action if the button is not disabled
-        if (!secondActionCol.includes('cursor-not-allowed')) {
+        if (secondActionCol.includes('cursor-not-allowed') || isClosing) return;
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsVisible(false);
+            setIsClosing(false);
             onSecondAction();
-            handleClose();
-        }
+        }, 300);
     }
 
     if (!isVisible && !isClosing) return null;

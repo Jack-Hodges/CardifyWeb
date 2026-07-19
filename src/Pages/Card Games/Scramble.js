@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Check, X, Shuffle, HelpCircle, MessageSquare } from 'lucide-react';
 import { fetchCards, sortCardsById } from '../../components/Card/CardManipulation';
 import { useUser } from '../../UserContext';
 import ReactMarkdown from 'react-markdown';
@@ -12,17 +13,58 @@ import PageEmptyState from '../../components/Elements/PageEmptyState';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
-  
+
   const words = text.split(' ');
   const chunks = [];
   const wordsPerChunk = Math.max(1, Math.ceil(words.length / maxChunks));
-  
+
   for (let i = 0; i < words.length; i += wordsPerChunk) {
     const chunk = words.slice(i, i + wordsPerChunk).join(' ');
     chunks.push(chunk);
   }
-  
+
   return chunks.slice(0, maxChunks);
+};
+
+const tileClass = (isMobile, isDraggingSource) => `
+  ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
+  rounded-xl bg-white text-gray-900 font-semibold
+  background-shadow-new background-hover cursor-pointer
+  inline-flex items-center justify-center text-center
+  transition-all duration-150 select-none
+  ${isDraggingSource ? 'opacity-40 scale-95' : 'hover:scale-[1.02] active:scale-95'}
+`;
+
+const ghostTileClass = (isMobile) => `
+  ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
+  rounded-xl bg-white text-gray-900 font-semibold
+  background-shadow-new border-2 border-blue-500
+  inline-flex items-center justify-center text-center
+  opacity-95 scale-110
+`;
+
+const placeholderTileClass = (isMobile) => `
+  ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
+  rounded-xl border-2 border-dashed border-blue-300 bg-blue-500/35 text-white font-semibold
+  inline-flex items-center justify-center text-center
+`;
+
+const wellClass = ({ isActive, isChecked, isZoneCorrect, isMobile }) => {
+  let state = 'border-white/40 bg-black/25';
+  if (isActive) {
+    state = 'border-blue-300 bg-blue-500/35 shadow-[0_0_0_3px_rgba(96,165,250,0.35)]';
+  } else if (isChecked) {
+    state = isZoneCorrect
+      ? 'border-green-300 bg-green-600/30'
+      : 'border-red-300 bg-red-600/30';
+  }
+
+  return `
+    ${isMobile ? 'px-3 py-3 min-h-[72px]' : 'px-4 py-3 min-h-[64px]'}
+    rounded-2xl border-2 border-dashed
+    flex flex-wrap gap-2 relative transition-all duration-200
+    ${state}
+  `;
 };
 
 const DragDropGame = () => {
@@ -43,21 +85,20 @@ const DragDropGame = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState({ question: false, answer: false });
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [roundKey, setRoundKey] = useState(0);
 
   const dragItemRef = useRef(null);
 
   const location = useLocation();
   const { subject } = location.state || {};
   const { user, getUser, theme } = useUser();
-  const { secondaryColor, tertiaryColor, shadow, textColor } = theme;
-  const borderCol = 'blue';
+  const { secondaryColor, tertiaryColor } = theme;
 
-  // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -94,23 +135,22 @@ const DragDropGame = () => {
 
     const questionChunks = splitIntoChunks(currentCard.question);
     const answerChunks = splitIntoChunks(currentCard.answer);
-    
+
     const allChunks = [...questionChunks, ...answerChunks]
       .map((text, index) => ({
         id: `chunk-${index}`,
         content: text,
-        originalArea: index < questionChunks.length ? 'question' : 'answer'
+        originalArea: index < questionChunks.length ? 'question' : 'answer',
       }))
       .sort(() => Math.random() - 0.5);
-      
+
     setAvailableChunks(allChunks);
     setQuestionArea([]);
     setAnswerArea([]);
-    
-    // Reset check state when card changes
     setIsChecked(false);
     setIsCorrect({ question: false, answer: false });
     setShowCorrectAnswer(false);
+    setRoundKey((k) => k + 1);
   }, [currentCardIndex, cards, loading]);
 
   const getItemsByArea = (area) => {
@@ -122,29 +162,22 @@ const DragDropGame = () => {
 
   const checkAnswer = () => {
     if (!cards.length) return;
-    
+
     const currentCard = cards[currentCardIndex];
     const questionChunks = splitIntoChunks(currentCard.question);
     const answerChunks = splitIntoChunks(currentCard.answer);
-    
-    // Check if question area has the correct chunks in the right order
-    const questionCorrect = questionArea.length === questionChunks.length &&
-      questionArea.every((chunk, index) => {
-        const expectedChunk = questionChunks[index];
-        return chunk.content === expectedChunk;
-      });
-    
-    // Check if answer area has the correct chunks in the right order
-    const answerCorrect = answerArea.length === answerChunks.length &&
-      answerArea.every((chunk, index) => {
-        const expectedChunk = answerChunks[index];
-        return chunk.content === expectedChunk;
-      });
-    
+
+    const questionCorrect =
+      questionArea.length === questionChunks.length &&
+      questionArea.every((chunk, index) => chunk.content === questionChunks[index]);
+
+    const answerCorrect =
+      answerArea.length === answerChunks.length &&
+      answerArea.every((chunk, index) => chunk.content === answerChunks[index]);
+
     setIsCorrect({ question: questionCorrect, answer: answerCorrect });
     setIsChecked(true);
-    
-    // Show correct answer if either is wrong
+
     if (!questionCorrect || !answerCorrect) {
       setShowCorrectAnswer(true);
     }
@@ -153,24 +186,25 @@ const DragDropGame = () => {
   const resetAnswer = () => {
     const currentCard = cards[currentCardIndex];
     if (!currentCard) return;
-    
+
     const questionChunks = splitIntoChunks(currentCard.question);
     const answerChunks = splitIntoChunks(currentCard.answer);
-    
+
     const allChunks = [...questionChunks, ...answerChunks]
       .map((text, index) => ({
         id: `chunk-${index}`,
         content: text,
-        originalArea: index < questionChunks.length ? 'question' : 'answer'
+        originalArea: index < questionChunks.length ? 'question' : 'answer',
       }))
       .sort(() => Math.random() - 0.5);
-      
+
     setAvailableChunks(allChunks);
     setQuestionArea([]);
     setAnswerArea([]);
     setIsChecked(false);
     setIsCorrect({ question: false, answer: false });
     setShowCorrectAnswer(false);
+    setRoundKey((k) => k + 1);
   };
 
   const handleOpenSubjectListModal = () => {
@@ -178,19 +212,23 @@ const DragDropGame = () => {
   };
 
   const getEventCoordinates = (event) => {
-    // Support both mouse and touch events
-    const clientX = event.clientX || (event.touches && event.touches[0]?.clientX) || (event.changedTouches && event.changedTouches[0]?.clientX);
-    const clientY = event.clientY || (event.touches && event.touches[0]?.clientY) || (event.changedTouches && event.changedTouches[0]?.clientY);
+    const clientX =
+      event.clientX ||
+      (event.touches && event.touches[0]?.clientX) ||
+      (event.changedTouches && event.changedTouches[0]?.clientX);
+    const clientY =
+      event.clientY ||
+      (event.touches && event.touches[0]?.clientY) ||
+      (event.changedTouches && event.changedTouches[0]?.clientY);
     return { clientX, clientY };
   };
 
   const handleStartDrag = (event, area, chunk) => {
-    // Prevent default to stop scroll/selection
     event.preventDefault();
     event.stopPropagation();
-    
+
     const { clientX, clientY } = getEventCoordinates(event);
-    const target = event.currentTarget; // Use currentTarget for better reliability
+    const target = event.currentTarget;
 
     setDraggedItem(chunk);
     setDraggedItemOrigin(area);
@@ -200,7 +238,6 @@ const DragDropGame = () => {
     });
     setDragging(true);
 
-    // Add move and end event listeners
     if (event.type === 'touchstart') {
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
       document.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -219,7 +256,7 @@ const DragDropGame = () => {
 
   const handleTouchMove = (event) => {
     if (!dragging) return;
-    event.preventDefault(); // Prevent scrolling
+    event.preventDefault();
     const { clientX, clientY } = getEventCoordinates(event);
     updateDragPosition(clientX, clientY);
   };
@@ -232,14 +269,12 @@ const DragDropGame = () => {
       dragItem.style.zIndex = '9999';
     }
 
-    // Determine which drop area the pointer is over
     const dropAreas = ['question', 'answer', 'available'];
     let overArea = null;
     for (let area of dropAreas) {
       const dropAreaElement = document.getElementById(`drop-area-${area}`);
       if (dropAreaElement) {
         const rect = dropAreaElement.getBoundingClientRect();
-        // Add some padding for mobile touch
         const padding = isMobile ? 20 : 0;
         if (
           clientX >= rect.left - padding &&
@@ -255,17 +290,14 @@ const DragDropGame = () => {
     setActiveDropArea(overArea);
 
     if (overArea) {
-      // Find drop position within the area
       const items = getItemsByArea(overArea);
       let dropIndex = items.length;
-
       let minDistance = Infinity;
+
       for (let i = 0; i < items.length; i++) {
         const itemElement = document.getElementById(items[i].id);
         if (itemElement) {
           const itemRect = itemElement.getBoundingClientRect();
-
-          // Calculate distance from pointer to item's center
           const itemCenterX = itemRect.left + itemRect.width / 2;
           const itemCenterY = itemRect.top + itemRect.height / 2;
           const deltaX = clientX - itemCenterX;
@@ -274,7 +306,6 @@ const DragDropGame = () => {
 
           if (distance < minDistance) {
             minDistance = distance;
-            // Check if pointer is to the left of the item (or above on mobile)
             if (isMobile ? clientY < itemCenterY : clientX < itemCenterX) {
               dropIndex = i;
             } else {
@@ -316,16 +347,14 @@ const DragDropGame = () => {
 
   const finalizeDrop = () => {
     if (!dragging || !draggedItem) return;
-    let droppedInArea = activeDropArea;
+    const droppedInArea = activeDropArea;
 
     if (droppedInArea) {
       moveItemToArea(draggedItem, draggedItemOrigin, droppedInArea, dropPosition);
     } else {
-      // Return item to original area if not dropped in any area
       moveItemToArea(draggedItem, draggedItemOrigin, draggedItemOrigin);
     }
 
-    // Cleanup
     setDragging(false);
     setDraggedItem(null);
     setDraggedItemOrigin(null);
@@ -335,7 +364,6 @@ const DragDropGame = () => {
   };
 
   const moveItemToArea = (item, fromArea, toArea, position = null) => {
-    // Remove from source area
     if (fromArea === 'question') {
       setQuestionArea((prev) => prev.filter((c) => c.id !== item.id));
     } else if (fromArea === 'answer') {
@@ -344,13 +372,12 @@ const DragDropGame = () => {
       setAvailableChunks((prev) => prev.filter((c) => c.id !== item.id));
     }
 
-    // Add to target area at the correct position
-    const insertAtPosition = (array, item, position) => {
+    const insertAtPosition = (array, nextItem, pos) => {
       const newArray = [...array];
-      if (position === null || position >= newArray.length) {
-        newArray.push(item);
+      if (pos === null || pos >= newArray.length) {
+        newArray.push(nextItem);
       } else {
-        newArray.splice(position, 0, item);
+        newArray.splice(pos, 0, nextItem);
       }
       return newArray;
     };
@@ -369,97 +396,82 @@ const DragDropGame = () => {
       id={chunk.id}
       onMouseDown={(e) => handleStartDrag(e, area, chunk)}
       onTouchStart={(e) => handleStartDrag(e, area, chunk)}
-      className={`
-        ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
-        rounded bg-white shadow-sm border border-gray-200 text-gray-700 
-        cursor-pointer inline-flex items-center justify-center text-center
-        ${isMobile ? 'active:bg-gray-50 active:scale-95' : 'hover:bg-gray-50'}
-        transition-all duration-150 select-none
-        ${dragging && draggedItem?.id === chunk.id ? 'opacity-50' : ''}
-      `}
-      style={{ 
+      className={tileClass(isMobile, dragging && draggedItem?.id === chunk.id)}
+      style={{
         WebkitUserSelect: 'none',
         userSelect: 'none',
         WebkitTouchCallout: 'none',
-        touchAction: 'manipulation'
+        touchAction: 'manipulation',
       }}
     >
-      <ReactMarkdown className="pointer-events-none text-xs">{chunk.content}</ReactMarkdown>
+      <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
+        {chunk.content}
+      </ReactMarkdown>
     </div>
   );
 
-  const DropArea = ({ id, items, title, theme }) => {
-    const getDropAreaBorderClass = () => {
-      if (activeDropArea === id) return 'border-blue-500 bg-blue-50';
-      if (isChecked && (id === 'question' || id === 'answer')) {
-        return isCorrect[id] ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50';
-      }
-      return 'border-gray-300';
-    };
+  const DropPlaceholder = () => (
+    <div className={placeholderTileClass(isMobile)}>
+      <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-white [&_*]:text-white">
+        {draggedItem.content}
+      </ReactMarkdown>
+    </div>
+  );
 
-    const getDropAreaTitle = () => {
-      if (isChecked && (id === 'question' || id === 'answer')) {
-        const icon = isCorrect[id] ? '✅' : '❌';
-        return `${icon} ${title}`;
-      }
-      return title;
-    };
+  const DropArea = ({ id, items, title, icon: Icon }) => {
+    const zoneChecked = isChecked && (id === 'question' || id === 'answer');
+    const zoneCorrect = isCorrect[id];
 
     return (
-      <div
-        id={`drop-area-${id}`}
-        className="w-full"
-      >
-        <h3 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold py-2 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
-          {getDropAreaTitle()}
-        </h3>
-        <div className={`
-          ${isMobile ? 'px-4 py-4 min-h-[80px]' : 'px-4 py-2 min-h-14'} 
-          rounded-lg border-2 border-dashed 
-          ${getDropAreaBorderClass()} 
-          flex flex-wrap gap-2 relative transition-all duration-200
-        `}>
+      <div id={`drop-area-${id}`} className="w-full">
+        <div className="flex items-center gap-2 mb-2">
+          <Icon size={18} className="text-blue-300 shrink-0" />
+          <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-sm">{title}</h3>
+          {zoneChecked && (
+            <span
+              className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
+                zoneCorrect ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            >
+              {zoneCorrect ? (
+                <Check size={14} strokeWidth={3} className="text-white" />
+              ) : (
+                <X size={14} strokeWidth={3} className="text-white" />
+              )}
+            </span>
+          )}
+        </div>
+
+        <div
+          className={wellClass({
+            isActive: activeDropArea === id,
+            isChecked: zoneChecked,
+            isZoneCorrect: zoneCorrect,
+            isMobile,
+          })}
+        >
           {items.map((item, index) => (
             <React.Fragment key={item.id}>
               {activeDropArea === id && dropPosition === index && draggedItem && (
-                <div className={`
-                  ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
-                  rounded border-2 border-blue-500 bg-blue-100 text-gray-700
-                  inline-flex items-center justify-center text-center opacity-75
-                `}>
-                  <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
-                </div>
+                <DropPlaceholder />
               )}
               <ChunkItem chunk={item} area={id} />
             </React.Fragment>
           ))}
           {activeDropArea === id && dropPosition === items.length && draggedItem && (
-            <div className={`
-              ${isMobile ? 'px-3 py-2 text-base min-h-[44px]' : 'px-2 py-1'} 
-              rounded border-2 border-blue-500 bg-blue-100 text-gray-700
-              inline-flex items-center justify-center text-center opacity-75
-            `}>
-              <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
-            </div>
+            <DropPlaceholder />
           )}
           {items.length === 0 && !draggedItem && (
-            <div className={`
-              ${isMobile ? 'text-base py-4' : 'text-sm py-2'} 
-              text-gray-400 italic text-center w-full
-            `}>
-              {id === 'available' ? 'Drag blocks from here' : `Drop ${title.toLowerCase()} blocks here`}
+            <div className="text-sm sm:text-base text-white/80 font-medium text-center w-full py-2">
+              Drop {title.toLowerCase()} tiles here
             </div>
           )}
         </div>
-        
-        {/* Show correct answer when wrong */}
+
         {showCorrectAnswer && isChecked && !isCorrect[id] && (id === 'question' || id === 'answer') && (
-          <div className={`
-            mt-3 p-3 rounded-lg bg-green-100 border border-green-300
-            ${isMobile ? 'text-base' : 'text-sm'}
-          `}>
-            <h4 className="font-semibold text-green-800 mb-2">Correct {title}:</h4>
-            <div className="text-green-700">
+          <div className="mt-2 px-3 py-3 rounded-xl bg-black/45 border border-green-400/50 backdrop-blur-md">
+            <p className="text-sm font-bold text-green-300 mb-1">Correct {title}</p>
+            <div className="text-base text-white leading-snug font-medium [&_*]:text-white">
               <ReactMarkdown>
                 {cards[currentCardIndex] ? cards[currentCardIndex][id] : ''}
               </ReactMarkdown>
@@ -470,35 +482,38 @@ const DragDropGame = () => {
     );
   };
 
+  const themeBg =
+    theme.image.startsWith('url(') ||
+    theme.image.startsWith('linear-gradient') ||
+    theme.image.startsWith('#')
+      ? theme.image
+      : `url(${theme.image})`;
+
   return (
-    <div className="w-screen h-screen relative overflow-hidden">
-      {/* Fixed background - ensure it covers entire viewport */}
-      <div 
+    <div className="w-screen h-[100dvh] relative overflow-hidden">
+      <div
         className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{ 
-          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
-            ? theme.image 
-            : `url(${theme.image})`,
+        style={{
+          background: themeBg,
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
         }}
-      ></div>
-      
-      {/* Fixed height content - no scrolling */}
-      <div 
-        className="relative z-10 h-full flex flex-col"
+      />
+
+      <div
+        className="relative z-10 h-full flex flex-col overflow-hidden"
         onMouseMove={!isMobile ? handleMouseMove : undefined}
         onMouseUp={!isMobile ? handleMouseUp : undefined}
-        style={{ 
+        style={{
           touchAction: dragging ? 'none' : 'manipulation',
-          overscrollBehavior: 'none'
+          overscrollBehavior: 'none',
         }}
       >
         <div className="flex-shrink-0">
           <TitleBar text="Scramble" />
         </div>
-        
-        <div className="flex-1 flex flex-col min-h-0">
+
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {loading ? (
             <LoadingSpinner text="Loading cards..." />
           ) : !cards.length ? (
@@ -520,102 +535,146 @@ const DragDropGame = () => {
               )}
             </PageEmptyState>
           ) : (
-            <div className={`flex-1 flex flex-col ${isMobile ? 'p-2' : 'p-4'} min-h-0 overflow-hidden`}>
-              <div className={`flex-shrink-0 ${isMobile ? 'mb-2' : 'mb-4'} ${isMobile ? 'flex-col space-y-2' : 'flex justify-between items-center'}`}>
-                <h2 className={`${isMobile ? 'text-base text-center' : 'text-xl'} font-bold ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
-                  Card {currentCardIndex + 1} of {cards.length}
-                </h2>
-                <div className={`${isMobile ? 'flex justify-center' : ''} space-x-2`}>
-                  <BackgroundButton 
-                    text="Previous" 
-                    bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"} 
-                    disabled={currentCardIndex === 0} 
-                    wWidth={isMobile ? "w-28" : "w-32"} 
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-3 sm:px-6 py-3 sm:py-4 max-w-5xl w-full mx-auto">
+              {/* Progress header */}
+              <div
+                className={`flex-shrink-0 mb-3 sm:mb-4 ${
+                  isMobile
+                    ? 'flex flex-col gap-2 items-center'
+                    : 'flex justify-between items-center gap-4'
+                }`}
+              >
+                <div className={isMobile ? 'text-center' : ''}>
+                  {subject?.name && (
+                    <p className="text-sm text-white font-semibold mb-0.5 drop-shadow-sm">{subject.name}</p>
+                  )}
+                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 justify-center sm:justify-start drop-shadow-sm">
+                    <Shuffle size={20} className="text-blue-300" />
+                    Card {currentCardIndex + 1} of {cards.length}
+                  </h2>
+                </div>
+                <div className="flex gap-2">
+                  <BackgroundButton
+                    text="Previous"
+                    bgColor={
+                      theme
+                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                        : 'bg-orange-500 hover:bg-orange-400'
+                    }
+                    disabled={currentCardIndex === 0}
+                    wWidth={isMobile ? 'w-28' : 'w-32'}
                     onClick={() => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}
                   />
-                  <BackgroundButton 
-                    text="Next" 
-                    bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"} 
-                    disabled={currentCardIndex === cards.length - 1} 
-                    wWidth={isMobile ? "w-28" : "w-32"} 
-                    onClick={() => setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1))}
+                  <BackgroundButton
+                    text="Next"
+                    bgColor={
+                      theme
+                        ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
+                        : 'bg-purple-500 hover:bg-purple-400'
+                    }
+                    disabled={currentCardIndex === cards.length - 1}
+                    wWidth={isMobile ? 'w-28' : 'w-32'}
+                    onClick={() =>
+                      setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1))
+                    }
                   />
                 </div>
               </div>
 
-              <div className={`flex-1 flex flex-col ${isMobile ? 'space-y-2' : 'space-y-3'} min-h-0 overflow-hidden`}>
-                <div className="flex-shrink-0">
-                  <DropArea id="question" items={questionArea} title="Question" theme={theme}/>
-                </div>
-                <div className="flex-shrink-0">
-                  <DropArea id="answer" items={answerArea} title="Answer" theme={theme}/>
-                </div>
+              {/* Glass board */}
+              <div
+                key={roundKey}
+                className="flex-1 min-h-0 flex flex-col overflow-hidden
+                  bg-gradient-to-t from-black/55 via-black/45 to-black/35 backdrop-blur-xl
+                  rounded-2xl border border-white/25 shadow-2xl shadow-black/40
+                  animate-pop-up"
+              >
+                <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4">
+                  <DropArea
+                    id="question"
+                    items={questionArea}
+                    title="Question"
+                    icon={HelpCircle}
+                  />
+                  <DropArea
+                    id="answer"
+                    items={answerArea}
+                    title="Answer"
+                    icon={MessageSquare}
+                  />
 
-                <div className="flex-1 min-h-0">
-                  <div id="drop-area-available">
-                    <h3 className={`${isMobile ? 'text-lg' : 'text-lg'} font-semibold py-1 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? textColor : 'textClass'}`}>
-                      {isMobile ? 'Tap and drag the blocks' : 'Drag the blocks'}
-                    </h3>
-                    <div className={`
-                      ${isMobile ? 'px-3 py-3 min-h-[60px]' : 'px-4 py-2 min-h-14'} 
-                      rounded-lg border-2 border-dashed 
-                      ${activeDropArea === 'available' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'} 
-                      flex flex-wrap gap-2 relative transition-all duration-200 h-full overflow-y-auto
-                    `}>
+                  {/* Word bank */}
+                  <div id="drop-area-available" className="pt-1">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <Shuffle size={18} className="text-blue-300 shrink-0" />
+                        <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-sm">Word bank</h3>
+                      </div>
+                      <p className="text-sm text-white/85 font-medium hidden sm:block">
+                        Drag tiles into Question and Answer
+                      </p>
+                    </div>
+                    <p className="text-sm text-white/85 font-medium mb-2 sm:hidden">
+                      {isMobile
+                        ? 'Tap and drag tiles into Question and Answer'
+                        : 'Drag tiles into Question and Answer'}
+                    </p>
+                    <div
+                      className={wellClass({
+                        isActive: activeDropArea === 'available',
+                        isChecked: false,
+                        isZoneCorrect: false,
+                        isMobile,
+                      })}
+                    >
                       {availableChunks.map((chunk, index) => (
                         <React.Fragment key={chunk.id}>
-                          {activeDropArea === 'available' && dropPosition === index && draggedItem && (
-                            <div className={`
-                              ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
-                              rounded border-2 ${theme ? borderCol : 'border-blue-500'} bg-blue-100
-                              inline-flex items-center justify-center text-center opacity-75
-                            `}>
-                              <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
-                            </div>
-                          )}
+                          {activeDropArea === 'available' &&
+                            dropPosition === index &&
+                            draggedItem && <DropPlaceholder />}
                           <ChunkItem chunk={chunk} area="available" />
                         </React.Fragment>
                       ))}
-                      {activeDropArea === 'available' && dropPosition === availableChunks.length && draggedItem && (
-                        <div className={`
-                          ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
-                          rounded border-2 border-blue-500 bg-blue-100
-                          inline-flex items-center justify-center text-center opacity-75
-                        `}>
-                          <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
-                        </div>
-                      )}
+                      {activeDropArea === 'available' &&
+                        dropPosition === availableChunks.length &&
+                        draggedItem && <DropPlaceholder />}
                       {availableChunks.length === 0 && !draggedItem && (
-                        <div className={`
-                          ${isMobile ? 'text-sm py-3' : 'text-sm py-2'} 
-                          text-gray-400 italic text-center w-full
-                        `}>
-                          All blocks have been placed!
+                        <div className="text-sm sm:text-base text-white/80 font-medium text-center w-full py-2">
+                          All tiles placed
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Check Answer and Reset Buttons */}
-                <div className={`flex-shrink-0 flex ${isMobile ? 'justify-center' : 'justify-start'} pt-2`}>
-                  {!isChecked ? (
-                    <BackgroundButton
-                      text="Check Answer"
-                      bgColor={theme ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}` : "bg-blue-600 hover:bg-blue-500"}
-                      onClick={checkAnswer}
-                      disabled={questionArea.length === 0 && answerArea.length === 0}
-                    />
-                  ) : (
-                    <div className={`flex ${isMobile ? 'flex-col space-y-2 items-center' : 'flex-row space-x-3 items-center'}`}>
+                {/* Actions footer */}
+                <div className="flex-none px-4 sm:px-6 py-3 sm:py-4 border-t border-white/15 bg-black/10">
+                  <div
+                    className={`flex ${
+                      isMobile ? 'justify-center' : 'sm:justify-end'
+                    }`}
+                  >
+                    {!isChecked ? (
+                      <BackgroundButton
+                        text="Check answer"
+                        bgColor="bg-blue-500 hover:bg-blue-400"
+                        wWidth="w-full sm:w-auto"
+                        onClick={checkAnswer}
+                        disabled={questionArea.length === 0 && answerArea.length === 0}
+                      />
+                    ) : (
                       <BackgroundButton
                         text="Reset"
-                        bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-gray-600 hover:bg-gray-500"}
-                        wWidth={isMobile ? "w-32" : "w-32"}
+                        bgColor={
+                          theme
+                            ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                            : 'bg-gray-600 hover:bg-gray-500'
+                        }
+                        wWidth="w-full sm:w-auto"
                         onClick={resetAnswer}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -625,27 +684,23 @@ const DragDropGame = () => {
         {dragging && draggedItem && (
           <div
             ref={dragItemRef}
-            className={`
-              fixed pointer-events-none z-[9999]
-              ${isMobile ? 'px-3 py-2 text-sm min-h-[40px]' : 'px-2 py-1'} 
-              rounded bg-white shadow-xl border-2 border-blue-500
-              inline-flex items-center justify-center text-center
-              opacity-90 transform scale-105
-            `}
+            className={`fixed pointer-events-none z-[9999] ${ghostTileClass(isMobile)}`}
             style={{
               left: '-9999px',
               top: '-9999px',
             }}
           >
-            <ReactMarkdown>{draggedItem.content}</ReactMarkdown>
+            <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
+              {draggedItem.content}
+            </ReactMarkdown>
           </div>
         )}
 
-        <SubjectList 
-          isOpen={isSubjectListModalOpen} 
+        <SubjectList
+          isOpen={isSubjectListModalOpen}
           onClose={() => setIsSubjectListModalOpen(false)}
           user={user}
-          page='scramble'
+          page="scramble"
         />
       </div>
     </div>
