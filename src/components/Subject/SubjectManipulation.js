@@ -1,4 +1,5 @@
 import supabase from '../../supabaseClient';
+import { saveProfile } from '../Profile/ProfileManipulation';
 
 const TUTORIAL_SUBJECT_ID = Number(process.env.REACT_APP_TUTORIAL_SUBJECT_ID || 136);
 
@@ -83,6 +84,22 @@ export const fetchSubjects = async (user, profile = null) => {
 };
 
 export { TUTORIAL_SUBJECT_ID };
+
+export const dismissTutorialSubject = async (profile) => {
+  if (!profile?.id) return false;
+
+  const updated = await saveProfile(
+    profile.id,
+    profile.first_name,
+    profile.theme,
+    profile.sort_preference,
+    profile.card_art,
+    profile.generation_count,
+    true
+  );
+
+  return Boolean(updated);
+};
 
 // Add or update subject
 export const saveSubject = async (id, subjectName, subjectColor, subjectIntensity, userId, upToIndex = null, collectionId = null, pinned = false) => {
@@ -261,6 +278,23 @@ export const createShareInvite = async (ownerId, subjectId, recipientEmail, perm
     console.error('createShareInvite', error);
     return null;
   }
+  return data;
+};
+
+export const fetchPublicLink = async (subjectId, userId) => {
+  const { data, error } = await supabase
+    .from('public_subject_links')
+    .select('*')
+    .eq('subject_id', subjectId)
+    .eq('created_by', userId)
+    .is('revoked_at', null)
+    .maybeSingle();
+
+  if (error) {
+    console.error('fetchPublicLink', error);
+    return null;
+  }
+
   return data;
 };
 

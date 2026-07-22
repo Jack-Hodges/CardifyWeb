@@ -1,7 +1,10 @@
 import BackgroundButton from '../Elements/BackgroundButton';
+import PageEmptyState from '../Elements/PageEmptyState';
+import { useUser } from '../../UserContext';
 
 /**
- * End-of-session summary used by Practice and Quiz.
+ * End-of-session summary used by Practice (SM-2) and Quiz.
+ * Renders on the page with theme styling — not a glass modal.
  */
 function SessionSummary({
   title = 'Session complete',
@@ -13,33 +16,40 @@ function SessionSummary({
   onHome,
   weakCount = 0,
 }) {
+  const { theme } = useUser();
+  const { textClass, secondaryColor, tertiaryColor, shadow } = theme || {};
   const totalGraded = correct + incorrect;
   const accuracy = totalGraded ? Math.round((correct / totalGraded) * 100) : 0;
   const mins = Math.floor(durationSec / 60);
   const secs = durationSec % 60;
+  const textTone = theme ? textClass : 'textColor';
+  const shadowClass = shadow ? 'drop-shadow-custom' : '';
 
   return (
-    <div className="w-full max-w-lg mx-auto px-4 py-8">
-      <div
-        className="rounded-2xl border border-white/20 bg-gradient-to-t from-black/50 via-black/35 to-black/25
-          backdrop-blur-xl shadow-2xl shadow-black/30 p-6 sm:p-8 text-center"
-      >
-        <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{title}</h2>
-        <p className="text-white/70 mb-6">
+    <PageEmptyState>
+      <div className="text-center max-w-lg mx-auto">
+        <p className={`font-bold text-2xl sm:text-3xl mb-2 ${textTone} ${shadowClass}`}>
+          {title}
+        </p>
+        <p className={`text-lg sm:text-xl font-medium mb-8 opacity-90 ${textTone} ${shadowClass}`}>
           {cardsSeen} cards · {mins}m {secs}s · {accuracy}% accuracy
         </p>
 
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <Stat label="Correct" value={correct} tone="text-green-300" />
-          <Stat label="Missed" value={incorrect} tone="text-red-300" />
-          <Stat label="Weak" value={weakCount} tone="text-amber-300" />
+        <div className={`grid grid-cols-3 gap-4 mb-10 ${textTone} ${shadowClass}`}>
+          <Stat label="Correct" value={correct} />
+          <Stat label="Missed" value={incorrect} />
+          <Stat label="Weak" value={weakCount} />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {onStudyAgain && (
             <BackgroundButton
               text="Study again"
-              bgColor="bg-blue-500 hover:bg-blue-400"
+              bgColor={
+                theme
+                  ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                  : 'bg-blue-500 hover:bg-blue-400'
+              }
               onClick={onStudyAgain}
               wWidth="w-full sm:w-auto"
             />
@@ -47,22 +57,26 @@ function SessionSummary({
           {onHome && (
             <BackgroundButton
               text="Back to Home"
-              bgColor="bg-gray-600 hover:bg-gray-500"
+              bgColor={
+                theme
+                  ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
+                  : 'bg-gray-600 hover:bg-gray-500'
+              }
               onClick={onHome}
               wWidth="w-full sm:w-auto"
             />
           )}
         </div>
       </div>
-    </div>
+    </PageEmptyState>
   );
 }
 
-function Stat({ label, value, tone }) {
+function Stat({ label, value }) {
   return (
-    <div className="rounded-xl bg-white/10 border border-white/15 px-3 py-3">
-      <p className={`text-2xl font-bold ${tone}`}>{value}</p>
-      <p className="text-xs text-white/60 font-medium">{label}</p>
+    <div>
+      <p className="text-3xl sm:text-4xl font-bold">{value}</p>
+      <p className="text-sm sm:text-base font-medium opacity-80 mt-1">{label}</p>
     </div>
   );
 }

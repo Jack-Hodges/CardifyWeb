@@ -20,6 +20,7 @@ function Card({
   practice,
   onUpsertCard,
   dataTour,
+  lightSurface = false,
 }) {
   const [modalFrontContent, setModalFrontContent] = useState(card.question);
   const [modalBackContent, setModalBackContent] = useState(card.answer);
@@ -92,6 +93,7 @@ function Card({
           content={modalFrontContent}
           align={frontAlign}
           back={false}
+          lightSurface={lightSurface}
         />
 
         {/* Back card */}
@@ -102,6 +104,7 @@ function Card({
           align={backAlign}
           back={true}
           imageUrl={card.image_url}
+          lightSurface={lightSurface}
         />
       </div>
 
@@ -121,7 +124,13 @@ function Card({
       )}
 
       {practice && (
-        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2 z-10">
+        <div
+          className={`rounded-md bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2 z-10 ${
+            lightSurface
+              ? 'hover:bg-gray-200 text-gray-700'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
+          }`}
+        >
           <RefreshCw size="32"/>
         </div>
       )}
@@ -157,12 +166,15 @@ function CardContent ({
   content,
   back,
   align,
+  lightSurface = false,
 }) {
+  const textTone = lightSurface ? 'text-gray-700' : 'text-gray-700 dark:text-gray-200';
+
   return (
     <div
-      className={`absolute inset-0 flex items-center justify-center 
-                  bg-gray-50 dark:bg-gray-700 p-5 rounded-2xl select-none 
-                  background-shadow-new text-center`}
+      className={`absolute inset-0 flex items-center justify-center p-5 rounded-2xl select-none background-shadow-new text-center ${
+        lightSurface ? 'bg-gray-50' : 'bg-gray-50 dark:bg-gray-700'
+      }`}
       style={{
         backfaceVisibility: 'hidden',
         transform: rotate,
@@ -179,7 +191,7 @@ function CardContent ({
       // -------------------------
       // CASE A: back=true AND backMode=1
       // Render something special if needed:
-      <div className="text-gray-700 dark:text-gray-200">
+      <div className={textTone}>
 
         <EditableMathField
           latex={content}
@@ -200,8 +212,7 @@ function CardContent ({
                     components={{
             u: ({ node, ...props }) => <u {...props} />,
           }}
-          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-          font-bold ${align}`}
+          className={`text-xl sm:text-4xl font-bold ${textTone} ${align}`}
         >
           {content}
         </SafeMarkdown>
@@ -218,8 +229,7 @@ function CardContent ({
                     components={{
             u: ({ node, ...props }) => <u {...props} />,
           }}
-          className={`text-xl sm:text-4xl text-gray-700 dark:text-gray-200 
-          font-bold ${align}`}
+          className={`text-xl sm:text-4xl font-bold ${textTone} ${align}`}
         >
           {content}
         </SafeMarkdown>

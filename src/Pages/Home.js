@@ -14,23 +14,23 @@ import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-r
 import { Helmet } from 'react-helmet-async';
 
 const RAINBOW_JUMP_COLORS = [
-  'bg-red-500',
-  'bg-orange-500',
-  'bg-yellow-500',
-  'bg-green-500',
-  'bg-blue-500',
-  'bg-purple-500',
+  ['red', 500],
+  ['orange', 500],
+  ['yellow', 500],
+  ['green', 500],
+  ['blue', 500],
+  ['purple', 500],
 ];
 
 /** Default theme keeps the rainbow; other themes derive 6 shades from primary/secondary/tertiary. */
 function getJumpInColors(theme) {
   if (!theme?.name || theme.name === 'default') {
-    return RAINBOW_JUMP_COLORS;
+    return RAINBOW_JUMP_COLORS.map((entry) => getColors(entry));
   }
 
   const bases = [theme.primary, theme.secondary, theme.tertiary];
   if (bases.some((entry) => !Array.isArray(entry) || entry.length !== 2)) {
-    return RAINBOW_JUMP_COLORS;
+    return RAINBOW_JUMP_COLORS.map((entry) => getColors(entry));
   }
 
   const clampIntensity = (value) => Math.min(800, Math.max(300, value));
@@ -45,7 +45,7 @@ function getJumpInColors(theme) {
 
   return recipes.map(([index, delta]) => {
     const [color, intensity] = bases[index];
-    return `bg-${color}-${clampIntensity(intensity + delta)}`;
+    return getColors([color, clampIntensity(intensity + delta)]);
   });
 }
 
@@ -236,8 +236,8 @@ function Home() {
               <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>
                 Hey, {profile.first_name}!
                 {profile.streak_current > 0 && (
-                  <span className="ml-2 whitespace-nowrap" aria-label={`${profile.streak_current}-day streak`}>
-                    {profile.streak_current}🔥
+                  <span className="ml-4 whitespace-nowrap" aria-label={`${profile.streak_current}-day streak`}>
+                    🔥{profile.streak_current}
                   </span>
                 )}
               </p>
@@ -365,11 +365,11 @@ function JumpButton( { text, img, color, onClick }) {
   return (
     <div
       className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40
-        ${color} text-white rounded-xl background-shadow-new background-hover cursor-pointer`}
+        ${color.bgClass} ${color.hoverClass} text-white rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
       onClick={() => onClick(text.toLowerCase())}
     >
       <div className="text-white [&_svg]:text-white">{img}</div>
-      <p className="text-2xl sm:text-3xl text-white font-bold">{text}</p>
+      <p className="text-xl sm:text-2xl text-white font-bold">{text}</p>
     </div>
   );
 }
@@ -388,7 +388,8 @@ function InProgress({ subject, theme }) {
   };
 
   const strokeWidth = 6;
-  const radius = 40;
+  // Keep the ring near the SVG edge so right inset matches left text padding
+  const radius = 47 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
 
   useEffect(() => {
@@ -403,17 +404,17 @@ function InProgress({ subject, theme }) {
 
   return (
     <div
-      className={`w-1/4 min-w-72 flex items-center justify-between p-2 h-28 rounded-xl text-white ${theme} background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
+      className={`w-1/4 min-w-72 flex items-center gap-3 px-4 py-2 h-28 rounded-xl text-white ${theme} background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
       onClick={navigateClick}
     >
-      <div className="w-3/4">
+      <div className="min-w-0 flex-1">
         <p className="w-full truncate text-2xl">{subject.name}</p>
         <p className="text-sm">
           {cardsRemaining} {cardsRemaining === 1 ? 'card' : 'cards'} remaining
         </p>
       </div>
 
-      <div className="w-1/4 relative flex justify-center items-center h-full">
+      <div className="relative w-20 h-20 shrink-0 flex justify-center items-center">
         <svg viewBox="0 0 100 100" className="w-full h-full">
           <circle
             cx="50"

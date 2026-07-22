@@ -7,7 +7,7 @@ import { fetchCards, upsertCard, deleteCard, restoreCard, sortCardsById, updateC
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import { saveSubject } from '../components/Subject/SubjectManipulation';
+import { saveSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
 import EditModal from '../components/Card/EditModal';
@@ -41,6 +41,7 @@ function Create() {
 
   const navigate = useNavigate();
   const { subject, loadingSubject } = useSubjectFromRoute();
+  const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
 
   const { user, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
@@ -77,6 +78,10 @@ function Create() {
   }, [subject?.id, loadingSubject]);
 
   const handleUpsertCard = async (cardData, file) => {
+    if (isTutorialSubject) {
+      toast.info('Sample subject cards are read only');
+      return;
+    }
     const isNewCard = !cardData.id;
     await upsertCard(cardData, file);
     const updatedCards = await fetchCards(subject.id);
@@ -88,6 +93,10 @@ function Create() {
   };
 
   const handleDeleteCard = async (cardId) => {
+    if (isTutorialSubject) {
+      toast.info('Sample subject cards are read only');
+      return;
+    }
     const deleted = await deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
     if (!deleted) return;
     toast.info(
@@ -117,6 +126,7 @@ function Create() {
   };
 
   const handleReorderCards = async (reordered, move) => {
+    if (isTutorialSubject) return;
     setCards(reordered);
     if (move && currentCardIndex === move.from) {
       setCurrentCardIndex(move.to);
@@ -161,6 +171,10 @@ function Create() {
   };
 
   const handleOpenAddCardModal = () => {
+    if (isTutorialSubject) {
+      toast.info('Sample subject cards are read only');
+      return;
+    }
     const maxCards = profile.pro ? 500 : 100;
     if (profile.flashcard_count >= maxCards) {
       toast.error(
@@ -304,8 +318,8 @@ function Create() {
                     setFlipped={setFlipped}
                     animateFlip={animateFlip}
                     cardId={cards[currentCardIndex]?.id}
-                    onDeleteCard={handleDeleteCard}
-                    edit={true}
+                    onDeleteCard={isTutorialSubject ? undefined : handleDeleteCard}
+                    edit={!isTutorialSubject}
                     onUpsertCard={handleUpsertCard}
                     dataTour="create-card-flip"
                   />
@@ -323,6 +337,7 @@ function Create() {
                       )
                     }
                     create
+                    readOnly={isTutorialSubject}
                     themeText={theme.textClass}
                     themeSecondary={secondaryColor}
                     themeTertiary={tertiaryColor}
@@ -337,17 +352,18 @@ function Create() {
                   />
                 </div>
 
-                <div className="w-full lg:w-[30%] mt-20 lg:mt-0" data-tour="create-card-list">
+                <div className="w-full lg:w-[30%] mt-20 lg:mt-0 pr-5 lg:pr-6 pl-4 lg:pl-2" data-tour="create-card-list">
                   <CardList
                     cards={cards}
                     onCardClick={handleCardClick}
                     onUpsertCard={handleUpsertCard}
                     onDeleteCard={handleDeleteCard}
-                    onReorder={handleReorderCards}
+                    onReorder={isTutorialSubject ? undefined : handleReorderCards}
                     subject={subject}
                     themeText={theme.textClass}
                     passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
                     selectedIndex={currentCardIndex}
+                    readOnly={isTutorialSubject}
                     onAddClick={() => {
                       const maxCards = profile.pro ? 500 : 100;
                       if (profile.flashcard_count >= maxCards) {
@@ -373,8 +389,11 @@ function Create() {
                     <p
                       className={`${theme ? theme.textClass : 'textColor'} text-lg sm:text-xl font-medium text-center opacity-90 ${shadow ? 'drop-shadow-custom' : ''}`}
                     >
-                      Add a card, import a file, or generate with AI.
+                      {isTutorialSubject
+                        ? 'This is a sample subject — browse the cards to see how Cardify works.'
+                        : 'Add a card, import a file, or generate with AI.'}
                     </p>
+                    {!isTutorialSubject && (
                     <div className="flex flex-col sm:flex-row gap-3 mt-3 w-full sm:w-auto items-center justify-center">
                       <BackgroundButton
                         text={`Add Card to ${subject.name}`}
@@ -411,6 +430,7 @@ function Create() {
                         />
                       )}
                     </div>
+                    )}
                   </div>
                 ) : (
                   <NoSelectionModal

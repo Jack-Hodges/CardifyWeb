@@ -2,15 +2,24 @@ import ReactDOM from 'react-dom';
 import BackgroundButton from "../Elements/BackgroundButton";
 import getColors from "../Functions/getColors";
 import SubjectBlock from "../Subject/SubjectBlock";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Pencil, FolderOpen } from "lucide-react";
 import useBodyScrollLock from "../../hooks/useBodyScrollLock";
+import { getCardArt } from "../Functions/getCardArt";
+import CardArtOverlay from "../Elements/CardArtOverlay";
+import { useUser } from "../../UserContext";
 
 function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
     const [isClosing, setIsClosing] = useState(false);
+    const { profile } = useUser();
+
+    const cardArtImage = useMemo(() => {
+        const art = profile?.card_art ? getCardArt(profile.card_art) : { image: null };
+        return art.image;
+    }, [profile?.card_art]);
 
     useEffect(() => {
         if (isExpanded) {
@@ -56,8 +65,10 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                         return (
                             <div
                                 key={index}
-                                className={`rounded-lg ${bgClass}`}
-                            />
+                                className={`relative overflow-hidden rounded-lg ${bgClass}`}
+                            >
+                                <CardArtOverlay image={cardArtImage} />
+                            </div>
                         );
                     })}
                 </div>

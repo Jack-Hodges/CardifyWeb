@@ -2,9 +2,11 @@ import getColors from "../Functions/getColors";
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCardArt } from "../Functions/getCardArt";
+import CardArtOverlay from "../Elements/CardArtOverlay";
 import { useUser } from "../../UserContext";
-import { Share, LogOut } from "lucide-react";
-import Modal from "../Modals/Modal";
+import { Share, LogOut, Share2, Mail, Link2, X } from "lucide-react";
+import GlassPanel from "../Modals/GlassPanel";
+import BackgroundButton from "../Elements/BackgroundButton";
 import ConfirmModal from "../Modals/ConfirmModal";
 import {
   saveShare,
@@ -12,22 +14,30 @@ import {
   createShareInvite,
   createOrGetPublicLink,
   revokePublicLink,
+  getShares,
+  fetchPublicLink,
+  TUTORIAL_SUBJECT_ID,
 } from "./SubjectManipulation";
 import { toast } from '../Toast';
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false, tourTarget = false, forceActions = false }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutorial, home, shared = false, tourTarget = false, forceActions = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
-  const [shareRole, setShareRole] = useState("viewer"); // Add role state
+  const [shareRole, setShareRole] = useState("viewer");
   const [publicLink, setPublicLink] = useState(null);
+  const [subjectShares, setSubjectShares] = useState([]);
+  const [activeShareDropdown, setActiveShareDropdown] = useState(null);
+  const [shareToRemove, setShareToRemove] = useState(null);
   const navigate = useNavigate();
-  const { profile, user } = useUser();
+  const { profile, user, theme } = useUser();
+  const { secondaryColor } = theme;
   // Use local state for the pinned status
   const [subjectPinned, setSubjectPinned] = useState(subject?.pinned || false);
 
   const isSharedSubject = shared || subject?.isShared || Boolean(subject?.permission);
+  const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
 
   // Set local state when subject prop changes
   useEffect(() => {
@@ -35,6 +45,44 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
       setSubjectPinned(subject.pinned);
     }
   }, [subject]);
+
+  useEffect(() => {
+    if (!isShareModalOpen || !profile?.id || !subject?.id) return;
+
+    const loadShareData = async () => {
+      const allShares = await getShares(profile.id);
+      setSubjectShares(allShares.filter((share) => share.subject_id === subject.id));
+      const link = await fetchPublicLink(subject.id, profile.id);
+      setPublicLink(link);
+    };
+
+    loadShareData();
+  }, [isShareModalOpen, profile?.id, subject?.id]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (activeShareDropdown && !event.target.closest('.share-permission-dropdown')) {
+        setActiveShareDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeShareDropdown]);
+
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    setShareEmail("");
+    setShareRole("viewer");
+    setActiveShareDropdown(null);
+    setPublicLink(null);
+  };
+
+  const refreshSubjectShares = async () => {
+    if (!profile?.id || !subject?.id) return;
+    const allShares = await getShares(profile.id);
+    setSubjectShares(allShares.filter((share) => share.subject_id === subject.id));
+  };
 
   // Toggle the pinned state and save it
   const handleTogglePin = () => {
@@ -71,24 +119,52 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
     if (!shareEmail) return;
 
     const invite = await createShareInvite(profile.id, subject.id, shareEmail, shareRole);
-    // Also grant permission directly for backwards compatibility
     const success = await saveShare(null, profile.id, subject.id, shareEmail, shareRole);
     if (invite || success) {
-      setIsShareModalOpen(false);
       setShareEmail("");
       setShareRole("viewer");
+      await refreshSubjectShares();
       toast.success('Invite sent');
     }
   };
 
-  const handleCopyPublicLink = async () => {
+  const handleSharePermissionChange = async (share, newPermission) => {
+    const success = await saveShare(share.id, share.owner_id, share.subject_id, share.recipient_email, newPermission);
+    if (success) {
+      setSubjectShares((current) =>
+        current.map((item) =>
+          item.id === share.id ? { ...item, permission: newPermission } : item
+        )
+      );
+    }
+    setActiveShareDropdown(null);
+  };
+
+  const handleConfirmRemoveShare = async () => {
+    if (!shareToRemove) return;
+
+    const success = await removeShare(shareToRemove.subject_id, shareToRemove.recipient_email);
+    if (success) {
+      setSubjectShares((current) => current.filter((item) => item.id !== shareToRemove.id));
+      toast.success('Access removed');
+    }
+    setShareToRemove(null);
+  };
+
+  const handleMakePublicLink = async () => {
     const link = await createOrGetPublicLink(subject.id, profile.id);
     if (!link) {
       toast.error('Could not create public link');
       return;
     }
     setPublicLink(link);
-    const url = `${window.location.origin}/study/${link.token}`;
+    toast.success('Public link created');
+  };
+
+  const handleCopyPublicLink = async () => {
+    if (!publicLink?.token) return;
+
+    const url = `${window.location.origin}/study/${publicLink.token}`;
     try {
       await navigator.clipboard.writeText(url);
       toast.success('Public study link copied');
@@ -98,12 +174,12 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
   };
 
   const handleRevokePublicLink = async () => {
-    if (!publicLink?.id) {
-      const link = await createOrGetPublicLink(subject.id, profile.id);
-      if (!link) return;
-      await revokePublicLink(link.id);
-    } else {
-      await revokePublicLink(publicLink.id);
+    if (!publicLink?.id) return;
+
+    const success = await revokePublicLink(publicLink.id);
+    if (!success) {
+      toast.error('Could not revoke public link');
+      return;
     }
     setPublicLink(null);
     toast.success('Public link revoked');
@@ -131,32 +207,19 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
     return art;
   }, [profile?.card_art]);
 
-  // Memoize the background style to prevent recalculation
-  const backgroundStyle = useMemo(() => ({
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundImage: cardArt.image,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center center',
-    backgroundRepeat: 'no-repeat',
-    opacity: 0.85,
-    borderRadius: 'inherit'
-  }), [cardArt.image]);
+  const cardArtImage = cardArt.image;
 
   return (
     <>
       <div
-        className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
+        className={`group relative mx-auto w-full min-h-56 sm:h-56 overflow-hidden ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
         style={{ 
           position: 'relative',
           zIndex: forceActions ? 55 : undefined,
         }}
         data-tour={tourTarget ? 'dashboard-subject' : undefined}
       >
-        <div style={backgroundStyle} />
+        <CardArtOverlay image={cardArtImage} />
         {isSharedSubject && (
           <span
             className={`absolute top-2 left-3 z-10 text-xs font-bold uppercase tracking-wide text-white ${cardArt.image ? 'drop-shadow-custom' : ''}`}
@@ -164,7 +227,14 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
             Shared · {subject.permission || 'viewer'}
           </span>
         )}
-        {!isSharedSubject && (
+        {isTutorialSubject && (
+          <span
+            className={`absolute top-2 left-3 z-10 text-xs font-bold uppercase tracking-wide text-white ${cardArt.image ? 'drop-shadow-custom' : ''}`}
+          >
+            Sample
+          </span>
+        )}
+        {!isSharedSubject && !isTutorialSubject && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
             <div 
               className="relative"
@@ -277,7 +347,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {!home && !isSharedSubject && (
+            {!home && !isSharedSubject && !isTutorialSubject && (
               // Edit button
               <SubjectButton
                 img={
@@ -299,7 +369,31 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
               />
             )}
 
-            {!home && !isSharedSubject && (
+            {!home && isTutorialSubject && (
+              <SubjectButton
+                img={
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="size-10"
+                    filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm3.75 8.25a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1 0-1.5h7.5Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                }
+                setHoveredIcon={setHoveredIcon}
+                hoveredIcon={hoveredIcon}
+                tooltipText="Remove"
+                onClick={onDismissTutorial}
+              />
+            )}
+
+            {!home && !isSharedSubject && !isTutorialSubject && (
               // Delete button
               <SubjectButton
                 img={
@@ -337,66 +431,187 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         </div>
       </div>
 
-      <Modal
+      <GlassPanel
         isOpen={isShareModalOpen}
-        onFirstAction={() => setIsShareModalOpen(false)}
-        onSecondAction={handleShareSubmit}
-        text="Share Subject"
-        width="w-full h-full sm:w-2/3 sm:h-auto"
-        mainText={
-          <div className="w-full space-y-4">
+        onClose={closeShareModal}
+        title="Share subject"
+        subtitle={subject?.name}
+        icon={<Share2 size={22} className="text-white/90 shrink-0" />}
+        footer={
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
+            <BackgroundButton
+              text="Cancel"
+              bgColor="bg-gray-600 hover:bg-gray-500"
+              wWidth="w-full sm:w-auto"
+              onClick={closeShareModal}
+            />
+            <BackgroundButton
+              text="Send invite"
+              image={<Mail size={18} />}
+              flip
+              bgColor={shareEmail ? 'bg-blue-500 hover:bg-blue-400' : 'bg-gray-400'}
+              wWidth="w-full sm:w-auto"
+              disabled={!shareEmail}
+              onClick={handleShareSubmit}
+            />
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <section>
+            <label htmlFor="share-email" className="block text-sm font-bold text-white/90 mb-2 ml-1">
+              Invite by email
+            </label>
             <input
+              id="share-email"
               type="email"
               value={shareEmail}
               onChange={(e) => setShareEmail(e.target.value)}
-              placeholder="Enter email address"
-              className="w-full p-2 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/40"
+              placeholder="friend@example.com"
+              className={`w-full px-4 py-3 rounded-full text-white
+                ${secondaryColor.bgClass}
+                background-shadow-new background-focus focus:outline-none font-medium
+                placeholder:text-white/60`}
             />
-            <div className="flex gap-4">
-              <label className="flex items-center space-x-2 text-white">
-                <input
-                  type="radio"
-                  value="viewer"
-                  checked={shareRole === "viewer"}
-                  onChange={(e) => setShareRole(e.target.value)}
-                  className="form-radio text-blue-500"
-                />
-                <span>Viewer</span>
-              </label>
-              <label className="flex items-center space-x-2 text-white">
-                <input
-                  type="radio"
-                  value="editor"
-                  checked={shareRole === "editor"}
-                  onChange={(e) => setShareRole(e.target.value)}
-                  className="form-radio text-blue-500"
-                />
-                <span>Editor</span>
-              </label>
+
+            <p className="text-sm font-bold text-white/90 mb-2 mt-4 ml-1">Access level</p>
+            <div className="flex gap-3">
+              {['viewer', 'editor'].map((role) => {
+                const isSelected = shareRole === role;
+                return (
+                  <button
+                    key={role}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setShareRole(role)}
+                    className={`flex-1 h-10 rounded-full font-semibold text-sm capitalize text-white
+                      ${secondaryColor.bgClass} ${secondaryColor.hoverClass}
+                      transition-all duration-300 transform
+                      ${isSelected ? 'background-pressed' : 'background-shadow-new background-hover'}`}
+                  >
+                    {role}
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <button
-                type="button"
-                onClick={handleCopyPublicLink}
-                className="px-3 py-2 rounded-xl bg-white/15 text-white text-sm font-semibold hover:bg-white/25"
-              >
-                Copy public link
-              </button>
-              <button
-                type="button"
-                onClick={handleRevokePublicLink}
-                className="px-3 py-2 rounded-xl bg-white/10 text-white/80 text-sm font-semibold hover:bg-white/20"
-              >
-                Revoke public link
-              </button>
+          </section>
+
+          <section className="rounded-2xl bg-white/10 border border-white/15 p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <Link2 size={20} className="text-white/80 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">Public study link</p>
+                <p className="text-sm text-white/60 mt-1">
+                  {publicLink
+                    ? 'Your public link is active. Copy it to share or revoke it anytime.'
+                    : 'Create a link anyone can use to study this subject without an invite.'}
+                </p>
+              </div>
             </div>
-          </div>
-        }
-        firstActionText="Cancel"
-        secondActionText="Share"
-        firstActionCol="bg-red-500 hover:bg-red-400"
-        secondActionCol="bg-blue-500 hover:bg-blue-400"
-        titleCol="text-white"
+            <div className="flex flex-col sm:flex-row gap-2">
+              {publicLink ? (
+                <>
+                  <BackgroundButton
+                    text="Copy link"
+                    image={<Link2 size={18} />}
+                    flip
+                    bgColor="bg-indigo-500 hover:bg-indigo-400"
+                    wWidth="w-full sm:w-auto"
+                    onClick={handleCopyPublicLink}
+                  />
+                  <BackgroundButton
+                    text="Revoke link"
+                    bgColor="bg-gray-600 hover:bg-gray-500"
+                    wWidth="w-full sm:w-auto"
+                    onClick={handleRevokePublicLink}
+                  />
+                </>
+              ) : (
+                <BackgroundButton
+                  text="Make public link"
+                  image={<Link2 size={18} />}
+                  flip
+                  bgColor="bg-indigo-500 hover:bg-indigo-400"
+                  wWidth="w-full sm:w-auto"
+                  onClick={handleMakePublicLink}
+                />
+              )}
+            </div>
+          </section>
+
+          {subjectShares.length > 0 ? (
+            <section>
+              <p className="text-sm font-bold text-white/90 mb-2 ml-1">People with access</p>
+              <div className="space-y-2">
+                {subjectShares.map((share) => (
+                  <div
+                    key={share.id}
+                    className="flex justify-between items-center gap-3 rounded-2xl bg-white/10 border border-white/15 px-3.5 py-3"
+                  >
+                    <span className="text-sm font-medium text-white/90 truncate min-w-0">
+                      {share.recipient_email}
+                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="relative share-permission-dropdown">
+                        <button
+                          type="button"
+                          onClick={() => setActiveShareDropdown(activeShareDropdown === share.id ? null : share.id)}
+                          className="capitalize flex items-center font-semibold text-white px-3 py-1.5 rounded-full bg-blue-500 background-shadow-new background-hover"
+                        >
+                          {share.permission}
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 ml-1">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                          </svg>
+                        </button>
+                        {activeShareDropdown === share.id && (
+                          <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => handleSharePermissionChange(share, 'viewer')}
+                              className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              Viewer
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleSharePermissionChange(share, 'editor')}
+                              className="w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            >
+                              Editor
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <BackgroundButton
+                        image={<X size={16} strokeWidth={3} />}
+                        bgColor="bg-red-500 hover:bg-red-400"
+                        onClick={() => setShareToRemove(share)}
+                        wSizing="w-9"
+                        hSizing="h-9"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <div className="py-6 text-center rounded-2xl bg-white/5 border border-white/10">
+              <Share2 size={32} className="mx-auto mb-2 text-white/40" />
+              <p className="text-sm font-semibold text-white/80">No collaborators yet</p>
+              <p className="mt-1 text-sm text-white/50">Invite someone above to give them access.</p>
+            </div>
+          )}
+        </div>
+      </GlassPanel>
+
+      <ConfirmModal
+        isOpen={Boolean(shareToRemove)}
+        onClose={() => setShareToRemove(null)}
+        onConfirm={handleConfirmRemoveShare}
+        title="Remove access"
+        message={`Remove access for ${shareToRemove?.recipient_email}?`}
+        icon={<Share2 size={20} />}
+        confirmText="Remove"
       />
 
       <ConfirmModal

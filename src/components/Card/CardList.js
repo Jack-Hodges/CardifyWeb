@@ -18,6 +18,7 @@ function CardList({
   onAddClick,
   onReorder,
   selectedIndex = 0,
+  readOnly = false,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { theme } = useUser();
@@ -56,11 +57,12 @@ function CardList({
   );
 
   return (
-    <div className="w-full h-full px-4 flex flex-col min-h-0">
-      <div className="flex items-center mb-4 justify-between sticky top-0 z-10 shrink-0">
-        <h2 className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${textColor}`}>
+    <div className="w-full h-full flex flex-col min-h-0">
+      <div className="flex items-center gap-3 mb-4 justify-between sticky top-0 z-10 shrink-0">
+        <h2 className={`font-bold text-2xl min-w-0 truncate ${shadow ? 'drop-shadow-custom' : ''} ${textColor}`}>
           All Flashcards
         </h2>
+        {!readOnly && (
         <BackgroundButton
           onClick={handleAddClick}
           image={plusIcon}
@@ -68,20 +70,21 @@ function CardList({
           bgColor={passedInColor}
           dataTour="create-add-card"
         />
+        )}
       </div>
 
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="card-list">
           {(provided) => (
             <ul
-              className="flex flex-col space-y-3 items-stretch flex-1 min-h-0 overflow-y-auto pb-8"
+              className="flex flex-col space-y-3 items-stretch flex-1 min-h-0 overflow-y-auto pb-8 pr-1.5"
               ref={provided.innerRef}
               {...provided.droppableProps}
             >
               {cards.map((card, index) => {
                 const isSelected = index === selectedIndex;
                 return (
-                  <Draggable key={String(card.id)} draggableId={String(card.id)} index={index}>
+                  <Draggable key={String(card.id)} draggableId={String(card.id)} index={index} isDragDisabled={readOnly}>
                     {(dragProvided, snapshot) => (
                       <li
                         ref={dragProvided.innerRef}
@@ -91,11 +94,12 @@ function CardList({
                           snapshot.isDragging
                             ? 'opacity-95 border-blue-500 bg-gray-50 dark:bg-gray-700 shadow-lg z-20'
                             : isSelected
-                              ? `${secondaryColor?.bgClass || 'bg-purple-500'} text-white border-[rgba(3,15,64,1)] shadow-[4px_4px_0_0_rgba(3,15,64,1)] dark:border-[rgba(56,57,59,1)] dark:shadow-[4px_4px_0_0_rgba(56,57,59,1)]`
+                              ? `${secondaryColor?.bgClass || 'bg-purple-500'} text-white background-shadow-new`
                               : 'bg-gray-50 dark:bg-gray-700 background-shadow-new'
                         }`}
                         style={dragProvided.draggableProps.style}
                       >
+                        {!readOnly && (
                         <button
                           type="button"
                           className={`shrink-0 h-full px-2 flex items-center cursor-grab active:cursor-grabbing touch-none ${
@@ -107,6 +111,7 @@ function CardList({
                         >
                           <GripVertical size={22} />
                         </button>
+                        )}
                         <button
                           type="button"
                           className={`flex-1 min-w-0 h-full px-3 flex items-center justify-center cursor-pointer ${

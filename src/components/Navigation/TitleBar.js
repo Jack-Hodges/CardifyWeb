@@ -2,6 +2,7 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
+import ProfileAvatar from "../Profile/ProfileAvatar";
 import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
 
 function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
@@ -95,9 +96,15 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
       {/* User Profile and Additional Content */}
       <div className="flex gap-2">
         {content}
-        <div className={`w-10 h-10 rounded-full bg-black flex items-center justify-center background-shadow-new background-hover cursor-pointer`}
+        <div className={`w-10 h-10 rounded-full background-shadow-new background-hover cursor-pointer overflow-hidden`}
           onClick={() => setIsProfileOpen(true)}>
-          <p className="text-white font-bold text-xl">{profile?.first_name?.charAt(0) || 'U'}</p>
+          <ProfileAvatar
+            avatarUrl={profile?.avatar_url}
+            firstName={profile?.first_name}
+            size="sm"
+            fallbackBgClass="bg-black"
+            className="w-full h-full"
+          />
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
+import ReactDOM from 'react-dom'
 import {
   Brush,
   Eraser,
@@ -10,14 +11,30 @@ import {
   Download
 } from 'lucide-react'
 import { SketchPicker } from 'react-color'
+import BackgroundButton from '../Elements/BackgroundButton'
+import { useUser } from '../../UserContext'
 
 // Wrap the component with forwardRef so we can expose methods to the parent.
 const Drawing = forwardRef((props, ref) => {
+  const { theme } = useUser()
+  const { primaryColor, secondaryColor, tertiaryColor } = theme || {}
+  const primaryBtn = theme
+    ? `${primaryColor.bgClass} ${primaryColor.hoverClass}`
+    : 'bg-blue-500 hover:bg-blue-400'
+  const secondaryBtn = theme
+    ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+    : 'bg-orange-500 hover:bg-orange-400'
+  const tertiaryBtn = theme
+    ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
+    : 'bg-purple-500 hover:bg-purple-400'
+  const idleBtn = 'bg-gray-500 hover:bg-gray-400'
   // Refs for two canvases: one for drawing, one for images
+  const containerRef = useRef(null)
   const drawingCanvasRef = useRef(null)
   const drawingContextRef = useRef(null)
   const imageCanvasRef = useRef(null)
   const imageContextRef = useRef(null)
+  const sizeRef = useRef({ width: 0, height: 0, dpr: 1 })
   
   // Drawing state and other variables
   const [isDrawing, setIsDrawing] = useState(false)
@@ -38,6 +55,16 @@ const Drawing = forwardRef((props, ref) => {
   const [initialImageProps, setInitialImageProps] = useState(null)
   const undoStack = useRef([])
   const redoStack = useRef([])
+  const brushSizeRef = useRef(brushSize)
+  const brushColorRef = useRef(brushColor)
+  const eraserSizeRef = useRef(eraserSize)
+  const modeRef = useRef(mode)
+  const drawImagesRef = useRef(() => {})
+
+  useEffect(() => { brushSizeRef.current = brushSize }, [brushSize])
+  useEffect(() => { brushColorRef.current = brushColor }, [brushColor])
+  useEffect(() => { eraserSizeRef.current = eraserSize }, [eraserSize])
+  useEffect(() => { modeRef.current = mode }, [mode])
 
   // Helper to extract pointer coordinates from both mouse and touch events
   const getEventPos = (e, canvas) => {
@@ -53,6 +80,7 @@ const Drawing = forwardRef((props, ref) => {
       clientY = e.clientY
     }
     const rect = canvas.getBoundingClientRect()
+    // Context is scaled by devicePixelRatio, so use CSS-pixel offsets
     return {
       offsetX: clientX - rect.left,
       offsetY: clientY - rect.top,
@@ -61,30 +89,79 @@ const Drawing = forwardRef((props, ref) => {
     }
   }
 
-  // Initialize drawing canvas once on mount
-  useEffect(() => {
-    const canvas = drawingCanvasRef.current
-    canvas.width = window.innerWidth * 2
-    canvas.height = window.innerHeight * 2
-    canvas.style.width = `${window.innerWidth}px`
-    canvas.style.height = `100dvh`
-    // Prevent scrolling/pinch-zoom on mobile
-    canvas.style.touchAction = 'none'
-    const context = canvas.getContext('2d')
-    context.scale(2, 2)
-    context.lineCap = 'round'
-    context.lineWidth = brushSize
-    context.lineJoin = 'round'
-    context.strokeStyle = brushColor
-    drawingContextRef.current = context
-    // Save initial (blank) state for undo
-    const initialState = context.getImageData(0, 0, canvas.width, canvas.height)
-    undoStack.current.push(initialState)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only canvas setup
+  const applyStrokeStyle = (ctx) => {
+    if (!ctx) return
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    if (modeRef.current === 'erase') {
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.lineWidth = eraserSizeRef.current
+    } else {
+      ctx.globalCompositeOperation = 'source-over'
+      ctx.lineWidth = brushSizeRef.current
+      ctx.strokeStyle = brushColorRef.current
+    }
+  }
+
+  const syncCanvasSize = useCallback((preserveDrawing = true) => {
+    const container = containerRef.current
+    const drawingCanvas = drawingCanvasRef.current
+    const imageCanvas = imageCanvasRef.current
+    if (!container || !drawingCanvas || !imageCanvas) return
+
+    const width = Math.max(1, Math.floor(container.clientWidth))
+    const height = Math.max(1, Math.floor(container.clientHeight))
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const prev = sizeRef.current
+
+    if (prev.width === width && prev.height === height && prev.dpr === dpr && drawingContextRef.current) {
+      return
+    }
+
+    let savedDrawing = null
+    if (preserveDrawing && drawingCanvas.width > 0 && drawingCanvas.height > 0) {
+      savedDrawing = document.createElement('canvas')
+      savedDrawing.width = drawingCanvas.width
+      savedDrawing.height = drawingCanvas.height
+      savedDrawing.getContext('2d').drawImage(drawingCanvas, 0, 0)
+    }
+
+    const setup = (canvas) => {
+      canvas.width = Math.floor(width * dpr)
+      canvas.height = Math.floor(height * dpr)
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      canvas.style.touchAction = 'none'
+      const ctx = canvas.getContext('2d')
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.scale(dpr, dpr)
+      return ctx
+    }
+
+    const drawingCtx = setup(drawingCanvas)
+    const imageCtx = setup(imageCanvas)
+
+    if (savedDrawing) {
+      drawingCtx.setTransform(1, 0, 0, 1, 0, 0)
+      drawingCtx.drawImage(savedDrawing, 0, 0, drawingCanvas.width, drawingCanvas.height)
+      drawingCtx.scale(dpr, dpr)
+    }
+
+    applyStrokeStyle(drawingCtx)
+    drawingContextRef.current = drawingCtx
+    imageContextRef.current = imageCtx
+    sizeRef.current = { width, height, dpr }
+
+    if (!preserveDrawing || undoStack.current.length === 0) {
+      const initialState = drawingCtx.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height)
+      undoStack.current = [initialState]
+      redoStack.current = []
+    }
   }, [])
 
   useEffect(() => {
     if (mode === 'brush' && drawingContextRef.current) {
+      drawingContextRef.current.globalCompositeOperation = 'source-over'
       drawingContextRef.current.lineWidth = brushSize
       drawingContextRef.current.strokeStyle = brushColor
     }
@@ -92,6 +169,7 @@ const Drawing = forwardRef((props, ref) => {
 
   useEffect(() => {
     if (mode === 'erase' && drawingContextRef.current) {
+      drawingContextRef.current.globalCompositeOperation = 'destination-out'
       drawingContextRef.current.lineWidth = eraserSize
     }
   }, [eraserSize, mode])
@@ -111,10 +189,33 @@ const Drawing = forwardRef((props, ref) => {
     }
   }, [selectedImageId])
 
+  // Size canvases to the visible container (not the full viewport)
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return undefined
+
+    const resize = () => {
+      syncCanvasSize(true)
+      drawImagesRef.current?.()
+    }
+
+    syncCanvasSize(false)
+    drawImagesRef.current?.()
+
+    const observer = new ResizeObserver(resize)
+    observer.observe(container)
+    window.addEventListener('orientationchange', resize)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('orientationchange', resize)
+    }
+  }, [syncCanvasSize])
+
   // Drawing handlers (note: preventDefault() calls have been removed)
   const startDrawing = (e) => {
     if (mode === 'brush' || mode === 'erase') {
-        e.preventDefault()
+      e.preventDefault()
       setShowBrushSettings(false)
       setShowEraserSettings(false)
       setShowSizeInput(false)
@@ -129,10 +230,9 @@ const Drawing = forwardRef((props, ref) => {
 
   const finishDrawing = (e) => {
     if (mode === 'brush' || mode === 'erase') {
-        e && e.preventDefault()
+      e && e.preventDefault()
       drawingContextRef.current.closePath()
       setIsDrawing(false)
-      setShowCursor(false)
       const canvas = drawingCanvasRef.current
       const imageData = drawingContextRef.current.getImageData(0, 0, canvas.width, canvas.height)
       undoStack.current.push(imageData)
@@ -153,12 +253,28 @@ const Drawing = forwardRef((props, ref) => {
   const handleMouseMove = (e) => {
     const pos = getEventPos(e, drawingCanvasRef.current)
     setCursorPos({ x: pos.clientX, y: pos.clientY })
+    if (mode === 'brush' || mode === 'erase') {
+      setShowCursor(true)
+    }
+  }
+
+  const handleCursorEnter = (e) => {
+    if (mode !== 'brush' && mode !== 'erase') return
+    const pos = getEventPos(e, drawingCanvasRef.current)
+    setCursorPos({ x: pos.clientX, y: pos.clientY })
+    setShowCursor(true)
+  }
+
+  const handleCursorLeave = () => {
+    setShowCursor(false)
   }
 
   const handleModeSwitch = (newMode) => {
     if (newMode !== 'select') {
       setSelectedImageId(null)
       setImageAction(null)
+    } else {
+      setShowCursor(false)
     }
     setMode(newMode)
     
@@ -198,7 +314,8 @@ const Drawing = forwardRef((props, ref) => {
   const handleClear = () => {
     if (window.confirm('Are you sure you want to clear the canvas and remove all images?')) {
       const canvas = drawingCanvasRef.current
-      drawingContextRef.current.clearRect(0, 0, canvas.width, canvas.height)
+      const { width, height } = sizeRef.current
+      drawingContextRef.current.clearRect(0, 0, width, height)
       const clearedState = drawingContextRef.current.getImageData(0, 0, canvas.width, canvas.height)
       undoStack.current.push(clearedState)
       redoStack.current = []
@@ -226,8 +343,9 @@ const Drawing = forwardRef((props, ref) => {
   const drawImages = useCallback(() => {
     const canvas = imageCanvasRef.current
     const ctx = imageContextRef.current
-    if (!ctx) return
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    if (!ctx || !canvas) return
+    const { width, height } = sizeRef.current
+    ctx.clearRect(0, 0, width || canvas.width, height || canvas.height)
     images.forEach((image) => {
       ctx.save()
       ctx.translate(image.x, image.y)
@@ -254,16 +372,11 @@ const Drawing = forwardRef((props, ref) => {
   }, [images, selectedImageId])
 
   useEffect(() => {
-    const canvas = imageCanvasRef.current
-    canvas.width = window.innerWidth * 2
-    canvas.height = window.innerHeight * 2
-    canvas.style.width = `${window.innerWidth}px`
-    canvas.style.height = `100dvh`
-    canvas.style.touchAction = 'none'
-    const ctx = canvas.getContext('2d')
-    ctx.scale(2, 2)
-    imageContextRef.current = ctx
     drawImages()
+  }, [drawImages])
+
+  useEffect(() => {
+    drawImagesRef.current = drawImages
   }, [drawImages])
 
   const fileInputRef = useRef(null)
@@ -285,11 +398,12 @@ const Drawing = forwardRef((props, ref) => {
         const originalDataUrl = offCanvas.toDataURL(file.type, 1);
         const highQualityImg = new Image();
         highQualityImg.onload = () => {
+          const { width, height } = sizeRef.current
           const newImage = {
             id: Date.now(),
             img: highQualityImg,
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: (width || 400) / 2,
+            y: (height || 400) / 2,
             width: offCanvas.width,
             height: offCanvas.height,
             rotation: 0
@@ -418,218 +532,220 @@ const Drawing = forwardRef((props, ref) => {
   }))
 
   return (
-    <div style={{ margin: 0, padding: 0, touchAction: 'none' }}>
-      <div style={{ position: 'relative', width: '100vw', height: '100dvh' }}>
-        {/* Bottom toolbar */}
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30 flex gap-6 items-center bg-white rounded-lg p-2 shadow-md">
-          <button
-            onClick={() => handleModeSwitch('brush')}
-            className={`${mode === 'brush' ? 'bg-gray-100' : ''} hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100`}
-          >
-            <Brush size={30} color="#4f4f4f" />
-          </button>
-          {mode === 'brush' && (
-            <div className="flex gap-6">
-              <div
-                className="w-10 h-10 rounded-full cursor-pointer"
-                style={{ backgroundColor: brushColor, position: 'relative' }}
+    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-white" style={{ margin: 0, padding: 0, touchAction: 'none' }}>
+      <div className="absolute inset-0">
+        <canvas
+          ref={imageCanvasRef}
+          onClick={() => { 
+            setShowSketchPicker(false)
+            setShowSizeInput(false)
+            setShowEraserSettings(false)
+          }}
+          onMouseDown={handleImageCanvasMouseDown}
+          onMouseMove={handleImageCanvasMouseMove}
+          onMouseUp={handleImageCanvasMouseUp}
+          onTouchStart={handleImageCanvasMouseDown}
+          onTouchMove={handleImageCanvasMouseMove}
+          onTouchEnd={handleImageCanvasMouseUp}
+          style={{
+            display: 'block',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            pointerEvents: mode === 'select' ? 'auto' : 'none',
+            zIndex: 1,
+            touchAction: 'none',
+            cursor: mode === 'select' ? 'default' : 'none'
+          }}
+        />
+        <canvas
+          ref={drawingCanvasRef}
+          onClick={() => { 
+            setShowSketchPicker(false)
+            setShowSizeInput(false)
+            setShowEraserSettings(false)
+          }}
+          onMouseDown={startDrawing}
+          onMouseUp={finishDrawing}
+          onMouseEnter={handleCursorEnter}
+          onMouseLeave={handleCursorLeave}
+          onMouseMove={(e) => {
+            draw(e)
+            handleMouseMove(e)
+          }}
+          onTouchStart={startDrawing}
+          onTouchMove={(e) => {
+            draw(e)
+            handleMouseMove(e)
+          }}
+          onTouchEnd={finishDrawing}
+          style={{
+            display: 'block',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 2,
+            pointerEvents: mode === 'select' ? 'none' : 'auto',
+            touchAction: 'none',
+            cursor: mode === 'brush' || mode === 'erase' ? 'none' : 'default'
+          }}
+        />
+      </div>
+
+      {/* Free-floating tools — along the bottom */}
+      <div className="absolute bottom-4 left-4 right-4 z-30 flex flex-wrap items-center justify-center gap-2">
+        <BackgroundButton
+          image={<Brush size={20} strokeWidth={2.5} />}
+          bgColor={mode === 'brush' ? primaryBtn : idleBtn}
+          onClick={() => handleModeSwitch('brush')}
+        />
+        {mode === 'brush' && (
+          <>
+            <div className="relative">
+              <button
+                type="button"
+                title="Brush color"
+                className="relative inline-flex items-center justify-center w-10 h-10 rounded-full background-shadow-new background-hover"
+                style={{ backgroundColor: brushColor }}
                 onClick={(e) => {
                   e.stopPropagation()
-                  setShowSketchPicker(true)
+                  setShowSketchPicker((v) => !v)
+                  setShowSizeInput(false)
                 }}
-              >
-                {showSketchPicker && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      zIndex: 50,
-                      bottom: 'calc(100% + 10px)'
-                    }}
-                  >
-                    <SketchPicker
-                      color={brushColor}
-                      onChange={(color) => setBrushColor(color.hex)}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="relative inline-block">
+              />
+              {showSketchPicker && (
                 <div
-                  className="w-10 h-10 rounded-full border border-black flex items-center justify-center cursor-pointer"
-                  onClick={() => setShowSizeInput((prev) => !prev)}
+                  className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 rounded-xl overflow-hidden background-shadow-new bg-white"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <div
-                    style={{
-                      width: `${(brushSize / 50) * 100}%`,
-                      height: `${(brushSize / 50) * 100}%`
-                    }}
-                    className="rounded-full bg-current"
-                  />
-                </div>
-                {showSizeInput && (
-                  <div className="absolute top-[-70px] left-[-30px]">
-                    <input
-                      type="range"
-                      min="1"
-                      max="50"
-                      value={brushSize}
-                      onChange={(e) => setBrushSize(parseInt(e.target.value))}
-                      style={{
-                        transform: 'rotate(-90deg)',
-                        width: '100px',
-                        position: 'absolute'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          <button
-            onClick={() => handleModeSwitch('erase')}
-            className={`${mode === 'erase' ? 'bg-gray-100' : ''} hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100`}
-          >
-            <Eraser size={30} color="#4f4f4f" />
-          </button>
-          {mode === 'erase' && (
-            <div className="relative inline-block">
-              <div
-                className="w-10 h-10 rounded-full border border-black flex items-center justify-center cursor-pointer"
-                onClick={() => setShowEraserSettings((prev) => !prev)}
-              >
-                <div
-                  style={{
-                    width: `${(eraserSize / 50) * 100}%`,
-                    height: `${(eraserSize / 50) * 100}%`
-                  }}
-                  className="rounded-full bg-current"
-                />
-              </div>
-              {showEraserSettings && (
-                <div className="absolute top-[-70px] left-[-30px]">
-                  <input
-                    type="range"
-                    min="1"
-                    max="50"
-                    value={eraserSize}
-                    onChange={(e) => setEraserSize(parseInt(e.target.value))}
-                    style={{
-                      transform: 'rotate(-90deg)',
-                      width: '100px',
-                      position: 'absolute'
-                    }}
+                  <SketchPicker
+                    color={brushColor}
+                    onChange={(color) => setBrushColor(color.hex)}
                   />
                 </div>
               )}
             </div>
-          )}
-          <button
-            onClick={() => handleModeSwitch('select')}
-            className={`${mode === 'select' ? 'bg-gray-100' : ''} hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100`}
-          >
-            <MousePointer size={30} color="#4f4f4f" />
-          </button>
-          <button
-            onClick={handleUndo}
-            className="hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100"
-          >
-            <RotateCcw size={30} color="#4f4f4f" />
-          </button>
-          <button
-            onClick={handleRedo}
-            className="hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100"
-          >
-            <RotateCw size={30} color="#4f4f4f" />
-          </button>
-          <button
-            onClick={handleClear}
-            className="hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100"
-          >
-            <Trash size={30} color="#4f4f4f" />
-          </button>
-          <button
-            onClick={() => fileInputRef.current.click()}
-            className="hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100"
-          >
-            <ImageIcon size={30} color="#4f4f4f" />
-          </button>
-          <button
-            onClick={handleDownload}
-            className="hover:bg-gray-200 border-none cursor-pointer p-2 rounded-md transition duration-100"
-          >
-            <Download size={30} color="#4f4f4f" />
-          </button>
-        </div>
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-          <canvas
-            ref={imageCanvasRef}
-            onClick={() => { 
-              setShowSketchPicker(false)
-              setShowSizeInput(false)
-            }}
-            onMouseDown={handleImageCanvasMouseDown}
-            onMouseMove={handleImageCanvasMouseMove}
-            onMouseUp={handleImageCanvasMouseUp}
-            onTouchStart={handleImageCanvasMouseDown}
-            onTouchMove={handleImageCanvasMouseMove}
-            onTouchEnd={handleImageCanvasMouseUp}
-            style={{
-              border: '1px solid transparent',
-              display: 'block',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              pointerEvents: mode === 'select' ? 'auto' : 'none',
-              zIndex: 1,
-              touchAction: 'none'
-            }}
-          />
-          <canvas
-            ref={drawingCanvasRef}
-            onClick={() => { 
-              setShowSketchPicker(false)
-              setShowSizeInput(false)
-            }}
-            onMouseDown={startDrawing}
-            onMouseUp={finishDrawing}
-            onMouseMove={(e) => {
-              draw(e)
-              handleMouseMove(e)
-            }}
-            onTouchStart={startDrawing}
-            onTouchMove={(e) => {
-              draw(e)
-              handleMouseMove(e)
-            }}
-            onTouchEnd={finishDrawing}
-            style={{
-              border: '1px solid #000',
-              display: 'block',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              zIndex: 2,
-              pointerEvents: mode === 'select' ? 'none' : 'auto',
-              touchAction: 'none'
-            }}
-          />
-        </div>
-        {showCursor && (mode === 'brush' || mode === 'erase') && (
+            <div className="relative">
+              <BackgroundButton
+                image={
+                  <span
+                    className="rounded-full bg-white"
+                    style={{
+                      width: `${Math.max(6, (brushSize / 50) * 22)}px`,
+                      height: `${Math.max(6, (brushSize / 50) * 22)}px`
+                    }}
+                  />
+                }
+                bgColor={secondaryBtn}
+                onClick={() => {
+                  setShowSizeInput((prev) => !prev)
+                  setShowSketchPicker(false)
+                }}
+              />
+              {showSizeInput && (
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 bg-white rounded-xl px-3 py-2 background-shadow-new">
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    value={brushSize}
+                    onChange={(e) => setBrushSize(parseInt(e.target.value, 10))}
+                    className="w-28"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        <BackgroundButton
+          image={<Eraser size={20} strokeWidth={2.5} />}
+          bgColor={mode === 'erase' ? primaryBtn : idleBtn}
+          onClick={() => handleModeSwitch('erase')}
+        />
+        {mode === 'erase' && (
+          <div className="relative">
+            <BackgroundButton
+              image={
+                <span
+                  className="rounded-full bg-white"
+                  style={{
+                    width: `${Math.max(6, (eraserSize / 50) * 22)}px`,
+                    height: `${Math.max(6, (eraserSize / 50) * 22)}px`
+                  }}
+                />
+              }
+              bgColor={secondaryBtn}
+              onClick={() => setShowEraserSettings((prev) => !prev)}
+            />
+            {showEraserSettings && (
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-50 bg-white rounded-xl px-3 py-2 background-shadow-new">
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  value={eraserSize}
+                  onChange={(e) => setEraserSize(parseInt(e.target.value, 10))}
+                  className="w-28"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        <BackgroundButton
+          image={<MousePointer size={20} strokeWidth={2.5} />}
+          bgColor={mode === 'select' ? primaryBtn : idleBtn}
+          onClick={() => handleModeSwitch('select')}
+        />
+        <BackgroundButton
+          image={<RotateCcw size={20} strokeWidth={2.5} />}
+          bgColor={idleBtn}
+          onClick={handleUndo}
+        />
+        <BackgroundButton
+          image={<RotateCw size={20} strokeWidth={2.5} />}
+          bgColor={idleBtn}
+          onClick={handleRedo}
+        />
+        <BackgroundButton
+          image={<Trash size={20} strokeWidth={2.5} />}
+          bgColor="bg-red-500 hover:bg-red-400"
+          onClick={handleClear}
+        />
+        <BackgroundButton
+          image={<ImageIcon size={20} strokeWidth={2.5} />}
+          bgColor={tertiaryBtn}
+          onClick={() => fileInputRef.current.click()}
+        />
+        <BackgroundButton
+          image={<Download size={20} strokeWidth={2.5} />}
+          bgColor={secondaryBtn}
+          onClick={handleDownload}
+        />
+      </div>
+
+      {showCursor &&
+        (mode === 'brush' || mode === 'erase') &&
+        ReactDOM.createPortal(
           <div
             style={{
               position: 'fixed',
-              top: cursorPos.y - currentSize / 2,
-              left: cursorPos.x - currentSize / 2,
+              top: cursorPos.y,
+              left: cursorPos.x,
               width: currentSize,
               height: currentSize,
-              border: '1px solid gray',
+              transform: 'translate(-50%, -50%)',
+              border: mode === 'brush' ? `2px solid ${brushColor}` : '2px solid rgba(3,15,64,0.55)',
               borderRadius: '50%',
+              backgroundColor: mode === 'brush' ? `${brushColor}22` : 'rgba(3,15,64,0.08)',
               pointerEvents: 'none',
-              zIndex: 40
+              zIndex: 200,
+              boxSizing: 'border-box'
             }}
-          />
+          />,
+          document.body
         )}
-      </div>
       <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} style={{ display: 'none' }} />
     </div>
   )

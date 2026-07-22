@@ -23,6 +23,7 @@ function CardControls({
   isGenerateModalOpen,
   setIsGenerateModalOpen,
   isGenerating,
+  readOnly = false,
 }) {
   const { theme, profile } = useUser();
   const { shadow, primaryColor, secondaryColor } = theme;
@@ -73,7 +74,7 @@ function CardControls({
 
   return (
     <div className={`w-full h-12 flex items-center ${create ? 'justify-between' : 'justify-end'}`}>
-      {create && (
+      {create && !readOnly && (
         <div className="mt-2 flex gap-2">
           <div className="hidden sm:block">
             <BackgroundButton

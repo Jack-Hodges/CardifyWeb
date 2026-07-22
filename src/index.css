@@ -138,6 +138,12 @@ html {
   @apply sm:focus:shadow-none sm:focus:translate-x-1 sm:focus:translate-y-1 transition-all duration-300 transform;
 }
 
+.background-pressed {
+  @apply border-4 translate-x-1 translate-y-1 transition-all duration-300 transform;
+  border-color: var(--theme-border-color);
+  box-shadow: none;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

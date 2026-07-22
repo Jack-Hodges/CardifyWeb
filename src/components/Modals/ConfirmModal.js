@@ -66,7 +66,7 @@ function ConfirmModal({
 
   return ReactDOM.createPortal(
     <div
-      className={`fixed inset-0 flex items-center justify-center z-[60] p-4 sm:p-6 transition-opacity duration-300 ${
+      className={`fixed inset-0 flex items-center justify-center z-[80] p-4 sm:p-6 transition-opacity duration-300 ${
         isClosing ? 'opacity-0' : 'opacity-100'
       }`}
       onClick={(e) => e.stopPropagation()}

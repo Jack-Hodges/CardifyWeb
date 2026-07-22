@@ -1,14 +1,16 @@
 import ReactDOM from 'react-dom';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { getThemeAssets } from '../Functions/getTheme';
-import { getCardArtAssets } from '../Functions/getCardArt';
-import { saveProfile } from './ProfileManipulation';
+import { getThemeAssets, getThemesByCategory, normalizeThemeKey } from '../Functions/getTheme';
+import { getCardArtAssets, getCardArtByCategory, normalizeCardArtKey } from '../Functions/getCardArt';
+import { saveProfile, uploadProfilePicture, removeProfilePicture } from './ProfileManipulation';
 import { getShares, fetchSubjects, removeShare, saveShare, fetchPendingShareInvites, respondShareInvite } from '../Subject/SubjectManipulation';
 import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail } from 'lucide-react';
 import Modal from '../Modals/Modal';
+import GlassPanel from '../Modals/GlassPanel';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
+import ProfileAvatar from './ProfileAvatar';
 
 function assetBackground(url) {
     if (!url) return undefined;
@@ -19,91 +21,6 @@ function assetBackground(url) {
     return `url(${url})`;
 }
 
-function GlassPanel({ isOpen, onClose, title, subtitle, icon, children, footer, wide = false }) {
-    const [isVisible, setIsVisible] = useState(false);
-    const [isClosing, setIsClosing] = useState(false);
-
-    const handleClose = () => {
-        if (isClosing) return;
-        setIsClosing(true);
-        setTimeout(() => {
-            setIsVisible(false);
-            setIsClosing(false);
-            onClose();
-        }, 300);
-    };
-
-    useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-            setIsClosing(false);
-            return;
-        }
-        setIsVisible(false);
-        setIsClosing(false);
-    }, [isOpen]);
-
-    useBodyScrollLock(isVisible || isClosing);
-
-    useEffect(() => {
-        if (!isVisible) return;
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape') handleClose();
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [isVisible]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    if (!isVisible && !isClosing) return null;
-
-    return ReactDOM.createPortal(
-        <div
-            className={`fixed inset-0 flex items-center justify-center z-[60] p-0 sm:p-6 transition-opacity duration-300 ${
-                isClosing ? 'opacity-0' : 'opacity-100'
-            }`}
-        >
-            <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
-            <div
-                className={`relative w-full ${wide ? 'sm:max-w-4xl' : 'sm:max-w-lg'} h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
-                    bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
-                    sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
-                    transform transition-all duration-300 ease-in-out
-                    ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                {icon}
-                                <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">{title}</h2>
-                            </div>
-                            {subtitle && (
-                                <p className="text-sm text-white/60">{subtitle}</p>
-                            )}
-                        </div>
-                        <BackgroundButton
-                            image={<X size={20} strokeWidth={3} />}
-                            bgColor="bg-red-500 hover:bg-red-400"
-                            onClick={handleClose}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
-                    {children}
-                </div>
-
-                {footer && (
-                    <div className="flex-none px-5 sm:px-7 py-4 border-t border-white/15 bg-black/10">
-                        {footer}
-                    </div>
-                )}
-            </div>
-        </div>,
-        document.body
-    );
-}
 
 function ProfileModal({ isOpen, onClose, logout }) {
     const { theme, profile, user, setProfile } = useUser();
@@ -121,8 +38,12 @@ function ProfileModal({ isOpen, onClose, logout }) {
     const [isInboxOpen, setIsInboxOpen] = useState(false);
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
+    const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const photoInputRef = useRef(null);
     const themeAssets = getThemeAssets();
+    const themeSections = getThemesByCategory();
     const cardArtAssets = useMemo(() => getCardArtAssets(), []);
+    const cardArtSections = useMemo(() => getCardArtByCategory(), []);
     const { color, secondaryColor } = theme;
 
     useEffect(() => {
@@ -176,7 +97,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
 
     const handleCardArtSelect = async (cardArtName) => {
         try {
-            const cardArtKey = cardArtName.toLowerCase();
+            const cardArtKey = normalizeCardArtKey(cardArtName);
             const updated = await saveProfile(
                 profile.id,
                 profile.first_name,
@@ -354,6 +275,44 @@ function ProfileModal({ isOpen, onClose, logout }) {
         setIsEditModalOpen(true);
     };
 
+    const handlePhotoSelect = async (event) => {
+        const file = event.target.files?.[0];
+        event.target.value = '';
+        if (!file || !profile?.id) return;
+
+        setIsUploadingPhoto(true);
+        try {
+            const updated = await uploadProfilePicture(profile.id, file);
+            if (updated) {
+                setProfile({
+                    ...updated,
+                    avatar_url: updated.avatar_url
+                        ? `${updated.avatar_url.split('?')[0]}?v=${Date.now()}`
+                        : null,
+                });
+            }
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+        } finally {
+            setIsUploadingPhoto(false);
+        }
+    };
+
+    const handleRemovePhoto = async () => {
+        if (!profile?.id || !profile?.avatar_url) return;
+
+        setIsUploadingPhoto(true);
+        try {
+            const updated = await removeProfilePicture(profile.id);
+            if (updated) setProfile(updated);
+            else setProfile({ ...profile, avatar_url: null });
+        } catch (error) {
+            console.error('Error removing profile picture:', error);
+        } finally {
+            setIsUploadingPhoto(false);
+        }
+    };
+
     const handleSaveEdit = async () => {
         try {
             const updated = await saveProfile(
@@ -378,9 +337,12 @@ function ProfileModal({ isOpen, onClose, logout }) {
     const genLimit = profile.pro ? 60 : 20;
     const cardCount = profile.flashcard_count || 0;
     const genCount = profile.generation_count || 0;
-    const currentThemeAsset = themeAssets.find(asset => asset.name.toLowerCase() === theme.name);
-    const currentCardArt = cardArtAssets.find(asset => asset.name.toLowerCase() === profile.card_art);
-    const initial = profile?.first_name?.charAt(0)?.toUpperCase() || 'U';
+    const currentThemeAsset = themeAssets.find(
+        (asset) => normalizeThemeKey(asset.name) === normalizeThemeKey(profile?.theme || theme.name)
+    );
+    const currentCardArt = cardArtAssets.find(
+        (asset) => normalizeCardArtKey(asset.name) === normalizeCardArtKey(profile?.card_art)
+    );
 
     return (
         <>
@@ -408,9 +370,12 @@ function ProfileModal({ isOpen, onClose, logout }) {
                         <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex items-center gap-4 min-w-0">
-                                    <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold shrink-0 ${secondaryColor?.bgClass || 'bg-purple-500'}`}>
-                                        {initial}
-                                    </div>
+                                    <ProfileAvatar
+                                        avatarUrl={profile.avatar_url}
+                                        firstName={profile.first_name}
+                                        size="md"
+                                        fallbackBgClass={secondaryColor?.bgClass || 'bg-purple-500'}
+                                    />
                                     <div className="min-w-0">
                                         <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">
                                             Hey, {profile.first_name}!
@@ -660,36 +625,47 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 icon={<Palette size={22} className="text-white/90 shrink-0" />}
                 wide
             >
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {themeAssets.map((asset) => {
-                        const selected = asset.name.toLowerCase() === theme.name;
-                        return (
-                            <button
-                                type="button"
-                                key={asset.name}
-                                className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
-                                    selected ? 'ring-4 ring-green-400' : ''
-                                }`}
-                                onClick={() => {
-                                    handleThemeSelect(asset.name);
-                                    setIsThemeModalOpen(false);
-                                }}
-                            >
-                                <div
-                                    className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-200 dark:bg-gray-600"
-                                    style={{ backgroundImage: assetBackground(asset.url) }}
-                                />
-                                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
-                                    {asset.name}
-                                </p>
-                                {selected && (
-                                    <p className="text-xs font-semibold text-green-600 dark:text-green-400 px-0.5">
-                                        Current
-                                    </p>
-                                )}
-                            </button>
-                        );
-                    })}
+                <div className="space-y-6">
+                    {themeSections.map((section) => (
+                        <div key={section.id}>
+                            <h3 className="text-sm font-bold uppercase tracking-wide text-white/60 mb-3">
+                                {section.label}
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                                {section.themes.map((asset) => {
+                                    const selected =
+                                        normalizeThemeKey(asset.name) ===
+                                        normalizeThemeKey(profile?.theme || theme.name);
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={asset.name}
+                                            className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
+                                                selected ? 'ring-4 ring-green-400' : ''
+                                            }`}
+                                            onClick={() => {
+                                                handleThemeSelect(asset.name);
+                                                setIsThemeModalOpen(false);
+                                            }}
+                                        >
+                                            <div
+                                                className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-200 dark:bg-gray-600"
+                                                style={{ backgroundImage: assetBackground(asset.url) }}
+                                            />
+                                            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
+                                                {asset.name}
+                                            </p>
+                                            {selected && (
+                                                <p className="text-xs font-semibold text-green-600 dark:text-green-400 px-0.5">
+                                                    Current
+                                                </p>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </GlassPanel>
 
@@ -701,40 +677,51 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 icon={<ImageIcon size={22} className="text-white/90 shrink-0" />}
                 wide
             >
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                    {cardArtAssets.map((asset) => {
-                        const selected = asset.name.toLowerCase() === (profile.card_art || 'none');
-                        return (
-                            <button
-                                type="button"
-                                key={asset.name}
-                                className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
-                                    selected ? 'ring-4 ring-purple-400' : ''
-                                }`}
-                                onClick={() => {
-                                    handleCardArtSelect(asset.name);
-                                    setIsCardArtModalOpen(false);
-                                }}
-                            >
-                                <div
-                                    className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-100 dark:bg-gray-600 flex items-center justify-center"
-                                    style={{ backgroundImage: asset.url ? `url(${asset.url})` : undefined }}
-                                >
-                                    {!asset.url && (
-                                        <span className="text-sm font-bold text-gray-400">None</span>
-                                    )}
-                                </div>
-                                <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
-                                    {asset.name}
-                                </p>
-                                {selected && (
-                                    <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 px-0.5">
-                                        Current
-                                    </p>
-                                )}
-                            </button>
-                        );
-                    })}
+                <div className="space-y-6">
+                    {cardArtSections.map((section) => (
+                        <div key={section.id}>
+                            <h3 className="text-sm font-bold uppercase tracking-wide text-white/60 mb-3">
+                                {section.label}
+                            </h3>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                                {section.items.map((asset) => {
+                                    const selected =
+                                        normalizeCardArtKey(asset.name) ===
+                                        normalizeCardArtKey(profile?.card_art);
+                                    return (
+                                        <button
+                                            type="button"
+                                            key={asset.name}
+                                            className={`text-left bg-white dark:bg-gray-700 rounded-2xl p-2.5 background-shadow-new background-hover cursor-pointer ${
+                                                selected ? 'ring-4 ring-purple-400' : ''
+                                            }`}
+                                            onClick={() => {
+                                                handleCardArtSelect(asset.name);
+                                                setIsCardArtModalOpen(false);
+                                            }}
+                                        >
+                                            <div
+                                                className="h-24 sm:h-28 w-full rounded-xl mb-2 bg-cover bg-center bg-gray-100 dark:bg-gray-600 flex items-center justify-center"
+                                                style={{ backgroundImage: asset.url ? `url(${asset.url})` : undefined }}
+                                            >
+                                                {!asset.url && (
+                                                    <span className="text-sm font-bold text-gray-400">None</span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm font-bold text-gray-800 dark:text-gray-100 truncate px-0.5">
+                                                {asset.name}
+                                            </p>
+                                            {selected && (
+                                                <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 px-0.5">
+                                                    Current
+                                                </p>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </GlassPanel>
 
@@ -756,6 +743,46 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 }
             >
                 <div className="space-y-6">
+                    <div>
+                        <p className="text-sm font-bold text-white/90 mb-3 ml-1">Profile picture</p>
+                        <div className="flex items-center gap-4">
+                            <ProfileAvatar
+                                avatarUrl={profile.avatar_url}
+                                firstName={profile.first_name}
+                                size="md"
+                                fallbackBgClass={secondaryColor?.bgClass || 'bg-purple-500'}
+                            />
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <BackgroundButton
+                                    text={isUploadingPhoto ? 'Uploading…' : 'Upload photo'}
+                                    image={<ImageIcon size={18} />}
+                                    flip
+                                    bgColor="bg-blue-500 hover:bg-blue-400"
+                                    onClick={() => photoInputRef.current?.click()}
+                                    disabled={isUploadingPhoto}
+                                />
+                                {profile.avatar_url && (
+                                    <BackgroundButton
+                                        text="Remove"
+                                        bgColor="bg-gray-600 hover:bg-gray-500"
+                                        onClick={handleRemovePhoto}
+                                        disabled={isUploadingPhoto}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <p className="text-xs text-white/50 mt-2 ml-1">
+                            Photos are resized to a small avatar before upload.
+                        </p>
+                        <input
+                            ref={photoInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoSelect}
+                            className="hidden"
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-sm font-bold text-white/90 mb-2 ml-1">
                             Email

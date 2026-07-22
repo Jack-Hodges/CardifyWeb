@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
 import { saveSubjectProgress } from '../components/Subject/SubjectManipulation';
-import Modal from '../components/Modals/Modal';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import SessionSummary from '../components/Study/SessionSummary';
@@ -21,7 +20,7 @@ import { isDue, srsFromCard, srsFilterBucket } from '../components/Study/sm2';
 import useSubjectFromRoute from '../hooks/useSubjectFromRoute';
 import { Helmet } from 'react-helmet-async';
 import BackgroundButton from '../components/Elements/BackgroundButton';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, CirclePlay } from 'lucide-react';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { PRACTICE_STEPS } from '../components/Tutorial/tourSteps';
@@ -142,7 +141,7 @@ function Practice() {
   }, [modeMenuOpen]);
 
   const handleClose = () => {
-    setTimeout(() => setIsModalOpen(false), 100);
+    setIsModalOpen(false);
   };
 
   const persistClassicProgress = useCallback(async (index, total, { clear = false } = {}) => {
@@ -151,6 +150,8 @@ function Practice() {
     if (!subj?.id || !u?.id) return;
     // Skip shared decks; if user_id missing from route state, still try (RLS enforces ownership)
     if (subj.user_id != null && String(subj.user_id) !== String(u.id)) return;
+    // Don't overwrite a completed/cleared session (e.g. unmount after finish)
+    if (!clear && finishedRef.current) return;
     if (modeRef.current !== 'classic' && !clear) return;
 
     let upToIndex = null;
@@ -259,7 +260,9 @@ function Practice() {
 
     return () => {
       cancelled = true;
-      persistClassicProgress(currentCardIndexRef.current, cardsLengthRef.current);
+      if (!finishedRef.current) {
+        persistClassicProgress(currentCardIndexRef.current, cardsLengthRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId, userId, loadingSubject]);
@@ -300,11 +303,18 @@ function Practice() {
     if (finishedRef.current) return;
     finishedRef.current = true;
     if (mode === 'classic') {
-      persistClassicProgress(0, 0, { clear: true });
+      // Await clear so unmount / navigation can't race and re-save progress
+      await persistClassicProgress(0, 0, { clear: true });
     }
     const durationSec = await finalizeSession(finalStats || statsRef.current);
     setStats((s) => ({ ...(finalStats || s), duration_sec: durationSec }));
-    setFinished(true);
+
+    // Session summary is SM-2 only; classic just wraps up and returns home
+    if (mode === 'srs') {
+      setFinished(true);
+    } else {
+      navigate('/home');
+    }
   };
 
   const handleNextCard = () => {
@@ -437,7 +447,7 @@ function Practice() {
         <TitleBar text="Practice" />
 
         <div className="flex-1 min-h-0 overflow-y-auto">
-          {subject && !finished && (
+          {subject && !finished && !isModalOpen && (
             <div className="flex justify-center mt-3 px-4 relative z-40" ref={modeMenuRef} data-tour="practice-mode">
               <div className="relative inline-block text-left">
                 <BackgroundButton
@@ -514,30 +524,27 @@ function Practice() {
             </div>
           )}
 
-          <Modal
-            isOpen={isModalOpen}
-            onFirstAction={() => {
-              setCurrentCardIndex(0);
-              persistClassicProgress(0, 0, { clear: true });
-              handleClose();
-            }}
-            onSecondAction={() => {
-              const idx = subject?.up_to_index || 0;
-              setCurrentCardIndex(idx);
-              handleClose();
-            }}
-            text="Continue where you left off?"
-            mainText={`You were up to card ${(subject?.up_to_index || 0) + 1}. Continue from there?`}
-            width="w-[95%] sm:w-1/3 "
-            firstActionText="No, start over"
-            secondActionText="Yes, continue"
-            firstActionCol="bg-gray-500 hover:bg-gray-400"
-            secondActionCol="bg-green-500 hover:bg-green-400"
-            titleCol="text-green-500"
-          />
-
           {!finished ? (
-            loading || loadingSubject ? (
+            isModalOpen ? (
+              <PageEmptyState>
+                <NoSelectionModal
+                  text="Continue where you left off?"
+                  subtext={`You were up to card ${(subject?.up_to_index || 0) + 1}. Continue from there?`}
+                  text1="Yes, continue"
+                  text2="No, start over"
+                  icon={<CirclePlay size={44} strokeWidth={2.5} />}
+                  action1={() => {
+                    setCurrentCardIndex(subject?.up_to_index || 0);
+                    handleClose();
+                  }}
+                  action2={() => {
+                    setCurrentCardIndex(0);
+                    persistClassicProgress(0, 0, { clear: true });
+                    handleClose();
+                  }}
+                />
+              </PageEmptyState>
+            ) : loading || loadingSubject ? (
               <PageEmptyState>
                 <div className="animate-pulse flex flex-col space-y-4 w-full max-w-2xl">
                   <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg" />
@@ -626,7 +633,7 @@ function Practice() {
                 )}
               </PageEmptyState>
             )
-          ) : (
+          ) : mode === 'srs' ? (
             <SessionSummary
               correct={stats.correct}
               incorrect={stats.incorrect}
@@ -636,7 +643,7 @@ function Practice() {
               onStudyAgain={studyAgain}
               onHome={() => navigate('/home')}
             />
-          )}
+          ) : null}
 
           <SubjectList
             isOpen={isSubjectListModalOpen}

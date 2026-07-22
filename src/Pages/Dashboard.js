@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import { fetchSubjects, saveSubject, removeSubject, restoreSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
+import { fetchSubjects, saveSubject, removeSubject, restoreSubject, dismissTutorialSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import { toast } from '../components/Toast';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
@@ -14,7 +14,7 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import { ChevronDown, Search, Trash2 } from 'lucide-react';
+import { ChevronDown, Search, Trash2, CircleMinus } from 'lucide-react';
 import useModals from '../hooks/useModals';
 import { Helmet } from 'react-helmet-async';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
@@ -37,6 +37,7 @@ function Dashboard() {
     addSubject:        false,
     editSubject:       false,
     deleteSubject:     false,
+    dismissTutorial:   false,
     addCollection:     false,
     editCollection:    false,
     deleteCollection:  false,
@@ -45,7 +46,7 @@ function Dashboard() {
   const mounted = useRef(false);
 
   const navigate = useNavigate();
-  const { user, loading: userLoading, theme, profile } = useUser();
+  const { user, loading: userLoading, theme, profile, setProfile } = useUser();
   const { secondaryColor, shadow, textClass } = theme;  // Get the secondary color
 
   const tour = usePageTour({
@@ -127,18 +128,6 @@ function Dashboard() {
     if (success) {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
 
-      if (subjectId === TUTORIAL_SUBJECT_ID && profile) {
-        await saveProfile(
-          profile.id,
-          profile.first_name,
-          profile.theme,
-          profile.sort_preference,
-          profile.card_art,
-          profile.generation_count,
-          true
-        );
-      }
-
       toast.info(
         ({ closeToast }) => (
           <div className="flex items-center gap-3">
@@ -164,6 +153,18 @@ function Dashboard() {
       );
     }
     closeModal('deleteSubject');
+  };
+
+  const handleDismissTutorialSubject = async () => {
+    if (!profile) return;
+
+    const success = await dismissTutorialSubject(profile);
+    if (success) {
+      setProfile({ ...profile, tutorial_subject: true });
+      setSubjects(subjects.filter((subject) => subject.id !== TUTORIAL_SUBJECT_ID));
+      toast.success('Sample subject removed');
+    }
+    closeModal('dismissTutorial');
   };
 
   // Collections
@@ -395,6 +396,7 @@ function Dashboard() {
                       setSubjectToDelete(subject);
                       openModal('deleteSubject');
                     }}
+                    onDismissTutorial={() => openModal('dismissTutorial')}
                     tourTarget={subject.id === tourSubjectId}
                     forceActions={
                       tour.active &&
@@ -477,6 +479,16 @@ function Dashboard() {
         message="This will also delete all cards associated with the subject."
         icon={<Trash2 size={20} />}
         confirmText="Delete"
+      />
+
+      <ConfirmModal
+        isOpen={modals.dismissTutorial}
+        onClose={() => closeModal('dismissTutorial')}
+        onConfirm={handleDismissTutorialSubject}
+        title="Remove sample subject"
+        message="This removes the tutorial from your dashboard. The sample stays available for other users."
+        icon={<CircleMinus size={20} />}
+        confirmText="Remove"
       />
 
       {/* Delete Confirmation Modal - Collection */}

@@ -266,6 +266,7 @@ function EditModal({
   const subtitle = subject?.name ? `In ${subject.name}` : (text || 'Question and answer');
 
   return ReactDOM.createPortal(
+    <>
     <div
       data-tour-edit-modal
       className={`fixed inset-0 flex items-center justify-center z-[70] p-0 sm:p-6 transition-opacity duration-300 ${
@@ -466,6 +467,7 @@ function EditModal({
           </div>
         </div>
       </div>
+    </div>
 
       {isDrawingPopupOpen && (
         <DrawingPopup onSaveDrawing={handleDrawingSave} onClose={closeDrawingPopup} />
@@ -480,7 +482,7 @@ function EditModal({
         confirmText="Discard"
         confirmColor="bg-red-500 hover:bg-red-400"
       />
-    </div>,
+    </>,
     document.body
   );
 }
@@ -530,6 +532,8 @@ function TextButton({ text, handleClick, mode, modeText }) {
 
 function DrawingPopup({ onSaveDrawing, onClose }) {
   const canvasRef = useRef();
+  const { theme } = useUser();
+  const { secondaryColor } = theme || {};
 
   useBodyScrollLock(true);
 
@@ -545,7 +549,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
 
   return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 flex items-center justify-center z-[60] select-none"
+      className="fixed inset-0 flex items-center justify-center z-[90] select-none"
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
@@ -554,19 +558,39 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="relative w-full h-full sm:max-w-5xl sm:h-[90%] sm:rounded-2xl overflow-hidden flex flex-col
+        className="relative w-full h-full sm:w-[min(96vw,72rem)] sm:h-[min(92dvh,56rem)] sm:rounded-2xl overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           border border-white/20 shadow-2xl shadow-black/30"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex-none px-5 pt-4 pb-3 border-b border-white/15 flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">Drawing</h3>
-          <div className="flex gap-2">
-            <BackgroundButton text="Save drawing" bgColor="bg-blue-500 hover:bg-blue-400" onClick={handleSaveDrawing} />
-            <BackgroundButton image={<X size={18} strokeWidth={3} />} bgColor="bg-red-500 hover:bg-red-400" onClick={onClose} />
+        <div className="flex-none px-5 sm:px-7 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Brush size={22} className="text-white/90 shrink-0" />
+                <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">Drawing</h2>
+              </div>
+              <p className="text-sm text-white/60">Sketch on the canvas, then save to your card</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <BackgroundButton
+                text="Save drawing"
+                bgColor={
+                  theme
+                    ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                    : 'bg-blue-500 hover:bg-blue-400'
+                }
+                onClick={handleSaveDrawing}
+              />
+              <BackgroundButton
+                image={<X size={18} strokeWidth={3} />}
+                bgColor="bg-red-500 hover:bg-red-400"
+                onClick={onClose}
+              />
+            </div>
           </div>
         </div>
-        <div className="flex-1 min-h-0 bg-white p-2">
+        <div className="flex-1 min-h-0 bg-white relative overflow-hidden">
           <Drawing ref={canvasRef} />
         </div>
       </div>

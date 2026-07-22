@@ -4,6 +4,9 @@ import { Helmet } from 'react-helmet-async';
 import supabase from '../supabaseClient';
 import Card from '../components/Card/Card';
 import BackgroundButton from '../components/Elements/BackgroundButton';
+import ThemeBackground from '../components/Elements/ThemeBackground';
+import { useUser } from '../UserContext';
+import CardifyLogo from '../images/Logos/CardifyLogoOfficial.png';
 
 /**
  * Public read-only study page — no account required.
@@ -11,6 +14,8 @@ import BackgroundButton from '../components/Elements/BackgroundButton';
 function PublicStudy() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const { theme, colorScheme } = useUser();
+  const { primaryColor, secondaryColor, textColor } = theme;
   const [payload, setPayload] = useState(null);
   const [error, setError] = useState(null);
   const [index, setIndex] = useState(0);
@@ -47,48 +52,71 @@ function PublicStudy() {
     : 'Shared Cardify flashcard study link.';
 
   return (
-    <div className="w-screen min-h-[100dvh] relative overflow-hidden bg-gray-900">
+    <div className="w-screen min-h-[100dvh] relative overflow-hidden">
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
-      <div className="relative z-10 h-full flex flex-col">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-          <div>
-            <p className="text-xs text-white/50 font-semibold uppercase tracking-wide">Public study</p>
-            <h1 className="text-xl font-bold text-white">{subject?.name || 'Cardify'}</h1>
+
+      <ThemeBackground />
+
+      <div className="relative z-10 min-h-[100dvh] flex flex-col">
+        <header className="flex items-center justify-between gap-4 px-4 mb-2 pt-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={CardifyLogo} alt="Cardify" className="h-9 w-auto shrink-0" />
+            <div className="min-w-0">
+              <p className={`text-xs font-bold uppercase tracking-wide opacity-70 ${textColor}`}>
+                Public study
+              </p>
+              <h1 className={`text-xl sm:text-2xl font-bold truncate ${textColor}`}>
+                {subject?.name || 'Cardify'}
+              </h1>
+            </div>
           </div>
           <BackgroundButton
             text="Open Cardify"
-            bgColor="bg-blue-500 hover:bg-blue-400"
+            bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
             onClick={() => navigate('/')}
           />
-        </div>
+        </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6">
+        <main className="flex-1 flex flex-col justify-center px-5 sm:px-7 py-6">
           {loading ? (
-            <p className="text-white/70 text-center">Loading…</p>
+            <p className={`${textColor} text-center font-medium opacity-80`}>Loading…</p>
           ) : error ? (
-            <p className="text-red-300 text-center font-semibold">{error}</p>
+            <div className="max-w-md mx-auto text-center rounded-2xl bg-white/40 border border-black/10 backdrop-blur-sm px-6 py-8">
+              <p className="text-red-600 font-semibold">{error}</p>
+            </div>
           ) : cards.length === 0 ? (
-            <p className="text-white/70 text-center">No cards in this subject.</p>
+            <p className={`${textColor} text-center font-medium opacity-80`}>
+              No cards in this subject.
+            </p>
           ) : (
-            <div className="max-w-2xl mx-auto">
-              <p className="text-white/70 text-sm font-medium mb-3 text-center">
+            <div className="w-full max-w-3xl mx-auto">
+              <p className={`${textColor} text-sm sm:text-base font-bold mb-4 text-center`}>
                 Card {index + 1} of {cards.length}
               </p>
-              <Card
-                card={cards[index]}
-                flipped={flipped}
-                setFlipped={setFlipped}
-                animateFlip
-                practice
-              />
+
+              <div className="w-full h-[50vh] sm:h-[60vh] min-h-[280px]">
+                <Card
+                  card={cards[index]}
+                  flipped={flipped}
+                  setFlipped={setFlipped}
+                  animateFlip
+                  practice
+                  lightSurface={colorScheme === 'light'}
+                />
+              </div>
+
+              <p className={`${textColor} text-sm text-center mt-4 opacity-70 font-medium`}>
+                Tap the card to flip
+              </p>
+
               <div className="flex justify-center gap-3 mt-6">
                 <BackgroundButton
                   text="Previous"
-                  bgColor="bg-gray-600 hover:bg-gray-500"
+                  bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
                   disabled={index === 0}
                   onClick={() => {
                     setIndex((i) => Math.max(0, i - 1));
@@ -97,7 +125,7 @@ function PublicStudy() {
                 />
                 <BackgroundButton
                   text="Next"
-                  bgColor="bg-blue-500 hover:bg-blue-400"
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
                   disabled={index >= cards.length - 1}
                   onClick={() => {
                     setIndex((i) => Math.min(cards.length - 1, i + 1));
@@ -107,7 +135,7 @@ function PublicStudy() {
               </div>
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

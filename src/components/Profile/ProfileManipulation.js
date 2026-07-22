@@ -1,4 +1,13 @@
 import supabase from '../../supabaseClient';
+import { compressAndConvertToBlob } from '../Functions/compressImage';
+
+const PROFILE_PICTURE_BUCKET = 'ProfilePictures';
+const PROFILE_PICTURE_MAX_WIDTH = 128;
+const PROFILE_PICTURE_QUALITY = 0.75;
+
+function profilePicturePath(userId) {
+  return `${userId}/avatar.webp`;
+}
 
 export const fetchProfile = async (userId) => {
   try {
@@ -81,6 +90,77 @@ export const saveProfile = async (id, firstName, theme, sort_preference = 0, car
     }
   } catch (error) {
     console.error('Unexpected error saving profile:', error);
+    return null;
+  }
+};
+
+export const uploadProfilePicture = async (userId, imageFile) => {
+  try {
+    const blob = await compressAndConvertToBlob(
+      imageFile,
+      PROFILE_PICTURE_MAX_WIDTH,
+      PROFILE_PICTURE_QUALITY
+    );
+    const filePath = profilePicturePath(userId);
+
+    const { error: uploadError } = await supabase.storage
+      .from(PROFILE_PICTURE_BUCKET)
+      .upload(filePath, blob, { contentType: 'image/webp', upsert: true });
+
+    if (uploadError) {
+      console.error('Error uploading profile picture:', uploadError);
+      return null;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(PROFILE_PICTURE_BUCKET)
+      .getPublicUrl(filePath);
+
+    const avatarUrl = publicUrlData?.publicUrl || null;
+    if (!avatarUrl) return null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', userId)
+      .select();
+
+    if (error) {
+      console.error('Error saving profile picture URL:', error);
+      return null;
+    }
+
+    return data?.[0] || null;
+  } catch (error) {
+    console.error('Unexpected error uploading profile picture:', error);
+    return null;
+  }
+};
+
+export const removeProfilePicture = async (userId) => {
+  try {
+    const { error: deleteError } = await supabase.storage
+      .from(PROFILE_PICTURE_BUCKET)
+      .remove([profilePicturePath(userId)]);
+
+    if (deleteError) {
+      console.error('Error deleting profile picture:', deleteError);
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ avatar_url: null })
+      .eq('id', userId)
+      .select();
+
+    if (error) {
+      console.error('Error clearing profile picture URL:', error);
+      return null;
+    }
+
+    return data?.[0] || null;
+  } catch (error) {
+    console.error('Unexpected error removing profile picture:', error);
     return null;
   }
 };
