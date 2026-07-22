@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import supabase from '../supabaseClient';
 import Card from '../components/Card/Card';
 import BackgroundButton from '../components/Elements/BackgroundButton';
@@ -36,9 +37,22 @@ function PublicStudy() {
 
   const cards = payload?.cards || [];
   const subject = payload?.subject;
+  const pageTitle = subject?.name
+    ? `${subject.name} — Public study | Cardify`
+    : error
+      ? 'Study link unavailable | Cardify'
+      : 'Public study | Cardify';
+  const pageDescription = subject?.name
+    ? `Study “${subject.name}” on Cardify${cards.length ? ` — ${cards.length} flashcard${cards.length === 1 ? '' : 's'}` : ''}. No account required.`
+    : 'Shared Cardify flashcard study link.';
 
   return (
     <div className="w-screen min-h-[100dvh] relative overflow-hidden bg-gray-900">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       <div className="relative z-10 h-full flex flex-col">
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
           <div>

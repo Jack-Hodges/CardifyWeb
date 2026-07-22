@@ -267,7 +267,8 @@ function EditModal({
 
   return ReactDOM.createPortal(
     <div
-      className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
+      data-tour-edit-modal
+      className={`fixed inset-0 flex items-center justify-center z-[70] p-0 sm:p-6 transition-opacity duration-300 ${
         isClosing ? 'opacity-0' : 'opacity-100'
       }`}
     >
@@ -297,6 +298,7 @@ function EditModal({
               image={<X size={20} strokeWidth={3} />}
               bgColor="bg-red-500 hover:bg-red-400"
               onClick={requestClose}
+              dataTour="create-edit-close"
             />
           </div>
         </div>
@@ -369,7 +371,7 @@ function EditModal({
             <label htmlFor="answer" className="block text-sm font-bold text-white/90 mb-2 ml-1">
               Answer
             </label>
-            <div className="mb-3 flex flex-wrap gap-2">
+            <div className="mb-3 flex flex-wrap gap-2" data-tour="create-edit-modes">
               <TextButton text={<b>B</b>} handleClick={handleBoldClick} mode={backMode} modeText="back" />
               <TextButton text={<i>I</i>} handleClick={handleItalicClick} mode={backMode} modeText="back" />
               <TextButton text={<u>U</u>} handleClick={handleUnderlineClick} mode={backMode} modeText="back" />

@@ -5,8 +5,7 @@ import Dashboard from './Pages/Dashboard';
 import Home from './Pages/Home';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useEffect, lazy, Suspense } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastViewport } from './components/Toast';
 
 const Memory = lazy(() => import('./Pages/Card Games/Memory'));
 const Quiz = lazy(() => import('./Pages/Card Games/Quiz'));
@@ -70,7 +69,7 @@ function App() {
             <Route path="/study/:token" element={<PublicStudy />} />
           </Routes>
         </Suspense>
-        <ToastContainer position="top-center" autoClose={3000} />
+        <ToastViewport />
       </Router>
     </div>
   );

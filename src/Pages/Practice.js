@@ -22,6 +22,9 @@ import useSubjectFromRoute from '../hooks/useSubjectFromRoute';
 import { Helmet } from 'react-helmet-async';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import { ChevronDown } from 'lucide-react';
+import SpotlightTour from '../components/Tutorial/SpotlightTour';
+import usePageTour from '../components/Tutorial/usePageTour';
+import { PRACTICE_STEPS } from '../components/Tutorial/tourSteps';
 
 const GRADE_LABELS = [
   { q: 0, label: 'Again', color: 'bg-red-500 hover:bg-red-400' },
@@ -78,6 +81,12 @@ function Practice() {
   const { user, getUser, theme, profile, setProfile } = useUser();
   const navigate = useNavigate();
   const { primaryColor } = theme;
+
+  const tour = usePageTour({
+    key: 'practice_popup',
+    steps: PRACTICE_STEPS,
+    ready: !loading && !loadingSubject,
+  });
 
   const currentCardIndexRef = useRef(0);
   const cardsLengthRef = useRef(0);
@@ -429,7 +438,7 @@ function Practice() {
 
         <div className="flex-1 min-h-0 overflow-y-auto">
           {subject && !finished && (
-            <div className="flex justify-center mt-3 px-4 relative z-40" ref={modeMenuRef}>
+            <div className="flex justify-center mt-3 px-4 relative z-40" ref={modeMenuRef} data-tour="practice-mode">
               <div className="relative inline-block text-left">
                 <BackgroundButton
                   text={MODE_LABELS[mode]}
@@ -537,7 +546,7 @@ function Practice() {
               </PageEmptyState>
             ) : activeCards.length > 0 && currentCard ? (
               <div className="w-full sm:w-4/5 flex flex-col mt-5 mx-auto px-5 pb-8">
-                <div className="w-full h-[50vh] sm:h-[60vh]">
+                <div className="w-full h-[50vh] sm:h-[60vh]" data-tour="practice-card">
                   <Card
                     card={currentCard}
                     flipped={flipped}
@@ -548,7 +557,7 @@ function Practice() {
                 </div>
 
                 {mode === 'srs' && flipped ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4" data-tour="practice-controls">
                     {GRADE_LABELS.map((g) => (
                       <BackgroundButton
                         key={g.q}
@@ -612,6 +621,7 @@ function Practice() {
                     subtext="Pick a subject to start practicing."
                     text1="Select a subject to practice"
                     action1={() => setIsSubjectListModalOpen(true)}
+                    dataTour="practice-pick-subject"
                   />
                 )}
               </PageEmptyState>
@@ -636,6 +646,16 @@ function Practice() {
           />
         </div>
       </div>
+
+      <SpotlightTour
+        active={tour.active}
+        step={tour.currentStep}
+        stepIndex={tour.stepIndex}
+        totalSteps={tour.totalSteps}
+        isLast={tour.isLast}
+        onNext={tour.next}
+        onSkip={tour.skip}
+      />
     </div>
   );
 }

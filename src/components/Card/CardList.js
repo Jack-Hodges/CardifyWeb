@@ -4,7 +4,8 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import SafeMarkdown from '../Functions/SafeMarkdown';
 import { useUser } from '../../UserContext';
 import { EditableMathField, addStyles } from 'react-mathquill';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { GripVertical } from 'lucide-react';
 
 addStyles();
 
@@ -16,10 +17,11 @@ function CardList({
   passedInColor = 'bg-yellow-500 hover:bg-yellow-400',
   onAddClick,
   onReorder,
+  selectedIndex = 0,
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { theme } = useUser();
-  const { textColor, shadow } = theme;
+  const { textColor, shadow, secondaryColor } = theme;
 
   const handleAddClick = () => {
     if (onAddClick && !onAddClick()) {
@@ -34,7 +36,10 @@ function CardList({
     const next = Array.from(cards);
     const [removed] = next.splice(result.source.index, 1);
     next.splice(result.destination.index, 0, removed);
-    onReorder(next.map((c, i) => ({ ...c, sort_order: i + 1 })));
+    onReorder(next.map((c, i) => ({ ...c, sort_order: i + 1 })), {
+      from: result.source.index,
+      to: result.destination.index,
+    });
   };
 
   const plusIcon = (
@@ -51,8 +56,8 @@ function CardList({
   );
 
   return (
-    <div className="w-full h-full px-4">
-      <div className="flex items-center mb-4 justify-between sticky top-0 z-10">
+    <div className="w-full h-full px-4 flex flex-col min-h-0">
+      <div className="flex items-center mb-4 justify-between sticky top-0 z-10 shrink-0">
         <h2 className={`font-bold text-2xl ${shadow ? 'drop-shadow-custom' : ''} ${textColor}`}>
           All Flashcards
         </h2>
@@ -61,65 +66,91 @@ function CardList({
           image={plusIcon}
           text="Add"
           bgColor={passedInColor}
+          dataTour="create-add-card"
         />
       </div>
 
-      <div className="h-full lg:h-[calc(100vh-160px)] overflow-y-auto">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="card-list">
-            {(provided) => (
-              <ul
-                className="flex flex-col space-y-4 justify-center items-center"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {cards.map((card, index) => (
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="card-list">
+          {(provided) => (
+            <ul
+              className="flex flex-col space-y-3 items-stretch flex-1 min-h-0 overflow-y-auto pb-8"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {cards.map((card, index) => {
+                const isSelected = index === selectedIndex;
+                return (
                   <Draggable key={String(card.id)} draggableId={String(card.id)} index={index}>
                     {(dragProvided, snapshot) => (
                       <li
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
-                        {...dragProvided.dragHandleProps}
-                        className={`bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md p-4 h-24 flex items-center justify-center text-center overflow-hidden cursor-pointer background-shadow-new
-                md:hover:scale-95 transition duration-300 w-[99%] sm:w-[95%] ${snapshot.isDragging ? 'opacity-90 ring-2 ring-blue-400' : ''}`}
-                        onClick={() => onCardClick(index)}
+                        aria-current={isSelected ? 'true' : undefined}
+                        className={`rounded-lg h-24 flex items-center text-center border-4 ${
+                          snapshot.isDragging
+                            ? 'opacity-95 border-blue-500 bg-gray-50 dark:bg-gray-700 shadow-lg z-20'
+                            : isSelected
+                              ? `${secondaryColor?.bgClass || 'bg-purple-500'} text-white border-[rgba(3,15,64,1)] shadow-[4px_4px_0_0_rgba(3,15,64,1)] dark:border-[rgba(56,57,59,1)] dark:shadow-[4px_4px_0_0_rgba(56,57,59,1)]`
+                              : 'bg-gray-50 dark:bg-gray-700 background-shadow-new'
+                        }`}
+                        style={dragProvided.draggableProps.style}
                       >
-                        <div className="text-gray-700 dark:text-gray-200 w-full overflow-hidden whitespace-nowrap text-ellipsis">
-                          {card.frontMode === 1 ? (
-                            <EditableMathField
-                              latex={card.question}
-                              style={{
-                                minHeight: '4rem',
-                                width: '100%',
-                                backgroundColor: 'transparent',
-                                color: 'inherit',
-                                border: 'none',
-                                pointerEvents: 'none',
-                                fontSize: '2rem',
-                                fontWeight: 'semibold',
-                              }}
-                            />
-                          ) : (
-                            <SafeMarkdown
-                              components={{
-                                u: ({ node, ...props }) => <u {...props} />,
-                              }}
-                              className="text-lg font-bold inline"
-                            >
-                              {card.question}
-                            </SafeMarkdown>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          className={`shrink-0 h-full px-2 flex items-center cursor-grab active:cursor-grabbing touch-none ${
+                            isSelected ? 'text-white/90' : 'text-gray-400 dark:text-gray-400'
+                          }`}
+                          aria-label="Drag to reorder"
+                          {...dragProvided.dragHandleProps}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <GripVertical size={22} />
+                        </button>
+                        <button
+                          type="button"
+                          className={`flex-1 min-w-0 h-full px-3 flex items-center justify-center cursor-pointer ${
+                            isSelected ? 'text-white' : 'text-gray-700 dark:text-gray-200'
+                          }`}
+                          onClick={() => onCardClick(index)}
+                        >
+                          <div className="w-full overflow-hidden whitespace-nowrap text-ellipsis">
+                            {card.frontMode === 1 ? (
+                              <EditableMathField
+                                latex={card.question}
+                                style={{
+                                  minHeight: '4rem',
+                                  width: '100%',
+                                  backgroundColor: 'transparent',
+                                  color: 'inherit',
+                                  border: 'none',
+                                  pointerEvents: 'none',
+                                  fontSize: '2rem',
+                                  fontWeight: 'semibold',
+                                }}
+                              />
+                            ) : (
+                              <SafeMarkdown
+                                components={{
+                                  u: ({ node, ...props }) => <u {...props} />,
+                                }}
+                                className="text-lg font-bold inline"
+                              >
+                                {card.question}
+                              </SafeMarkdown>
+                            )}
+                          </div>
+                        </button>
                       </li>
                     )}
                   </Draggable>
-                ))}
-                {provided.placeholder}
-              </ul>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </div>
+                );
+              })}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+      </DragDropContext>
 
       <EditModal
         isOpen={isModalOpen}

@@ -19,18 +19,20 @@
     <meta property="og:url" content="https://cardify.app">
     <meta property="og:title" content="Cardify - Smart Flashcard Study App">
     <meta property="og:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.">
-    <meta property="og:image" content="%PUBLIC_URL%/logo512.png">
+    <meta property="og:image" content="https://cardify.app/logo512.png">
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
+    <meta property="og:image:alt" content="Cardify — smart flashcard study app">
     <meta property="og:site_name" content="Cardify">
     <meta property="og:locale" content="en_US">
     
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://cardify.app">
-    <meta property="twitter:title" content="Cardify - Smart Flashcard Study App">
-    <meta property="twitter:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.">
-    <meta property="twitter:image" content="%PUBLIC_URL%/logo512.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://cardify.app">
+    <meta name="twitter:title" content="Cardify - Smart Flashcard Study App">
+    <meta name="twitter:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.">
+    <meta name="twitter:image" content="https://cardify.app/logo512.png">
+    <meta name="twitter:image:alt" content="Cardify — smart flashcard study app">
     
     <!-- Additional SEO Meta Tags -->
     <meta name="theme-color" content="#f1ebe0">
@@ -44,30 +46,79 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Cardify",
-      "description": "Smart flashcard study app for creating and practicing custom flashcards with AI-powered generation",
-      "url": "https://cardify.app",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "Web Browser",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "Cardify"
-      },
-      "featureList": [
-        "Create custom flashcards with text, math, images, and drawings",
-        "AI-powered flashcard generation",
-        "Multiple practice modes: Quiz, Memory, Scramble, Type",
-        "Subject and collection organization",
-        "Progress tracking",
-        "PDF export functionality",
-        "Collaborative sharing",
-        "Custom themes and backgrounds"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://cardify.app/#organization",
+          "name": "Cardify",
+          "url": "https://cardify.app",
+          "logo": "https://cardify.app/logo512.png"
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://cardify.app/#app",
+          "name": "Cardify",
+          "description": "Smart flashcard study app for creating and practicing custom flashcards with AI-powered generation",
+          "url": "https://cardify.app",
+          "applicationCategory": "EducationalApplication",
+          "operatingSystem": "Web Browser",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "creator": {
+            "@id": "https://cardify.app/#organization"
+          },
+          "featureList": [
+            "Create custom flashcards with text, math, images, and drawings",
+            "AI-powered flashcard generation",
+            "Multiple practice modes: Quiz, Memory, Scramble, Type",
+            "Subject and collection organization",
+            "Progress tracking",
+            "PDF export functionality",
+            "Collaborative sharing",
+            "Custom themes and backgrounds"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://cardify.app/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is Cardify free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Cardify is free to start. You can create an account, build subjects, and practice with your flashcards at no cost."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What practice modes does Cardify offer?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Cardify includes five practice modes: Practice (flip cards), Memory, Quiz, Scramble, and Type — so you can review the same deck in different ways."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I add math, images, and drawings to flashcards?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Each card can mix text, mathematical equations, images, and drawings so you can study the way your subject actually looks."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does Cardify support AI flashcard generation?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. You can generate a deck from a topic with AI, or import from CSV or spreadsheets, then edit anything before you study."
+              }
+            }
+          ]
+        }
       ]
     }
     </script>
@@ -79,7 +130,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app. </noscript>
+    <noscript>
+      <main style="max-width:40rem;margin:2rem auto;padding:0 1.25rem;font-family:system-ui,sans-serif;color:#1f2937;line-height:1.5;">
+        <h1>Cardify</h1>
+        <p><strong>Flashcards that feel like a game.</strong></p>
+        <p>Create, customise, and practice your own decks — with modes that make studying stick. Enable JavaScript to use the full Cardify app.</p>
+        <h2>Everything you need to study smarter</h2>
+        <ul>
+          <li>Build flashcards with text, math, images, and drawings</li>
+          <li>Practice with Quiz, Memory, Scramble, Type, and flip modes</li>
+          <li>Organise subjects and collections</li>
+          <li>Generate decks with AI or import from CSV</li>
+          <li>Themes, sharing, and progress tracking</li>
+        </ul>
+        <p><a href="https://cardify.app/">Open Cardify</a> — free to start.</p>
+      </main>
+    </noscript>
     <div id="root"></div>
   </body>
 </html>

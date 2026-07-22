@@ -2,7 +2,7 @@ import { useState } from 'react';
 import featureFlags from '../../config/featureFlags';
 import supabase from '../../supabaseClient';
 import BackgroundButton from '../Elements/BackgroundButton';
-import { toast } from 'react-toastify';
+import { toast } from '../Toast';
 
 /**
  * Generate flashcards from notes / pasted text / PDF text — gated off by default.

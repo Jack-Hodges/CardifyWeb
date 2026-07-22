@@ -2,11 +2,10 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect, useRef } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { fetchCollections } from '../Collections/CollectionManipulation';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import { Check, X } from 'lucide-react';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 import ConfirmModal from '../Modals/ConfirmModal';
+import { toast } from '../Toast';
 
 const COLOR_OPTIONS = [
     'red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan',
@@ -325,7 +324,6 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
 
     return ReactDOM.createPortal(
         <div className="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
-            <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={requestClose}></div>
             <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>

@@ -6,7 +6,7 @@ import ImportModal from '../Modals/ImportModal';
 import ExportModal from '../Modals/ExportModal';
 import GenerateModal from '../Modals/GenerateModal';
 import { useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from '../Toast';
 
 function CardControls({
   currentCardIndex,
@@ -82,6 +82,7 @@ function CardControls({
               flip
               bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
               onClick={() => setIsExportModalOpen(true)}
+              dataTour="create-export"
             />
           </div>
           <div className="block sm:hidden">
@@ -89,6 +90,7 @@ function CardControls({
               image={<Download />}
               bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
               onClick={() => setIsExportModalOpen(true)}
+              dataTour="create-export"
             />
           </div>
           <div className="hidden sm:block">
@@ -98,6 +100,7 @@ function CardControls({
               flip
               bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
               onClick={() => setIsImportModalOpen(true)}
+              dataTour="create-import"
             />
           </div>
           <div className="block sm:hidden">
@@ -105,6 +108,7 @@ function CardControls({
               image={<Upload />}
               bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
               onClick={() => setIsImportModalOpen(true)}
+              dataTour="create-import"
             />
           </div>
           <div className="hidden sm:block">
@@ -126,7 +130,10 @@ function CardControls({
         </div>
       )}
 
-      <div className="h-12 flex items-center justify-center sm:justify-end mt-2">
+      <div
+        className="h-12 flex items-center justify-center sm:justify-end mt-2"
+        data-tour={create ? undefined : 'practice-controls'}
+      >
         <div className="mt-0">
           <BackgroundButton
             image={<ArrowLeft strokeWidth={3} />}

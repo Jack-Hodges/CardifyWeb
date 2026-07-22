@@ -3,8 +3,9 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCardArt } from "../Functions/getCardArt";
 import { useUser } from "../../UserContext";
-import { Share } from "lucide-react";
+import { Share, LogOut } from "lucide-react";
 import Modal from "../Modals/Modal";
+import ConfirmModal from "../Modals/ConfirmModal";
 import {
   saveShare,
   removeShare,
@@ -12,9 +13,9 @@ import {
   createOrGetPublicLink,
   revokePublicLink,
 } from "./SubjectManipulation";
-import { toast } from 'react-toastify';
+import { toast } from '../Toast';
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared = false, tourTarget = false, forceActions = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -150,8 +151,10 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
       <div
         className={`group relative mx-auto w-full min-h-56 sm:h-56 ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
         style={{ 
-          position: 'relative'
+          position: 'relative',
+          zIndex: forceActions ? 55 : undefined,
         }}
+        data-tour={tourTarget ? 'dashboard-subject' : undefined}
       >
         <div style={backgroundStyle} />
         {isSharedSubject && (
@@ -206,17 +209,25 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         )}
 
         <div className="absolute bottom-0 left-0 mb-1 w-full">
-          <h1 className={`ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words line-clamp-2 hyphens-auto ${cardArt.image ? 'drop-shadow-custom' : ''}`}>
+          <h1 className={`ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 break-words line-clamp-2 hyphens-auto ${cardArt.image ? 'drop-shadow-custom' : ''} ${
+            forceActions ? 'sm:translate-y-0' : 'sm:translate-y-8 sm:group-hover:-translate-y-3'
+          }`}>
             {subject.name}
           </h1>
-          <p className={`ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-3 break-words overflow-hidden text-ellipsis ${cardArt.image ? 'drop-shadow-custom' : ''}`}>
+          <p className={`ml-3 text-lg text-white font-bold transform transition-transform duration-300 break-words overflow-hidden text-ellipsis ${cardArt.image ? 'drop-shadow-custom' : ''} ${
+            forceActions ? 'sm:translate-y-0' : 'sm:translate-y-8 sm:group-hover:-translate-y-3'
+          }`}>
             {subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}
           </p>
 
           <div
             className={`${
               home ? "flex ml-2" : "grid grid-cols-4"
-            } gap-4 w-full opacity-1 sm:opacity-0 justify-items-center sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition duration-300`}
+            } gap-4 w-full opacity-1 justify-items-center transition duration-300 ${
+              forceActions
+                ? 'sm:opacity-100 sm:translate-y-0'
+                : 'sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100'
+            }`}
           >
             {/* Play button */}
             <SubjectButton
@@ -262,6 +273,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
                 hoveredIcon={hoveredIcon}
                 tooltipText="Add"
                 onClick={handleCreateClick}
+                dataTour={tourTarget ? 'dashboard-subject-add' : undefined}
               />
             )}
 
@@ -387,23 +399,23 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, home, shared =
         titleCol="text-white"
       />
 
-      <Modal
+      <ConfirmModal
         isOpen={isLeaveModalOpen}
-        onFirstAction={() => setIsLeaveModalOpen(false)}
-        onSecondAction={handleLeaveSubject}
-        text="Leave Subject"
-        mainText="Are you sure you want to leave this subject? You will no longer have access to it."
-        firstActionText="Cancel"
-        secondActionText="Leave"
-        firstActionCol="bg-gray-500 hover:bg-gray-400"
-        secondActionCol="bg-red-500 hover:bg-red-400"
-        titleCol="text-white"
+        onClose={() => setIsLeaveModalOpen(false)}
+        onConfirm={() => {
+          setIsLeaveModalOpen(false);
+          handleLeaveSubject();
+        }}
+        title="Leave subject"
+        message="Are you sure you want to leave this subject? You will no longer have access to it."
+        icon={<LogOut size={20} />}
+        confirmText="Leave"
       />
     </>
   );
 }
 
-function SubjectButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onClick }) {
+function SubjectButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onClick, dataTour }) {
   const lowerCase = tooltipText.toLowerCase();
   return (
     <div
@@ -411,6 +423,7 @@ function SubjectButton({ img, setHoveredIcon, hoveredIcon, tooltipText, onClick 
       onMouseEnter={() => setHoveredIcon(lowerCase)}
       onMouseLeave={() => setHoveredIcon(null)}
       onClick={onClick}
+      data-tour={dataTour}
     >
       {img}
       {hoveredIcon === lowerCase && (

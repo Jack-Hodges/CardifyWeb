@@ -25,9 +25,8 @@ import DashboardVideo from '../videos/Dashboard.webm';
 import CreateVideo from '../videos/Create.webm';
 import HomeVideo from '../videos/Home.webm';
 import GenerateVideo from '../videos/Generate.webm';
+import { toast } from '../components/Toast';
 
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 const FEATURES = [
   {
@@ -206,29 +205,82 @@ function Welcome() {
           <meta property="og:title" content="Cardify - Smart Flashcard Study App" />
           <meta property="og:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
           <meta property="og:image" content="https://cardify.app/logo512.png" />
+          <meta property="og:image:alt" content="Cardify — smart flashcard study app" />
           <meta property="og:url" content="https://cardify.app" />
           <meta property="og:type" content="website" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content="Cardify - Smart Flashcard Study App" />
           <meta name="twitter:description" content="Create and customize flashcards with text, math, images, and drawings. Practice with quizzes, memory games, and AI-powered generation." />
           <meta name="twitter:image" content="https://cardify.app/logo512.png" />
+          <meta name="twitter:image:alt" content="Cardify — smart flashcard study app" />
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebPage",
-              "name": "Cardify - Smart Flashcard Study App",
-              "description": "Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.",
-              "url": "https://cardify.app",
-              "mainEntity": {
-                "@type": "SoftwareApplication",
-                "name": "Cardify",
-                "applicationCategory": "EducationalApplication",
-                "offers": {
-                  "@type": "Offer",
-                  "price": "0",
-                  "priceCurrency": "USD"
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://cardify.app/#organization",
+                  "name": "Cardify",
+                  "url": "https://cardify.app",
+                  "logo": "https://cardify.app/logo512.png"
+                },
+                {
+                  "@type": "WebPage",
+                  "@id": "https://cardify.app/#webpage",
+                  "name": "Cardify - Smart Flashcard Study App",
+                  "description": "Create and customize flashcards with text, mathematical equations, images, and drawings. Practice with quizzes, memory games, and AI-powered generation.",
+                  "url": "https://cardify.app",
+                  "isPartOf": { "@id": "https://cardify.app/#organization" },
+                  "mainEntity": {
+                    "@type": "SoftwareApplication",
+                    "name": "Cardify",
+                    "applicationCategory": "EducationalApplication",
+                    "offers": {
+                      "@type": "Offer",
+                      "price": "0",
+                      "priceCurrency": "USD"
+                    }
+                  }
+                },
+                {
+                  "@type": "FAQPage",
+                  "@id": "https://cardify.app/#faq",
+                  "mainEntity": [
+                    {
+                      "@type": "Question",
+                      "name": "Is Cardify free to use?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. Cardify is free to start. You can create an account, build subjects, and practice with your flashcards at no cost."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "What practice modes does Cardify offer?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Cardify includes five practice modes: Practice (flip cards), Memory, Quiz, Scramble, and Type — so you can review the same deck in different ways."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Can I add math, images, and drawings to flashcards?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. Each card can mix text, mathematical equations, images, and drawings so you can study the way your subject actually looks."
+                      }
+                    },
+                    {
+                      "@type": "Question",
+                      "name": "Does Cardify support AI flashcard generation?",
+                      "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. You can generate a deck from a topic with AI, or import from CSV or spreadsheets, then edit anything before you study."
+                      }
+                    }
+                  ]
                 }
-              }
+              ]
             })}
           </script>
         </Helmet>
@@ -245,7 +297,6 @@ function Welcome() {
         />
 
         <div className="relative z-10 min-h-screen flex flex-col bg-[#f1ebe0] dark:bg-gray-800">
-          <ToastContainer position="top-center" autoClose={3000} />
 
           <div className="fixed top-4 right-4 z-50">
             <MultiButton
@@ -282,7 +333,7 @@ function Welcome() {
 
             <div className="relative w-full sm:w-[48%] flex flex-col justify-center px-6 sm:pl-10 sm:pr-4 pt-28 sm:pt-0 pb-8 sm:pb-0 z-10">
               <div className="flex items-center gap-2 mb-6 sm:mb-8 animate-welcome-rise">
-                <img src={CardifyLogo} alt="" className="w-12 h-12 sm:hidden" />
+                <img src={CardifyLogo} alt="Cardify" className="w-12 h-12 sm:hidden" />
                 <h1 className="text-5xl sm:text-7xl font-bold text-gray-800 dark:text-gray-100 tracking-tight leading-none">
                   Cardify
                   <span className="ml-2 align-middle text-lg sm:text-2xl font-semibold text-gray-500 dark:text-gray-400">
@@ -405,7 +456,6 @@ function Welcome() {
       />
 
       <div className="relative z-10 min-h-screen flex flex-col">
-        <ToastContainer position="top-center" autoClose={3000} />
 
         <div className="flex items-center justify-between px-4 sm:px-6 pt-4">
           <BackgroundButton

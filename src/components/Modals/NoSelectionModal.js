@@ -2,7 +2,7 @@ import { useUser } from "../../UserContext";
 import BackgroundButton from "../Elements/BackgroundButton";
 import { Layers } from "lucide-react";
 
-export default function NoSelectionModal({ text, subtext, text1, text2, action1, action2, icon }) {
+export default function NoSelectionModal({ text, subtext, text1, text2, action1, action2, icon, dataTour }) {
     const { theme } = useUser();
     const { secondaryColor, tertiaryColor, shadow } = theme;
 
@@ -28,7 +28,10 @@ export default function NoSelectionModal({ text, subtext, text1, text2, action1,
             </p>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-3 mt-7 w-full sm:w-auto items-center justify-center">
+        <div
+            className="flex flex-col sm:flex-row gap-3 mt-7 w-full sm:w-auto items-center justify-center"
+            data-tour={dataTour}
+        >
             <BackgroundButton
                 text={text1}
                 bgColor={

@@ -1,8 +1,7 @@
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import BackgroundButton from '../Elements/BackgroundButton';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from '../Toast';
 
 function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
     const [isVisible, setIsVisible] = useState(false);
@@ -47,7 +46,6 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
     return ReactDOM.createPortal(
         <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
 
-            <ToastContainer position="top-center" autoClose={3000} />
 
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
             <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>

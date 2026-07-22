@@ -2,7 +2,7 @@ import { useState } from "react";
 import BackgroundButton from "../Elements/BackgroundButton";
 import { useUser } from "../../UserContext";
 
-function AddBar({ text, addSub, addCol }) {
+function AddBar({ text, addSub, addCol, dataTour }) {
   const { theme } = useUser();
   const { secondaryColor } = theme;
 
@@ -22,7 +22,7 @@ function AddBar({ text, addSub, addCol }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="pl-4 relative inline-block text-left z-50">
+    <div className="pl-4 relative inline-block text-left z-50" data-tour={dataTour}>
       {/* Desktop button (unchanged) */}
       <div className="hidden sm:block">
         <BackgroundButton

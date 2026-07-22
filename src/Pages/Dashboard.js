@@ -1,24 +1,25 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
 import { fetchSubjects, saveSubject, removeSubject, restoreSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
-import { toast } from 'react-toastify';
+import { toast } from '../components/Toast';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
-import Modal from '../components/Modals/Modal';
-import CustomModal from '../components/Modals/CustomModal';
+import ConfirmModal from '../components/Modals/ConfirmModal';
 import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import DashboardImage from '../images/tutorial/Dashboard.png';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, Trash2 } from 'lucide-react';
 import useModals from '../hooks/useModals';
 import { Helmet } from 'react-helmet-async';
+import SpotlightTour from '../components/Tutorial/SpotlightTour';
+import usePageTour from '../components/Tutorial/usePageTour';
+import { DASHBOARD_STEPS } from '../components/Tutorial/tourSteps';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -41,12 +42,24 @@ function Dashboard() {
     deleteCollection:  false,
   });
 
-  const [dashboardPopUp, setDashboardPopUp] = useState(false);
   const mounted = useRef(false);
 
   const navigate = useNavigate();
-  const { user, loading: userLoading, theme, popupStates, updatePopupState, profile } = useUser();
-  const { secondaryColor, shadow, primaryColor, textClass } = theme;  // Get the secondary color
+  const { user, loading: userLoading, theme, profile } = useUser();
+  const { secondaryColor, shadow, textClass } = theme;  // Get the secondary color
+
+  const tour = usePageTour({
+    key: 'dashboard_popup',
+    steps: DASHBOARD_STEPS,
+    ready: !loading && !userLoading && Boolean(user),
+  });
+
+  const tourSubjectId = useMemo(() => {
+    const tutorial = subjects.find((s) => s.id === TUTORIAL_SUBJECT_ID);
+    if (tutorial) return tutorial.id;
+    const firstOwn = subjects.find((s) => !s.isShared && !s.permission);
+    return firstOwn?.id ?? null;
+  }, [subjects]);
 
   useEffect(() => {
     if (userLoading) {
@@ -56,10 +69,6 @@ function Dashboard() {
     if (!user) {
       navigate('/');
       return;
-    }
-
-    if (!popupStates?.dashboard_popup) {
-      setDashboardPopUp(true); 
     }
 
     // Set initial sort preference from profile
@@ -84,12 +93,7 @@ function Dashboard() {
       loadData();
       mounted.current = true;
     }
-  }, [user, userLoading, navigate, popupStates?.dashboard_popup, profile, profile?.sort_preference]);
-
-  const handleDismissPopup = () => {
-    setDashboardPopUp(false); 
-    updatePopupState("dashboard_popup", true); // Update Supabase
-};
+  }, [user, userLoading, navigate, profile, profile?.sort_preference]);
 
   // Subject
   const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
@@ -141,7 +145,7 @@ function Dashboard() {
             <span>Subject deleted</span>
             <button
               type="button"
-              className="underline font-bold"
+              className="underline font-bold text-blue-300 hover:text-blue-200"
               onClick={async () => {
                 const restored = await restoreSubject(subjectId);
                 if (restored) {
@@ -327,13 +331,24 @@ function Dashboard() {
         <TitleBar text="Dashboard" user={user}
         content={
           <div className="block">
-            <AddBar text="Add" addSub={handleAddSubject} addCol={handleAddCollection}/>
+            <AddBar
+              text="Add"
+              addSub={handleAddSubject}
+              addCol={handleAddCollection}
+              dataTour={
+                subjects.length > 0 || collections.length > 0
+                  ? 'dashboard-create-subject'
+                  : undefined
+              }
+            />
           </div>
         }
       />
 
       {/* Controls Section */}
-      <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={handleSortChange} shadow={shadow} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={textClass}/>
+      <div data-tour="dashboard-controls">
+        <ControlSection searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedSort={selectedSort} setSelectedSort={handleSortChange} shadow={shadow} themeCol={theme ? secondaryColor : 'bg-gray-500 hover:bg-gray-600'} themeText={textClass}/>
+      </div>
 
       {/* Main Content Section */}
       {loading ? (
@@ -380,6 +395,12 @@ function Dashboard() {
                       setSubjectToDelete(subject);
                       openModal('deleteSubject');
                     }}
+                    tourTarget={subject.id === tourSubjectId}
+                    forceActions={
+                      tour.active &&
+                      subject.id === tourSubjectId &&
+                      tour.currentStep?.id === 'dashboard-subject-add'
+                    }
                   />
                 ))}
               </div>
@@ -424,6 +445,7 @@ function Dashboard() {
               bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
               onClick={handleAddSubject}
               wWidth="w-full sm:w-auto mb-3 sm:mb-0"
+              dataTour="dashboard-create-subject"
             />
           </div>
         </div>
@@ -443,27 +465,33 @@ function Dashboard() {
       />
 
       {/* Delete Confirmation Modal - Subject */}
-      <Modal
+      <ConfirmModal
         isOpen={modals.deleteSubject}
-        onFirstAction={() => closeModal('deleteSubject')}
-        onSecondAction={() => handleRemoveSubject(subjectToDelete.id)}
-        text="Delete Subject"
-        width="w-full sm:w-2/3 h-full sm:h-auto"
-        mainText="This will also delete all cards associated with the subject."
-        firstActionText="Cancel"
-        secondActionText="Delete"
+        onClose={() => closeModal('deleteSubject')}
+        onConfirm={() => {
+          const id = subjectToDelete?.id;
+          closeModal('deleteSubject');
+          if (id) handleRemoveSubject(id);
+        }}
+        title="Delete subject"
+        message="This will also delete all cards associated with the subject."
+        icon={<Trash2 size={20} />}
+        confirmText="Delete"
       />
 
       {/* Delete Confirmation Modal - Collection */}
-      <Modal
+      <ConfirmModal
         isOpen={modals.deleteCollection}
-        onFirstAction={() => closeModal('deleteCollection')}
-        onSecondAction={() => handleRemoveCollection(collectionToDelete.id)}
-        text="Delete Collection"
-        width="w-1/3"
-        mainText="This will NOT delete the subjects associated with the collection."
-        firstActionText="Cancel"
-        secondActionText="Delete"
+        onClose={() => closeModal('deleteCollection')}
+        onConfirm={() => {
+          const id = collectionToDelete?.id;
+          closeModal('deleteCollection');
+          if (id) handleRemoveCollection(id);
+        }}
+        title="Delete collection"
+        message="This will NOT delete the subjects associated with the collection."
+        icon={<Trash2 size={20} />}
+        confirmText="Delete"
       />
 
       <AddCollection 
@@ -478,31 +506,14 @@ function Dashboard() {
         text={editingCollection ? 'Edit Collection' : 'Add New Collection'}
       />
 
-      {/* Tooltip */}
-      <CustomModal
-        isOpen={dashboardPopUp}
-        content={
-          <div className="text-left">
-            <p className="text-2xl font-semibold mb-6">This is Dashboard</p>
-            <div className="flex items-center h-full">
-              <div className="w-[40%]">
-                  <img src={DashboardImage} alt="Home Tutorial" className="w-full" />
-              </div>
-              <div className="w-2/3 flex items-center">
-              <p className="text-lg text-gray-500 dark:text-gray-200">Dashboard shows all of your flashcards, organised into Subjects and Collections 
-                <br></br><br></br>
-                  <li>Subjects can be given a colour and a name, and can also be attached to a Collections. You can always move Subjects between or out of Collections</li>
-                  <li>You can search and filter your Subjects and Collections</li>
-                  <li>To get started, click Create New Subject. You can add more Subjects and Collections by clicking Add in the top right corner</li>
-                  
-                  </p>
-              </div>
-            </div>
-          </div>
-        }
-        firstActionText={'Got it!'}
-        firstActionCol={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : 'bg-green-500 hover:bg-green-400'}
-        onFirstAction={handleDismissPopup}
+      <SpotlightTour
+        active={tour.active}
+        step={tour.currentStep}
+        stepIndex={tour.stepIndex}
+        totalSteps={tour.totalSteps}
+        isLast={tour.isLast}
+        onNext={tour.next}
+        onSkip={tour.skip}
       />
       </div>
     </div>

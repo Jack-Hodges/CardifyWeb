@@ -1,9 +1,12 @@
 import { Pencil, RefreshCw } from 'lucide-react';
 
-function IconButtons({ onEditClick }) {
+function IconButtons({ onEditClick, dataTour }) {
     return (
         <div className="flex absolute bottom-0 right-0 m-2">
-            <div className="rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 mr-1 transition duration-300">
+            <div
+                className="rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 bg-transparent p-1 mr-1 transition duration-300"
+                data-tour={dataTour}
+            >
                 <Pencil size="32" onClick={(e) => {
                         e.stopPropagation();
                         onEditClick();

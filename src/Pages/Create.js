@@ -10,11 +10,8 @@ import AddSubject from '../components/Subject/AddSubject';
 import { saveSubject } from '../components/Subject/SubjectManipulation';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
-import CustomModal from '../components/Modals/CustomModal';
-import CreateImage from '../images/tutorial/Create.png';
 import EditModal from '../components/Card/EditModal';
 import ImportModal from '../components/Modals/ImportModal';
-import { ToastContainer, toast } from 'react-toastify';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
@@ -23,8 +20,11 @@ import NotesGeneratePanel from '../components/Card/NotesGeneratePanel';
 import { parseGeneratedFlashcards } from '../components/Card/ImportService';
 import useSubjectFromRoute from '../hooks/useSubjectFromRoute';
 import supabase from '../supabaseClient';
-import 'react-toastify/dist/ReactToastify.css';
 import { Helmet } from 'react-helmet-async';
+import { toast } from '../components/Toast';
+import SpotlightTour from '../components/Tutorial/SpotlightTour';
+import usePageTour from '../components/Tutorial/usePageTour';
+import { CREATE_STEPS } from '../components/Tutorial/tourSteps';
 
 function Create() {
   const [cards, setCards] = useState([]);
@@ -34,7 +34,6 @@ function Create() {
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [createPopUp, setCreatePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
@@ -43,16 +42,14 @@ function Create() {
   const navigate = useNavigate();
   const { subject, loadingSubject } = useSubjectFromRoute();
 
-  const { user, theme, popupStates, updatePopupState, profile } = useUser();
+  const { user, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
-  useEffect(() => {
-    if (popupStates && popupStates.create_popup === true) {
-      setCreatePopUp(false);
-    } else {
-      setCreatePopUp(true);
-    }
-  }, [popupStates]);
+  const tour = usePageTour({
+    key: 'create_popup',
+    steps: CREATE_STEPS,
+    ready: !loading && !loadingSubject,
+  });
 
   useEffect(() => {
     if (loadingSubject) return;
@@ -99,7 +96,7 @@ function Create() {
           <span>Card deleted</span>
           <button
             type="button"
-            className="underline font-bold"
+            className="underline font-bold text-blue-300 hover:text-blue-200"
             onClick={async () => {
               const restored = await restoreCard(deleted);
               if (restored) {
@@ -119,8 +116,18 @@ function Create() {
     );
   };
 
-  const handleReorderCards = async (reordered) => {
+  const handleReorderCards = async (reordered, move) => {
     setCards(reordered);
+    if (move && currentCardIndex === move.from) {
+      setCurrentCardIndex(move.to);
+    } else if (move) {
+      // Keep the same card selected when other cards move around it
+      if (move.from < currentCardIndex && move.to >= currentCardIndex) {
+        setCurrentCardIndex(currentCardIndex - 1);
+      } else if (move.from > currentCardIndex && move.to <= currentCardIndex) {
+        setCurrentCardIndex(currentCardIndex + 1);
+      }
+    }
     await updateCardsSortOrder(reordered);
   };
 
@@ -151,11 +158,6 @@ function Create() {
       setIsAddSubjectModalOpen(false);
       navigate(`/create/${data[0].id}`, { state: { subject: data[0] } });
     }
-  };
-
-  const handleDismissPopup = () => {
-    setCreatePopUp(false);
-    updatePopupState('create_popup', true);
   };
 
   const handleOpenAddCardModal = () => {
@@ -305,6 +307,7 @@ function Create() {
                     onDeleteCard={handleDeleteCard}
                     edit={true}
                     onUpsertCard={handleUpsertCard}
+                    dataTour="create-card-flip"
                   />
                   <CardControls
                     currentCardIndex={currentCardIndex + 1}
@@ -334,7 +337,7 @@ function Create() {
                   />
                 </div>
 
-                <div className="w-full lg:w-[30%] mt-20 lg:mt-0">
+                <div className="w-full lg:w-[30%] mt-20 lg:mt-0" data-tour="create-card-list">
                   <CardList
                     cards={cards}
                     onCardClick={handleCardClick}
@@ -344,6 +347,7 @@ function Create() {
                     subject={subject}
                     themeText={theme.textClass}
                     passedInColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
+                    selectedIndex={currentCardIndex}
                     onAddClick={() => {
                       const maxCards = profile.pro ? 500 : 100;
                       if (profile.flashcard_count >= maxCards) {
@@ -381,6 +385,7 @@ function Create() {
                         }
                         onClick={handleOpenAddCardModal}
                         wWidth="w-full sm:w-auto"
+                        dataTour="create-add-card"
                       />
                       <BackgroundButton
                         text="Import Cards"
@@ -391,6 +396,7 @@ function Create() {
                         }
                         onClick={() => setIsImportModalOpen(true)}
                         wWidth="w-full sm:w-auto"
+                        dataTour="create-import"
                       />
                       {featureFlags.aiGenerate && (
                         <BackgroundButton
@@ -414,6 +420,7 @@ function Create() {
                     text2="Create New Subject"
                     action1={handleOpenSubjectListModal}
                     action2={handleCreateNewSubject}
+                    dataTour="create-pick-subject"
                   />
                 )}
               </PageEmptyState>
@@ -468,35 +475,16 @@ function Create() {
             page="create"
           />
 
-          <CustomModal
-            isOpen={createPopUp}
-            content={
-              <div className="text-center">
-                <p className="text-2xl font-semibold mb-6">This is Create</p>
-                <div className="flex items-center h-full">
-                  <div className="w-[40%]">
-                    <img src={CreateImage} alt="Home Tutorial" className="w-[90%]" />
-                  </div>
-                  <div className="w-2/3 flex items-center text-left">
-                    <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
-                      Here you will create the flashcards to study in your Subjects!
-                      <br />
-                      If you don&apos;t have a Subject, create one by clicking &quot;Create New
-                      Subject&quot;.
-                      <br />
-                      Once you select a Subject, you can add new flashcards by clicking the
-                      &quot;Add&quot; button.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            }
-            firstActionText="Got it!"
-            firstActionCol="bg-green-500 hover:bg-green-400"
-            onFirstAction={handleDismissPopup}
+          <SpotlightTour
+            active={tour.active}
+            step={tour.currentStep}
+            stepIndex={tour.stepIndex}
+            totalSteps={tour.totalSteps}
+            isLast={tour.isLast}
+            onNext={tour.next}
+            onSkip={tour.skip}
           />
 
-          <ToastContainer position="top-center" autoClose={3000} />
         </div>
       </div>
     </div>

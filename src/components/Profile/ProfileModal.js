@@ -757,6 +757,18 @@ function ProfileModal({ isOpen, onClose, logout }) {
             >
                 <div className="space-y-6">
                     <div>
+                        <label className="block text-sm font-bold text-white/90 mb-2 ml-1">
+                            Email
+                        </label>
+                        <div
+                            className="w-full px-4 py-3 rounded-full bg-white/10 border border-white/15
+                                text-white font-medium truncate"
+                        >
+                            {user?.email || 'No email on file'}
+                        </div>
+                    </div>
+
+                    <div>
                         <label htmlFor="firstName" className="block text-sm font-bold text-white/90 mb-2 ml-1">
                             First name
                         </label>

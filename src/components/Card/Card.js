@@ -19,6 +19,7 @@ function Card({
   edit,
   practice,
   onUpsertCard,
+  dataTour,
 }) {
   const [modalFrontContent, setModalFrontContent] = useState(card.question);
   const [modalBackContent, setModalBackContent] = useState(card.answer);
@@ -74,6 +75,7 @@ function Card({
       className="relative h-full w-full"
       onClick={handleCardClick}
       style={{ perspective: '1000px' }}
+      data-tour={dataTour}
     >
       <div
         className={`absolute inset-0 transform ${
@@ -88,11 +90,7 @@ function Card({
           cardMode={card.frontMode}
           rotate={'rotateY(0deg)'}
           content={modalFrontContent}
-          onClickDelete={handleDeleteClick}
-          onClickEdit={handleEditClick}
-          edit={edit}
           align={frontAlign}
-          practice={practice}
           back={false}
         />
 
@@ -101,15 +99,32 @@ function Card({
           cardMode={card.backMode}
           rotate={'rotateY(180deg)'}
           content={modalBackContent}
-          onClickDelete={handleDeleteClick}
-          onClickEdit={handleEditClick}
-          edit={edit}
           align={backAlign}
-          practice={practice}
           back={true}
           imageUrl={card.image_url}
         />
       </div>
+
+      {/* Controls stay outside the 3D flip so position (and tour spotlight) stay correct */}
+      {edit && (
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <div
+            className="absolute top-2 right-2 cursor-pointer text-red-500 pointer-events-auto"
+            onClick={handleDeleteClick}
+          >
+            <Trash2 />
+          </div>
+          <div className="pointer-events-auto">
+            <IconButtons onEditClick={handleEditClick} dataTour="create-edit-pencil" />
+          </div>
+        </div>
+      )}
+
+      {practice && (
+        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2 z-10">
+          <RefreshCw size="32"/>
+        </div>
+      )}
 
       {/* Edit Modal */}
       <EditModal
@@ -140,11 +155,7 @@ function CardContent ({
   imageUrl,
   rotate,
   content,
-  onClickDelete,
-  onClickEdit,
   back,
-  edit,
-  practice,
   align,
 }) {
   return (
@@ -213,25 +224,6 @@ function CardContent ({
           {content}
         </SafeMarkdown>
     )}
-
-      {edit && (
-        <div>
-          <div
-            className="absolute top-2 right-2 cursor-pointer text-red-500"
-            onClick={onClickDelete}
-          >
-            {/* Delete Icon */}
-            <Trash2 />
-          </div>
-          <IconButtons onEditClick={onClickEdit} />
-        </div>
-      )}
-
-      {practice && (
-        <div className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 bg-transparent p-1 transition duration-300 absolute bottom-0 right-0 m-2">
-          <RefreshCw size="32"/>
-        </div>
-      )}
     </div>
   );
 }

@@ -7,9 +7,10 @@ import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import SubjectList from "../components/Subject/SubjectList";
-import CustomModal from "../components/Modals/CustomModal";
-import HomeImage from '../images/tutorial/Home.png';
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog, Gauge } from 'lucide-react';
+import SpotlightTour from "../components/Tutorial/SpotlightTour";
+import usePageTour from "../components/Tutorial/usePageTour";
+import { HOME_STEPS } from "../components/Tutorial/tourSteps";
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 
 const RAINBOW_JUMP_COLORS = [
@@ -108,9 +109,6 @@ function Home() {
     getUser, 
     profile, 
     theme, 
-    popupStates, 
-    popupStatesLoaded, 
-    updatePopupState, 
   } = useUser();
   
   const { primaryColor, secondaryColor, textColor, shadow } = theme;
@@ -118,9 +116,14 @@ function Home() {
   const [subjects, setSubjects] = useState([]);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [subjectPage, setSubjectPage] = useState('create');
-  const [homePopUp, setHomePopUp] = useState(false);
   const [loading, setLoading] = useState(true);
   const pinnedSubjects = subjects.filter(subject => subject.pinned && subject.permission == null);
+
+  const tour = usePageTour({
+    key: 'home_popup',
+    steps: HOME_STEPS,
+    ready: !loading && Boolean(user && profile),
+  });
 
   // Redirect unauthenticated users to root path
   useEffect(() => {
@@ -128,13 +131,6 @@ function Home() {
       navigate('/');
     }
   }, [user, navigate]);
-
-  // Show home popup only when popupStates load changes
-  useEffect(() => {
-    if (popupStatesLoaded && popupStates && !popupStates.home_popup) {
-      setHomePopUp(true);
-    }
-  }, [popupStates, popupStatesLoaded, popupStates?.home_popup]);
 
   // Fetch subjects whenever Home is shown (so In Progress stays fresh after Practice)
   useEffect(() => {
@@ -161,11 +157,6 @@ function Home() {
       cancelled = true;
     };
   }, [user?.id, profile?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const handleDismissPopup = () => {
-        setHomePopUp(false);
-        updatePopupState("home_popup", true);  // Update Supabase
-    };
 
     const handleOpenSubjectListModal = (navigateTo) => {
         setSubjectPage(navigateTo);
@@ -229,7 +220,12 @@ function Home() {
       {/* Scrolling content */}
       <div className="relative z-10 min-h-screen pb-20">
         <div>
-          <TitleBar text="Home" user={user} home={true}/>
+          <TitleBar
+            text="Home"
+            user={user}
+            home={true}
+            forceMenuOpen={tour.active && tour.currentStep?.id === 'home-nav-dashboard'}
+          />
         </div>
 
         {loading ? (
@@ -237,16 +233,19 @@ function Home() {
         ) : user && profile ? (
           <div className={`text-3xl font-bold ${theme ? textColor : 'text-gray-700 dark:text-gray-200'}`}>
             <div className="mx-5">
-              <div className="flex justify-between items-end gap-3">
-                <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>Hey, {profile.first_name}!</p>
-                {(profile.streak_current > 0 || profile.study_minutes_total > 0) && (
-                  <p className={`text-base sm:text-lg font-semibold opacity-90 ${shadow ? 'drop-shadow-custom' : ''}`}>
-                    {profile.streak_current > 0 ? `${profile.streak_current}-day streak` : ''}
-                    {profile.streak_current > 0 && profile.study_minutes_total > 0 ? ' · ' : ''}
-                    {profile.study_minutes_total > 0 ? `${profile.study_minutes_total} min studied` : ''}
-                  </p>
+              <p className={`text-4xl sm:text-5xl font-bold ${shadow ? 'drop-shadow-custom' : ''}`}>
+                Hey, {profile.first_name}!
+                {profile.streak_current > 0 && (
+                  <span className="ml-2 whitespace-nowrap" aria-label={`${profile.streak_current}-day streak`}>
+                    {profile.streak_current}🔥
+                  </span>
                 )}
-              </div>
+              </p>
+              {profile.study_minutes_total > 0 && (
+                <p className={`mt-1 text-base sm:text-lg font-semibold opacity-90 ${shadow ? 'drop-shadow-custom' : ''}`}>
+                  {profile.study_minutes_total} min studied
+                </p>
+              )}
             </div>
 
             {subjects.filter(subject => subject.up_to_index != null && subject.user_id === (profile?.id || user?.id)).length > 0 && (
@@ -266,7 +265,7 @@ function Home() {
               </div>
             )}
 
-            <div>
+            <div data-tour="home-jump-in">
               <div className={`flex justify-between ml-5 mr-2 mt-6 mb-3 ${shadow ? 'drop-shadow-custom' : ''}`}>
                 <p>Jump In</p>
               </div>
@@ -277,8 +276,6 @@ function Home() {
                 <JumpButton text="Quiz" img={<NotebookText size="100"/>} color={jumpColors[3]} onClick={handleOpenSubjectListModal}/>
                 <JumpButton text="Scramble" img={<Shuffle size="100"/>} color={jumpColors[4]} onClick={handleOpenSubjectListModal}/>
                 <JumpButton text="Type" img={<BookText size="100"/>} color={jumpColors[5]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Match" img={<BrainCog size="100"/>} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Dash" img={<Gauge size="100"/>} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
 
@@ -308,7 +305,7 @@ function Home() {
               </div>
             )}
 
-            {subjects.length > 0 ? (<div>
+            {subjects.length > 0 ? (<div data-tour="home-subjects">
               <div className="flex justify-between ml-5 mr-2 mt-6">
                 <p className={`${shadow ? 'drop-shadow-custom' : ''}`}>Continue Learning</p>
                 <BackgroundButton text="View all" onClick={goToDashboard} bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
@@ -331,7 +328,7 @@ function Home() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full mt-10 gap-2">
+            <div className="flex flex-col items-center justify-center h-full mt-10 gap-2" data-tour="home-subjects">
               <h1 className="mb-3 text-3xl sm:text-4xl font-bold text-center px-4">Create your first subject</h1>
               <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
             </div>
@@ -349,28 +346,14 @@ function Home() {
         )}
       </div>
 
-      <CustomModal
-        isOpen={homePopUp}
-        content={
-            <div className="text-center">
-                <p className="text-2xl font-semibold mb-6">Welcome to Cardify!</p>
-                <div className="flex items-center h-full">
-                    <div className="w-[40%]">
-                        <img src={HomeImage} alt="Home Tutorial" className="w-[90%]" />
-                    </div>
-                    <div className="w-2/3 flex items-center text-left">
-                        <p className="mt-5 text-lg text-gray-500 dark:text-gray-200">
-                            Cardify is a platform for creating, practicing, and mastering your own flashcards.
-                            Get started by creating your first subject and adding flashcards to it.
-                            You can also practice your flashcards and track your progress.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        }
-        firstActionText={'Got it!'}
-        firstActionCol="bg-green-500 hover:bg-green-400"
-        onFirstAction={handleDismissPopup}
+      <SpotlightTour
+        active={tour.active}
+        step={tour.currentStep}
+        stepIndex={tour.stepIndex}
+        totalSteps={tour.totalSteps}
+        isLast={tour.isLast}
+        onNext={tour.next}
+        onSkip={tour.skip}
       />
     </div>
   );

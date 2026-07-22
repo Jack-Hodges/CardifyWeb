@@ -5,7 +5,7 @@ import { X, Download, FileText, FileJson, FileSpreadsheet, FileType } from 'luci
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 import { exportCardsAsCSV, exportCardsAsJSON, exportCardsAsTXT } from '../Functions/exportFlashcards';
 import { FlashcardPDFDocument, generateFlashcardPDF } from '../Functions/flashcardPDFExport';
-import { toast } from 'react-toastify';
+import { toast } from '../Toast';
 
 const FORMATS = [
   {

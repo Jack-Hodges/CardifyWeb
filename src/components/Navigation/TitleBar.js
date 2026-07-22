@@ -2,9 +2,9 @@ import { useState } from "react";import BackgroundButton from "../Elements/Backg
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
-import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, BrainCog, Gauge } from 'lucide-react';
+import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
 
-function TitleBar( { text, content, home = false }) {
+function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
 
   // images
 
@@ -30,6 +30,7 @@ function TitleBar( { text, content, home = false }) {
   } 
 
   const [isOpen, setIsOpen] = useState(false);
+  const menuOpen = forceMenuOpen || isOpen;
 
   const images = {
     Dashboard: <BookCopy />,
@@ -40,8 +41,6 @@ function TitleBar( { text, content, home = false }) {
     Scramble: <Shuffle />,
     Memory: Cards,
     Type: <BookText />,
-    Match: <BrainCog />,
-    Dash: <Gauge />,
   };
   
   var firstImg = images[text] || null;
@@ -69,25 +68,25 @@ function TitleBar( { text, content, home = false }) {
             image={firstImg}
             flip
             onClick={() => setIsOpen(!isOpen)}
+            dataTour="nav-menu"
           />
 
           {/* Dropdown options with animation */}
           <div
             className={`p-1 absolute text-white text-xl font-bold left-0 ${!home ? 'ml-12' : ''} mt-12 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
-              isOpen ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0'
+              menuOpen ? 'scale-y-100 opacity-100 pointer-events-auto' : 'scale-y-0 opacity-0 pointer-events-none'
             }`}
-            style={{ transformOrigin: 'top' }} // Ensure the dropdown opens from the top
+            style={{ transformOrigin: 'top', zIndex: forceMenuOpen ? 70 : undefined }}
+            data-tour={menuOpen ? 'nav-dropdown' : undefined}
           >
             <LinkButton text="Home" img={<House />} hoverClass={primaryColor.hoverClass}/>
-            <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass} dataTour="nav-dashboard"/>
             <LinkButton text="Create" img={<BadgePlus />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Practice" img={<CirclePlay />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Quiz" img={<NotebookText />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Type" img={<BookText />} hoverClass={primaryColor.hoverClass}/>
-            <LinkButton text="Match" img={<BrainCog />} hoverClass={primaryColor.hoverClass}/>
-            <LinkButton text="Dash" img={<Gauge />} hoverClass={primaryColor.hoverClass}/>
           </div>
         </div>
         
@@ -116,7 +115,7 @@ function TitleBar( { text, content, home = false }) {
 
 export default TitleBar;
 
-function LinkButton({ text, img, hoverClass }) {
+function LinkButton({ text, img, hoverClass, dataTour }) {
   const navigate = useNavigate();
   const textLower = text.toLowerCase();
 
@@ -126,7 +125,11 @@ function LinkButton({ text, img, hoverClass }) {
   };
 
   return (
-    <div onClick={handleClick} className={`flex items-center justify-start ${hoverClass} p-1 w-full rounded-3xl cursor-pointer`}>
+    <div
+      onClick={handleClick}
+      className={`flex items-center justify-start ${hoverClass} p-1 w-full rounded-3xl cursor-pointer`}
+      data-tour={dataTour}
+    >
       {img}
       <span className="ml-2">{text}</span>
     </div>
