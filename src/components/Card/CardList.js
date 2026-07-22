@@ -58,7 +58,7 @@ function CardList({
 
   return (
     <div className="w-full h-full flex flex-col min-h-0">
-      <div className="flex items-center gap-3 mb-4 justify-between sticky top-0 z-10 shrink-0">
+      <div className="flex items-center gap-3 mb-4 justify-between sticky top-[env(safe-area-inset-top)] sm:top-0 z-10 shrink-0">
         <h2 className={`font-bold text-2xl min-w-0 truncate ${shadow ? 'drop-shadow-custom' : ''} ${textColor}`}>
           All Flashcards
         </h2>

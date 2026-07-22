@@ -7,6 +7,17 @@ import getColors from './components/Functions/getColors';
 // Create UserContext
 const UserContext = createContext();
 
+const toSolidThemeColor = (value, fallback = 'rgb(3, 15, 64)') => {
+  if (!value) return fallback;
+  const normalized = String(value).trim();
+  const rgbaMatch = normalized.match(/^rgba\(([^)]+)\)$/i);
+  if (rgbaMatch) {
+    const [r, g, b] = rgbaMatch[1].split(',').map((part) => part.trim()).slice(0, 3);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+  return normalized;
+};
+
 // Helper to resolve theme colors with defaults
 const resolveThemeColors = (theme) => {
   const defaultTheme = {
@@ -69,10 +80,12 @@ export const UserProvider = ({ children }) => {
       document.documentElement.style.setProperty('--theme-background', theme.image);
     }
     if (theme.color) {
+      const solidThemeColor = toSolidThemeColor(theme.color);
       document.documentElement.style.setProperty('--theme-border-color', theme.color);
+      document.documentElement.style.setProperty('--theme-surface-color', solidThemeColor);
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', theme.color);
+        metaThemeColor.setAttribute('content', solidThemeColor);
       }
     }
   }, [theme]);
@@ -128,10 +141,12 @@ export const UserProvider = ({ children }) => {
       
       // Reset theme to default
       const defaultTheme = resolveThemeColors(null);
+      const solidThemeColor = toSolidThemeColor(defaultTheme.color);
       document.documentElement.style.setProperty('--theme-border-color', defaultTheme.color);
+      document.documentElement.style.setProperty('--theme-surface-color', solidThemeColor);
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (metaThemeColor) {
-        metaThemeColor.setAttribute('content', defaultTheme.color);
+        metaThemeColor.setAttribute('content', solidThemeColor);
       }
     }
   };

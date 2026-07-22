@@ -490,9 +490,16 @@ const DragDropGame = () => {
       : `url(${theme.image})`;
 
   return (
-    <div className="w-screen h-[100dvh] relative overflow-hidden">
+    <div
+      className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+      style={{
+        background: themeBg,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{
           background: themeBg,
           backgroundSize: 'cover',
@@ -501,7 +508,7 @@ const DragDropGame = () => {
       />
 
       <div
-        className="relative z-10 h-full flex flex-col overflow-hidden"
+        className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden"
         onMouseMove={!isMobile ? handleMouseMove : undefined}
         onMouseUp={!isMobile ? handleMouseUp : undefined}
         style={{
@@ -513,7 +520,7 @@ const DragDropGame = () => {
           <TitleBar text="Scramble" />
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className="flex-1 flex flex-col min-h-0 sm:overflow-hidden">
           {loading ? (
             <LoadingSpinner text="Loading cards..." />
           ) : !cards.length ? (
@@ -535,7 +542,7 @@ const DragDropGame = () => {
               )}
             </PageEmptyState>
           ) : (
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-3 sm:px-6 py-3 sm:py-4 max-w-5xl w-full mx-auto">
+            <div className="flex-1 flex flex-col min-h-0 px-3 sm:px-6 py-3 sm:py-4 max-w-5xl w-full mx-auto sm:overflow-hidden">
               {/* Progress header */}
               <div
                 className={`flex-shrink-0 mb-3 sm:mb-4 ${

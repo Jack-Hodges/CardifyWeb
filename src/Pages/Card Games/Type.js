@@ -139,10 +139,19 @@ function Type() {
 
     if (finished) {
       return (
-        <div className="w-screen h-screen relative">
+        <div
+          className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+          style={{
+            background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
+              ? theme.image
+              : `url(${theme.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
           {/* Fixed background - ensure it covers entire viewport */}
           <div 
-            className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+            className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
             style={{ 
               background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
                 ? theme.image 
@@ -153,7 +162,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 min-h-screen pb-20">
+          <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20">
             <TitleBar text="Type" />
             <GameComplete
               title="Session Complete!"
@@ -189,10 +198,19 @@ function Type() {
     }
 
     return (
-        <div className="w-screen h-screen relative">
+        <div
+          className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+          style={{
+            background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
+              ? theme.image
+              : `url(${theme.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
           {/* Fixed background - ensure it covers entire viewport */}
           <div 
-            className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+            className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
             style={{ 
               background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
                 ? theme.image 
@@ -203,7 +221,7 @@ function Type() {
           ></div>
           
           {/* Scrolling content */}
-          <div className="relative z-10 min-h-screen pb-20">
+          <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20">
             <TitleBar text="Type" />
 
             {/* If no subject or no cards, show the snippet */}
@@ -239,7 +257,7 @@ function Type() {
                 </PageEmptyState>
             ) : (
                 // Game area
-                <div className="flex flex-col items-center justify-center p-4 w-full h-screen">
+                <div className="flex flex-col items-center justify-center p-4 w-full h-[100lvh] sm:h-screen">
                     <div className="w-full h-2/3 flex flex-col items-center">
                         {!showAnswer ? (
                             <div className="w-full sm:w-4/5 mb-8 h-full transition-transform duration-500 ease-in-out">

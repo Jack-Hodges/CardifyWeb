@@ -89,7 +89,7 @@ function ToastViewport() {
   if (typeof document === 'undefined') return null;
 
   return ReactDOM.createPortal(
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none">
+    <div className="fixed top-[calc(env(safe-area-inset-top)+1rem)] sm:top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-none">
       {items.map((item) => (
         <ToastItem key={item.id} item={item} />
       ))}

@@ -182,7 +182,7 @@ function Home() {
     };
   
   const Cards = (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-[100px]">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-[64px] sm:size-[100px]">
       <path d="M9.4 7.53333C9.2 7.26667 8.8 7.26667 8.6 7.53333L6.225 10.7C6.09167 10.8778 6.09167 11.1222 6.225 11.3L8.6 14.4667C8.8 14.7333 9.2 14.7333 9.4 14.4667L11.775 11.3C11.9083 11.1222 11.9083 10.8778 11.775 10.7L9.4 7.53333Z"/>
       <path d="M4.09245 5.63868C4.03647 5.5547 4.03647 5.4453 4.09245 5.36133L4.79199 4.31202C4.89094 4.16359 5.10906 4.16359 5.20801 4.31202L5.90755 5.36132C5.96353 5.4453 5.96353 5.5547 5.90755 5.63867L5.20801 6.68798C5.10906 6.83641 4.89094 6.83641 4.79199 6.68798L4.09245 5.63868Z"/>
       <path d="M13.208 15.312C13.1091 15.1636 12.8909 15.1636 12.792 15.312L12.0924 16.3613C12.0365 16.4453 12.0365 16.5547 12.0924 16.6387L12.792 17.688C12.8909 17.8364 13.1091 17.8364 13.208 17.688L13.9075 16.6387C13.9635 16.5547 13.9635 16.4453 13.9075 16.3613L13.208 15.312Z"/>
@@ -191,7 +191,16 @@ function Home() {
   );
 
   return (
-    <div className="w-screen h-screen relative">
+    <div
+      className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+      style={{
+        background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
+          ? theme.image
+          : `url(${theme.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
              <Helmet>
          <title>Home - Cardify | Your Personal Study Dashboard</title>
          <meta name="description" content="Access your personalized study dashboard with progress tracking, pinned subjects, and quick access to all your flashcard collections. Continue your learning journey with Cardify." />
@@ -204,7 +213,7 @@ function Home() {
        </Helmet>
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{ 
           background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
             ? theme.image 
@@ -218,7 +227,7 @@ function Home() {
       <div className={`${shadow ? 'fixed top-0 left-0 w-full h-2/5 bg-gradient-to-b from-[rgba(0,0,0,0.2)] to-transparent z-5 pointer-events-none' : ''}`}></div>
 
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen pb-20">
+      <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20">
         <div>
           <TitleBar
             text="Home"
@@ -270,12 +279,12 @@ function Home() {
                 <p>Jump In</p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
-                <JumpButton text="Create" img={<BadgePlus size="100"/>} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Practice" img={<CirclePlay size="100"/>} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Create" img={<BadgePlus className="size-16 sm:size-[100px]" />} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Practice" img={<CirclePlay className="size-16 sm:size-[100px]" />} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
                 <JumpButton text="Memory" img={Cards} color={jumpColors[2]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Quiz" img={<NotebookText size="100"/>} color={jumpColors[3]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Scramble" img={<Shuffle size="100"/>} color={jumpColors[4]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Type" img={<BookText size="100"/>} color={jumpColors[5]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Quiz" img={<NotebookText className="size-16 sm:size-[100px]" />} color={jumpColors[3]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Scramble" img={<Shuffle className="size-16 sm:size-[100px]" />} color={jumpColors[4]} onClick={handleOpenSubjectListModal}/>
+                <JumpButton text="Type" img={<BookText className="size-16 sm:size-[100px]" />} color={jumpColors[5]} onClick={handleOpenSubjectListModal}/>
               </div>
             </div>
 
@@ -369,7 +378,7 @@ function JumpButton( { text, img, color, onClick }) {
       onClick={() => onClick(text.toLowerCase())}
     >
       <div className="text-white [&_svg]:text-white">{img}</div>
-      <p className="text-xl sm:text-2xl text-white font-bold">{text}</p>
+      <p className="text-base sm:text-2xl text-white font-bold">{text}</p>
     </div>
   );
 }

@@ -272,7 +272,19 @@ function Create() {
   };
 
   return (
-    <div className="w-screen h-[100dvh] relative overflow-hidden">
+    <div
+      className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+      style={{
+        background:
+          theme.image.startsWith('url(') ||
+          theme.image.startsWith('linear-gradient') ||
+          theme.image.startsWith('#')
+            ? theme.image
+            : `url(${theme.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <Helmet>
         <title>Create Flashcards - Cardify | Design Custom Study Cards</title>
         <meta
@@ -284,7 +296,7 @@ function Create() {
       </Helmet>
 
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{
           background:
             theme.image.startsWith('url(') ||
@@ -297,10 +309,10 @@ function Create() {
         }}
       />
 
-      <div className="relative z-10 h-full flex flex-col overflow-hidden">
+      <div className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden">
         <TitleBar text="Create" user={user} />
 
-        <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+        <div className="flex-1 min-h-0 sm:overflow-y-auto lg:overflow-hidden">
           <div className="block lg:flex w-full h-auto lg:h-full lg:min-h-0">
             {loading || loadingSubject ? (
               <PageEmptyState>

@@ -52,7 +52,14 @@ function PublicStudy() {
     : 'Shared Cardify flashcard study link.';
 
   return (
-    <div className="w-screen min-h-[100dvh] relative overflow-hidden">
+    <div
+      className="w-screen min-h-[100lvh] relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{
+        background: 'var(--theme-background)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
@@ -61,7 +68,7 @@ function PublicStudy() {
 
       <ThemeBackground />
 
-      <div className="relative z-10 min-h-[100dvh] flex flex-col">
+      <div className="relative z-10 min-h-[100lvh] flex flex-col">
         <header className="flex items-center justify-between gap-4 px-4 mb-2 pt-2">
           <div className="flex items-center gap-3 min-w-0">
             <img src={CardifyLogo} alt="Cardify" className="h-9 w-auto shrink-0" />

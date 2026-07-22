@@ -6,7 +6,16 @@ function ThemeBackground({ shadow = false }) {
   return (
     <>
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="absolute inset-0 sm:hidden bg-cover bg-center bg-no-repeat z-0"
+        style={{
+          background: 'var(--theme-background)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+        aria-hidden="true"
+      />
+      <div
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{
           background: 'var(--theme-background)',
           backgroundSize: 'cover',

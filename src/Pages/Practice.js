@@ -418,7 +418,19 @@ function Practice() {
   }, {});
 
   return (
-    <div className="w-screen h-[100dvh] relative overflow-hidden">
+    <div
+      className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+      style={{
+        background:
+          theme.image.startsWith('url(') ||
+          theme.image.startsWith('linear-gradient') ||
+          theme.image.startsWith('#')
+            ? theme.image
+            : `url(${theme.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <Helmet>
         <title>Practice Flashcards - Cardify | Study & Review Your Cards</title>
         <meta
@@ -430,7 +442,7 @@ function Practice() {
       </Helmet>
 
       <div
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{
           background:
             theme.image.startsWith('url(') ||
@@ -443,10 +455,10 @@ function Practice() {
         }}
       />
 
-      <div className="relative z-10 h-full flex flex-col overflow-hidden">
+      <div className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden">
         <TitleBar text="Practice" />
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 sm:overflow-y-auto">
           {subject && !finished && !isModalOpen && (
             <div className="flex justify-center mt-3 px-4 relative z-40" ref={modeMenuRef} data-tour="practice-mode">
               <div className="relative inline-block text-left">

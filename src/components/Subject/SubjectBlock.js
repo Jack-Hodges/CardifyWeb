@@ -212,7 +212,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
   return (
     <>
       <div
-        className={`group relative mx-auto w-full min-h-56 sm:h-56 overflow-hidden ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
+        className={`group relative mx-auto w-full min-h-44 sm:h-56 overflow-hidden ${colors.bgClass} ${colors.hoverClass} rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
         style={{ 
           position: 'relative',
           zIndex: forceActions ? 55 : undefined,
@@ -279,12 +279,12 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
         )}
 
         <div className="absolute bottom-0 left-0 mb-1 w-full">
-          <h1 className={`ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 break-words line-clamp-2 hyphens-auto ${cardArt.image ? 'drop-shadow-custom' : ''} ${
+          <h1 className={`ml-3 mr-2 text-2xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 break-words line-clamp-2 hyphens-auto ${cardArt.image ? 'drop-shadow-custom' : ''} ${
             forceActions ? 'sm:translate-y-0' : 'sm:translate-y-8 sm:group-hover:-translate-y-3'
           }`}>
             {subject.name}
           </h1>
-          <p className={`ml-3 text-lg text-white font-bold transform transition-transform duration-300 break-words overflow-hidden text-ellipsis ${cardArt.image ? 'drop-shadow-custom' : ''} ${
+          <p className={`ml-3 text-base sm:text-lg text-white font-bold transform transition-transform duration-300 break-words overflow-hidden text-ellipsis ${cardArt.image ? 'drop-shadow-custom' : ''} ${
             forceActions ? 'sm:translate-y-0' : 'sm:translate-y-8 sm:group-hover:-translate-y-3'
           }`}>
             {subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}

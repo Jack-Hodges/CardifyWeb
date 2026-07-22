@@ -303,7 +303,16 @@ function Dashboard() {
   };
 
   return (
-    <div className="w-screen h-screen relative">
+    <div
+      className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
+      style={{
+        background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
+          ? theme.image
+          : `url(${theme.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <Helmet>
         <title>Dashboard - Cardify | Manage Your Flashcard Collections</title>
         <meta name="description" content="Organise and manage all your flashcard subjects and collections in one place. Create, edit, search, and sort your study materials with Cardify's comprehensive dashboard." />
@@ -316,7 +325,7 @@ function Dashboard() {
       </Helmet>
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
         style={{ 
           background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
             ? theme.image 
@@ -327,7 +336,7 @@ function Dashboard() {
       ></div>
       
       {/* Scrolling content */}
-      <div className="relative z-10 min-h-screen pb-20 px-1 sm:px-0">
+      <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20 px-1 sm:px-0">
         {/* Header Section */}
         <TitleBar text="Dashboard" user={user}
         content={

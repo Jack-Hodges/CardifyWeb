@@ -286,7 +286,7 @@ function Welcome() {
         </Helmet>
 
         <div
-          className="fixed inset-0 w-screen h-screen bg-cover bg-center bg-no-repeat z-0"
+          className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
           style={{
             background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
               ? theme.image
@@ -298,7 +298,7 @@ function Welcome() {
 
         <div className="relative z-10 min-h-screen flex flex-col bg-[#f1ebe0] dark:bg-gray-800">
 
-          <div className="fixed top-4 right-4 z-50">
+          <div className="fixed top-[calc(env(safe-area-inset-top)+1rem)] sm:top-4 right-4 z-50">
             <MultiButton
               buttons={[
                 {

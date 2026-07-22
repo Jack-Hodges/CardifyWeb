@@ -56,7 +56,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
         <>
             {/* Closed collection box for the grid */}
             <div
-                className="group relative mx-auto w-full h-56 cursor-pointer background-hover backdrop-blur-md rounded-xl background-shadow-new transition duration-300"
+                className="group relative mx-auto w-full h-44 sm:h-56 cursor-pointer background-hover backdrop-blur-md rounded-xl background-shadow-new transition duration-300"
                 onClick={onClick}
             >
                 <div className="absolute inset-0 grid grid-cols-4 grid-rows-2 gap-2 py-6 px-5">
@@ -77,10 +77,10 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
 
                 <div className="absolute bottom-0 left-0 mb-1 w-full">
                     <div className="text-left mb-[-6%] sm:mb-0">
-                        <h1 className="ml-3 mr-2 text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
+                        <h1 className="ml-3 mr-2 text-2xl sm:text-3xl font-montserrat font-bold text-white transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {collection ? collection.name : 'name'}
                         </h1>
-                        <p className="ml-3 text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
+                        <p className="ml-3 text-base sm:text-lg text-white font-bold transform transition-transform duration-300 sm:translate-y-8 sm:group-hover:-translate-y-0 break-words overflow-hidden text-ellipsis">
                             {subject_count} {subject_count === 1 ? 'subject' : 'subjects'}
                         </p>
                     </div>

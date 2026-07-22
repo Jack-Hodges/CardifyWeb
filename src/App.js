@@ -4,7 +4,7 @@ import Practice from './Pages/Practice';
 import Dashboard from './Pages/Dashboard';
 import Home from './Pages/Home';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { useEffect, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { ToastViewport } from './components/Toast';
 
 const Memory = lazy(() => import('./Pages/Card Games/Memory'));
@@ -16,24 +16,9 @@ const Match = lazy(() => import('./Pages/Card Games/Match'));
 const PublicStudy = lazy(() => import('./Pages/PublicStudy'));
 
 function App() {
-  useEffect(() => {
-    const handleTouchStart = () => {
-      setTimeout(() => {
-        window.scrollTo(0, 1);
-        setTimeout(() => window.scrollTo(0, 0), 50);
-      }, 100);
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { once: true, passive: true });
-
-    return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-    };
-  }, []);
-
   return (
     <div
-      className="w-screen min-h-screen dark:bg-gray-800"
+      className="w-screen min-h-screen"
       style={{
         backgroundColor: 'transparent',
       }}
