@@ -6,7 +6,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
-import { saveSubjectProgress } from '../components/Subject/SubjectManipulation';
+import { saveSubjectProgress, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import SessionSummary from '../components/Study/SessionSummary';
@@ -20,11 +20,12 @@ import { isDue, srsFromCard, srsFilterBucket } from '../components/Study/sm2';
 import useSubjectFromRoute from '../hooks/useSubjectFromRoute';
 import { Helmet } from 'react-helmet-async';
 import BackgroundButton from '../components/Elements/BackgroundButton';
-import { ChevronDown, CirclePlay } from 'lucide-react';
+import { ChevronDown, CirclePlay, Share2 } from 'lucide-react';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { PRACTICE_STEPS } from '../components/Tutorial/tourSteps';
 import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
+import ShareSubjectModal from '../components/Modals/ShareSubjectModal';
 
 const GRADE_LABELS = [
   { q: 0, label: 'Again', color: 'bg-red-500 hover:bg-red-400' },
@@ -76,11 +77,17 @@ function Practice() {
   });
   const [finished, setFinished] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const { subject, loadingSubject } = useSubjectFromRoute();
   const { user, getUser, theme, profile, setProfile } = useUser();
   const navigate = useNavigate();
   const { primaryColor } = theme;
+
+  const canShareSubject =
+    subject &&
+    !subject.permission &&
+    subject.id !== TUTORIAL_SUBJECT_ID;
 
   const tour = usePageTour({
     key: 'practice_popup',
@@ -439,7 +446,22 @@ function Practice() {
       />
 
       <div className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden">
-        <TitleBar text="Practice" />
+        <TitleBar
+          text="Practice"
+          content={
+            canShareSubject ? (
+              <BackgroundButton
+                image={<Share2 size={18} />}
+                bgColor={
+                  theme
+                    ? `${primaryColor.bgClass} ${primaryColor.hoverClass}`
+                    : 'bg-blue-500 hover:bg-blue-400'
+                }
+                onClick={() => setIsShareModalOpen(true)}
+              />
+            ) : null
+          }
+        />
 
         <div className="flex-1 min-h-0 sm:overflow-y-auto">
           {subject && !finished && !isModalOpen && (
@@ -645,6 +667,11 @@ function Practice() {
             onClose={() => setIsSubjectListModalOpen(false)}
             user={user}
             page="practice"
+          />
+          <ShareSubjectModal
+            isOpen={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+            subject={subject}
           />
         </div>
       </div>

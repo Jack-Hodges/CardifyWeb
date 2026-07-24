@@ -13,7 +13,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const navigate = useNavigate();
     const [subjects, setSubjects] = useState([]);
     const [collections, setCollections] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState(null);
@@ -42,6 +42,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                 setSubjects(subjectsData);
                 setCollections(collectionsData);
                 setLoading(false);
+            } else {
+                setLoading(false);
             }
         };
 
@@ -53,7 +55,9 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     }
 
     if (!isOpen) return null;
-    if (loading) return <div>Loading...</div>;
+
+    // Keep the modal chrome visible while subjects load (avoid bare "Loading...")
+    const showSkeleton = loading;
 
     // Group subjects by collectionId
     const collectionsWithSubjects = collections.map((collection) => ({
@@ -136,7 +140,13 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                 </div>
       
                 <div className="flex-1 overflow-y-auto pb-8">
-                  {subjects.length > 0 ? (
+                  {showSkeleton ? (
+                    <div className="space-y-2 animate-pulse" aria-busy="true" aria-label="Loading subjects">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="w-[99%] h-16 rounded-xl bg-white/20" />
+                      ))}
+                    </div>
+                  ) : subjects.length > 0 ? (
                     sortedCombinedList.map((item) => {
                       if (item.type === 'subject') {
                         if (item.permission !== 'viewer') {
@@ -166,9 +176,23 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                       return null;
                     })
                   ) : (
-                    <div className="text-center text-lg text-gray-500 mt-10 flex flex-col items-center">
-                      <p className="mb-3">You have no subjects yet</p>
-                      <BackgroundButton text="Go to Dashboard" onClick={goToDashboard} bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}/>
+                    <div className="text-center text-lg text-white/80 mt-10 flex flex-col items-center px-4">
+                      <p className="mb-2 font-bold text-xl text-white">No subjects yet</p>
+                      <p className="mb-4 text-sm text-white/60">
+                        Create one here to jump straight into {page}.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-2 items-center">
+                        <BackgroundButton
+                          text="Create a subject"
+                          onClick={() => { setEditingSubject(null); setIsAddOpen(true); }}
+                          bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : `bg-purple-500 hover:bg-purple-400`}
+                        />
+                        <BackgroundButton
+                          text="Go to Dashboard"
+                          onClick={goToDashboard}
+                          bgColor="bg-gray-600 hover:bg-gray-500"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -180,7 +204,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
             onClose={() => setIsAddOpen(false)}
             onSave={async (subjectId, name, colourText, colourIntensity, upToIndex, collectionId) => {
               // save or update subject
-              await saveSubject(
+              const data = await saveSubject(
                 subjectId,
                 name,
                 colourText,
@@ -190,6 +214,13 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                 collectionId,
                 false // pinned default
               );
+              // New subject from empty picker → go straight to the destination page
+              if (!subjectId && Array.isArray(data) && data[0]?.id) {
+                const created = data[0];
+                onClose();
+                navigate(`/${page}/${created.id}`, { state: { subject: created } });
+                return;
+              }
               // reload list
               const refreshed = await fetchSubjects(user, profile);
               setSubjects(refreshed);
@@ -229,11 +260,27 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
     const subjectCol = getColors([subject.colourText, subject.colourIntensity]);
     const navigate = useNavigate();
 
+    const openSubject = () => {
+      navigate(`/${page}/${subject.id}`, { state: { subject } });
+      onClose();
+    };
+
+    const onRowKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openSubject();
+      }
+    };
+
     return (
       <div className={`relative mb-2 w-[99%]`}>
         <div 
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${subject.name}`}
           className={`${subjectCol.bgClass} ${themeShadow} w-full h-16 flex justify-between items-center text-white font-bold text-xl px-2 rounded-xl cursor-pointer background-hover`}
-          onClick={() => { navigate(`/${page}/${subject.id}`, { state: { subject } }); onClose(); }}
+          onClick={openSubject}
+          onKeyDown={onRowKeyDown}
         >
           <div className="truncate w-full">
             <p className="text-2xl">{subject.name}</p>
@@ -280,12 +327,23 @@ function CollectionRow({ collection, subjects, onClick, themeShadow = 'backgroun
         </svg>
     );
 
+    const onKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onClick();
+      }
+    };
+
     return (
         <div 
-            key={collection.id} 
+            key={collection.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`Open collection ${collection.name}`}
             className={`bg-[color-mix(in_srgb,var(--theme-border-color)_80%,black_20%)] w-[99%] h-16 mb-2 flex justify-between items-center text-white font-bold text-xl pl-2 pr-1 rounded-xl cursor-pointer ${themeShadow} background-hover`}
-            onClick={onClick}>
-            <div>
+            onClick={onClick}
+            onKeyDown={onKeyDown}
+        >            <div>
                 <p className="text-2xl">{collection.name}</p>
                 <p className="text-lg font-normal">{subjects.length} {subjects.length === 1 ? "subject" : "subjects"}</p>
             </div>

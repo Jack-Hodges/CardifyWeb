@@ -306,7 +306,7 @@ function Create() {
               </PageEmptyState>
             ) : cards.length > 0 ? (
               <>
-                <div className="w-full lg:w-[70%] px-5 h-[50vh] sm:h-[60vh] lg:h-full mt-5 sm:mt-14">
+                <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
                   <Card
                     card={cards[currentCardIndex]}
                     flipped={flipped}
@@ -386,7 +386,9 @@ function Create() {
                     >
                       {isTutorialSubject
                         ? 'This is a sample subject — browse the cards to see how Cardify works.'
-                        : 'Add a card, import a file, or generate with AI.'}
+                        : featureFlags.aiGenerate
+                          ? 'Add a card, import a file, or generate with AI.'
+                          : 'Add a card or import a file to get started.'}
                     </p>
                     {!isTutorialSubject && (
                     <div className="flex flex-col sm:flex-row gap-3 mt-3 w-full sm:w-auto items-center justify-center">

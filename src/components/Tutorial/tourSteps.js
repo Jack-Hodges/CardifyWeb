@@ -78,7 +78,7 @@ export const DASHBOARD_STEPS = [
     id: 'dashboard-subject',
     selector: '[data-tour="dashboard-subject"]',
     title: 'Subject actions',
-    body: 'Hover a subject to reveal Practice, Add, Edit, and Delete. Try hovering this one.',
+    body: 'Subject actions (Practice, Add, Edit, Delete) appear on each subject card. On desktop, hover to reveal them; on mobile they stay visible.',
     placement: 'left',
     advanceOn: 'next',
   },

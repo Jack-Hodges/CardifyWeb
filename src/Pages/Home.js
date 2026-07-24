@@ -14,6 +14,13 @@ import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-r
 import { Helmet } from 'react-helmet-async';
 import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
+function activateClickable(e, onClick) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    onClick?.(e);
+  }
+}
+
 const RAINBOW_JUMP_COLORS = [
   ['red', 500],
   ['orange', 500],
@@ -340,7 +347,7 @@ function Home() {
             />
           </div>
         ) : (
-          <p>Loading...</p>
+          <HomeLoading />
         )}
       </div>
 
@@ -360,11 +367,16 @@ function Home() {
 export default Home;
 
 function JumpButton( { text, img, color, onClick }) {
+  const handleActivate = () => onClick(text.toLowerCase());
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Jump into ${text}`}
       className={`group flex flex-col justify-between items-center p-2 w-full sm:w-40 h-full aspect-square sm:h-40
         ${color.bgClass} ${color.hoverClass} text-white rounded-xl background-shadow-new background-hover cursor-pointer transition duration-300`}
-      onClick={() => onClick(text.toLowerCase())}
+      onClick={handleActivate}
+      onKeyDown={(e) => activateClickable(e, handleActivate)}
     >
       <div className="text-white [&_svg]:text-white">{img}</div>
       <p className="text-base sm:text-2xl text-white font-bold">{text}</p>
@@ -402,8 +414,12 @@ function InProgress({ subject, theme }) {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Continue practising ${subject.name}`}
       className={`w-1/4 min-w-72 flex items-center gap-3 px-4 py-2 h-28 rounded-xl text-white ${theme} background-hover cursor-pointer ${colors.bgClass} ${colors.hoverClass}`}
       onClick={navigateClick}
+      onKeyDown={(e) => activateClickable(e, navigateClick)}
     >
       <div className="min-w-0 flex-1">
         <p className="w-full truncate text-2xl">{subject.name}</p>

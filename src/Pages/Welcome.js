@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import supabase from "../supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import BackgroundButton from "../components/Elements/BackgroundButton";
 import MultiButton from "../components/Elements/MultiButton";
 import { useUser } from '../UserContext';
@@ -110,7 +110,15 @@ function Welcome() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, setUser, startSignUpProcess, theme } = useUser();
+
+  useEffect(() => {
+    if (searchParams.get('signup') === '1') {
+      setShowLogin(true);
+      setIsSignUp(true);
+    }
+  }, [searchParams]);
 
   const scrollToFeatures = () => {
     const featuresSection = document.querySelector('.features-section');

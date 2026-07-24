@@ -11,70 +11,87 @@ import Ad from '../../components/Advertisement/Ad';
 import { EditableMathField } from 'react-mathquill';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import SessionSummary from '../../components/Study/SessionSummary';
 import GameSettings from '../../components/Games/GameSettings';
+import GameHUD, { hudIcons } from '../../components/Games/GameHUD';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
+function quizMessage(percentage) {
+  if (percentage >= 90) return 'Outstanding work';
+  if (percentage >= 75) return 'Great session';
+  if (percentage >= 50) return 'Solid progress';
+  if (percentage >= 25) return 'Keep practicing';
+  return 'Review and try again';
+}
+
 function Quiz() {
-  // State variables
   const [allCards, setAllCards] = useState([]);
   const [cards, setCards] = useState([]);
-  // randomizedOptions: each card gets an array of option objects: { mode: number, content: string }
   const [randomizedOptions, setRandomizedOptions] = useState([]);
-  // selectedAnswers: stores the chosen option for each card index
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [finished, setFinished] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [showAd, setShowAd] = useState(false);
-  const [leaveAd, setLeaveAd] = useState("Home");
+  const [leaveAd, setLeaveAd] = useState('Home');
   const [sessionStartedAt, setSessionStartedAt] = useState(() => Date.now());
   const [cardCount, setCardCount] = useState(10);
   const [shuffleOn, setShuffleOn] = useState(true);
   const [started, setStarted] = useState(false);
 
-  // Hooks
   const navigate = useNavigate();
   const { subject } = useSubjectFromRoute();
   const { user, getUser, theme, profile } = useUser();
-  const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
+  const { primaryColor, secondaryColor, tertiaryColor, shadow, textClass } = theme;
+  const textTone = textClass || 'textColor';
 
-  // Navigation function to switch to the create page
   const handleSwitchToCreate = () => {
     if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
     else navigate('/create');
   };
 
-  // Load cards and generate randomized options
+  const subjectId = subject?.id ?? null;
+  const userId = user?.id ?? null;
+
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       getUser();
       return;
     }
 
-    if (!subject) {
+    if (!subjectId) {
       setAllCards([]);
       setCards([]);
       setStarted(false);
+      setFinished(false);
       setLoading(false);
       return;
     }
 
+    let cancelled = false;
     const loadCards = async () => {
       setLoading(true);
-      const data = await fetchCards(subject.id);
-      sortCardsById(data);
-      setAllCards(data);
-      setCardCount(Math.min(10, data.length || 1));
       setStarted(false);
       setFinished(false);
+      setSelectedAnswers({});
+      setCurrentCardIndex(0);
+      const data = await fetchCards(subjectId);
+      if (cancelled) return;
+      sortCardsById(data);
+      setAllCards(data);
+      setCardCount(Math.max(1, data.length || 1));
       setLoading(false);
     };
 
     loadCards();
-  }, [subject, user, getUser]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectId, userId]);
 
   const handleStart = () => {
     let pool = [...allCards];
@@ -89,22 +106,15 @@ function Quiz() {
     setStarted(true);
   };
 
-  // Randomize options for each card.
-  // Mode logic:
-  // - If either frontMode or backMode is 1, use math mode (EditableMathField).
-  // - If mode is 2 or 3, render as image.
-  // - Otherwise, mode 0 uses text rendering via ReactMarkdown.
-  const randomizeOptions = (cards) => {
-    const optionsPerCard = cards.map((card) => {
+  const randomizeOptions = (cardsPool) => {
+    const optionsPerCard = cardsPool.map((card) => {
       const mode = card.frontMode === 1 || card.backMode === 1 ? 1 : card.backMode;
-      // Build the correct option
       const correctOption =
         mode === 2 || mode === 3
           ? { mode, content: card.image_url || '' }
           : { mode, content: card.answer || '' };
 
-      // Build incorrect options from other cards
-      const incorrectOptions = cards
+      const incorrectOptions = cardsPool
         .filter((c) => c.id !== card.id)
         .map((c) => {
           const m = c.frontMode === 1 || c.backMode === 1 ? 1 : c.backMode;
@@ -115,14 +125,11 @@ function Quiz() {
         .sort(() => Math.random() - 0.5)
         .slice(0, 3);
 
-      // Combine and shuffle the options
-      const options = [...incorrectOptions, correctOption].sort(() => Math.random() - 0.5);
-      return options;
+      return [...incorrectOptions, correctOption].sort(() => Math.random() - 0.5);
     });
     setRandomizedOptions(optionsPerCard);
   };
 
-  // Handle answer selection
   const handleAnswerClick = (selectedOption) => {
     if (selectedAnswers[currentCardIndex] !== undefined) return;
     setSelectedAnswers((prev) => ({
@@ -131,20 +138,14 @@ function Quiz() {
     }));
   };
 
-  // Navigation functions
   const goToPreviousCard = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex((prev) => prev - 1);
-    }
+    if (currentCardIndex > 0) setCurrentCardIndex((prev) => prev - 1);
   };
 
   const goToNextCard = () => {
-    if (currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex((prev) => prev + 1);
-    }
+    if (currentCardIndex < cards.length - 1) setCurrentCardIndex((prev) => prev + 1);
   };
 
-  // Compute quiz results when finished
   let correctCount = 0;
   let incorrectCount = 0;
   let percentage = 0;
@@ -171,58 +172,38 @@ function Quiz() {
 
     const totalAnswered = correctCount + incorrectCount;
     percentage = totalAnswered > 0 ? (correctCount / totalAnswered) * 100 : 0;
-    const roundedPercentage = Math.round(percentage / 5) * 5; // Round to nearest 5%
-
-    const messages = {
-      0: "Don't worry, keep trying! 😕",
-      5: "A rough start, but don't give up! 😟",
-      10: "Review the material, you can do it! 📖",
-      15: "Keep studying, progress awaits! 📚",
-      20: "Practice makes perfect, keep going! 📝",
-      25: "You're getting the hang of it! 👍",
-      30: "Good effort, continue practicing! 💪",
-      35: "Nice work, you're improving! 👏",
-      40: "Steady progress, well done! 😊",
-      45: "Halfway there, keep pushing! 🚀",
-      50: "Great job, you're halfway! 🎯",
-      55: "More than halfway, excellent! 🥳",
-      60: "You're doing well, keep it up! 🌟",
-      65: "Impressive work, almost there! 🎉",
-      70: "Fantastic effort, keep shining! ✨",
-      75: "Excellent performance, well done! 🏅",
-      80: "You're mastering this! 🎓",
-      85: "Outstanding, keep up the great work! 🏆",
-      90: "Almost perfect, amazing job! 🌟",
-      95: "So close to perfection! 🌠",
-      100: "Perfect score! Outstanding! 🎉",
-    };
-
-    message = messages[roundedPercentage] || "Good attempt! Keep practicing!";
+    message = quizMessage(percentage);
   }
+
+  const answeredCount = Object.keys(selectedAnswers).length;
+  const liveCorrect = Object.entries(selectedAnswers).reduce((acc, [idx, selected]) => {
+    const card = cards[Number(idx)];
+    if (!card || !selected) return acc;
+    const mode = card.frontMode === 1 || card.backMode === 1 ? 1 : card.backMode;
+    const correct =
+      mode === 2 || mode === 3
+        ? { mode, content: card.image_url }
+        : { mode, content: card.answer };
+    return selected.content === correct.content && selected.mode === correct.mode
+      ? acc + 1
+      : acc;
+  }, 0);
 
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{...getThemeBackgroundStyle(theme.image)}}
+      style={{ ...getThemeBackgroundStyle(theme.image) }}
     >
-      {/* Fixed background - ensure it covers entire viewport */}
-      <div 
+      <div
         className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
-        style={{...getThemeBackgroundStyle(theme.image)}}
-      ></div>
-      
-      {/* Scrolling content */}
-      <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20">
+        style={{ ...getThemeBackgroundStyle(theme.image) }}
+      />
+
+      <div className="relative z-10 min-h-[100lvh] sm:h-screen flex flex-col sm:overflow-hidden">
         <TitleBar text="Quiz" />
-      <div className="block sm:flex w-full h-full">
+
         {loading ? (
-          <div className="flex w-full h-full justify-center items-center">
-            <div className="animate-pulse space-y-4 w-[70%] h-full">
-              <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg"></div>
-              <div className="bg-gray-300 dark:bg-gray-600 h-12 w-3/4 rounded"></div>
-              <div className="bg-gray-300 dark:bg-gray-600 h-12 w-1/2 rounded"></div>
-            </div>
-          </div>
+          <LoadingSpinner text="Loading quiz..." />
         ) : allCards.length >= 4 ? (
           !started ? (
             <PageEmptyState>
@@ -237,21 +218,48 @@ function Quiz() {
               />
             </PageEmptyState>
           ) : !finished ? (
-            <div className="w-full h-full flex flex-col">
-              <div className="mx-auto w-[100vw] min-h-[40vh] h-[40vh] sm:w-[60vw] sm:h-[25vh] mt-5 px-5">
+            <div className="flex-1 min-h-0 flex flex-col px-3 sm:px-5 pb-3">
+              <GameHUD
+                items={[
+                  {
+                    key: 'progress',
+                    icon: hudIcons.layers,
+                    value: `${currentCardIndex + 1}/${cards.length}`,
+                    label: 'Progress',
+                  },
+                  {
+                    key: 'answered',
+                    icon: hudIcons.check,
+                    value: answeredCount,
+                    hint: 'answered',
+                    label: 'Answered',
+                  },
+                  {
+                    key: 'correct',
+                    icon: hudIcons.zap,
+                    value: liveCorrect,
+                    hint: 'correct',
+                    label: 'Correct so far',
+                  },
+                ]}
+              />
+
+              <div className="mx-auto w-full max-w-3xl h-[44vh] sm:h-[42vh] shrink-0 px-1">
                 <Card
                   card={cards[currentCardIndex]}
                   edit={false}
                   user={user}
-                  themeShadow={'background-shadow-new'}
+                  themeShadow="background-shadow-new"
                 />
               </div>
-              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 mx-auto w-[90vw] gap-4 mt-4">
+
+              <div className="flex-1 min-h-0 grid grid-cols-1 sm:grid-cols-2 sm:grid-rows-2 gap-2.5 sm:gap-3 max-w-4xl w-full mx-auto mt-3 auto-rows-fr">
                 {randomizedOptions[currentCardIndex]?.map((option, index) => {
-                  // Determine the mode for the current card using the same logic:
-                  const mode = cards[currentCardIndex].frontMode === 1 || cards[currentCardIndex].backMode === 1
-                    ? 1
-                    : cards[currentCardIndex].backMode;
+                  const mode =
+                    cards[currentCardIndex].frontMode === 1 ||
+                    cards[currentCardIndex].backMode === 1
+                      ? 1
+                      : cards[currentCardIndex].backMode;
                   const correctOption =
                     mode === 2 || mode === 3
                       ? { mode, content: cards[currentCardIndex].image_url }
@@ -263,21 +271,25 @@ function Quiz() {
                       correctOption={correctOption}
                       selectedOption={selectedAnswers[currentCardIndex]}
                       onClick={() => handleAnswerClick(option)}
-                      themeShadow={'background-shadow-new'}
                     />
                   );
                 })}
               </div>
-              <div className="flex justify-center gap-4 p-4">
+
+              <div className="flex justify-center gap-4 pt-3 shrink-0">
                 <BackgroundButton
-                  text="Previous Card"
-                  bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : "bg-orange-500 hover:bg-orange-400"}
-                  wWidth="w-40"
+                  text="Previous"
+                  bgColor={
+                    theme
+                      ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                      : 'bg-orange-500 hover:bg-orange-400'
+                  }
+                  wWidth="w-36"
                   onClick={goToPreviousCard}
                   disabled={currentCardIndex === 0}
                 />
                 <BackgroundButton
-                  text={currentCardIndex === cards.length - 1 ? 'Finish Quiz' : 'Next Card'}
+                  text={currentCardIndex === cards.length - 1 ? 'Finish' : 'Next'}
                   bgColor={
                     currentCardIndex === cards.length - 1
                       ? 'bg-green-500 hover:bg-green-400'
@@ -285,71 +297,70 @@ function Quiz() {
                         ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
                         : 'bg-purple-500 hover:bg-purple-400'
                   }
-                  wWidth="w-40"
+                  wWidth="w-36"
                   disabled={!selectedAnswers[currentCardIndex]}
                   onClick={() => {
-                    if (currentCardIndex === cards.length - 1) {
-                      setFinished(true);
-                    } else {
-                      goToNextCard();
-                    }
+                    if (currentCardIndex === cards.length - 1) setFinished(true);
+                    else goToNextCard();
                   }}
                 />
               </div>
             </div>
+          ) : !showAd ? (
+            <SessionSummary
+              title={`${message} · ${Math.round(percentage)}%`}
+              correct={correctCount}
+              incorrect={incorrectCount}
+              cardsSeen={cards.length}
+              durationSec={Math.round((Date.now() - sessionStartedAt) / 1000)}
+              weakCount={incorrectCount}
+              onHome={() => {
+                if (profile.pro) navigate('/home');
+                else {
+                  setLeaveAd('Home');
+                  setShowAd(true);
+                }
+              }}
+              onStudyAgain={() => {
+                if (profile.pro) {
+                  setFinished(false);
+                  setStarted(false);
+                  setCurrentCardIndex(0);
+                  setSelectedAnswers({});
+                } else {
+                  setLeaveAd('Retry Quiz');
+                  setShowAd(true);
+                }
+              }}
+            />
           ) : (
-            !showAd ? (
-              <SessionSummary
-                title={message}
-                correct={correctCount}
-                incorrect={incorrectCount}
-                cardsSeen={cards.length}
-                durationSec={Math.round((Date.now() - sessionStartedAt) / 1000)}
-                weakCount={incorrectCount}
-                onHome={() => {
-                  if (profile.pro) {
-                    navigate('/home');
-                  } else {
-                    setLeaveAd('Home');
-                    setShowAd(true);
-                  }
-                }}
-                onStudyAgain={() => {
-                  if (profile.pro) {
+            <PageEmptyState>
+              <h2
+                className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${textTone}`}
+              >
+                Advertisement
+              </h2>
+              <Ad />
+              <BackgroundButton
+                text="Continue"
+                bgColor={
+                  theme
+                    ? `${primaryColor.bgClass} ${primaryColor.hoverClass}`
+                    : 'bg-purple-500 hover:bg-purple-400'
+                }
+                delay={5}
+                onClick={() => {
+                  setShowAd(false);
+                  if (leaveAd === 'Home') navigate('/home');
+                  else {
                     setFinished(false);
                     setStarted(false);
                     setCurrentCardIndex(0);
                     setSelectedAnswers({});
-                  } else {
-                    setLeaveAd('Retry Quiz');
-                    setShowAd(true);
                   }
                 }}
               />
-            ) : (
-              <PageEmptyState>
-                <h2 className={`text-3xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textClass'}`}>
-                  Advertisement
-                </h2>
-                <Ad />
-                <BackgroundButton
-                  text="Continue"
-                  bgColor={theme ? `${primaryColor.bgClass} ${primaryColor.hoverClass}` : "bg-purple-500 hover:bg-purple-400"}
-                  delay={5}
-                  onClick={() => {
-                    setShowAd(false);
-                    if (leaveAd === "Home") {
-                      navigate('/home');
-                    } else {
-                      setFinished(false);
-                      setStarted(false);
-                      setCurrentCardIndex(0);
-                      setSelectedAnswers({});
-                    }
-                  }}
-                />
-              </PageEmptyState>
-            )
+            </PageEmptyState>
           )
         ) : (
           <PageEmptyState>
@@ -373,7 +384,7 @@ function Quiz() {
           </PageEmptyState>
         )}
       </div>
-      </div>
+
       <SubjectList
         isOpen={isSubjectListModalOpen}
         onClose={() => setIsSubjectListModalOpen(false)}
@@ -386,21 +397,15 @@ function Quiz() {
 
 export default Quiz;
 
-// -----------------------------------------------------------------------
-// SelectionBox Component
-// Renders differently based on the option's mode:
-// - Mode 0: Render text with ReactMarkdown.
-// - Mode 1: Render an EditableMathField (MathQuill).
-// - Modes 2 and 3: Render an image.
-// The image is styled to fit inside the selection box.
-// -----------------------------------------------------------------------
-function SelectionBox({ option, onClick, selectedOption, correctOption, themeShadow }) {
+function SelectionBox({ option, onClick, selectedOption, correctOption }) {
   if (!option) return null;
   const optionContent = option.content || '';
-  let boxColor = 'bg-white dark:bg-gray-600';
+  let boxColor = 'bg-white';
+  let borderExtra = '';
 
   if (selectedOption !== undefined) {
-    const isSelected = (selectedOption.content || '') === optionContent && selectedOption.mode === option.mode;
+    const isSelected =
+      (selectedOption.content || '') === optionContent && selectedOption.mode === option.mode;
     const isCorrect =
       correctOption &&
       (correctOption.content || '') === optionContent &&
@@ -408,11 +413,11 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
     if (isSelected) {
       boxColor = isCorrect ? 'bg-green-400' : 'bg-red-400';
     } else if (isCorrect) {
-      boxColor = 'bg-green-200 dark:text-gray-500';
+      boxColor = 'bg-green-100';
+      borderExtra = 'ring-2 ring-green-500';
     }
   }
 
-  // Function to determine font size based on content length
   const getFontSize = (content) => {
     if (!content) return 'text-lg';
     const length = content.length;
@@ -424,8 +429,11 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
   };
 
   return (
-    <div
-      className={`w-full h-auto sm:h-[20vh] ${boxColor} ${themeShadow} background-hover cursor-pointer rounded-xl p-4 text-center flex items-center justify-center font-bold textColor`}
+    <button
+      type="button"
+      className={`w-full h-full min-h-[3.5rem] ${boxColor} background-shadow-new background-hover
+        cursor-pointer rounded-2xl p-3 sm:p-4 text-center flex items-center justify-center font-bold text-gray-800
+        ${borderExtra}`}
       onClick={onClick}
     >
       <div className="w-full h-full overflow-hidden flex items-center justify-center">
@@ -433,32 +441,32 @@ function SelectionBox({ option, onClick, selectedOption, correctOption, themeSha
           <img
             src={optionContent}
             alt="Answer option"
-            className="w-full h-full object-contain"
+            className="w-full h-full max-h-28 object-contain"
           />
         ) : option.mode === 1 ? (
           <EditableMathField
             latex={optionContent}
             style={{
-              minHeight: '4rem',
+              minHeight: '3rem',
               width: '100%',
               backgroundColor: 'transparent',
               color: 'inherit',
               border: 'none',
               pointerEvents: 'none',
-              fontSize: optionContent.length > 50 ? '1.5rem' : '2rem',
+              fontSize: optionContent.length > 50 ? '1.25rem' : '1.75rem',
               fontWeight: 'semibold',
               textAlign: 'center',
             }}
           />
         ) : (
           <SafeMarkdown
-                        components={{ u: ({ node, ...props }) => <u {...props} /> }}
+            components={{ u: ({ node, ...props }) => <u {...props} /> }}
             className={`inline ${getFontSize(optionContent)}`}
           >
             {optionContent}
           </SafeMarkdown>
         )}
       </div>
-    </div>
+    </button>
   );
 }

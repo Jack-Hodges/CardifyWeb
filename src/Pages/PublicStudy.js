@@ -5,16 +5,18 @@ import supabase from '../supabaseClient';
 import Card from '../components/Card/Card';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import ThemeBackground from '../components/Elements/ThemeBackground';
+import LoadingSpinner from '../components/Elements/LoadingSpinner';
 import { useUser } from '../UserContext';
 import CardifyLogo from '../images/Logos/CardifyLogoOfficial.png';
 
 /**
  * Public read-only study page — no account required.
+ * Guest funnel: study → sign up / open Cardify to keep practising.
  */
 function PublicStudy() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { theme, colorScheme } = useUser();
+  const { theme, colorScheme, user } = useUser();
   const { primaryColor, secondaryColor, textColor } = theme;
   const [payload, setPayload] = useState(null);
   const [error, setError] = useState(null);
@@ -42,6 +44,38 @@ function PublicStudy() {
 
   const cards = payload?.cards || [];
   const subject = payload?.subject;
+
+  const goPrev = () => {
+    setIndex((i) => Math.max(0, i - 1));
+    setFlipped(false);
+  };
+
+  const goNext = () => {
+    setIndex((i) => Math.min(cards.length - 1, i + 1));
+    setFlipped(false);
+  };
+
+  useEffect(() => {
+    if (loading || error || !cards.length) return;
+    const onKey = (e) => {
+      const tag = e.target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        setFlipped((f) => !f);
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goPrev();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, error, cards.length, index]);
+
   const pageTitle = subject?.name
     ? `${subject.name} — Public study | Cardify`
     : error
@@ -50,6 +84,9 @@ function PublicStudy() {
   const pageDescription = subject?.name
     ? `Study “${subject.name}” on Cardify${cards.length ? ` — ${cards.length} flashcard${cards.length === 1 ? '' : 's'}` : ''}. No account required.`
     : 'Shared Cardify flashcard study link.';
+
+  const openCardify = () => navigate(user ? '/home' : '/');
+  const openSignUp = () => navigate('/?signup=1');
 
   return (
     <div
@@ -84,18 +121,25 @@ function PublicStudy() {
             </div>
           </div>
           <BackgroundButton
-            text="Open Cardify"
+            text={user ? 'Open Home' : 'Open Cardify'}
             bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
-            onClick={() => navigate('/')}
+            onClick={openCardify}
           />
         </header>
 
         <main className="flex-1 flex flex-col justify-center px-5 sm:px-7 py-6">
           {loading ? (
-            <p className={`${textColor} text-center font-medium opacity-80`}>Loading…</p>
+            <LoadingSpinner text="Loading shared cards…" />
           ) : error ? (
             <div className="max-w-md mx-auto text-center rounded-2xl bg-white/40 border border-black/10 backdrop-blur-sm px-6 py-8">
               <p className="text-red-600 font-semibold">{error}</p>
+              <div className="mt-5 flex justify-center">
+                <BackgroundButton
+                  text="Go to Cardify"
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                  onClick={openCardify}
+                />
+              </div>
             </div>
           ) : cards.length === 0 ? (
             <p className={`${textColor} text-center font-medium opacity-80`}>
@@ -119,7 +163,7 @@ function PublicStudy() {
               </div>
 
               <p className={`${textColor} text-sm text-center mt-4 opacity-70 font-medium`}>
-                Tap the card to flip
+                Tap the card to flip · Space flips · ← → move
               </p>
 
               <div className="flex justify-center gap-3 mt-6">
@@ -127,20 +171,52 @@ function PublicStudy() {
                   text="Previous"
                   bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
                   disabled={index === 0}
-                  onClick={() => {
-                    setIndex((i) => Math.max(0, i - 1));
-                    setFlipped(false);
-                  }}
+                  onClick={goPrev}
                 />
                 <BackgroundButton
                   text="Next"
                   bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
                   disabled={index >= cards.length - 1}
-                  onClick={() => {
-                    setIndex((i) => Math.min(cards.length - 1, i + 1));
-                    setFlipped(false);
-                  }}
+                  onClick={goNext}
                 />
+              </div>
+
+              <div className="mt-8 max-w-lg mx-auto rounded-2xl bg-white/35 border border-black/10 backdrop-blur-sm px-5 py-5 text-center">
+                {user ? (
+                  <>
+                    <p className="font-bold text-gray-900 text-lg">Like this deck?</p>
+                    <p className="text-sm text-gray-700 mt-1 mb-4">
+                      Jump into Cardify to practise with games, spaced repetition, and your own subjects.
+                    </p>
+                    <BackgroundButton
+                      text="Continue in Cardify"
+                      bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
+                      wWidth="w-full sm:w-auto"
+                      onClick={() => navigate('/home')}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <p className="font-bold text-gray-900 text-lg">Want your own flashcards?</p>
+                    <p className="text-sm text-gray-700 mt-1 mb-4">
+                      Create a free account to build decks, practise with games, and share your own study links.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                      <BackgroundButton
+                        text="Create free account"
+                        bgColor={`${secondaryColor.bgClass} ${secondaryColor.hoverClass}`}
+                        wWidth="w-full sm:w-auto"
+                        onClick={openSignUp}
+                      />
+                      <BackgroundButton
+                        text="Sign in"
+                        bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                        wWidth="w-full sm:w-auto"
+                        onClick={() => navigate('/')}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
