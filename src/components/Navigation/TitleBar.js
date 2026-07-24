@@ -74,6 +74,8 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
 
           {/* Dropdown options with animation */}
           <div
+            role="menu"
+            aria-label="Page navigation"
             className={`p-1 absolute text-white text-xl font-bold left-0 ${!home ? 'ml-12' : ''} mt-12 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
               menuOpen ? 'scale-y-100 opacity-100 pointer-events-auto' : 'scale-y-0 opacity-0 pointer-events-none'
             }`}
@@ -96,8 +98,19 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
       {/* User Profile and Additional Content */}
       <div className="flex gap-2">
         {content}
-        <div className={`w-10 h-10 rounded-full background-shadow-new background-hover cursor-pointer overflow-hidden`}
-          onClick={() => setIsProfileOpen(true)}>
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Open profile"
+          className={`w-10 h-10 rounded-full background-shadow-new background-hover cursor-pointer overflow-hidden`}
+          onClick={() => setIsProfileOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsProfileOpen(true);
+            }
+          }}
+        >
           <ProfileAvatar
             avatarUrl={profile?.avatar_url}
             firstName={profile?.first_name}
@@ -131,9 +144,19 @@ function LinkButton({ text, img, hoverClass, dataTour }) {
     navigate(`/${textLower}`, { state: { subject: null } });
   };
 
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
   return (
     <div
+      role="menuitem"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={onKeyDown}
       className={`flex items-center justify-start ${hoverClass} p-1 w-full rounded-3xl cursor-pointer`}
       data-tour={dataTour}
     >

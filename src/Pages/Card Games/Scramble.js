@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Check, X, Shuffle, HelpCircle, MessageSquare } from 'lucide-react';
 import { fetchCards, sortCardsById } from '../../components/Card/CardManipulation';
 import { useUser } from '../../UserContext';
-import ReactMarkdown from 'react-markdown';
+import SafeMarkdown from '../../components/Functions/SafeMarkdown';
 import TitleBar from '../../components/Navigation/TitleBar';
 import BackgroundButton from '../../components/Elements/BackgroundButton';
 import SubjectList from '../../components/Subject/SubjectList';
 import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
+import GameComplete from '../../components/Elements/GameComplete';
+import GameSettings from '../../components/Games/GameSettings';
+import GameHUD, { hudIcons } from '../../components/Games/GameHUD';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
 import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
@@ -28,6 +31,15 @@ const splitIntoChunks = (text, maxChunks = 5) => {
   return chunks.slice(0, maxChunks);
 };
 
+const shuffleArray = (array) => {
+  const next = [...array];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+  return next;
+};
+
 const tileClass = (isMobile, isDraggingSource) => `
   ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
   rounded-xl bg-white text-gray-900 font-semibold
@@ -40,21 +52,21 @@ const tileClass = (isMobile, isDraggingSource) => `
 const ghostTileClass = (isMobile) => `
   ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
   rounded-xl bg-white text-gray-900 font-semibold
-  background-shadow-new border-2 border-blue-500
+  background-shadow-new border-2 border-[var(--theme-border-color)]
   inline-flex items-center justify-center text-center
   opacity-95 scale-110
 `;
 
 const placeholderTileClass = (isMobile) => `
   ${isMobile ? 'px-3 py-2.5 text-base min-h-[44px]' : 'px-3.5 py-2 text-base'}
-  rounded-xl border-2 border-dashed border-blue-300 bg-blue-500/35 text-white font-semibold
+  rounded-xl border-2 border-dashed border-white/50 bg-white/20 text-white font-semibold
   inline-flex items-center justify-center text-center
 `;
 
 const wellClass = ({ isActive, isChecked, isZoneCorrect, isMobile }) => {
   let state = 'border-white/40 bg-black/25';
   if (isActive) {
-    state = 'border-blue-300 bg-blue-500/35 shadow-[0_0_0_3px_rgba(96,165,250,0.35)]';
+    state = 'border-white/80 bg-white/25 shadow-[0_0_0_3px_rgba(255,255,255,0.2)]';
   } else if (isChecked) {
     state = isZoneCorrect
       ? 'border-green-300 bg-green-600/30'
@@ -70,8 +82,13 @@ const wellClass = ({ isActive, isChecked, isZoneCorrect, isMobile }) => {
 };
 
 const DragDropGame = () => {
+  const [allCards, setAllCards] = useState([]);
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [started, setStarted] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [cardCount, setCardCount] = useState(12);
+  const [shuffleOn, setShuffleOn] = useState(true);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [questionArea, setQuestionArea] = useState([]);
   const [answerArea, setAnswerArea] = useState([]);
@@ -88,12 +105,17 @@ const DragDropGame = () => {
   const [isCorrect, setIsCorrect] = useState({ question: false, answer: false });
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
   const [roundKey, setRoundKey] = useState(0);
+  const [checkedCount, setCheckedCount] = useState(0);
+  const [perfectCount, setPerfectCount] = useState(0);
+  const [sessionStartedAt, setSessionStartedAt] = useState(() => Date.now());
 
   const dragItemRef = useRef(null);
 
   const { subject } = useSubjectFromRoute();
   const { user, getUser, theme } = useUser();
-  const { secondaryColor, tertiaryColor } = theme;
+  const { secondaryColor, tertiaryColor, textClass, shadow } = theme;
+  const textTone = textClass || 'textColor';
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -105,34 +127,57 @@ const DragDropGame = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const subjectId = subject?.id ?? null;
+  const userId = user?.id ?? null;
+  const currentCardId = cards[currentCardIndex]?.id ?? null;
+  const roundSetupKeyRef = useRef('');
+
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       getUser();
       return;
     }
 
-    if (!subject) {
+    if (!subjectId) {
+      setAllCards([]);
       setCards([]);
+      setStarted(false);
+      setFinished(false);
       setLoading(false);
       return;
     }
 
+    let cancelled = false;
     const loadCards = async () => {
       setLoading(true);
-      const data = await fetchCards(subject.id);
+      setStarted(false);
+      setFinished(false);
+      setCurrentCardIndex(0);
+      roundSetupKeyRef.current = '';
+      const data = await fetchCards(subjectId);
+      if (cancelled) return;
       sortCardsById(data);
-      setCards(data);
+      setAllCards(data);
+      setCardCount(Math.max(1, data.length || 1));
       setLoading(false);
     };
 
     loadCards();
-  }, [subject, user, getUser]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectId, userId]);
 
   useEffect(() => {
-    if (!cards.length || loading) return;
+    if (!started || !cards.length || loading || currentCardId == null) return;
 
     const currentCard = cards[currentCardIndex];
     if (!currentCard) return;
+
+    const setupKey = `${currentCardId}:${currentCardIndex}`;
+    if (roundSetupKeyRef.current === setupKey) return;
+    roundSetupKeyRef.current = setupKey;
 
     const questionChunks = splitIntoChunks(currentCard.question);
     const answerChunks = splitIntoChunks(currentCard.answer);
@@ -152,7 +197,29 @@ const DragDropGame = () => {
     setIsCorrect({ question: false, answer: false });
     setShowCorrectAnswer(false);
     setRoundKey((k) => k + 1);
-  }, [currentCardIndex, cards, loading]);
+  }, [started, currentCardIndex, currentCardId, cards, loading]);
+
+  const handleStart = () => {
+    let pool = [...allCards];
+    if (shuffleOn) pool = shuffleArray(pool);
+    pool = pool.slice(0, Math.min(cardCount, pool.length));
+    setCards(pool);
+    setCurrentCardIndex(0);
+    setCheckedCount(0);
+    setPerfectCount(0);
+    setSessionStartedAt(Date.now());
+    setFinished(false);
+    setStarted(true);
+    roundSetupKeyRef.current = '';
+  };
+
+  const playAgain = () => {
+    setStarted(false);
+    setFinished(false);
+    setCards([]);
+    setCheckedCount(0);
+    setPerfectCount(0);
+  };
 
   const getItemsByArea = (area) => {
     if (area === 'question') return questionArea;
@@ -178,6 +245,10 @@ const DragDropGame = () => {
 
     setIsCorrect({ question: questionCorrect, answer: answerCorrect });
     setIsChecked(true);
+    setCheckedCount((c) => c + 1);
+    if (questionCorrect && answerCorrect) {
+      setPerfectCount((c) => c + 1);
+    }
 
     if (!questionCorrect || !answerCorrect) {
       setShowCorrectAnswer(true);
@@ -187,6 +258,9 @@ const DragDropGame = () => {
   const resetAnswer = () => {
     const currentCard = cards[currentCardIndex];
     if (!currentCard) return;
+
+    // Allow the round-setup effect to re-run if index/id unchanged
+    roundSetupKeyRef.current = '';
 
     const questionChunks = splitIntoChunks(currentCard.question);
     const answerChunks = splitIntoChunks(currentCard.answer);
@@ -206,6 +280,7 @@ const DragDropGame = () => {
     setIsCorrect({ question: false, answer: false });
     setShowCorrectAnswer(false);
     setRoundKey((k) => k + 1);
+    roundSetupKeyRef.current = `${currentCard.id}:${currentCardIndex}`;
   };
 
   const handleOpenSubjectListModal = () => {
@@ -321,10 +396,9 @@ const DragDropGame = () => {
     }
   };
 
-  const navigate = useNavigate();
-
   const handleSwitchToCreate = () => {
-    navigate('/create', { state: { subject } });
+    if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
+    else navigate('/create');
   };
 
   const handleMouseUp = () => {
@@ -405,17 +479,17 @@ const DragDropGame = () => {
         touchAction: 'manipulation',
       }}
     >
-      <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
+      <SafeMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
         {chunk.content}
-      </ReactMarkdown>
+      </SafeMarkdown>
     </div>
   );
 
   const DropPlaceholder = () => (
     <div className={placeholderTileClass(isMobile)}>
-      <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-white [&_*]:text-white">
+      <SafeMarkdown className="pointer-events-none text-sm sm:text-base text-white [&_*]:text-white">
         {draggedItem.content}
-      </ReactMarkdown>
+      </SafeMarkdown>
     </div>
   );
 
@@ -473,9 +547,9 @@ const DragDropGame = () => {
           <div className="mt-2 px-3 py-3 rounded-xl bg-black/45 border border-green-400/50 backdrop-blur-md">
             <p className="text-sm font-bold text-green-300 mb-1">Correct {title}</p>
             <div className="text-base text-white leading-snug font-medium [&_*]:text-white">
-              <ReactMarkdown>
+              <SafeMarkdown>
                 {cards[currentCardIndex] ? cards[currentCardIndex][id] : ''}
-              </ReactMarkdown>
+              </SafeMarkdown>
             </div>
           </div>
         )}
@@ -511,7 +585,7 @@ const DragDropGame = () => {
         <div className="flex-1 flex flex-col min-h-0 sm:overflow-hidden">
           {loading ? (
             <LoadingSpinner text="Loading cards..." />
-          ) : !cards.length ? (
+          ) : !allCards.length ? (
             <PageEmptyState>
               {subject ? (
                 <NoSelectionModal
@@ -529,51 +603,87 @@ const DragDropGame = () => {
                 />
               )}
             </PageEmptyState>
+          ) : finished ? (
+            <GameComplete
+              title="Session complete!"
+              primaryText="Back to Home"
+              onPrimary={() => navigate('/home')}
+              secondaryText="Play again"
+              onSecondary={playAgain}
+            >
+              <p className={`${textTone} text-xl font-semibold ${shadow ? 'drop-shadow-custom' : ''}`}>
+                {perfectCount}/{checkedCount || cards.length} perfect checks
+              </p>
+              <p className={`${textTone} text-base opacity-80 mt-2 ${shadow ? 'drop-shadow-custom' : ''}`}>
+                {cards.length} cards ·{' '}
+                {Math.round((Date.now() - sessionStartedAt) / 1000)}s
+              </p>
+            </GameComplete>
+          ) : !started ? (
+            <PageEmptyState>
+              <GameSettings
+                cardCount={cardCount}
+                setCardCount={setCardCount}
+                maxCards={allCards.length}
+                shuffle={shuffleOn}
+                setShuffle={setShuffleOn}
+                showTimer={false}
+                onStart={handleStart}
+              />
+            </PageEmptyState>
           ) : (
             <div className="flex-1 flex flex-col min-h-0 px-3 sm:px-6 py-3 sm:py-4 max-w-5xl w-full mx-auto sm:overflow-hidden">
-              {/* Progress header */}
-              <div
-                className={`flex-shrink-0 mb-3 sm:mb-4 ${
-                  isMobile
-                    ? 'flex flex-col gap-2 items-center'
-                    : 'flex justify-between items-center gap-4'
-                }`}
-              >
-                <div className={isMobile ? 'text-center' : ''}>
-                  {subject?.name && (
-                    <p className="text-sm text-white font-semibold mb-0.5 drop-shadow-sm">{subject.name}</p>
-                  )}
-                  <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 justify-center sm:justify-start drop-shadow-sm">
-                    <Shuffle size={20} className="text-blue-300" />
-                    Card {currentCardIndex + 1} of {cards.length}
-                  </h2>
-                </div>
-                <div className="flex gap-2">
-                  <BackgroundButton
-                    text="Previous"
-                    bgColor={
-                      theme
-                        ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
-                        : 'bg-orange-500 hover:bg-orange-400'
-                    }
-                    disabled={currentCardIndex === 0}
-                    wWidth={isMobile ? 'w-28' : 'w-32'}
-                    onClick={() => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}
-                  />
-                  <BackgroundButton
-                    text="Next"
-                    bgColor={
-                      theme
+              <GameHUD
+                items={[
+                  {
+                    key: 'progress',
+                    icon: hudIcons.layers,
+                    value: `${currentCardIndex + 1}/${cards.length}`,
+                    label: 'Progress',
+                  },
+                  {
+                    key: 'perfect',
+                    icon: hudIcons.check,
+                    value: perfectCount,
+                    hint: 'perfect',
+                  },
+                  {
+                    key: 'checks',
+                    icon: hudIcons.zap,
+                    value: checkedCount,
+                    hint: 'checks',
+                  },
+                ]}
+                trailing={subject?.name}
+              />
+
+              <div className="flex-shrink-0 mb-3 flex justify-center sm:justify-end gap-2">
+                <BackgroundButton
+                  text="Previous"
+                  bgColor={
+                    theme
+                      ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                      : 'bg-orange-500 hover:bg-orange-400'
+                  }
+                  disabled={currentCardIndex === 0}
+                  wWidth={isMobile ? 'w-28' : 'w-32'}
+                  onClick={() => setCurrentCardIndex((prev) => Math.max(0, prev - 1))}
+                />
+                <BackgroundButton
+                  text={currentCardIndex === cards.length - 1 ? 'Finish' : 'Next'}
+                  bgColor={
+                    currentCardIndex === cards.length - 1
+                      ? 'bg-green-500 hover:bg-green-400'
+                      : theme
                         ? `${tertiaryColor.bgClass} ${tertiaryColor.hoverClass}`
                         : 'bg-purple-500 hover:bg-purple-400'
-                    }
-                    disabled={currentCardIndex === cards.length - 1}
-                    wWidth={isMobile ? 'w-28' : 'w-32'}
-                    onClick={() =>
-                      setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1))
-                    }
-                  />
-                </div>
+                  }
+                  wWidth={isMobile ? 'w-28' : 'w-32'}
+                  onClick={() => {
+                    if (currentCardIndex === cards.length - 1) setFinished(true);
+                    else setCurrentCardIndex((prev) => Math.min(cards.length - 1, prev + 1));
+                  }}
+                />
               </div>
 
               {/* Glass board */}
@@ -602,7 +712,7 @@ const DragDropGame = () => {
                   <div id="drop-area-available" className="pt-1">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-2">
-                        <Shuffle size={18} className="text-blue-300 shrink-0" />
+                        <Shuffle size={18} className="text-white/90 shrink-0" />
                         <h3 className="text-base sm:text-lg font-bold text-white drop-shadow-sm">Word bank</h3>
                       </div>
                       <p className="text-sm text-white/85 font-medium hidden sm:block">
@@ -652,7 +762,11 @@ const DragDropGame = () => {
                     {!isChecked ? (
                       <BackgroundButton
                         text="Check answer"
-                        bgColor="bg-blue-500 hover:bg-blue-400"
+                        bgColor={
+                          theme
+                            ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                            : 'bg-purple-500 hover:bg-purple-400'
+                        }
                         wWidth="w-full sm:w-auto"
                         onClick={checkAnswer}
                         disabled={questionArea.length === 0 && answerArea.length === 0}
@@ -685,9 +799,9 @@ const DragDropGame = () => {
               top: '-9999px',
             }}
           >
-            <ReactMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
+            <SafeMarkdown className="pointer-events-none text-sm sm:text-base text-gray-900 [&_*]:text-gray-900">
               {draggedItem.content}
-            </ReactMarkdown>
+            </SafeMarkdown>
           </div>
         )}
 

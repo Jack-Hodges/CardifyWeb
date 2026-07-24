@@ -1,12 +1,15 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { saveProfile } from '../Profile/ProfileManipulation';
-import { ArrowLeft, ArrowRight, Sparkles, Upload, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sparkles, Upload, Download, Share2 } from 'lucide-react';
 import ImportModal from '../Modals/ImportModal';
 import ExportModal from '../Modals/ExportModal';
 import GenerateModal from '../Modals/GenerateModal';
+import ShareSubjectModal from '../Modals/ShareSubjectModal';
 import { useState } from 'react';
 import { toast } from '../Toast';
+import featureFlags from '../../config/featureFlags';
+import { TUTORIAL_SUBJECT_ID } from '../Subject/SubjectManipulation';
 
 function CardControls({
   currentCardIndex,
@@ -29,6 +32,15 @@ function CardControls({
   const { shadow, primaryColor, secondaryColor } = theme;
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  const canShare =
+    create &&
+    subject &&
+    !readOnly &&
+    !subject.permission &&
+    subject.id !== TUTORIAL_SUBJECT_ID;
+  const showGenerate = create && !readOnly && featureFlags.aiGenerate;
 
   const nextButton = currentCardIndex === totalCards && !create ? (
     <BackgroundButton text="Finish" onClick={onNextClick} bgColor="bg-green-500 hover:bg-green-500" />
@@ -76,6 +88,26 @@ function CardControls({
     <div className={`w-full h-12 flex items-center ${create ? 'justify-between' : 'justify-end'}`}>
       {create && !readOnly && (
         <div className="mt-2 flex gap-2">
+          {canShare && (
+            <>
+              <div className="hidden sm:block">
+                <BackgroundButton
+                  text="Share"
+                  image={<Share2 />}
+                  flip
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                  onClick={() => setIsShareModalOpen(true)}
+                />
+              </div>
+              <div className="block sm:hidden">
+                <BackgroundButton
+                  image={<Share2 />}
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                  onClick={() => setIsShareModalOpen(true)}
+                />
+              </div>
+            </>
+          )}
           <div className="hidden sm:block">
             <BackgroundButton
               text="Export"
@@ -112,22 +144,26 @@ function CardControls({
               dataTour="create-import"
             />
           </div>
-          <div className="hidden sm:block">
-            <BackgroundButton
-              text="Generate"
-              image={<Sparkles />}
-              flip
-              bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
-              onClick={openGenerate}
-            />
-          </div>
-          <div className="block sm:hidden">
-            <BackgroundButton
-              image={<Sparkles />}
-              bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
-              onClick={openGenerate}
-            />
-          </div>
+          {showGenerate && (
+            <>
+              <div className="hidden sm:block">
+                <BackgroundButton
+                  text="Generate"
+                  image={<Sparkles />}
+                  flip
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                  onClick={openGenerate}
+                />
+              </div>
+              <div className="block sm:hidden">
+                <BackgroundButton
+                  image={<Sparkles />}
+                  bgColor={`${primaryColor.bgClass} ${primaryColor.hoverClass}`}
+                  onClick={openGenerate}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -164,7 +200,13 @@ function CardControls({
         subject={subject}
       />
 
-      {typeof onGenerate === 'function' && (
+      <ShareSubjectModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        subject={subject}
+      />
+
+      {typeof onGenerate === 'function' && showGenerate && (
         <GenerateModal
           isOpen={isGenerateModalOpen}
           onClose={() => setIsGenerateModalOpen(false)}

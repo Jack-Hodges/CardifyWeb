@@ -53,22 +53,31 @@ function Match() {
     setIsCorrect(null);
   }, [cards]);
 
+  const subjectId = subject?.id ?? null;
+  const userId = user?.id ?? null;
+
   useEffect(() => {
-    if (!user) {
+    if (!userId) {
       getUser();
       return;
     }
-    if (!subject) {
+    if (!subjectId) {
       setAllCards([]);
       setCards([]);
       return;
     }
+    let cancelled = false;
     (async () => {
-      const data = await fetchCards(subject.id);
+      const data = await fetchCards(subjectId);
+      if (cancelled) return;
       setAllCards(data);
-      setCardCount(Math.min(12, data.length || 1));
+      setCardCount(Math.max(1, data.length || 1));
     })();
-  }, [subject, user, getUser]);
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- getUser is unstable; userId/subjectId are the real triggers
+  }, [subjectId, userId]);
 
   useEffect(() => {
     if (started && cards.length >= 4) {

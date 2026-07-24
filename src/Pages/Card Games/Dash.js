@@ -43,26 +43,35 @@ function Dash() {
         else navigate('/create');
     };
 
+    const subjectId = subject?.id ?? null;
+    const userId = user?.id ?? null;
+
     useEffect(() => {
-        if (!user) {
+        if (!userId) {
             getUser();
             return;
         }
 
-        if (!subject) {
+        if (!subjectId) {
             setCards([]);
             setAllCards([]);
             return;
         }
 
+        let cancelled = false;
         const loadCards = async () => {
-            const data = await fetchCards(subject.id);
+            const data = await fetchCards(subjectId);
+            if (cancelled) return;
             setAllCards(data);
-            setCardCount(Math.min(20, data.length || 1));
+            setCardCount(Math.max(1, data.length || 1));
         };
 
         loadCards();
-    }, [subject, user, getUser]);
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- getUser is unstable; userId/subjectId are the real triggers
+    }, [subjectId, userId]);
 
     const handleStart = () => {
         let pool = [...allCards];

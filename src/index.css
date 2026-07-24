@@ -165,3 +165,24 @@ html.scroll-locked body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Memory game — 3D flip tiles */
+.memory-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.memory-card-matched {
+  animation: memory-match-pop 0.45s ease-out;
+}
+
+@keyframes memory-match-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
