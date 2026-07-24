@@ -51,6 +51,34 @@ export const normalizeBackgroundImage = (value) => {
   return `url(${v})`;
 };
 
+/** True when the value should be applied as background-image (not background-color). */
+export const isBackgroundImageValue = (value) => {
+  const v = String(value || '');
+  return (
+    v.startsWith('url(') ||
+    v.startsWith('linear-gradient') ||
+    v.startsWith('radial-gradient')
+  );
+};
+
+/**
+ * Inline styles for a theme backdrop. Uses longhands so the `background`
+ * shorthand cannot reset size/repeat (which tiles the image on large screens).
+ */
+export const getThemeBackgroundStyle = (value) => {
+  const v = normalizeBackgroundImage(value);
+  if (!v) return {};
+  if (isBackgroundImageValue(v)) {
+    return {
+      backgroundImage: v,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+    };
+  }
+  return { backgroundColor: v };
+};
+
 export const normalizeThemeKey = (name) => {
   if (!name) return 'default';
   return String(name).toLowerCase().replaceAll(' ', '');

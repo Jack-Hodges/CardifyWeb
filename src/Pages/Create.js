@@ -25,6 +25,7 @@ import { toast } from '../components/Toast';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { CREATE_STEPS } from '../components/Tutorial/tourSteps';
+import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 function Create() {
   const [cards, setCards] = useState([]);
@@ -274,16 +275,7 @@ function Create() {
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{
-        background:
-          theme.image.startsWith('url(') ||
-          theme.image.startsWith('linear-gradient') ||
-          theme.image.startsWith('#')
-            ? theme.image
-            : `url(${theme.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{...getThemeBackgroundStyle(theme.image)}}
     >
       <Helmet>
         <title>Create Flashcards - Cardify | Design Custom Study Cards</title>
@@ -296,17 +288,8 @@ function Create() {
       </Helmet>
 
       <div
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background:
-            theme.image.startsWith('url(') ||
-            theme.image.startsWith('linear-gradient') ||
-            theme.image.startsWith('#')
-              ? theme.image
-              : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{...getThemeBackgroundStyle(theme.image)}}
       />
 
       <div className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden">
@@ -323,7 +306,7 @@ function Create() {
               </PageEmptyState>
             ) : cards.length > 0 ? (
               <>
-                <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
+                <div className="w-full lg:w-[70%] px-5 h-[50vh] sm:h-[60vh] lg:h-full mt-5 sm:mt-14">
                   <Card
                     card={cards[currentCardIndex]}
                     flipped={flipped}

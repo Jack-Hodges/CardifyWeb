@@ -11,6 +11,7 @@ import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
+import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
   if (!text || typeof text !== 'string') return [];
@@ -482,29 +483,16 @@ const DragDropGame = () => {
     );
   };
 
-  const themeBg =
-    theme.image.startsWith('url(') ||
-    theme.image.startsWith('linear-gradient') ||
-    theme.image.startsWith('#')
-      ? theme.image
-      : `url(${theme.image})`;
+  const themeBgStyle = getThemeBackgroundStyle(theme.image);
 
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{
-        background: themeBg,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{...themeBgStyle}}
     >
       <div
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background: themeBg,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{...themeBgStyle}}
       />
 
       <div

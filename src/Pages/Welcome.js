@@ -26,6 +26,7 @@ import CreateVideo from '../videos/Create.webm';
 import HomeVideo from '../videos/Home.webm';
 import GenerateVideo from '../videos/Generate.webm';
 import { toast } from '../components/Toast';
+import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 
 const FEATURES = [
@@ -286,14 +287,8 @@ function Welcome() {
         </Helmet>
 
         <div
-          className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-          style={{
-            background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
-              ? theme.image
-              : `url(${theme.image})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
+          className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+          style={{...getThemeBackgroundStyle(theme.image)}}
         />
 
         <div className="relative z-10 min-h-screen flex flex-col bg-[#f1ebe0] dark:bg-gray-800">

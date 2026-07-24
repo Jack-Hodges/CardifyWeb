@@ -55,9 +55,11 @@ function PublicStudy() {
     <div
       className="w-screen min-h-[100lvh] relative overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{
-        background: 'var(--theme-background)',
+        backgroundColor: 'var(--theme-background-color)',
+        backgroundImage: 'var(--theme-background-image)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       <Helmet>

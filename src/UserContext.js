@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import supabase from './supabaseClient';
 import { fetchProfile } from './components/Profile/ProfileManipulation';
-import { getTheme, normalizeBackgroundImage } from './components/Functions/getTheme';
+import { getTheme, normalizeBackgroundImage, isBackgroundImageValue } from './components/Functions/getTheme';
 import getColors from './components/Functions/getColors';
 
 // Create UserContext
@@ -76,11 +76,18 @@ export const UserProvider = ({ children }) => {
   // Push theme into CSS so pages don't recompute background strings
   useEffect(() => {
     if (!theme) return;
+    const solidThemeColor = toSolidThemeColor(theme.color);
     if (theme.image) {
       document.documentElement.style.setProperty('--theme-background', theme.image);
+      if (isBackgroundImageValue(theme.image)) {
+        document.documentElement.style.setProperty('--theme-background-image', theme.image);
+        document.documentElement.style.setProperty('--theme-background-color', solidThemeColor);
+      } else {
+        document.documentElement.style.setProperty('--theme-background-image', 'none');
+        document.documentElement.style.setProperty('--theme-background-color', theme.image);
+      }
     }
     if (theme.color) {
-      const solidThemeColor = toSolidThemeColor(theme.color);
       document.documentElement.style.setProperty('--theme-border-color', theme.color);
       document.documentElement.style.setProperty('--theme-surface-color', solidThemeColor);
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');

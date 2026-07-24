@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useImperativeHandle, forwardRef, useCallback } from 'react'
-import ReactDOM from 'react-dom'
+import { createPortal } from 'react-dom'
 import {
   Brush,
   Eraser,
@@ -727,7 +727,7 @@ const Drawing = forwardRef((props, ref) => {
 
       {showCursor &&
         (mode === 'brush' || mode === 'erase') &&
-        ReactDOM.createPortal(
+        createPortal(
           <div
             style={{
               position: 'fixed',

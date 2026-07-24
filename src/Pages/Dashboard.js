@@ -20,6 +20,7 @@ import { Helmet } from 'react-helmet-async';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { DASHBOARD_STEPS } from '../components/Tutorial/tourSteps';
+import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -305,13 +306,7 @@ function Dashboard() {
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{
-        background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#')
-          ? theme.image
-          : `url(${theme.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{...getThemeBackgroundStyle(theme.image)}}
     >
       <Helmet>
         <title>Dashboard - Cardify | Manage Your Flashcard Collections</title>
@@ -325,14 +320,8 @@ function Dashboard() {
       </Helmet>
       {/* Fixed background - ensure it covers entire viewport */}
       <div 
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{ 
-          background: theme.image.startsWith('url(') || theme.image.startsWith('linear-gradient') || theme.image.startsWith('#') 
-            ? theme.image 
-            : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{...getThemeBackgroundStyle(theme.image)}}
       ></div>
       
       {/* Scrolling content */}

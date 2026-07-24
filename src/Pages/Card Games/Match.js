@@ -11,6 +11,7 @@ import PageEmptyState from '../../components/Elements/PageEmptyState';
 import GameComplete from '../../components/Elements/GameComplete';
 import GameSettings from '../../components/Games/GameSettings';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
+import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
 function Match() {
   const [allCards, setAllCards] = useState([]);
@@ -125,29 +126,11 @@ function Match() {
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{
-        background:
-          theme.image.startsWith('url(') ||
-          theme.image.startsWith('linear-gradient') ||
-          theme.image.startsWith('#')
-            ? theme.image
-            : `url(${theme.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{...getThemeBackgroundStyle(theme.image)}}
     >
       <div
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background:
-            theme.image.startsWith('url(') ||
-            theme.image.startsWith('linear-gradient') ||
-            theme.image.startsWith('#')
-              ? theme.image
-              : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{...getThemeBackgroundStyle(theme.image)}}
       />
 
       <div className="relative z-10 min-h-[100lvh] sm:min-h-screen pb-20">

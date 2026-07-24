@@ -24,6 +24,7 @@ import { ChevronDown, CirclePlay } from 'lucide-react';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { PRACTICE_STEPS } from '../components/Tutorial/tourSteps';
+import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 const GRADE_LABELS = [
   { q: 0, label: 'Again', color: 'bg-red-500 hover:bg-red-400' },
@@ -420,16 +421,7 @@ function Practice() {
   return (
     <div
       className="w-screen min-h-[100lvh] sm:h-screen relative bg-cover bg-center bg-no-repeat"
-      style={{
-        background:
-          theme.image.startsWith('url(') ||
-          theme.image.startsWith('linear-gradient') ||
-          theme.image.startsWith('#')
-            ? theme.image
-            : `url(${theme.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      style={{...getThemeBackgroundStyle(theme.image)}}
     >
       <Helmet>
         <title>Practice Flashcards - Cardify | Study & Review Your Cards</title>
@@ -442,17 +434,8 @@ function Practice() {
       </Helmet>
 
       <div
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background:
-            theme.image.startsWith('url(') ||
-            theme.image.startsWith('linear-gradient') ||
-            theme.image.startsWith('#')
-              ? theme.image
-              : `url(${theme.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={{...getThemeBackgroundStyle(theme.image)}}
       />
 
       <div className="relative z-10 min-h-[100lvh] sm:h-full flex flex-col sm:overflow-hidden">

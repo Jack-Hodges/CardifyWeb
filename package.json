@@ -49,7 +49,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node server.js",
-    "dev": "node server.js & react-scripts start"
+    "dev": "node server.js & react-scripts start",
+    "postinstall": "node scripts/fix-html2pdf-sourcemap.js"
   },
   "eslintConfig": {
     "extends": [

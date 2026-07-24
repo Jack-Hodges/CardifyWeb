@@ -1,26 +1,28 @@
 /**
- * Single fixed theme backdrop. Background value comes from --theme-background
- * set by UserContext whenever the theme changes.
+ * Single theme backdrop. Uses CSS vars set by UserContext.
+ *
+ * Mobile: absolute fill of the page container (scrolls with content / iOS-safe).
+ * Desktop: fixed viewport layer so large screens never tile the image.
  */
 function ThemeBackground({ shadow = false }) {
+  const style = {
+    backgroundColor: 'var(--theme-background-color)',
+    backgroundImage: 'var(--theme-background-image)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  };
+
   return (
     <>
       <div
         className="absolute inset-0 sm:hidden bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background: 'var(--theme-background)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        style={style}
         aria-hidden="true"
       />
       <div
-        className="hidden sm:block fixed inset-0 w-screen h-[100lvh] sm:h-screen bg-cover bg-center bg-no-repeat z-0"
-        style={{
-          background: 'var(--theme-background)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
+        className="hidden sm:block fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat z-0"
+        style={style}
         aria-hidden="true"
       />
       {shadow && (
