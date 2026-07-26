@@ -10,6 +10,7 @@ import { saveSubjectProgress, TUTORIAL_SUBJECT_ID } from '../components/Subject/
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import SessionSummary from '../components/Study/SessionSummary';
+import GameComplete from '../components/Elements/GameComplete';
 import {
   upsertCardSrs,
   startStudySession,
@@ -316,13 +317,7 @@ function Practice() {
     }
     const durationSec = await finalizeSession(finalStats || statsRef.current);
     setStats((s) => ({ ...(finalStats || s), duration_sec: durationSec }));
-
-    // Session summary is SM-2 only; classic just wraps up and returns home
-    if (mode === 'srs') {
-      setFinished(true);
-    } else {
-      navigate('/home');
-    }
+    setFinished(true);
   };
 
   const handleNextCard = () => {
@@ -660,7 +655,15 @@ function Practice() {
               onStudyAgain={studyAgain}
               onHome={() => navigate('/home')}
             />
-          ) : null}
+          ) : (
+            <GameComplete
+              title="You completed all the cards!"
+              primaryText="Back to Home"
+              onPrimary={() => navigate('/home')}
+              secondaryText="Practice again"
+              onSecondary={studyAgain}
+            />
+          )}
 
           <SubjectList
             isOpen={isSubjectListModalOpen}

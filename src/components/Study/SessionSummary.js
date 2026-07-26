@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import BackgroundButton from '../Elements/BackgroundButton';
 import PageEmptyState from '../Elements/PageEmptyState';
 import { useUser } from '../../UserContext';
@@ -15,6 +17,7 @@ function SessionSummary({
   onStudyAgain,
   onHome,
   weakCount = 0,
+  celebrate = true,
 }) {
   const { theme } = useUser();
   const { textClass, secondaryColor, tertiaryColor, shadow } = theme || {};
@@ -24,6 +27,16 @@ function SessionSummary({
   const secs = durationSec % 60;
   const textTone = theme ? textClass : 'textColor';
   const shadowClass = shadow ? 'drop-shadow-custom' : '';
+
+  useEffect(() => {
+    if (!celebrate) return;
+    confetti({
+      particleCount: 300,
+      spread: 100,
+      origin: { y: 0.5 },
+      gravity: 0.9,
+    });
+  }, [celebrate]);
 
   return (
     <PageEmptyState>

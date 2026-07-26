@@ -716,7 +716,7 @@ function ScrollVideo({ videoSrc }) {
   }, [videoSrc]);
 
   return (
-    <div ref={containerRef} className="relative aspect-[4/3] sm:aspect-video bg-gray-200 dark:bg-gray-600">
+    <div ref={containerRef} className="relative bg-gray-200 dark:bg-gray-600">
       <video
         ref={videoRef}
         src={videoSrc}
@@ -724,7 +724,7 @@ function ScrollVideo({ videoSrc }) {
         muted
         playsInline
         preload="metadata"
-        className="w-full h-full object-cover"
+        className="w-full h-auto block"
       />
     </div>
   );
