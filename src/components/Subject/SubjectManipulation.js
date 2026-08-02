@@ -432,14 +432,28 @@ export const fetchListing = async (subjectId, userId) => {
   return data;
 };
 
+const DISCOVER_CATEGORIES = new Set([
+  'geography',
+  'science',
+  'languages',
+  'history',
+  'general',
+  'other',
+]);
+
 /** Publish (or re-publish) to Discover. Paid fields stored but not activated in app yet. */
-export const publishToDiscover = async (subjectId, userId, { description = null, pricing = 'free', priceCents = 0 } = {}) => {
+export const publishToDiscover = async (
+  subjectId,
+  userId,
+  { description = null, pricing = 'free', priceCents = 0, category = 'other' } = {}
+) => {
   const payload = {
     subject_id: subjectId,
     publisher_id: userId,
     description: description?.trim() || null,
     pricing: pricing === 'paid' ? 'paid' : 'free',
     price_cents: pricing === 'paid' ? Math.max(0, Number(priceCents) || 0) : 0,
+    category: DISCOVER_CATEGORIES.has(category) ? category : 'other',
     published_at: new Date().toISOString(),
   };
 
@@ -472,9 +486,10 @@ export const unpublishFromDiscover = async (subjectId, userId) => {
   return Boolean(data);
 };
 
-export const listDiscoverSubjects = async (search = '') => {
+export const listDiscoverSubjects = async (search = '', category = null) => {
   const { data, error } = await supabase.rpc('list_discover_subjects', {
     p_search: search || null,
+    p_category: category || null,
   });
   if (error) {
     console.error('listDiscoverSubjects', error);
@@ -529,7 +544,12 @@ export const fetchLibrarySubjectIds = async (userId) => {
     console.error('fetchLibrarySubjectIds', error);
     return new Set();
   }
-  return new Set((data || []).map((row) => row.subject_id));
+  return new Set(
+    (data || []).flatMap((row) => {
+      const id = row.subject_id;
+      return id == null ? [] : [id, Number(id)];
+    })
+  );
 };
 
 export const isInLibrary = async (subjectId, userId) => {
