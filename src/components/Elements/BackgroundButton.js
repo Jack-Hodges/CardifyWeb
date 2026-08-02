@@ -34,8 +34,8 @@ const BackgroundButton = ({ text, image = null, bgColor, onClick, wWidth = "w-au
         );
     } else if (text) {
         return (
-            <button disabled={disabled} onClick={onClick} className={`relative inline-flex items-center justify-center h-10 ${wWidth} ${disabled ? disabledBgColor : bgColor} text-white text-lg font-semibold rounded-full background-shadow-new background-hover`} {...tourProps}>
-                <span className="px-4">{text}</span> {/* Show the text */}
+            <button disabled={disabled} onClick={onClick} className={`relative inline-flex items-center justify-center h-10 px-5 whitespace-nowrap ${wWidth} ${disabled ? disabledBgColor : bgColor} text-white text-lg font-semibold rounded-full background-shadow-new background-hover`} {...tourProps}>
+                <span>{text}</span>
             </button>
         );
     }

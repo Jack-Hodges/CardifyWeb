@@ -56,10 +56,47 @@ export const fetchSubjects = async (user, profile = null) => {
 
     
 
-    // Combine own subjects with shared subjects
+    const ownIds = new Set((ownSubjects || []).map((s) => s.id));
+    const sharedIds = new Set(sharedSubjects.map((s) => s.id));
+
+    // Discover library (reference — not owned copies)
+    let discoverSubjects = [];
+    const { data: libraryRows, error: libraryError } = await supabase
+      .from('subject_library')
+      .select('subject_id, added_at')
+      .eq('user_id', user.id);
+
+    if (libraryError) {
+      console.error('Error fetching subject library:', libraryError);
+    } else if (libraryRows?.length) {
+      const libraryIds = libraryRows
+        .map((r) => r.subject_id)
+        .filter((id) => !ownIds.has(id) && !sharedIds.has(id));
+
+      if (libraryIds.length > 0) {
+        const { data: librarySubjects, error: libSubError } = await supabase
+          .from('subjects')
+          .select('*')
+          .in('id', libraryIds)
+          .is('deleted_at', null);
+
+        if (libSubError) {
+          console.error('Error fetching discover subjects:', libSubError);
+        } else {
+          discoverSubjects = (librarySubjects || []).map((subject) => ({
+            ...subject,
+            isFromDiscover: true,
+            permission: 'viewer',
+          }));
+        }
+      }
+    }
+
+    // Combine own subjects with shared + discover library
     let allSubjects = [
       ...(ownSubjects || []),
-      ...sharedSubjects
+      ...sharedSubjects,
+      ...discoverSubjects,
     ];
 
     // Check if user needs tutorial subject (tutorial_subject is false)
@@ -331,6 +368,136 @@ export const revokePublicLink = async (linkId) => {
     return false;
   }
   return true;
+};
+
+export const fetchListing = async (subjectId, userId) => {
+  const { data, error } = await supabase
+    .from('subject_listings')
+    .select('*')
+    .eq('subject_id', subjectId)
+    .eq('publisher_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('fetchListing', error);
+    return null;
+  }
+  return data;
+};
+
+/** Publish (or re-publish) to Discover. Paid fields stored but not activated in app yet. */
+export const publishToDiscover = async (subjectId, userId, { description = null, pricing = 'free', priceCents = 0 } = {}) => {
+  const payload = {
+    subject_id: subjectId,
+    publisher_id: userId,
+    description: description?.trim() || null,
+    pricing: pricing === 'paid' ? 'paid' : 'free',
+    price_cents: pricing === 'paid' ? Math.max(0, Number(priceCents) || 0) : 0,
+    published_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from('subject_listings')
+    .upsert(payload, { onConflict: 'subject_id' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('publishToDiscover', error);
+    return null;
+  }
+  return data;
+};
+
+export const unpublishFromDiscover = async (subjectId, userId) => {
+  const { data, error } = await supabase
+    .from('subject_listings')
+    .update({ published_at: null })
+    .eq('subject_id', subjectId)
+    .eq('publisher_id', userId)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error('unpublishFromDiscover', error);
+    return false;
+  }
+  return Boolean(data);
+};
+
+export const listDiscoverSubjects = async (search = '') => {
+  const { data, error } = await supabase.rpc('list_discover_subjects', {
+    p_search: search || null,
+  });
+  if (error) {
+    console.error('listDiscoverSubjects', error);
+    return [];
+  }
+  return Array.isArray(data) ? data : [];
+};
+
+export const getDiscoverSubject = async (subjectId) => {
+  const { data, error } = await supabase.rpc('get_discover_subject', {
+    p_subject_id: subjectId,
+  });
+  if (error) {
+    console.error('getDiscoverSubject', error);
+    return null;
+  }
+  return data?.subject ? data : null;
+};
+
+export const addToLibrary = async (subjectId) => {
+  const { data, error } = await supabase.rpc('add_to_library', {
+    p_subject_id: subjectId,
+  });
+  if (error) {
+    console.error('addToLibrary', error);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, ...(data || {}) };
+};
+
+export const removeFromLibrary = async (subjectId, userId) => {
+  const { error } = await supabase
+    .from('subject_library')
+    .delete()
+    .eq('subject_id', subjectId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error('removeFromLibrary', error);
+    return false;
+  }
+  return true;
+};
+
+export const fetchLibrarySubjectIds = async (userId) => {
+  if (!userId) return new Set();
+  const { data, error } = await supabase
+    .from('subject_library')
+    .select('subject_id')
+    .eq('user_id', userId);
+  if (error) {
+    console.error('fetchLibrarySubjectIds', error);
+    return new Set();
+  }
+  return new Set((data || []).map((row) => row.subject_id));
+};
+
+export const isInLibrary = async (subjectId, userId) => {
+  if (!userId || !subjectId) return false;
+  const { data, error } = await supabase
+    .from('subject_library')
+    .select('subject_id')
+    .eq('subject_id', subjectId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) {
+    console.error('isInLibrary', error);
+    return false;
+  }
+  return Boolean(data);
 };
 
 // Save or update subject share permissions

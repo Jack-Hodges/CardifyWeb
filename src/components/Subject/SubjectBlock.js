@@ -9,10 +9,11 @@ import ConfirmModal from "../Modals/ConfirmModal";
 import ShareSubjectModal from "../Modals/ShareSubjectModal";
 import {
   removeShare,
+  removeFromLibrary,
   TUTORIAL_SUBJECT_ID,
 } from "./SubjectManipulation";
 
-function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutorial, home, shared = false, tourTarget = false, forceActions = false }) {
+function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutorial, onRemoveFromLibrary, home, shared = false, fromDiscover = false, tourTarget = false, forceActions = false }) {
   const [hoveredIcon, setHoveredIcon] = useState(null); // Tracks hovered icon
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -21,8 +22,10 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
   // Use local state for the pinned status
   const [subjectPinned, setSubjectPinned] = useState(subject?.pinned || false);
 
-  const isSharedSubject = shared || subject?.isShared || Boolean(subject?.permission);
+  const isFromDiscover = fromDiscover || Boolean(subject?.isFromDiscover);
+  const isSharedSubject = !isFromDiscover && (shared || subject?.isShared || Boolean(subject?.permission));
   const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
+  const isReadOnlyLibrary = isSharedSubject || isFromDiscover;
 
   // Set local state when subject prop changes
   useEffect(() => {
@@ -63,9 +66,20 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
   };
 
   const handleLeaveSubject = async () => {
-    const success = await removeShare(subject.id, user.email);
-    if (success) {
-      navigate('/dashboard');
+    if (isFromDiscover) {
+      const success = await removeFromLibrary(subject.id, user.id);
+      if (success) {
+        if (onRemoveFromLibrary) {
+          onRemoveFromLibrary(subject.id);
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } else {
+      const success = await removeShare(subject.id, user.email);
+      if (success) {
+        navigate('/dashboard');
+      }
     }
     setIsLeaveModalOpen(false);
   };
@@ -102,6 +116,13 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
             Shared · {subject.permission || 'viewer'}
           </span>
         )}
+        {isFromDiscover && (
+          <span
+            className={`absolute top-2 left-3 z-10 text-xs font-bold uppercase tracking-wide text-white ${cardArt.image ? 'drop-shadow-custom' : ''}`}
+          >
+            Discover
+          </span>
+        )}
         {isTutorialSubject && (
           <span
             className={`absolute top-2 left-3 z-10 text-xs font-bold uppercase tracking-wide text-white ${cardArt.image ? 'drop-shadow-custom' : ''}`}
@@ -109,7 +130,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
             Sample
           </span>
         )}
-        {!isSharedSubject && !isTutorialSubject && (
+        {!isReadOnlyLibrary && !isTutorialSubject && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
             <div 
               className="relative"
@@ -197,7 +218,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               onClick={handlePracticeClick}
             />
 
-            {(!isSharedSubject || subject.permission === 'editor') && (
+            {(!isReadOnlyLibrary || subject.permission === 'editor') && !isFromDiscover && (
               <SubjectButton
                 img={
                   <svg
@@ -222,7 +243,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {!home && !isSharedSubject && !isTutorialSubject && (
+            {!home && !isReadOnlyLibrary && !isTutorialSubject && (
               // Edit button
               <SubjectButton
                 img={
@@ -268,7 +289,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {!home && !isSharedSubject && !isTutorialSubject && (
+            {!home && !isReadOnlyLibrary && !isTutorialSubject && (
               // Delete button
               <SubjectButton
                 img={
@@ -293,12 +314,12 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {isSharedSubject && (
+            {isReadOnlyLibrary && (
               <SubjectButton
                 img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out-icon lucide-log-out" filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
                 setHoveredIcon={setHoveredIcon}
                 hoveredIcon={hoveredIcon}
-                tooltipText="Leave"
+                tooltipText={isFromDiscover ? 'Remove' : 'Leave'}
                 onClick={() => setIsLeaveModalOpen(true)}
               />
             )}
@@ -319,10 +340,14 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
           setIsLeaveModalOpen(false);
           handleLeaveSubject();
         }}
-        title="Leave subject"
-        message="Are you sure you want to leave this subject? You will no longer have access to it."
+        title={isFromDiscover ? 'Remove from library' : 'Leave subject'}
+        message={
+          isFromDiscover
+            ? 'Remove this Discover subject from your dashboard? You can add it again anytime.'
+            : 'Are you sure you want to leave this subject? You will no longer have access to it.'
+        }
         icon={<LogOut size={20} />}
-        confirmText="Leave"
+        confirmText={isFromDiscover ? 'Remove' : 'Leave'}
       />
     </>
   );

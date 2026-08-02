@@ -149,19 +149,34 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   ) : subjects.length > 0 ? (
                     sortedCombinedList.map((item) => {
                       if (item.type === 'subject') {
-                        if (item.permission !== 'viewer') {
-                          return (
-                            <SubjectRow
-                              key={`subject-${item.id}`}
-                              subject={item}
-                              page={page}
-                              onClose={onClose}
-                              themeShadow={'background-shadow-new'}
-                              onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
-                              onDelete={() => setConfirmDeleteSubject(item)}
-                            />
-                          );
+                        const isReadOnly =
+                          item.isFromDiscover || item.permission === 'viewer';
+                        // Create requires edit access; practice/games allow library + shared viewers
+                        if (page === 'create' && isReadOnly) {
+                          return null;
                         }
+                        return (
+                          <SubjectRow
+                            key={`subject-${item.id}`}
+                            subject={item}
+                            page={page}
+                            onClose={onClose}
+                            themeShadow={'background-shadow-new'}
+                            onEdit={
+                              isReadOnly
+                                ? undefined
+                                : () => {
+                                    setEditingSubject(item);
+                                    setIsAddOpen(true);
+                                  }
+                            }
+                            onDelete={
+                              isReadOnly
+                                ? undefined
+                                : () => setConfirmDeleteSubject(item)
+                            }
+                          />
+                        );
                       } else if (item.type === 'collection') {
                         return (
                           <CollectionRow 
@@ -286,14 +301,16 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
             <p className="text-2xl">{subject.name}</p>
             <p className="text-lg font-normal">{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
-            className="p-2 hover:bg-gray-700 rounded-full"
-          >
-            <MoreVertical className="text-white" />
-          </button>
+          {(onEdit || onDelete) && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
+              className="p-2 hover:bg-gray-700 rounded-full"
+            >
+              <MoreVertical className="text-white" />
+            </button>
+          )}
         </div>
-        {menuOpen && (
+        {menuOpen && (onEdit || onDelete) && (
           <div className="absolute right-0 top-full mt-1 bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-2 w-40 border border-white/20 shadow-2xl shadow-black/30 z-50">
             <button
               onClick={() => setMenuOpen(false)}
@@ -301,18 +318,22 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
             >
               Cancel
             </button>
-            <button
-              onClick={() => { setMenuOpen(false); onEdit(); }}
-              className="block w-full text-left px-4 py-2 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-              className="block w-full text-left px-4 py-2 text-red-600 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
-            >
-              Delete
-            </button>
+            {onEdit && (
+              <button
+                onClick={() => { setMenuOpen(false); onEdit(); }}
+                className="block w-full text-left px-4 py-2 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
+              >
+                Edit
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => { setMenuOpen(false); onDelete(); }}
+                className="block w-full text-left px-4 py-2 text-red-600 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
+              >
+                Delete
+              </button>
+            )}
           </div>
         )}
       </div>

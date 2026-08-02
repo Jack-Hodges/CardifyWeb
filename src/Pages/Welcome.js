@@ -107,6 +107,7 @@ function Welcome() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [username, setUsername] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
 
   const navigate = useNavigate();
@@ -137,6 +138,7 @@ function Welcome() {
     setPassword("");
     setConfirmPassword("");
     setFirstName("");
+    setUsername("");
   };
 
   const handleAuth = async () => {
@@ -147,6 +149,15 @@ function Welcome() {
       }
       if (!firstName) {
         toast.error("Please enter your first name");
+        return;
+      }
+      const normalizedUsername = username.trim().toLowerCase();
+      if (!normalizedUsername) {
+        toast.error("Please choose a username");
+        return;
+      }
+      if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
+        toast.error("Username must be 3–20 characters: lowercase letters, numbers, or underscores");
         return;
       }
 
@@ -167,10 +178,15 @@ function Welcome() {
           .insert([{
             id: user.id,
             first_name: firstName,
+            username: normalizedUsername,
             theme: 'default'
           }]);
         if (profileError) {
-          toast.error(`Error creating profile: ${profileError.message}`);
+          if (profileError.code === '23505') {
+            toast.error("That username is already taken. Please choose another.");
+          } else {
+            toast.error(`Error creating profile: ${profileError.message}`);
+          }
         } else {
           setUser(user);
           navigate('/home');
@@ -352,20 +368,27 @@ function Welcome() {
                 Create, customise, and practice your own decks — with modes that make studying stick.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-welcome-rise-delayed-2">
+              <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 animate-welcome-rise-delayed-2">
                 <BackgroundButton
                   text="Get Started"
                   onClick={() => setShowLogin(true)}
                   bgColor="bg-purple-500 hover:bg-purple-400"
-                  wWidth="w-full sm:w-auto"
+                  wWidth="w-full sm:w-fit"
                 />
                 <BackgroundButton
-                  text="See what’s inside"
-                  onClick={scrollToFeatures}
+                  text="Explore free subjects"
+                  onClick={() => navigate('/discover')}
                   bgColor="bg-green-500 hover:bg-green-400"
-                  wWidth="w-full sm:w-auto"
+                  wWidth="w-full sm:w-fit"
                 />
               </div>
+              <button
+                type="button"
+                onClick={scrollToFeatures}
+                className="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400 underline-offset-4 hover:underline animate-welcome-rise-delayed-2 text-left"
+              >
+                See what’s inside
+              </button>
             </div>
 
             <div className="relative w-full sm:w-[52%] flex items-end sm:items-center justify-center sm:justify-end pb-6 sm:pb-0 animate-welcome-float">
@@ -539,6 +562,32 @@ function Welcome() {
                       placeholder="Your first name"
                       autoComplete="given-name"
                     />
+                  </div>
+                )}
+
+                {isSignUp && (
+                  <div>
+                    <label htmlFor="username" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
+                      Username
+                    </label>
+                    <FancyInput
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) =>
+                        setUsername(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9_]/g, '')
+                            .slice(0, 20)
+                        )
+                      }
+                      placeholder="your_username"
+                      autoComplete="username"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-3">
+                      Unique · shown on Discover when you publish
+                    </p>
                   </div>
                 )}
 

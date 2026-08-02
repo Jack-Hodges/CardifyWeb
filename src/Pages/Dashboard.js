@@ -59,7 +59,7 @@ function Dashboard() {
   const tourSubjectId = useMemo(() => {
     const tutorial = subjects.find((s) => s.id === TUTORIAL_SUBJECT_ID);
     if (tutorial) return tutorial.id;
-    const firstOwn = subjects.find((s) => !s.isShared && !s.permission);
+    const firstOwn = subjects.find((s) => !s.isShared && !s.permission && !s.isFromDiscover);
     return firstOwn?.id ?? null;
   }, [subjects]);
 
@@ -205,9 +205,19 @@ function Dashboard() {
   const sortedSubjects = [...subjects]
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Split subjects into personal and shared
-  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id === TUTORIAL_SUBJECT_ID);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id !== TUTORIAL_SUBJECT_ID);
+  // Split subjects into personal, shared, and Discover library
+  const personalSubjects = sortedSubjects.filter(
+    (subject) =>
+      !subject.isFromDiscover &&
+      (subject.user_id === user.id || subject.id === TUTORIAL_SUBJECT_ID)
+  );
+  const sharedSubjects = sortedSubjects.filter(
+    (subject) =>
+      !subject.isFromDiscover &&
+      subject.user_id !== user.id &&
+      subject.id !== TUTORIAL_SUBJECT_ID
+  );
+  const discoverSubjects = sortedSubjects.filter((subject) => subject.isFromDiscover);
 
   // Attach subjects to their collections and sort them
   const collectionsWithSubjects = collections.map((collection) => {
@@ -261,20 +271,28 @@ function Dashboard() {
   const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection');
   const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject');
 
-  // Sort shared subjects
-  const sortedSharedSubjects = [...sharedSubjects].sort((a, b) => {
-    if (selectedSort === 'Alphabetical') {
-      return a.name.localeCompare(b.name);
-    } else if (selectedSort === 'Most Cards') {
-      const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
-      return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
-    } else if (selectedSort === 'Date Created (Newest)') {
-      return new Date(b.created_at) - new Date(a.created_at);
-    } else if (selectedSort === 'Date Created (Oldest)') {
-      return new Date(a.created_at) - new Date(b.created_at);
-    }
-    return 0;
-  });
+  const sortSubjectList = (list) =>
+    [...list].sort((a, b) => {
+      if (selectedSort === 'Alphabetical') {
+        return a.name.localeCompare(b.name);
+      } else if (selectedSort === 'Most Cards') {
+        const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
+        return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+      } else if (selectedSort === 'Date Created (Newest)') {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else if (selectedSort === 'Date Created (Oldest)') {
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+      return 0;
+    });
+
+  const sortedSharedSubjects = sortSubjectList(sharedSubjects);
+  const sortedDiscoverSubjects = sortSubjectList(discoverSubjects);
+
+  const handleRemoveFromLibrary = (subjectId) => {
+    setSubjects((current) => current.filter((subject) => subject.id !== subjectId));
+    toast.success('Removed from library');
+  };
 
   const handleCollectionClick = (collectionId) => {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
@@ -424,6 +442,25 @@ function Dashboard() {
                       openModal('deleteSubject');
                     }}
                     shared={true}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Discover library Section */}
+          {sortedDiscoverSubjects.length > 0 && (
+            <div>
+              <h2 className={`text-2xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>From Discover</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {sortedDiscoverSubjects.map((subject) => (
+                  <SubjectBlock
+                    key={subject.id}
+                    subject={subject}
+                    user={user}
+                    onSave={handleSaveSubject}
+                    fromDiscover
+                    onRemoveFromLibrary={handleRemoveFromLibrary}
                   />
                 ))}
               </div>
