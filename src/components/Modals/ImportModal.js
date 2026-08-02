@@ -102,6 +102,10 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     }
   };
 
+  const handleRemovePreviewCard = (index) => {
+    setPreviewCards((current) => current.filter((_, i) => i !== index));
+  };
+
   const maxCards = profile?.pro ? 500 : 100;
   const remainingSpace = Math.max(0, maxCards - (profile?.flashcard_count || 0));
 
@@ -173,22 +177,28 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
             <div>
               <h3 className="text-sm font-bold text-white/90 mb-3 ml-1">
                 Preview · {previewCards.length} {previewCards.length === 1 ? 'card' : 'cards'}
+                <span className="font-medium text-white/50"> · tap × to exclude</span>
               </h3>
-              <div className="max-h-56 overflow-y-auto space-y-2">
-                {previewCards.slice(0, 5).map((card, index) => (
+              <div className="max-h-72 overflow-y-auto space-y-2">
+                {previewCards.map((card, index) => (
                   <div
-                    key={index}
-                    className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3"
+                    key={`${index}-${card.question?.slice(0, 24) || 'card'}`}
+                    className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3 flex items-start gap-3"
                   >
-                    <p className="text-white font-semibold truncate">Q: {card.question}</p>
-                    <p className="text-white/70 truncate">A: {card.answer}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-semibold truncate">Q: {card.question}</p>
+                      <p className="text-white/70 truncate">A: {card.answer}</p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={`Remove card ${index + 1}`}
+                      onClick={() => handleRemovePreviewCard(index)}
+                      className="shrink-0 mt-0.5 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-red-500/80 transition-colors"
+                    >
+                      <X size={16} strokeWidth={3} />
+                    </button>
                   </div>
                 ))}
-                {previewCards.length > 5 && (
-                  <p className="text-white/50 text-center text-sm py-1">
-                    ...and {previewCards.length - 5} more
-                  </p>
-                )}
               </div>
             </div>
           )}

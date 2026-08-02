@@ -272,8 +272,8 @@ export const bulkInsertCards = async (cards) => {
     answer: card.answer,
     subject_id: card.subject_id,
     image_url: card.image_url || null,
-    frontMode: card.frontMode || 'text',
-    backMode: card.backMode || 'text',
+    frontMode: card.frontMode ?? 0,
+    backMode: card.backMode ?? 0,
     sort_order: card.sort_order != null ? card.sort_order : nextOrder++,
   }));
 
