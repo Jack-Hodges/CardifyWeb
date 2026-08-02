@@ -58,7 +58,6 @@ export const UserProvider = ({ children }) => {
   const [popupStates, setPopupStates] = useState({});
   const [popupStatesLoaded, setPopupStatesLoaded] = useState(false); // New state
   const [loading, setLoading] = useState(true);
-  const [isSignUpProcess, setIsSignUpProcess] = useState(false); // Track sign-up process
   // Ref so auth listeners always see the current signup flag (state alone is stale in mount-only effects)
   const isSignUpProcessRef = useRef(false);
 
@@ -117,7 +116,6 @@ export const UserProvider = ({ children }) => {
         setPopupStates(userProfile.popup_states || {});  // Initialize popup states
         setPopupStatesLoaded(true);  // Mark popup states as loaded
         isSignUpProcessRef.current = false;
-        setIsSignUpProcess(false); // Clear sign-up flag when profile is found
       } else {
         // No profile found for the given user ID - redirect to login page
         // But only if we're not in the sign-up process
@@ -133,7 +131,6 @@ export const UserProvider = ({ children }) => {
       setPopupStates({});
       setPopupStatesLoaded(false);  // Reset state
       isSignUpProcessRef.current = false;
-      setIsSignUpProcess(false); // Clear sign-up flag
     }
 
     setLoading(false);
@@ -210,7 +207,6 @@ export const UserProvider = ({ children }) => {
             });
           } else if (userProfile) {
             isSignUpProcessRef.current = false;
-            setIsSignUpProcess(false); // Clear sign-up flag when profile is found
           }
         });
       } else {
@@ -219,7 +215,6 @@ export const UserProvider = ({ children }) => {
         setPopupStates({});
         setPopupStatesLoaded(false);  // Reset on logout
         isSignUpProcessRef.current = false;
-        setIsSignUpProcess(false); // Clear sign-up flag
       }
     });
 
@@ -233,12 +228,10 @@ export const UserProvider = ({ children }) => {
   // Function to mark that sign-up process has started
   const startSignUpProcess = () => {
     isSignUpProcessRef.current = true;
-    setIsSignUpProcess(true);
   };
 
   const finishSignUpProcess = () => {
     isSignUpProcessRef.current = false;
-    setIsSignUpProcess(false);
   };
 
   // Function to manually toggle color scheme
