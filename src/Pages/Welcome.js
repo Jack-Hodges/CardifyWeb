@@ -109,10 +109,11 @@ function Welcome() {
   const [firstName, setFirstName] = useState("");
   const [username, setUsername] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, setUser, startSignUpProcess, theme } = useUser();
+  const { user, setUser, setProfile, startSignUpProcess, finishSignUpProcess, theme } = useUser();
 
   useEffect(() => {
     if (searchParams.get('signup') === '1') {
@@ -142,6 +143,8 @@ function Welcome() {
   };
 
   const handleAuth = async () => {
+    if (submitting) return;
+
     if (isSignUp) {
       if (password !== confirmPassword) {
         toast.error("Passwords do not match");
@@ -161,44 +164,91 @@ function Welcome() {
         return;
       }
 
+      setSubmitting(true);
       startSignUpProcess();
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        if (error.message.includes("already registered")) {
-          toast.error("This email is already registered.");
-        } else {
-          toast.error(`Error signing up: ${error.message}`);
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              username: normalizedUsername,
+            },
+          },
+        });
+
+        if (error) {
+          finishSignUpProcess();
+          if (error.message.includes("already registered")) {
+            toast.error("This email is already registered.");
+          } else {
+            toast.error(`Error signing up: ${error.message}`);
+          }
+          return;
         }
-      } else {
-        toast.success("Welcome to Cardify! Check your email to verify your account.");
-        const { user } = data;
-        const { error: profileError } = await supabase
+
+        const newUser = data?.user;
+        if (!newUser?.id) {
+          finishSignUpProcess();
+          toast.success("Check your email to verify your account, then sign in.");
+          return;
+        }
+
+        const { data: profileRow, error: profileError } = await supabase
           .from('profiles')
           .insert([{
-            id: user.id,
+            id: newUser.id,
             first_name: firstName,
             username: normalizedUsername,
             theme: 'default'
-          }]);
+          }])
+          .select()
+          .maybeSingle();
+
         if (profileError) {
+          finishSignUpProcess();
+          // Soft sign-out so the auth race doesn't hard-reload and hide this toast
+          await supabase.auth.signOut();
+          setUser(null);
           if (profileError.code === '23505') {
-            toast.error("That username is already taken. Please choose another.");
+            toast.error(
+              profileError.message?.toLowerCase().includes('username')
+                ? "That username is already taken. Please choose another."
+                : "That account or username already exists. Try signing in."
+            );
           } else {
             toast.error(`Error creating profile: ${profileError.message}`);
           }
-        } else {
-          setUser(user);
-          navigate('/home');
+          return;
         }
+
+        if (profileRow) setProfile(profileRow);
+        finishSignUpProcess();
+        setUser(newUser);
+        toast.success("Welcome to Cardify!");
+        navigate('/home');
+      } catch (err) {
+        finishSignUpProcess();
+        toast.error(err?.message || "Something went wrong during sign up.");
+      } finally {
+        setSubmitting(false);
       }
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast.error(`Error logging in: ${error.message}`);
-      } else {
-        setUser(data.user);
-        navigate('/home');
+      setSubmitting(true);
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          toast.error(`Error logging in: ${error.message}`);
+        } else {
+          setUser(data.user);
+          navigate('/home');
+        }
+      } catch (err) {
+        toast.error(err?.message || "Something went wrong during sign in.");
+      } finally {
+        setSubmitting(false);
       }
     }
   };
@@ -654,8 +704,13 @@ function Welcome() {
 
                 <div className="pt-2">
                   <BackgroundButton
-                    text={isSignUp ? 'Create account' : 'Start learning'}
-                    onClick={handleAuth}
+                    type="submit"
+                    text={
+                      submitting
+                        ? (isSignUp ? 'Creating…' : 'Signing in…')
+                        : (isSignUp ? 'Create account' : 'Start learning')
+                    }
+                    disabled={submitting}
                     bgColor={isSignUp ? 'bg-purple-500 hover:bg-purple-400' : 'bg-green-500 hover:bg-green-400'}
                     wWidth="w-full"
                   />

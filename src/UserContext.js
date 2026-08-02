@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import supabase from './supabaseClient';
 import { fetchProfile } from './components/Profile/ProfileManipulation';
 import { getTheme, normalizeBackgroundImage, isBackgroundImageValue } from './components/Functions/getTheme';
@@ -59,6 +59,8 @@ export const UserProvider = ({ children }) => {
   const [popupStatesLoaded, setPopupStatesLoaded] = useState(false); // New state
   const [loading, setLoading] = useState(true);
   const [isSignUpProcess, setIsSignUpProcess] = useState(false); // Track sign-up process
+  // Ref so auth listeners always see the current signup flag (state alone is stale in mount-only effects)
+  const isSignUpProcessRef = useRef(false);
 
   // State to track color scheme changes for default theme
   const [colorScheme, setColorScheme] = useState(() => {
@@ -114,11 +116,12 @@ export const UserProvider = ({ children }) => {
         setProfile(userProfile);
         setPopupStates(userProfile.popup_states || {});  // Initialize popup states
         setPopupStatesLoaded(true);  // Mark popup states as loaded
+        isSignUpProcessRef.current = false;
         setIsSignUpProcess(false); // Clear sign-up flag when profile is found
       } else {
         // No profile found for the given user ID - redirect to login page
         // But only if we're not in the sign-up process
-        if (!isSignUpProcess) {
+        if (!isSignUpProcessRef.current) {
           console.warn('No profile found for the given user ID. Redirecting to login page.');
           await logout();
           window.location.href = '/';
@@ -129,6 +132,7 @@ export const UserProvider = ({ children }) => {
       setProfile(null);
       setPopupStates({});
       setPopupStatesLoaded(false);  // Reset state
+      isSignUpProcessRef.current = false;
       setIsSignUpProcess(false); // Clear sign-up flag
     }
 
@@ -199,12 +203,13 @@ export const UserProvider = ({ children }) => {
           
           // If no profile is found, redirect to login page
           // But only if we're not in the sign-up process
-          if (!userProfile && !isSignUpProcess) {
+          if (!userProfile && !isSignUpProcessRef.current) {
             console.warn('No profile found for the given user ID. Redirecting to login page.');
             logout().then(() => {
               window.location.href = '/';
             });
           } else if (userProfile) {
+            isSignUpProcessRef.current = false;
             setIsSignUpProcess(false); // Clear sign-up flag when profile is found
           }
         });
@@ -213,6 +218,7 @@ export const UserProvider = ({ children }) => {
         setProfile(null);
         setPopupStates({});
         setPopupStatesLoaded(false);  // Reset on logout
+        isSignUpProcessRef.current = false;
         setIsSignUpProcess(false); // Clear sign-up flag
       }
     });
@@ -226,7 +232,13 @@ export const UserProvider = ({ children }) => {
 
   // Function to mark that sign-up process has started
   const startSignUpProcess = () => {
+    isSignUpProcessRef.current = true;
     setIsSignUpProcess(true);
+  };
+
+  const finishSignUpProcess = () => {
+    isSignUpProcessRef.current = false;
+    setIsSignUpProcess(false);
   };
 
   // Function to manually toggle color scheme
@@ -258,6 +270,7 @@ export const UserProvider = ({ children }) => {
         logout,
         updatePopupState,
         startSignUpProcess,
+        finishSignUpProcess,
         upgradeToPro,
         manageBilling,
         toggleColorScheme,
