@@ -334,18 +334,20 @@ function Create() {
               </PageEmptyState>
             ) : cards.length > 0 ? (
               <>
-                <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
-                  <Card
-                    card={cards[currentCardIndex]}
-                    flipped={flipped}
-                    setFlipped={setFlipped}
-                    animateFlip={animateFlip}
-                    cardId={cards[currentCardIndex]?.id}
-                    onDeleteCard={isTutorialSubject ? undefined : handleDeleteCard}
-                    edit={!isTutorialSubject}
-                    onUpsertCard={handleUpsertCard}
-                    dataTour="create-card-flip"
-                  />
+                <div className="w-full lg:w-[70%] px-5 mt-5 sm:mt-14 flex flex-col">
+                  <div className="w-full h-[50vh] sm:h-[55vh] lg:h-[60vh] min-h-[16rem]">
+                    <Card
+                      card={cards[currentCardIndex]}
+                      flipped={flipped}
+                      setFlipped={setFlipped}
+                      animateFlip={animateFlip}
+                      cardId={cards[currentCardIndex]?.id}
+                      onDeleteCard={isTutorialSubject ? undefined : handleDeleteCard}
+                      edit={!isTutorialSubject}
+                      onUpsertCard={handleUpsertCard}
+                      dataTour="create-card-flip"
+                    />
+                  </div>
                   <CardControls
                     currentCardIndex={currentCardIndex + 1}
                     totalCards={cards.length}
@@ -376,7 +378,7 @@ function Create() {
                   />
                 </div>
 
-                <div className="w-full lg:w-[30%] mt-20 lg:mt-0 pr-5 lg:pr-6 pl-4 lg:pl-2" data-tour="create-card-list">
+                <div className="w-full lg:w-[30%] mt-8 lg:mt-0 pr-5 lg:pr-6 pl-4 lg:pl-2 pb-8" data-tour="create-card-list">
                   <CardList
                     cards={cards}
                     onCardClick={handleCardClick}

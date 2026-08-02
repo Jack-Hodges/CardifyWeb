@@ -179,7 +179,9 @@ function CardControls({
           />
         </div>
 
-        <p className={`text-2xl ${themeText} font-bold text-center w-16 ${shadow ? 'drop-shadow-custom' : ''}`}>
+        <p
+          className={`text-2xl ${themeText} font-bold text-center min-w-[4.75rem] sm:min-w-[5.5rem] px-1 whitespace-nowrap ${shadow ? 'drop-shadow-custom' : ''}`}
+        >
           {currentCardIndex}/{totalCards}
         </p>
 
