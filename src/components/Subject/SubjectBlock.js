@@ -25,7 +25,10 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
   const isFromDiscover = fromDiscover || Boolean(subject?.isFromDiscover);
   const isSharedSubject = !isFromDiscover && (shared || subject?.isShared || Boolean(subject?.permission));
   const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
-  const isReadOnlyLibrary = isSharedSubject || isFromDiscover;
+  // Shared subjects stay read-only; Discover can customise color/collection/pin only
+  const canEditMeta = (isFromDiscover || (!isSharedSubject && !isTutorialSubject)) && !home;
+  const canManageContent = !isSharedSubject && !isFromDiscover && !isTutorialSubject;
+  const canLeaveOrRemove = isSharedSubject || isFromDiscover;
 
   // Set local state when subject prop changes
   useEffect(() => {
@@ -130,7 +133,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
             Sample
           </span>
         )}
-        {!isReadOnlyLibrary && !isTutorialSubject && (
+        {!isSharedSubject && !isTutorialSubject && !isFromDiscover && (
           <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
             <div 
               className="relative"
@@ -146,6 +149,36 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               )}
             </div>
             <div 
+              className="relative"
+              onMouseEnter={() => setHoveredIcon('pin')}
+              onMouseLeave={() => setHoveredIcon(null)}
+              onClick={handleTogglePin}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                version="1.1"
+                viewBox="-5 -10 110 135"
+                className="w-12 h-12"
+                filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}
+              >
+                <path
+                  d="m59.926 58.926 18.52-20.766c2.9961 0.625 5.8672 0.375 8.0312-0.95703 0.78906-0.5 0.91406-1.6211 0.20703-2.3711l-21.516-21.516c-0.75-0.75-1.8711-0.625-2.3711 0.20703-1.332 2.1641-1.582 5.0352-0.95703 8.0312l-20.766 18.52c-5.5352-2.082-11.027-2.1211-14.941 0.29297-1.125 0.70703-1.2891 2.2891-0.29297 3.3281l13.73 13.73-15.523 15.523c-0.83203 0.83203-0.83203 2.1211 0 2.9531 0.83203 0.83203 2.1211 0.83203 2.9531 0l15.523-15.523 13.73 13.73c1.0391 1.0391 2.6211 0.875 3.3281-0.29297 2.4141-3.9531 2.3711-9.4062 0.29297-14.941z"
+                  fill={subjectPinned ? "white" : "none"}
+                  stroke="white"
+                  strokeWidth="5"
+                />
+              </svg>
+              {hoveredIcon === 'pin' && (
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 px-2 py-1 bg-black bg-opacity-50 text-white rounded-md text-sm transition-opacity duration-300 opacity-100">
+                  {subjectPinned ? 'Unpin' : 'Pin'}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {isFromDiscover && !home && (
+          <div className="absolute top-0 right-0 flex gap-2 p-2 opacity-1 sm:opacity-0 sm:group-hover:opacity-100 transition duration-300 items-center">
+            <div
               className="relative"
               onMouseEnter={() => setHoveredIcon('pin')}
               onMouseLeave={() => setHoveredIcon(null)}
@@ -218,7 +251,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               onClick={handlePracticeClick}
             />
 
-            {(!isReadOnlyLibrary || subject.permission === 'editor') && !isFromDiscover && (
+            {((canManageContent || subject.permission === 'editor') && !isFromDiscover) && (
               <SubjectButton
                 img={
                   <svg
@@ -243,8 +276,8 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {!home && !isReadOnlyLibrary && !isTutorialSubject && (
-              // Edit button
+            {canEditMeta && (
+              // Edit button (own subjects + Discover prefs)
               <SubjectButton
                 img={
                   <svg
@@ -289,7 +322,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {!home && !isReadOnlyLibrary && !isTutorialSubject && (
+            {canManageContent && !home && (
               // Delete button
               <SubjectButton
                 img={
@@ -314,7 +347,7 @@ function SubjectBlock({ subject, onEdit, onSave, onRemoveSubject, onDismissTutor
               />
             )}
 
-            {isReadOnlyLibrary && (
+            {canLeaveOrRemove && (
               <SubjectButton
                 img={<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-out-icon lucide-log-out" filter={cardArt.image ? "drop-shadow(0 0 2px rgba(0, 0, 0, 0.5))" : "none"}><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg>}
                 setHoveredIcon={setHoveredIcon}

@@ -279,7 +279,7 @@ function EditModal({
       />
 
       <div
-        className={`relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+        className={`relative w-full sm:max-w-2xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
           transform transition-all duration-300 ease-in-out
@@ -304,7 +304,7 @@ function EditModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5 space-y-6">
           {/* Front (Question) */}
           <section>
             <label htmlFor="question" className="block text-sm font-bold text-white/90 mb-2 ml-1">
@@ -558,7 +558,7 @@ function DrawingPopup({ onSaveDrawing, onClose }) {
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="relative w-full h-full sm:w-[min(96vw,72rem)] sm:h-[min(92dvh,56rem)] sm:rounded-2xl overflow-hidden flex flex-col
+        className="relative w-full h-full max-h-[100dvh] sm:w-[min(96vw,72rem)] sm:h-[min(92dvh,56rem)] sm:max-h-[90dvh] sm:rounded-2xl overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           border border-white/20 shadow-2xl shadow-black/30"
         onClick={(e) => e.stopPropagation()}

@@ -3,7 +3,7 @@ import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
 import { useNavigate } from 'react-router-dom';
-import { fetchCards, upsertCard, deleteCard, restoreCard, sortCardsById, updateCardsSortOrder } from '../components/Card/CardManipulation';
+import { fetchCards, upsertCard, bulkInsertCards, deleteCard, restoreCard, sortCardsById, updateCardsSortOrder } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
@@ -44,7 +44,7 @@ function Create() {
   const { subject, loadingSubject } = useSubjectFromRoute();
   const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
 
-  const { user, theme, profile } = useUser();
+  const { user, theme, profile, setProfile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   const tour = usePageTour({
@@ -91,6 +91,36 @@ function Create() {
     if (isNewCard) {
       setCurrentCardIndex(updatedCards.length - 1);
     }
+  };
+
+  /** Batch import / AI generate — one insert path + one refetch */
+  const handleBulkImportCards = async (importedCards) => {
+    if (isTutorialSubject) {
+      toast.info('Sample subject cards are read only');
+      return [];
+    }
+    if (!importedCards?.length) return [];
+
+    const cardsToImport = importedCards.map((card) => ({
+      ...card,
+      subject_id: subject.id,
+      user_id: subject.user_id || user.id,
+    }));
+
+    await bulkInsertCards(cardsToImport);
+
+    if (typeof setProfile === 'function' && profile) {
+      setProfile({
+        ...profile,
+        flashcard_count: (profile.flashcard_count || 0) + cardsToImport.length,
+      });
+    }
+
+    const updatedCards = await fetchCards(subject.id);
+    sortCardsById(updatedCards);
+    setCards(updatedCards);
+    setCurrentCardIndex(Math.max(updatedCards.length - 1, 0));
+    return cardsToImport;
   };
 
   const handleDeleteCard = async (cardId) => {
@@ -243,15 +273,13 @@ function Create() {
       const text = await response.text();
       const generated = parseGeneratedFlashcards(text);
 
-      const cardsToImport = generated.map((card) => ({
-        ...card,
-        subject_id: subject.id,
-        user_id: subject.user_id,
-      }));
-
-      for (const card of cardsToImport) {
-        await handleUpsertCard(card);
-      }
+      await handleBulkImportCards(
+        generated.map((card) => ({
+          ...card,
+          subject_id: subject.id,
+          user_id: subject.user_id,
+        }))
+      );
 
       await saveProfile(
         profile.id,
@@ -340,6 +368,7 @@ function Create() {
                     generateClick={openGenerate}
                     onGenerate={handleGenerate}
                     onUpsertCard={handleUpsertCard}
+                    onBulkImport={handleBulkImportCards}
                     subject={subject}
                     isGenerateModalOpen={featureFlags.aiGenerate && isGenerateModalOpen}
                     setIsGenerateModalOpen={setIsGenerateModalOpen}
@@ -456,7 +485,14 @@ function Create() {
           <ImportModal
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
-            onImport={handleUpsertCard}
+            onImport={async (importedCards) => {
+              try {
+                await handleBulkImportCards(importedCards);
+                toast.success(`Successfully imported ${importedCards.length} cards`);
+              } catch (error) {
+                toast.error('Error importing cards: ' + error.message);
+              }
+            }}
             subject={subject}
           />
 
@@ -465,13 +501,13 @@ function Create() {
               <NotesGeneratePanel
                 onGenerated={async (text) => {
                   const generated = parseGeneratedFlashcards(text);
-                  for (const card of generated) {
-                    await handleUpsertCard({
+                  await handleBulkImportCards(
+                    generated.map((card) => ({
                       ...card,
                       subject_id: subject.id,
                       user_id: subject.user_id,
-                    });
-                  }
+                    }))
+                  );
                 }}
               />
             </div>

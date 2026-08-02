@@ -53,7 +53,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
     return ReactDOM.createPortal(
         <div
-            className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+            className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
                 isClosing ? 'opacity-0' : 'opacity-100'
             }`}
             onClick={onFirstAction} // Close modal if the background is clicked
@@ -66,17 +66,23 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl shadow-black/30 w-4/5 h-[70%] transform transition-all duration-300 ease-in-out ${
+                className={`relative flex flex-col w-full sm:w-4/5 h-full sm:h-[70%] max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden
+                    bg-white dark:bg-gray-800 sm:rounded-2xl border border-gray-200 dark:border-gray-700 shadow-2xl shadow-black/30
+                    transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
             >
-                {content}
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-6 sm:p-8 pb-24">
+                    {content}
+                </div>
 
                 {/* Action Buttons */}
-                <div className="absolute right-5 bottom-5 sm:flex sm:justify-end sm:space-x-4 items-center mx-auto w-full">
-                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} onClick={(e) => handleFirstAction(e)} />
-                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
+                <div className="flex-none px-5 sm:px-8 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-4 items-center w-full">
+                        <BackgroundButton text={firstActionText} bgColor={firstActionCol} wWidth="w-full sm:w-auto" onClick={(e) => handleFirstAction(e)} />
+                        <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full sm:w-auto mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
+                    </div>
                 </div>
             </div>
         </div>,

@@ -1,6 +1,5 @@
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
-import { saveProfile } from '../Profile/ProfileManipulation';
 import { ArrowLeft, ArrowRight, Sparkles, Upload, Download, Share2 } from 'lucide-react';
 import ImportModal from '../Modals/ImportModal';
 import ExportModal from '../Modals/ExportModal';
@@ -22,13 +21,14 @@ function CardControls({
   generateClick,
   onGenerate,
   onUpsertCard,
+  onBulkImport,
   subject,
   isGenerateModalOpen,
   setIsGenerateModalOpen,
   isGenerating,
   readOnly = false,
 }) {
-  const { theme, profile } = useUser();
+  const { theme, profile, setProfile } = useUser();
   const { shadow, primaryColor, secondaryColor } = theme;
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -54,26 +54,26 @@ function CardControls({
 
   const handleImport = async (importedCards) => {
     try {
-      const cardsToImport = importedCards.map((card) => ({
-        ...card,
-        subject_id: subject.id,
-        user_id: subject.user_id,
-      }));
-
-      for (const card of cardsToImport) {
-        await onUpsertCard(card);
+      if (typeof onBulkImport === 'function') {
+        await onBulkImport(importedCards);
+      } else {
+        const cardsToImport = importedCards.map((card) => ({
+          ...card,
+          subject_id: subject.id,
+          user_id: subject.user_id,
+        }));
+        for (const card of cardsToImport) {
+          await onUpsertCard(card);
+        }
+        if (typeof setProfile === 'function' && profile) {
+          setProfile({
+            ...profile,
+            flashcard_count: (profile.flashcard_count || 0) + cardsToImport.length,
+          });
+        }
       }
 
-      await saveProfile(
-        profile.id,
-        profile.first_name,
-        profile.theme,
-        profile.sort_preference,
-        profile.card_art,
-        profile.generation_count + cardsToImport.length
-      );
-
-      toast.success(`Successfully imported ${cardsToImport.length} cards`);
+      toast.success(`Successfully imported ${importedCards.length} cards`);
     } catch (error) {
       toast.error('Error importing cards: ' + error.message);
     }

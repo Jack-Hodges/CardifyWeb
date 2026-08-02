@@ -73,7 +73,7 @@ function ConfirmModal({
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
       <div
-        className={`relative w-full max-w-md overflow-hidden flex flex-col
+        className={`relative w-full max-w-md max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           rounded-2xl border border-white/20 shadow-2xl shadow-black/30
           transform transition-all duration-300 ease-in-out
@@ -100,7 +100,7 @@ function ConfirmModal({
           </div>
         </div>
 
-        <div className="px-5 sm:px-6 py-5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 py-5">
           {typeof message === 'string' ? (
             <p className="text-base text-white/70 leading-relaxed">{message}</p>
           ) : (

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchSubjects, saveSubject, removeSubject } from './SubjectManipulation';
+import { fetchSubjects, saveSubject, saveLibrarySubjectPrefs, removeSubject } from './SubjectManipulation';
 import getColors from '../Functions/getColors';
 import { useNavigate } from 'react-router-dom';
 import { fetchCollections } from '../Collections/CollectionManipulation';
@@ -95,8 +95,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     });
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-full sm:w-4/5 max-w-lg h-full sm:h-[70%] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-0 sm:p-6">
+          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-6 w-full sm:w-4/5 max-w-lg h-full sm:h-[70%] max-h-[100dvh] sm:max-h-[90dvh] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col overflow-hidden">
             {selectedCollection ? (
               <CollectionView 
                 collection={selectedCollection} 
@@ -139,7 +139,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   </div>
                 </div>
       
-                <div className="flex-1 overflow-y-auto pb-8">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-8">
                   {showSkeleton ? (
                     <div className="space-y-2 animate-pulse" aria-busy="true" aria-label="Loading subjects">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -149,10 +149,10 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   ) : subjects.length > 0 ? (
                     sortedCombinedList.map((item) => {
                       if (item.type === 'subject') {
-                        const isReadOnly =
-                          item.isFromDiscover || item.permission === 'viewer';
+                        const isSharedViewer = item.permission === 'viewer' && !item.isFromDiscover;
+                        const isContentReadOnly = item.isFromDiscover || isSharedViewer;
                         // Create requires edit access; practice/games allow library + shared viewers
-                        if (page === 'create' && isReadOnly) {
+                        if (page === 'create' && isContentReadOnly) {
                           return null;
                         }
                         return (
@@ -163,7 +163,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                             onClose={onClose}
                             themeShadow={'background-shadow-new'}
                             onEdit={
-                              isReadOnly
+                              isSharedViewer
                                 ? undefined
                                 : () => {
                                     setEditingSubject(item);
@@ -171,7 +171,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                                   }
                             }
                             onDelete={
-                              isReadOnly
+                              isContentReadOnly
                                 ? undefined
                                 : () => setConfirmDeleteSubject(item)
                             }
@@ -217,24 +217,36 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
           <AddSubject
             isOpen={isAddOpen}
             onClose={() => setIsAddOpen(false)}
-            onSave={async (subjectId, name, colourText, colourIntensity, upToIndex, collectionId) => {
-              // save or update subject
-              const data = await saveSubject(
-                subjectId,
-                name,
-                colourText,
-                colourIntensity,
-                user.id,
-                upToIndex,
-                collectionId,
-                false // pinned default
-              );
-              // New subject from empty picker → go straight to the destination page
-              if (!subjectId && Array.isArray(data) && data[0]?.id) {
-                const created = data[0];
-                onClose();
-                navigate(`/${page}/${created.id}`, { state: { subject: created } });
-                return;
+            onSave={async (subjectId, name, colourText, colourIntensity, upToIndex, collectionId, pinned) => {
+              const existing = subjectId
+                ? subjects.find((s) => s.id === subjectId) || editingSubject
+                : null;
+
+              if (existing?.isFromDiscover) {
+                await saveLibrarySubjectPrefs(user.id, subjectId, {
+                  colourText,
+                  colourIntensity,
+                  collectionId,
+                  pinned: pinned ?? existing.pinned ?? false,
+                });
+              } else {
+                const data = await saveSubject(
+                  subjectId,
+                  name,
+                  colourText,
+                  colourIntensity,
+                  user.id,
+                  upToIndex,
+                  collectionId,
+                  pinned ?? false
+                );
+                // New subject from empty picker → go straight to the destination page
+                if (!subjectId && Array.isArray(data) && data[0]?.id) {
+                  const created = data[0];
+                  onClose();
+                  navigate(`/${page}/${created.id}`, { state: { subject: created } });
+                  return;
+                }
               }
               // reload list
               const refreshed = await fetchSubjects(user, profile);
@@ -426,19 +438,34 @@ function CollectionView({ collection, subjects, onBack, onClose, page, theme, on
                     </div>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto pb-8">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-8">
                 {sortedSubjects.length > 0 ? (
-                    sortedSubjects.map((subject) => (
+                    sortedSubjects.map((subject) => {
+                        const isSharedViewer = subject.permission === 'viewer' && !subject.isFromDiscover;
+                        const isContentReadOnly = subject.isFromDiscover || isSharedViewer;
+                        if (page === 'create' && isContentReadOnly) {
+                            return null;
+                        }
+                        return (
                         <SubjectRow
                             key={subject.id}
                             subject={subject}
                             onClose={onClose}
                             page={page}
                             themeShadow={'background-shadow-new'}
-                            onEdit={() => onEditSubject(subject)}
-                            onDelete={() => onDeleteSubject(subject)}
+                            onEdit={
+                              isSharedViewer
+                                ? undefined
+                                : () => onEditSubject(subject)
+                            }
+                            onDelete={
+                              isContentReadOnly
+                                ? undefined
+                                : () => onDeleteSubject(subject)
+                            }
                         />
-                    ))
+                        );
+                    })
                 ) : (
                     <p>No subjects in this collection.</p>
                 )}

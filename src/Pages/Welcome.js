@@ -122,16 +122,18 @@ function Welcome() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
+
   const scrollToFeatures = () => {
     const featuresSection = document.querySelector('.features-section');
     if (featuresSection) {
       featuresSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  if (user) {
-    navigate('/home');
-  }
 
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
@@ -198,20 +200,20 @@ function Welcome() {
 
         const { data: profileRow, error: profileError } = await supabase
           .from('profiles')
-          .insert([{
+          .upsert([{
             id: newUser.id,
             first_name: firstName,
             username: normalizedUsername,
             theme: 'default'
-          }])
+          }], { onConflict: 'id' })
           .select()
           .maybeSingle();
 
         if (profileError) {
-          finishSignUpProcess();
-          // Soft sign-out so the auth race doesn't hard-reload and hide this toast
+          // Soft sign-out so the auth race doesn't wipe this toast
           await supabase.auth.signOut();
           setUser(null);
+          finishSignUpProcess();
           if (profileError.code === '23505') {
             toast.error(
               profileError.message?.toLowerCase().includes('username')
@@ -225,10 +227,12 @@ function Welcome() {
         }
 
         if (profileRow) setProfile(profileRow);
-        finishSignUpProcess();
         setUser(newUser);
         toast.success("Welcome to Cardify!");
+        // Keep signup flag set until Home mounts with a profile — auth listener retries rely on it
         navigate('/home');
+        // Clear after navigation tick so in-flight SIGNED_IN handlers still see the flag
+        setTimeout(() => finishSignUpProcess(), 1500);
       } catch (err) {
         finishSignUpProcess();
         toast.error(err?.message || "Something went wrong during sign up.");

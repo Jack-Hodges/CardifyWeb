@@ -49,7 +49,7 @@ export default function GlassPanel({ isOpen, onClose, title, subtitle, icon, chi
         >
             <div className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={handleClose} />
             <div
-                className={`relative w-full ${wide ? 'sm:max-w-4xl' : 'sm:max-w-lg'} h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+                className={`relative w-full ${wide ? 'sm:max-w-4xl' : 'sm:max-w-lg'} h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
                     bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
                     sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
                     transform transition-all duration-300 ease-in-out
@@ -75,7 +75,7 @@ export default function GlassPanel({ isOpen, onClose, title, subtitle, icon, chi
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5">
                     {children}
                 </div>
 

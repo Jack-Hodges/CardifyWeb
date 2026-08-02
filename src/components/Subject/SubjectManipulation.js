@@ -6,27 +6,34 @@ const TUTORIAL_SUBJECT_ID = Number(process.env.REACT_APP_TUTORIAL_SUBJECT_ID || 
 // Fetch subjects
 export const fetchSubjects = async (user, profile = null) => {
   try {
-    // Fetch user's own subjects
-    const { data: ownSubjects, error: ownError } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null);
+    // Own subjects + shares + library membership in parallel
+    const [
+      { data: ownSubjects, error: ownError },
+      { data: permissions, error: permissionsError },
+      { data: libraryRows, error: libraryError },
+    ] = await Promise.all([
+      supabase
+        .from('subjects')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null),
+      supabase
+        .from('subject_permissions')
+        .select('subject_id, permission')
+        .eq('recipient_email', user.email),
+      supabase
+        .from('subject_library')
+        .select('subject_id, added_at, colour_text, colour_intensity, collection_id, pinned')
+        .eq('user_id', user.id),
+    ]);
 
     if (ownError) {
       console.error('Error fetching own subjects:', ownError);
       return [];
     }
 
-    // Get the subject_ids and permissions from subject_permissions
-    const { data: permissions, error: permissionsError } = await supabase
-      .from('subject_permissions')
-      .select('subject_id, permission')
-      .eq('recipient_email', user.email);
-
     if (permissionsError) {
       console.error('Error fetching subject permissions:', permissionsError);
-      return ownSubjects || [];
     }
 
     // If we have permissions, fetch the corresponding subjects
@@ -59,16 +66,14 @@ export const fetchSubjects = async (user, profile = null) => {
     const ownIds = new Set((ownSubjects || []).map((s) => s.id));
     const sharedIds = new Set(sharedSubjects.map((s) => s.id));
 
-    // Discover library (reference — not owned copies)
+    // Discover library (reference — not owned copies; personal prefs on membership row)
     let discoverSubjects = [];
-    const { data: libraryRows, error: libraryError } = await supabase
-      .from('subject_library')
-      .select('subject_id, added_at')
-      .eq('user_id', user.id);
-
     if (libraryError) {
       console.error('Error fetching subject library:', libraryError);
     } else if (libraryRows?.length) {
+      const prefsBySubjectId = new Map(
+        libraryRows.map((row) => [row.subject_id, row])
+      );
       const libraryIds = libraryRows
         .map((r) => r.subject_id)
         .filter((id) => !ownIds.has(id) && !sharedIds.has(id));
@@ -83,11 +88,22 @@ export const fetchSubjects = async (user, profile = null) => {
         if (libSubError) {
           console.error('Error fetching discover subjects:', libSubError);
         } else {
-          discoverSubjects = (librarySubjects || []).map((subject) => ({
-            ...subject,
-            isFromDiscover: true,
-            permission: 'viewer',
-          }));
+          discoverSubjects = (librarySubjects || []).map((subject) => {
+            const prefs = prefsBySubjectId.get(subject.id);
+            return {
+              ...subject,
+              colourText:
+                prefs?.colour_text != null ? prefs.colour_text : subject.colourText,
+              colourIntensity:
+                prefs?.colour_intensity != null
+                  ? prefs.colour_intensity
+                  : subject.colourIntensity,
+              collection_id: prefs?.collection_id ?? null,
+              pinned: prefs?.pinned != null ? prefs.pinned : false,
+              isFromDiscover: true,
+              permission: 'viewer',
+            };
+          });
         }
       }
     }
@@ -138,7 +154,7 @@ export const dismissTutorialSubject = async (profile) => {
   return Boolean(updated);
 };
 
-// Add or update subject
+// Add or update owned subject
 export const saveSubject = async (id, subjectName, subjectColor, subjectIntensity, userId, upToIndex = null, collectionId = null, pinned = false) => {
   try {
     if (id) {
@@ -167,6 +183,37 @@ export const saveSubject = async (id, subjectName, subjectColor, subjectIntensit
     }
   } catch (error) {
     console.error('Error saving subject:', error);
+  }
+};
+
+/** Personal prefs for a Discover library subject — never mutates the publisher's subjects row */
+export const saveLibrarySubjectPrefs = async (
+  userId,
+  subjectId,
+  { colourText, colourIntensity, collectionId = null, pinned = false } = {}
+) => {
+  if (!userId || !subjectId) return null;
+  try {
+    const { data, error } = await supabase
+      .from('subject_library')
+      .update({
+        colour_text: colourText,
+        colour_intensity: colourIntensity,
+        collection_id: collectionId,
+        pinned: pinned,
+      })
+      .eq('user_id', userId)
+      .eq('subject_id', subjectId)
+      .select('subject_id, colour_text, colour_intensity, collection_id, pinned');
+
+    if (error) {
+      console.error('Error saving library subject prefs:', error);
+      return null;
+    }
+    return data;
+  } catch (error) {
+    console.error('Unexpected error saving library subject prefs:', error);
+    return null;
   }
 };
 

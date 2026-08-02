@@ -98,38 +98,46 @@ export const UserProvider = ({ children }) => {
     }
   }, [theme]);
 
+  const fetchProfileWithRetry = async (userId, attempts = 6, delayMs = 250) => {
+    for (let i = 0; i < attempts; i++) {
+      const userProfile = await fetchProfile(userId);
+      if (userProfile) return userProfile;
+      // During signup the profile row may lag the auth session by a beat
+      if (!isSignUpProcessRef.current && i >= 1) break;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    return null;
+  };
+
   // Fetch the user and profile
   const getUser = async () => {
     const { data: { session }, error } = await supabase.auth.getSession();
 
     if (error) {
       console.error("Error getting session:", error);
+      setLoading(false);
       return;
     }
 
     if (session?.user) {
       setUser(session.user);
-      const userProfile = await fetchProfile(session.user.id);
+      const userProfile = await fetchProfileWithRetry(session.user.id);
 
       if (userProfile) {
         setProfile(userProfile);
-        setPopupStates(userProfile.popup_states || {});  // Initialize popup states
-        setPopupStatesLoaded(true);  // Mark popup states as loaded
+        setPopupStates(userProfile.popup_states || {});
+        setPopupStatesLoaded(true);
         isSignUpProcessRef.current = false;
-      } else {
-        // No profile found for the given user ID - redirect to login page
-        // But only if we're not in the sign-up process
-        if (!isSignUpProcessRef.current) {
-          console.warn('No profile found for the given user ID. Redirecting to login page.');
-          await logout();
-          window.location.href = '/';
-        }
+      } else if (!isSignUpProcessRef.current) {
+        // Broken session (auth user, no profile) — clear quietly without hard reload
+        console.warn('No profile found for session user. Signing out.');
+        await logout();
       }
     } else {
       setUser(null);
       setProfile(null);
       setPopupStates({});
-      setPopupStatesLoaded(false);  // Reset state
+      setPopupStatesLoaded(false);
       isSignUpProcessRef.current = false;
     }
 
@@ -192,28 +200,36 @@ export const UserProvider = ({ children }) => {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        fetchProfile(session.user.id).then(userProfile => {
+        // Don't block the auth callback; resolve profile asynchronously with retries
+        (async () => {
           setUser(session.user);
-          setProfile(userProfile);
-          setPopupStates(userProfile?.popup_states || {});
-          setPopupStatesLoaded(true);  // Mark popup states as loaded
-          
-          // If no profile is found, redirect to login page
-          // But only if we're not in the sign-up process
-          if (!userProfile && !isSignUpProcessRef.current) {
-            console.warn('No profile found for the given user ID. Redirecting to login page.');
-            logout().then(() => {
-              window.location.href = '/';
-            });
-          } else if (userProfile) {
+
+          const userProfile = await fetchProfileWithRetry(
+            session.user.id,
+            isSignUpProcessRef.current ? 8 : 3
+          );
+
+          if (userProfile) {
+            setProfile(userProfile);
+            setPopupStates(userProfile.popup_states || {});
+            setPopupStatesLoaded(true);
             isSignUpProcessRef.current = false;
+            return;
           }
-        });
+
+          // Still no profile. During signup, Welcome may still be inserting — do not sign out.
+          if (isSignUpProcessRef.current) {
+            return;
+          }
+
+          console.warn('No profile found for the given user ID. Signing out.');
+          await logout();
+        })();
       } else {
         setUser(null);
         setProfile(null);
         setPopupStates({});
-        setPopupStatesLoaded(false);  // Reset on logout
+        setPopupStatesLoaded(false);
         isSignUpProcessRef.current = false;
       }
     });
