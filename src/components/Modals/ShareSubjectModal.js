@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Share2, Mail, Link2, X } from 'lucide-react';
+import { Share2, Mail, Link2, X, Compass } from 'lucide-react';
 import GlassPanel from './GlassPanel';
 import BackgroundButton from '../Elements/BackgroundButton';
 import ConfirmModal from './ConfirmModal';
@@ -12,11 +12,14 @@ import {
   revokePublicLink,
   getShares,
   fetchPublicLink,
+  fetchListing,
+  publishToDiscover,
+  unpublishFromDiscover,
 } from '../Subject/SubjectManipulation';
 import { toast } from '../Toast';
 
 /**
- * Invite collaborators + public study link for a subject you own.
+ * Invite collaborators + public study link + Discover publish for a subject you own.
  */
 function ShareSubjectModal({ isOpen, onClose, subject }) {
   const { profile, theme } = useUser();
@@ -24,9 +27,12 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
   const [shareEmail, setShareEmail] = useState('');
   const [shareRole, setShareRole] = useState('viewer');
   const [publicLink, setPublicLink] = useState(null);
+  const [listing, setListing] = useState(null);
+  const [discoverDescription, setDiscoverDescription] = useState('');
   const [subjectShares, setSubjectShares] = useState([]);
   const [activeShareDropdown, setActiveShareDropdown] = useState(null);
   const [shareToRemove, setShareToRemove] = useState(null);
+  const [discoverBusy, setDiscoverBusy] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !profile?.id || !subject?.id) return;
@@ -36,6 +42,9 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
       setSubjectShares(allShares.filter((share) => share.subject_id === subject.id));
       const link = await fetchPublicLink(subject.id, profile.id);
       setPublicLink(link);
+      const existingListing = await fetchListing(subject.id, profile.id);
+      setListing(existingListing);
+      setDiscoverDescription(existingListing?.description || '');
     };
 
     loadShareData();
@@ -57,6 +66,8 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
     setShareRole('viewer');
     setActiveShareDropdown(null);
     setPublicLink(null);
+    setListing(null);
+    setDiscoverDescription('');
     setShareToRemove(null);
     onClose();
   };
@@ -140,6 +151,42 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
     }
     setPublicLink(null);
     toast.success('Public link revoked');
+  };
+
+  const isPublished = Boolean(listing?.published_at);
+
+  const handlePublishDiscover = async () => {
+    if (!profile?.id || !subject?.id) return;
+    if (!profile.username) {
+      toast.error('Set a unique username in Profile settings before publishing to Discover');
+      return;
+    }
+    setDiscoverBusy(true);
+    const data = await publishToDiscover(subject.id, profile.id, {
+      description: discoverDescription,
+      pricing: 'free',
+      priceCents: 0,
+    });
+    setDiscoverBusy(false);
+    if (!data) {
+      toast.error('Could not publish to Discover');
+      return;
+    }
+    setListing(data);
+    toast.success('Published to Discover');
+  };
+
+  const handleUnpublishDiscover = async () => {
+    if (!profile?.id || !subject?.id) return;
+    setDiscoverBusy(true);
+    const success = await unpublishFromDiscover(subject.id, profile.id);
+    setDiscoverBusy(false);
+    if (!success) {
+      toast.error('Could not unpublish');
+      return;
+    }
+    setListing((prev) => (prev ? { ...prev, published_at: null } : prev));
+    toast.success('Removed from Discover');
   };
 
   if (!subject) return null;
@@ -249,6 +296,78 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
                   bgColor="bg-indigo-500 hover:bg-indigo-400"
                   wWidth="w-full sm:w-auto"
                   onClick={handleMakePublicLink}
+                />
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl bg-white/10 border border-white/15 p-4">
+            <div className="flex items-start gap-3 mb-3">
+              <Compass size={20} className="text-white/80 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-white">Discover</p>
+                <p className="text-sm text-white/60 mt-1">
+                  {isPublished
+                    ? 'This subject is listed in Discover for anyone to browse and practice.'
+                    : profile?.username
+                      ? 'List this subject in Discover so others can find and practice it for free.'
+                      : 'Set a username in Profile settings first — it’s shown with your Discover listings.'}
+                </p>
+              </div>
+            </div>
+            <label htmlFor="discover-description" className="block text-sm font-bold text-white/90 mb-2 ml-1">
+              Short description (optional)
+            </label>
+            <textarea
+              id="discover-description"
+              value={discoverDescription}
+              onChange={(e) => setDiscoverDescription(e.target.value.slice(0, 280))}
+              rows={2}
+              placeholder="What will people learn?"
+              className={`w-full px-4 py-3 rounded-2xl text-white resize-none
+                ${secondaryColor?.bgClass || 'bg-purple-500'}
+                background-shadow-new background-focus focus:outline-none font-medium
+                placeholder:text-white/60`}
+            />
+            <div className="mt-3 flex items-center gap-2 text-sm text-white/70">
+              <span className="rounded-full bg-emerald-500/30 px-2.5 py-0.5 font-semibold text-emerald-100">
+                Free
+              </span>
+              <span className="opacity-60">Paid listings coming soon</span>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 mt-3">
+              {isPublished ? (
+                <>
+                  <BackgroundButton
+                    text="Update listing"
+                    image={<Compass size={18} />}
+                    flip
+                    bgColor="bg-teal-500 hover:bg-teal-400"
+                    wWidth="w-full sm:w-auto"
+                    disabled={discoverBusy}
+                    onClick={handlePublishDiscover}
+                  />
+                  <BackgroundButton
+                    text="Unpublish"
+                    bgColor="bg-gray-600 hover:bg-gray-500"
+                    wWidth="w-full sm:w-auto"
+                    disabled={discoverBusy}
+                    onClick={handleUnpublishDiscover}
+                  />
+                </>
+              ) : (
+                <BackgroundButton
+                  text="Publish to Discover"
+                  image={<Compass size={18} />}
+                  flip
+                  bgColor={
+                    profile?.username
+                      ? 'bg-teal-500 hover:bg-teal-400'
+                      : 'bg-gray-400'
+                  }
+                  wWidth="w-full sm:w-auto"
+                  disabled={discoverBusy || !profile?.username}
+                  onClick={handlePublishDiscover}
                 />
               )}
             </div>

@@ -54,7 +54,7 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
     return ReactDOM.createPortal(
         <div
-            className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+            className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
                 isClosing ? 'opacity-0' : 'opacity-100'
             }`}
             onClick={onFirstAction} // Close modal if the background is clicked
@@ -67,23 +67,32 @@ function Modal({ isOpen, onFirstAction, onSecondAction, text, mainText, firstAct
 
             {/* Modal Content */}
             <div
-                className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-2xl p-8 ${width} transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${
+                className={`relative flex flex-col max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden
+                    bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                    rounded-none sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                    transform transition-all duration-300 ease-in-out ${width} ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from propagating
             >
-                <h2 className={`text-2xl font-semibold mb-6 ${titleCol}`}>
-                    {text}
-                </h2>
+                <div className="flex-none px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
+                    <h2 className={`text-2xl font-semibold ${titleCol}`}>
+                        {text}
+                    </h2>
+                </div>
 
-                <p className="mb-6 text-lg text-white dark:text-gray-200">
-                    {mainText}
-                </p>
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-8 pb-4">
+                    <p className="text-lg text-white dark:text-gray-200">
+                        {mainText}
+                    </p>
+                </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                    <BackgroundButton text={firstActionText} bgColor={firstActionCol} wWidth='w-full' onClick={(e) => handleFirstAction(e)} />
-                    <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
+                <div className="flex-none px-6 sm:px-8 py-5 border-t border-white/15 bg-black/10">
+                    <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
+                        <BackgroundButton text={firstActionText} bgColor={firstActionCol} wWidth='w-full' onClick={(e) => handleFirstAction(e)} />
+                        <BackgroundButton text={secondActionText} bgColor={secondActionCol} wWidth='w-full mt-2 sm:mt-0' onClick={(e) => handleSecondAction(e)} />
+                    </div>
                 </div>
             </div>
         </div>,

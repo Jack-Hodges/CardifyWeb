@@ -34,7 +34,7 @@ function SingleInputModal({ isOpen, onClose, onSave, frontContent, setFrontConte
 
     return ReactDOM.createPortal(
         <div
-            className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${
+            className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${
                 isClosing ? 'opacity-0' : 'opacity-100'
             }`}
             onClick={(e) => e.stopPropagation()} // Prevent modal clicks from triggering the card click
@@ -47,15 +47,18 @@ function SingleInputModal({ isOpen, onClose, onSave, frontContent, setFrontConte
 
             {/* Modal Content */}
             <div
-                className={`relative bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg w-3/4 max-w-2xl transform transition-all duration-300 ease-in-out ${
+                className={`relative flex flex-col w-full sm:w-3/4 max-w-2xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden
+                    bg-white dark:bg-gray-800 sm:rounded-lg shadow-lg
+                    transform transition-all duration-300 ease-in-out ${
                     isClosing ? 'animate-pop-down' : 'animate-pop-up'
                 }`}
                 onClick={(e) => e.stopPropagation()} // Ensure clicking inside the modal also doesn't propagate
             >
-                <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
+                <div className="flex-none px-6 sm:px-8 pt-6 sm:pt-8 pb-2">
+                    <h2 className="text-2xl font-semibold mb-0 text-green-500">{text}</h2>
+                </div>
 
-                {/* Question Input */}
-                <div className="mb-6">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-8 py-4">
                     <input
                         id="question"
                         value={frontContent}
@@ -66,11 +69,13 @@ function SingleInputModal({ isOpen, onClose, onSave, frontContent, setFrontConte
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-4">
-                    { !hideCanc && (
-                        <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
-                    )}
-                    <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />
+                <div className="flex-none px-6 sm:px-8 py-5 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-end space-x-4">
+                        { !hideCanc && (
+                            <BackgroundButton text="Cancel" bgColor="red" onClick={handleClose} />
+                        )}
+                        <BackgroundButton text="Save" bgColor="blue" onClick={handleSave} />
+                    </div>
                 </div>
             </div>
         </div>,

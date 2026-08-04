@@ -9,7 +9,7 @@ import { getCardArt } from "../Functions/getCardArt";
 import CardArtOverlay from "../Elements/CardArtOverlay";
 import { useUser } from "../../UserContext";
 
-function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject }) {
+function CollectionBlock({ user, collection, subjects, isExpanded = false, onClick, onEditSubject, onRemoveSubject, onEditCollection, onRemoveCollection, onSaveSubject, onRemoveFromLibrary }) {
     const subject_count = subjects.length;
     const [hoveredIcon, setHoveredIcon] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
@@ -124,7 +124,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                 >
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
                     <div
-                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] overflow-hidden flex flex-col
+                        className={`relative w-full sm:w-[95%] h-full sm:h-[90%] max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
                             bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
                             sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
                             transform transition-all duration-300 ease-in-out
@@ -159,7 +159,7 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
+                        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5">
                             {subjects.length > 0 ? (
                                 <div className="flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
                                     {subjects.map((subject) => (
@@ -167,9 +167,11 @@ function CollectionBlock({ user, collection, subjects, isExpanded = false, onCli
                                             key={subject.id}
                                             subject={subject}
                                             user={user}
+                                            fromDiscover={Boolean(subject.isFromDiscover)}
                                             onEdit={() => onEditSubject(subject)}
                                             onSave={onSaveSubject}
                                             onRemoveSubject={() => onRemoveSubject(subject)}
+                                            onRemoveFromLibrary={onRemoveFromLibrary}
                                         />
                                     ))}
                                 </div>

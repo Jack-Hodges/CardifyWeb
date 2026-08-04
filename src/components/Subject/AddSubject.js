@@ -267,15 +267,25 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
         handleClose();
     };
 
+    const isDiscoverEdit = Boolean(subject?.isFromDiscover);
+
     const handleSave = () => {
-        if (subjectName !== '') {
+        if (isDiscoverEdit || subjectName !== '') {
             snapshotRef.current = {
-                name: subjectName,
+                name: isDiscoverEdit ? (subject?.name || subjectName) : subjectName,
                 color: subjectColor,
                 intensity: subjectIntensity,
                 collectionId: selectedCollectionId,
             };
-            onSave(subject?.id, subjectName, subjectColor, subjectIntensity, subject?.up_to_index, selectedCollectionId);
+            onSave(
+                subject?.id,
+                isDiscoverEdit ? subject?.name : subjectName,
+                subjectColor,
+                subjectIntensity,
+                subject?.up_to_index,
+                selectedCollectionId,
+                subject?.pinned
+            );
             handleClose();
         } else {
             toast.warning("Please add a subject name");
@@ -323,21 +333,30 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
     const activeTuning = tuningColor || subjectColor;
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
-
-            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={requestClose}></div>
-            <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 shadow-2xl shadow-black/30 border border-white/20 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
-                <div className="flex items-start justify-between gap-4 mb-6">
-                    <h2 className="text-3xl font-bold text-white">
-                        {subject ? "Edit Subject" : text}
-                    </h2>
-                    <BackgroundButton
-                        image={<X size={20} strokeWidth={3} />}
-                        bgColor="bg-red-500 hover:bg-red-400"
-                        onClick={requestClose}
-                    />
+        <div className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="absolute inset-0 bg-black/50 transition-opacity duration-300" onClick={requestClose} />
+            <div
+                className={`relative flex flex-col w-full h-full sm:h-auto sm:w-full sm:max-w-2xl max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden
+                    bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                    sm:rounded-2xl shadow-2xl shadow-black/30 border border-white/20
+                    transform transition-all duration-300 ease-in-out
+                    ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex-none px-5 sm:px-8 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+                    <div className="flex items-start justify-between gap-4">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                            {isDiscoverEdit ? 'Customise Subject' : subject ? 'Edit Subject' : text}
+                        </h2>
+                        <BackgroundButton
+                            image={<X size={20} strokeWidth={3} />}
+                            bgColor="bg-red-500 hover:bg-red-400"
+                            onClick={requestClose}
+                        />
+                    </div>
                 </div>
 
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-5">
                 <div className="mb-6">
                     <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-white/90">
                         Subject Name
@@ -347,10 +366,20 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         type="text"
                         value={subjectName}
                         onChange={(e) => setLocalSubjectName(e.target.value)}
-                        className="bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:border-white/40 focus:outline-none transition-colors"
+                        readOnly={isDiscoverEdit}
+                        className={`bg-black/20 backdrop-blur-sm w-full p-3 rounded-lg text-white border border-white/20 focus:outline-none transition-colors ${
+                            isDiscoverEdit
+                                ? 'opacity-70 cursor-not-allowed focus:border-white/20'
+                                : 'focus:border-white/40'
+                        }`}
                         placeholder="Enter the subject name here"
                         required
                     />
+                    {isDiscoverEdit && (
+                        <p className="mt-2 text-sm text-white/50">
+                            Name comes from Discover. You can still change colour and collection for yourself.
+                        </p>
+                    )}
                 </div>
 
                 <div className="mb-6 relative">
@@ -387,7 +416,7 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                     )}
                 </div>
 
-                <div className="mb-6">
+                <div className="mb-2">
                     <label className="block text-lg font-medium mb-2 text-white/90">
                         Subject Color
                     </label>
@@ -431,9 +460,12 @@ function AddSubject({ isOpen, onClose, onSave, subject, text, user }) {
                         />
                     )}
                 </div>
+                </div>
 
-                <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full' onClick={handleSave} />
+                <div className="flex-none px-5 sm:px-8 py-4 border-t border-white/15 bg-black/10">
+                    <div className="flex sm:justify-end">
+                        <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full sm:w-auto' onClick={handleSave} />
+                    </div>
                 </div>
             </div>
 

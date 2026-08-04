@@ -38,9 +38,9 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [isVisible, showLimitDialog]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleClose = () => {
-    if (isClosing) return;
-    if (previewCards.length > 0) {
+  const handleClose = (opts = {}) => {
+    if (isClosing || loading) return;
+    if (!opts.skipConfirm && previewCards.length > 0) {
       const discard = window.confirm('You have unsaved import preview. Discard it?');
       if (!discard) return;
     }
@@ -73,7 +73,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!profile) {
       setError('Profile is still loading. Try again in a moment.');
       return;
@@ -90,9 +90,20 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     if (currentCount + previewCards.length > maxCards) {
       setShowLimitDialog(true);
     } else {
-      onImport(previewCards);
-      handleClose();
+      setLoading(true);
+      try {
+        await onImport(previewCards);
+        handleClose({ skipConfirm: true });
+      } catch (err) {
+        setError(err.message || 'Import failed');
+      } finally {
+        setLoading(false);
+      }
     }
+  };
+
+  const handleRemovePreviewCard = (index) => {
+    setPreviewCards((current) => current.filter((_, i) => i !== index));
   };
 
   const maxCards = profile?.pro ? 500 : 100;
@@ -108,7 +119,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
     >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
       <div
-        className={`relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+        className={`relative w-full sm:max-w-2xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
           ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
@@ -133,7 +144,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5 space-y-5">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -166,22 +177,28 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
             <div>
               <h3 className="text-sm font-bold text-white/90 mb-3 ml-1">
                 Preview · {previewCards.length} {previewCards.length === 1 ? 'card' : 'cards'}
+                <span className="font-medium text-white/50"> · tap × to exclude</span>
               </h3>
-              <div className="max-h-56 overflow-y-auto space-y-2">
-                {previewCards.slice(0, 5).map((card, index) => (
+              <div className="max-h-72 overflow-y-auto space-y-2">
+                {previewCards.map((card, index) => (
                   <div
-                    key={index}
-                    className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3"
+                    key={`${index}-${card.question?.slice(0, 24) || 'card'}`}
+                    className="rounded-2xl bg-white/10 border border-white/15 px-4 py-3 flex items-start gap-3"
                   >
-                    <p className="text-white font-semibold truncate">Q: {card.question}</p>
-                    <p className="text-white/70 truncate">A: {card.answer}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-semibold truncate">Q: {card.question}</p>
+                      <p className="text-white/70 truncate">A: {card.answer}</p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={`Remove card ${index + 1}`}
+                      onClick={() => handleRemovePreviewCard(index)}
+                      className="shrink-0 mt-0.5 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-red-500/80 transition-colors"
+                    >
+                      <X size={16} strokeWidth={3} />
+                    </button>
                   </div>
                 ))}
-                {previewCards.length > 5 && (
-                  <p className="text-white/50 text-center text-sm py-1">
-                    ...and {previewCards.length - 5} more
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -203,11 +220,18 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
       <ConfirmModal
         isOpen={showLimitDialog}
         onClose={() => setShowLimitDialog(false)}
-        onConfirm={() => {
+        onConfirm={async () => {
           const cardsToImport = previewCards.slice(0, remainingSpace);
-          onImport(cardsToImport);
           setShowLimitDialog(false);
-          handleClose();
+          setLoading(true);
+          try {
+            await onImport(cardsToImport);
+            handleClose({ skipConfirm: true });
+          } catch (err) {
+            setError(err.message || 'Import failed');
+          } finally {
+            setLoading(false);
+          }
         }}
         title="Card limit warning"
         icon={<AlertTriangle size={20} />}

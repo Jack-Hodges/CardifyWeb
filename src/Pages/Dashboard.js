@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
-import { fetchSubjects, saveSubject, removeSubject, restoreSubject, dismissTutorialSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
+import { fetchSubjects, saveSubject, saveLibrarySubjectPrefs, removeSubject, restoreSubject, dismissTutorialSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import { toast } from '../components/Toast';
 import { saveProfile } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
@@ -14,13 +14,15 @@ import CollectionBlock from '../components/Collections/CollectionBlock';
 import AddBar from '../components/Navigation/AddBar';
 import AddCollection from '../components/Collections/AddCollection';
 import { saveCollection } from '../components/Collections/CollectionManipulation';
-import { ChevronDown, Search, Trash2, CircleMinus } from 'lucide-react';
+import { ChevronDown, Search, Trash2, CircleMinus, BadgePlus } from 'lucide-react';
 import useModals from '../hooks/useModals';
 import { Helmet } from 'react-helmet-async';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { DASHBOARD_STEPS } from '../components/Tutorial/tourSteps';
 import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
+import PageEmptyState from '../components/Elements/PageEmptyState';
+import NoSelectionModal from '../components/Modals/NoSelectionModal';
 
 function Dashboard() {
   const [subjects, setSubjects] = useState([]);
@@ -33,6 +35,7 @@ function Dashboard() {
   const [selectedSort, setSelectedSort] = useState('Most Cards');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollection, setSelectedCollection] = useState(null);
+  const MAX_ITEMS = 100;
 
   const { modals, openModal, closeModal } = useModals({
     addSubject:        false,
@@ -59,7 +62,7 @@ function Dashboard() {
   const tourSubjectId = useMemo(() => {
     const tutorial = subjects.find((s) => s.id === TUTORIAL_SUBJECT_ID);
     if (tutorial) return tutorial.id;
-    const firstOwn = subjects.find((s) => !s.isShared && !s.permission);
+    const firstOwn = subjects.find((s) => !s.isShared && !s.permission && !s.isFromDiscover);
     return firstOwn?.id ?? null;
   }, [subjects]);
 
@@ -99,16 +102,41 @@ function Dashboard() {
 
   // Subject
   const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
-    const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
-    if (data && !id) {
-      setSubjects([...subjects, ...data]);
-    } else {
-      const updatedSubjects = subjects.map((subject) =>
-        subject.id === id
-          ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned }
-          : subject
+    const existing = id ? subjects.find((s) => s.id === id) : null;
+
+    if (existing?.isFromDiscover) {
+      const data = await saveLibrarySubjectPrefs(user.id, id, {
+        colourText: subjectColor,
+        colourIntensity: subjectIntensity,
+        collectionId,
+        pinned: pinned ?? existing.pinned ?? false,
+      });
+      if (!data) return;
+      setSubjects((current) =>
+        current.map((subject) =>
+          subject.id === id
+            ? {
+                ...subject,
+                colourText: subjectColor,
+                colourIntensity: subjectIntensity,
+                collection_id: collectionId,
+                pinned: pinned ?? subject.pinned ?? false,
+              }
+            : subject
+        )
       );
-      setSubjects(updatedSubjects);
+    } else {
+      const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
+      if (data && !id) {
+        setSubjects([...subjects, ...data]);
+      } else {
+        const updatedSubjects = subjects.map((subject) =>
+          subject.id === id
+            ? { ...subject, name: subjectName, colourText: subjectColor, colourIntensity: subjectIntensity, collection_id: collectionId, pinned: pinned }
+            : subject
+        );
+        setSubjects(updatedSubjects);
+      }
     }
     closeModal('addSubject');
     closeModal('editSubject');
@@ -205,13 +233,29 @@ function Dashboard() {
   const sortedSubjects = [...subjects]
     .filter((subject) => subject.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Split subjects into personal and shared
-  const personalSubjects = sortedSubjects.filter(subject => subject.user_id === user.id || subject.id === TUTORIAL_SUBJECT_ID);
-  const sharedSubjects = sortedSubjects.filter(subject => subject.user_id !== user.id && subject.id !== TUTORIAL_SUBJECT_ID);
+  // Split subjects into personal, shared, and Discover library
+  const personalSubjects = sortedSubjects.filter(
+    (subject) =>
+      !subject.isFromDiscover &&
+      (subject.user_id === user.id || subject.id === TUTORIAL_SUBJECT_ID)
+  );
+  const sharedSubjects = sortedSubjects.filter(
+    (subject) =>
+      !subject.isFromDiscover &&
+      subject.user_id !== user.id &&
+      subject.id !== TUTORIAL_SUBJECT_ID
+  );
+  const discoverSubjects = sortedSubjects.filter((subject) => subject.isFromDiscover);
 
-  // Attach subjects to their collections and sort them
+  // Attach subjects to their collections and sort them (personal + Discover with personal collection)
   const collectionsWithSubjects = collections.map((collection) => {
-    const collectionSubjects = personalSubjects.filter((subject) => subject.collection_id === collection.id);
+    const collectionSubjects = sortedSubjects.filter(
+      (subject) =>
+        subject.collection_id === collection.id &&
+        (subject.isFromDiscover ||
+          subject.user_id === user.id ||
+          subject.id === TUTORIAL_SUBJECT_ID)
+    );
     
     // Sort subjects within the collection
     const sortedCollectionSubjects = [...collectionSubjects].sort((a, b) => {
@@ -230,11 +274,12 @@ function Dashboard() {
 
     return {
       ...collection,
-      subjects: sortedCollectionSubjects
+      // Cap the number of subjects shown per collection block.
+      subjects: sortedCollectionSubjects.slice(0, MAX_ITEMS)
     };
   });
 
-  // Combine collections and unassigned subjects into a single array
+  // Combine collections and unassigned personal subjects into a single array
   const combinedList = [
     ...personalSubjects.filter(subject => !subject.collection_id).map(subject => ({ ...subject, type: 'subject' })),
     ...collectionsWithSubjects.map(collection => ({ ...collection, type: 'collection' }))
@@ -258,23 +303,34 @@ function Dashboard() {
   });
 
   // Separate the sorted list back into collections and subjects
-  const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection');
-  const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject');
+  const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection').slice(0, MAX_ITEMS);
+  const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject').slice(0, MAX_ITEMS);
 
-  // Sort shared subjects
-  const sortedSharedSubjects = [...sharedSubjects].sort((a, b) => {
-    if (selectedSort === 'Alphabetical') {
-      return a.name.localeCompare(b.name);
-    } else if (selectedSort === 'Most Cards') {
-      const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
-      return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
-    } else if (selectedSort === 'Date Created (Newest)') {
-      return new Date(b.created_at) - new Date(a.created_at);
-    } else if (selectedSort === 'Date Created (Oldest)') {
-      return new Date(a.created_at) - new Date(b.created_at);
-    }
-    return 0;
-  });
+  const sortSubjectList = (list) =>
+    [...list].sort((a, b) => {
+      if (selectedSort === 'Alphabetical') {
+        return a.name.localeCompare(b.name);
+      } else if (selectedSort === 'Most Cards') {
+        const countDiff = (b.flashcard_count || 0) - (a.flashcard_count || 0);
+        return countDiff === 0 ? a.name.localeCompare(b.name) : countDiff;
+      } else if (selectedSort === 'Date Created (Newest)') {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else if (selectedSort === 'Date Created (Oldest)') {
+        return new Date(a.created_at) - new Date(b.created_at);
+      }
+      return 0;
+    });
+
+  const sortedSharedSubjects = sortSubjectList(sharedSubjects).slice(0, MAX_ITEMS);
+  // From Discover: only library subjects not filed into a personal collection
+  const sortedDiscoverSubjects = sortSubjectList(
+    discoverSubjects.filter((subject) => !subject.collection_id)
+  ).slice(0, MAX_ITEMS);
+
+  const handleRemoveFromLibrary = (subjectId) => {
+    setSubjects((current) => current.filter((subject) => subject.id !== subjectId));
+    toast.success('Removed from library');
+  };
 
   const handleCollectionClick = (collectionId) => {
     setSelectedCollection((prev) => (prev === collectionId ? null : collectionId));
@@ -379,6 +435,7 @@ function Dashboard() {
                       openModal('deleteCollection');
                     }}
                     onSaveSubject={handleSaveSubject}
+                    onRemoveFromLibrary={handleRemoveFromLibrary}
                   />
                 ))}
 
@@ -429,26 +486,40 @@ function Dashboard() {
               </div>
             </div>
           )}
+
+          {/* Discover library Section */}
+          {sortedDiscoverSubjects.length > 0 && (
+            <div>
+              <h2 className={`text-2xl font-bold mb-4 ${shadow ? 'drop-shadow-custom' : ''} ${theme ? theme.textClass : 'textColor'}`}>From Discover</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {sortedDiscoverSubjects.map((subject) => (
+                  <SubjectBlock
+                    key={subject.id}
+                    subject={subject}
+                    user={user}
+                    onSave={handleSaveSubject}
+                    onEdit={() => handleEditSubject(subject)}
+                    fromDiscover
+                    onRemoveFromLibrary={handleRemoveFromLibrary}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
-        // No Subjects or Collections Message
-        <div className="flex flex-col justify-center items-center w-full h-4/5 gap-4">
-          <p className={`${theme ? theme.textClass : 'textColor'} text-4xl font-bold text-center ${shadow ? 'drop-shadow-custom' : ''}`}>You have no subjects</p>
-          <p className={`${theme ? theme.textClass : 'textColor'} text-2xl font-semibold text-center`}>In order to create flashcards, you need to create a subject first. 
-            <br></br>Subjects organise your flashcards into groups, allowing you to edit and practice them in one go.
-            <br></br>You can also create <span className="text-blue-500">Collections</span> to organise your subjects into different groups.
-            <br></br>To add a subject, click the button below. You can also use the <span className="text-blue-500">Plus button</span> in the top right corner to create a subject or a collection.
-          </p>
-          <div className="block sm:flex gap-4 mt-5 items-center justify-center">
-            <BackgroundButton
-              text="Create New Subject"
-              bgColor={theme ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}` : 'bg-orange-500 hover:bg-orange-400'}
-              onClick={handleAddSubject}
-              wWidth="w-full sm:w-auto mb-3 sm:mb-0"
-              dataTour="dashboard-create-subject"
-            />
-          </div>
-        </div>
+        <PageEmptyState>
+          <NoSelectionModal
+            text="You have no subjects"
+            subtext="Create a subject to organise your flashcards — or browse free decks in Discover."
+            text1="Create subject"
+            action1={handleAddSubject}
+            text2="Explore Discover"
+            action2={() => navigate('/discover')}
+            icon={<BadgePlus size={44} strokeWidth={2.5} />}
+            dataTour="dashboard-create-subject"
+          />
+        </PageEmptyState>
       )}
 
       {/* Add/Edit Subject Modal */}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchSubjects, saveSubject, removeSubject } from './SubjectManipulation';
+import { fetchSubjects, saveSubject, saveLibrarySubjectPrefs, removeSubject } from './SubjectManipulation';
 import getColors from '../Functions/getColors';
 import { useNavigate } from 'react-router-dom';
 import { fetchCollections } from '../Collections/CollectionManipulation';
@@ -21,6 +21,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const { secondaryColor } = theme;
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
     const [sortBy, setSortBy] = useState('Most Cards');
+    const PAGE_SIZE = 30;
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const selectRef = useRef(null);
 
     useBodyScrollLock(isOpen);
@@ -49,6 +51,10 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
         loadData();
     }, [user, profile]);
+
+    useEffect(() => {
+      if (isOpen) setVisibleCount(PAGE_SIZE);
+    }, [isOpen, PAGE_SIZE]);
 
     const goToDashboard = () => {
         navigate('/dashboard');
@@ -95,8 +101,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     });
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-6 w-full sm:w-4/5 max-w-lg h-full sm:h-[70%] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-0 sm:p-6">
+          <div className="bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-6 w-full sm:w-4/5 max-w-lg h-full sm:h-[70%] max-h-[100dvh] sm:max-h-[90dvh] shadow-2xl shadow-black/30 border border-white/20 relative flex flex-col overflow-hidden">
             {selectedCollection ? (
               <CollectionView 
                 collection={selectedCollection} 
@@ -139,7 +145,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                   </div>
                 </div>
       
-                <div className="flex-1 overflow-y-auto pb-8">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-8">
                   {showSkeleton ? (
                     <div className="space-y-2 animate-pulse" aria-busy="true" aria-label="Loading subjects">
                       {Array.from({ length: 5 }).map((_, i) => (
@@ -147,9 +153,15 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                       ))}
                     </div>
                   ) : subjects.length > 0 ? (
-                    sortedCombinedList.map((item) => {
-                      if (item.type === 'subject') {
-                        if (item.permission !== 'viewer') {
+                    <>
+                      {sortedCombinedList.slice(0, visibleCount).map((item) => {
+                        if (item.type === 'subject') {
+                          const isSharedViewer = item.permission === 'viewer' && !item.isFromDiscover;
+                          const isContentReadOnly = item.isFromDiscover || isSharedViewer;
+                          // Create requires edit access; practice/games allow library + shared viewers
+                          if (page === 'create' && isContentReadOnly) {
+                            return null;
+                          }
                           return (
                             <SubjectRow
                               key={`subject-${item.id}`}
@@ -157,24 +169,51 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                               page={page}
                               onClose={onClose}
                               themeShadow={'background-shadow-new'}
-                              onEdit={() => { setEditingSubject(item); setIsAddOpen(true); }}
-                              onDelete={() => setConfirmDeleteSubject(item)}
+                              onEdit={
+                                isSharedViewer
+                                  ? undefined
+                                  : () => {
+                                      setEditingSubject(item);
+                                      setIsAddOpen(true);
+                                    }
+                              }
+                              onDelete={
+                                isContentReadOnly
+                                  ? undefined
+                                  : () => setConfirmDeleteSubject(item)
+                              }
+                            />
+                          );
+                        } else if (item.type === 'collection') {
+                          return (
+                            <CollectionRow
+                              key={`collection-${item.id}`}
+                              collection={item}
+                              subjects={item.subjects}
+                              onClick={() => setSelectedCollection(item)}
+                              themeShadow={'background-shadow-new'}
                             />
                           );
                         }
-                      } else if (item.type === 'collection') {
-                        return (
-                          <CollectionRow 
-                            key={`collection-${item.id}`} 
-                            collection={item} 
-                            subjects={item.subjects} 
-                            onClick={() => setSelectedCollection(item)} 
-                            themeShadow={'background-shadow-new'}
+                        return null;
+                      })}
+
+                      {visibleCount < sortedCombinedList.length && (
+                        <div className="mt-6 flex justify-center">
+                          <BackgroundButton
+                            text="Load more"
+                            bgColor={
+                              theme
+                                ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                                : 'bg-purple-500 hover:bg-purple-400'
+                            }
+                            onClick={() =>
+                              setVisibleCount((n) => Math.min(n + PAGE_SIZE, sortedCombinedList.length))
+                            }
                           />
-                        );
-                      }
-                      return null;
-                    })
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="text-center text-lg text-white/80 mt-10 flex flex-col items-center px-4">
                       <p className="mb-2 font-bold text-xl text-white">No subjects yet</p>
@@ -202,24 +241,36 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
           <AddSubject
             isOpen={isAddOpen}
             onClose={() => setIsAddOpen(false)}
-            onSave={async (subjectId, name, colourText, colourIntensity, upToIndex, collectionId) => {
-              // save or update subject
-              const data = await saveSubject(
-                subjectId,
-                name,
-                colourText,
-                colourIntensity,
-                user.id,
-                upToIndex,
-                collectionId,
-                false // pinned default
-              );
-              // New subject from empty picker → go straight to the destination page
-              if (!subjectId && Array.isArray(data) && data[0]?.id) {
-                const created = data[0];
-                onClose();
-                navigate(`/${page}/${created.id}`, { state: { subject: created } });
-                return;
+            onSave={async (subjectId, name, colourText, colourIntensity, upToIndex, collectionId, pinned) => {
+              const existing = subjectId
+                ? subjects.find((s) => s.id === subjectId) || editingSubject
+                : null;
+
+              if (existing?.isFromDiscover) {
+                await saveLibrarySubjectPrefs(user.id, subjectId, {
+                  colourText,
+                  colourIntensity,
+                  collectionId,
+                  pinned: pinned ?? existing.pinned ?? false,
+                });
+              } else {
+                const data = await saveSubject(
+                  subjectId,
+                  name,
+                  colourText,
+                  colourIntensity,
+                  user.id,
+                  upToIndex,
+                  collectionId,
+                  pinned ?? false
+                );
+                // New subject from empty picker → go straight to the destination page
+                if (!subjectId && Array.isArray(data) && data[0]?.id) {
+                  const created = data[0];
+                  onClose();
+                  navigate(`/${page}/${created.id}`, { state: { subject: created } });
+                  return;
+                }
               }
               // reload list
               const refreshed = await fetchSubjects(user, profile);
@@ -286,14 +337,16 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
             <p className="text-2xl">{subject.name}</p>
             <p className="text-lg font-normal">{subject.flashcard_count} {subject.flashcard_count === 1 ? "card" : "cards"}</p>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
-            className="p-2 hover:bg-gray-700 rounded-full"
-          >
-            <MoreVertical className="text-white" />
-          </button>
+          {(onEdit || onDelete) && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
+              className="p-2 hover:bg-gray-700 rounded-full"
+            >
+              <MoreVertical className="text-white" />
+            </button>
+          )}
         </div>
-        {menuOpen && (
+        {menuOpen && (onEdit || onDelete) && (
           <div className="absolute right-0 top-full mt-1 bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl rounded-xl p-2 w-40 border border-white/20 shadow-2xl shadow-black/30 z-50">
             <button
               onClick={() => setMenuOpen(false)}
@@ -301,18 +354,22 @@ function SubjectRow({ subject, page, onClose, themeShadow = 'background-shadow-n
             >
               Cancel
             </button>
-            <button
-              onClick={() => { setMenuOpen(false); onEdit(); }}
-              className="block w-full text-left px-4 py-2 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-              className="block w-full text-left px-4 py-2 text-red-600 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
-            >
-              Delete
-            </button>
+            {onEdit && (
+              <button
+                onClick={() => { setMenuOpen(false); onEdit(); }}
+                className="block w-full text-left px-4 py-2 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
+              >
+                Edit
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={() => { setMenuOpen(false); onDelete(); }}
+                className="block w-full text-left px-4 py-2 text-red-600 rounded-md hover:bg-gray-200/20 dark:hover:bg-gray-700/20"
+              >
+                Delete
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -405,19 +462,34 @@ function CollectionView({ collection, subjects, onBack, onClose, page, theme, on
                     </div>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto pb-8">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain pb-8">
                 {sortedSubjects.length > 0 ? (
-                    sortedSubjects.map((subject) => (
+                    sortedSubjects.map((subject) => {
+                        const isSharedViewer = subject.permission === 'viewer' && !subject.isFromDiscover;
+                        const isContentReadOnly = subject.isFromDiscover || isSharedViewer;
+                        if (page === 'create' && isContentReadOnly) {
+                            return null;
+                        }
+                        return (
                         <SubjectRow
                             key={subject.id}
                             subject={subject}
                             onClose={onClose}
                             page={page}
                             themeShadow={'background-shadow-new'}
-                            onEdit={() => onEditSubject(subject)}
-                            onDelete={() => onDeleteSubject(subject)}
+                            onEdit={
+                              isSharedViewer
+                                ? undefined
+                                : () => onEditSubject(subject)
+                            }
+                            onDelete={
+                              isContentReadOnly
+                                ? undefined
+                                : () => onDeleteSubject(subject)
+                            }
                         />
-                    ))
+                        );
+                    })
                 ) : (
                     <p>No subjects in this collection.</p>
                 )}

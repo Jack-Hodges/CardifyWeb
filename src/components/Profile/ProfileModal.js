@@ -4,13 +4,14 @@ import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
 import { getThemeAssets, getThemesByCategory, normalizeThemeKey } from '../Functions/getTheme';
 import { getCardArtAssets, getCardArtByCategory, normalizeCardArtKey } from '../Functions/getCardArt';
-import { saveProfile, uploadProfilePicture, removeProfilePicture } from './ProfileManipulation';
+import { saveProfile, saveUsername, uploadProfilePicture, removeProfilePicture } from './ProfileManipulation';
 import { getShares, fetchSubjects, removeShare, saveShare, fetchPendingShareInvites, respondShareInvite } from '../Subject/SubjectManipulation';
 import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail } from 'lucide-react';
 import Modal from '../Modals/Modal';
 import GlassPanel from '../Modals/GlassPanel';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 import ProfileAvatar from './ProfileAvatar';
+import { toast } from '../Toast';
 
 function assetBackground(url) {
     if (!url) return undefined;
@@ -31,6 +32,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isUnlimitedProModalOpen, setIsUnlimitedProModalOpen] = useState(false);
     const [newFirstName, setNewFirstName] = useState('');
+    const [newUsername, setNewUsername] = useState('');
     const [shareToDelete, setShareToDelete] = useState(null);
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [shares, setShares] = useState([]);
@@ -271,7 +273,8 @@ function ProfileModal({ isOpen, onClose, logout }) {
     }, [activeDropdown]);
 
     const handleEditClick = () => {
-        setNewFirstName(profile.first_name);
+        setNewFirstName(profile.first_name || '');
+        setNewUsername(profile.username || '');
         setIsEditModalOpen(true);
     };
 
@@ -323,12 +326,35 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 profile.card_art,
                 profile.generation_count
             );
-            if (updated) setProfile(updated);
-            else setProfile({ ...profile, first_name: newFirstName });
+
+            const usernameResult = await saveUsername(profile.id, newUsername);
+            if (!usernameResult.ok) {
+                toast.error(usernameResult.error);
+                if (updated) setProfile(updated);
+                else setProfile({ ...profile, first_name: newFirstName });
+                return;
+            }
+
+            const nextProfile = usernameResult.profile || updated;
+            if (nextProfile) {
+                setProfile({
+                    ...nextProfile,
+                    first_name: newFirstName,
+                    username: usernameResult.profile?.username ?? null,
+                });
+            } else {
+                setProfile({
+                    ...profile,
+                    first_name: newFirstName,
+                    username: usernameResult.profile?.username ?? null,
+                });
+            }
+            toast.success('Profile updated');
+            setIsEditModalOpen(false);
         } catch (error) {
             console.error('Error updating profile:', error);
+            toast.error('Could not update profile');
         }
-        setIsEditModalOpen(false);
     };
 
     if (!isVisible && !isClosing) return null;
@@ -359,7 +385,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                     />
 
                     <div
-                        className={`relative w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+                        className={`relative w-full sm:max-w-2xl h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
                             bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
                             sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
                             transform transition-all duration-300 ease-in-out
@@ -381,6 +407,11 @@ function ProfileModal({ isOpen, onClose, logout }) {
                                             Hey, {profile.first_name}!
                                         </h2>
                                         <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                            {profile.username && (
+                                                <span className="text-sm font-semibold text-white/70 truncate">
+                                                    @{profile.username}
+                                                </span>
+                                            )}
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${profile.pro ? 'bg-yellow-500' : 'bg-green-500'}`}>
                                                 {profile.pro ? 'Pro' : 'Free'} plan
                                             </span>
@@ -399,7 +430,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                         </div>
 
                         {/* Body */}
-                        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-6">
+                        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5 space-y-6">
                             {/* Usage */}
                             <section>
                                 <div className="flex items-center gap-2 mb-3">
@@ -809,6 +840,39 @@ function ProfileModal({ isOpen, onClose, logout }) {
                                 placeholder:text-gray-400"
                             placeholder="Enter your first name"
                         />
+                    </div>
+
+                    <div>
+                        <label htmlFor="username" className="block text-sm font-bold text-white/90 mb-2 ml-1">
+                            Username
+                        </label>
+                        <div className="relative">
+                            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">
+                                @
+                            </span>
+                            <input
+                                type="text"
+                                id="username"
+                                value={newUsername}
+                                onChange={(e) =>
+                                    setNewUsername(
+                                        e.target.value
+                                            .toLowerCase()
+                                            .replace(/[^a-z0-9_]/g, '')
+                                            .slice(0, 20)
+                                    )
+                                }
+                                className="w-full pl-9 pr-4 py-3 rounded-full bg-white dark:bg-gray-700 text-gray-800 dark:text-white
+                                    background-shadow-new background-focus focus:outline-none font-medium
+                                    placeholder:text-gray-400"
+                                placeholder="your_username"
+                                autoComplete="username"
+                                maxLength={20}
+                            />
+                        </div>
+                        <p className="text-xs text-white/50 mt-2 ml-1">
+                          Required · unique · 3–20 characters · shown on your Discover subjects
+                        </p>
                     </div>
 
                     <div>

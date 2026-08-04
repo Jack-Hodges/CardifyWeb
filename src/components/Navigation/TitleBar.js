@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
 import ProfileAvatar from "../Profile/ProfileAvatar";
-import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
+import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, Compass } from 'lucide-react';
 
 function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
 
@@ -38,6 +38,7 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
     Create: <BadgePlus />,
     Practice: <CirclePlay />,
     Home: <House />,
+    Discover: <Compass />,
     Quiz: <NotebookText />,
     Scramble: <Shuffle />,
     Memory: Cards,
@@ -84,6 +85,7 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
           >
             <LinkButton text="Home" img={<House />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Dashboard" img={<BookCopy />} hoverClass={primaryColor.hoverClass} dataTour="nav-dashboard"/>
+            <LinkButton text="Discover" img={<Compass />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Create" img={<BadgePlus />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Practice" img={<CirclePlay />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Memory" img={Cards} hoverClass={primaryColor.hoverClass}/>

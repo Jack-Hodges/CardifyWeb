@@ -107,11 +107,13 @@ function Welcome() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [username, setUsername] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, setUser, startSignUpProcess, theme } = useUser();
+  const { user, setUser, setProfile, startSignUpProcess, finishSignUpProcess, theme } = useUser();
 
   useEffect(() => {
     if (searchParams.get('signup') === '1') {
@@ -120,6 +122,12 @@ function Welcome() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
+
   const scrollToFeatures = () => {
     const featuresSection = document.querySelector('.features-section');
     if (featuresSection) {
@@ -127,19 +135,18 @@ function Welcome() {
     }
   };
 
-  if (user) {
-    navigate('/home');
-  }
-
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
     setEmail("");
     setPassword("");
     setConfirmPassword("");
     setFirstName("");
+    setUsername("");
   };
 
   const handleAuth = async () => {
+    if (submitting) return;
+
     if (isSignUp) {
       if (password !== confirmPassword) {
         toast.error("Passwords do not match");
@@ -149,40 +156,103 @@ function Welcome() {
         toast.error("Please enter your first name");
         return;
       }
+      const normalizedUsername = username.trim().toLowerCase();
+      if (!normalizedUsername) {
+        toast.error("Please choose a username");
+        return;
+      }
+      if (!/^[a-z0-9_]{3,20}$/.test(normalizedUsername)) {
+        toast.error("Username must be 3–20 characters: lowercase letters, numbers, or underscores");
+        return;
+      }
 
+      setSubmitting(true);
       startSignUpProcess();
 
-      const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        if (error.message.includes("already registered")) {
-          toast.error("This email is already registered.");
-        } else {
-          toast.error(`Error signing up: ${error.message}`);
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              first_name: firstName,
+              username: normalizedUsername,
+            },
+          },
+        });
+
+        if (error) {
+          finishSignUpProcess();
+          if (error.message.includes("already registered")) {
+            toast.error("This email is already registered.");
+          } else {
+            toast.error(`Error signing up: ${error.message}`);
+          }
+          return;
         }
-      } else {
-        toast.success("Welcome to Cardify! Check your email to verify your account.");
-        const { user } = data;
-        const { error: profileError } = await supabase
+
+        const newUser = data?.user;
+        if (!newUser?.id) {
+          finishSignUpProcess();
+          toast.success("Check your email to verify your account, then sign in.");
+          return;
+        }
+
+        const { data: profileRow, error: profileError } = await supabase
           .from('profiles')
-          .insert([{
-            id: user.id,
+          .upsert([{
+            id: newUser.id,
             first_name: firstName,
+            username: normalizedUsername,
             theme: 'default'
-          }]);
+          }], { onConflict: 'id' })
+          .select()
+          .maybeSingle();
+
         if (profileError) {
-          toast.error(`Error creating profile: ${profileError.message}`);
-        } else {
-          setUser(user);
-          navigate('/home');
+          // Soft sign-out so the auth race doesn't wipe this toast
+          await supabase.auth.signOut();
+          setUser(null);
+          finishSignUpProcess();
+          if (profileError.code === '23505') {
+            toast.error(
+              profileError.message?.toLowerCase().includes('username')
+                ? "That username is already taken. Please choose another."
+                : "That account or username already exists. Try signing in."
+            );
+          } else {
+            toast.error(`Error creating profile: ${profileError.message}`);
+          }
+          return;
         }
+
+        if (profileRow) setProfile(profileRow);
+        setUser(newUser);
+        toast.success("Welcome to Cardify!");
+        // Keep signup flag set until Home mounts with a profile — auth listener retries rely on it
+        navigate('/home');
+        // Clear after navigation tick so in-flight SIGNED_IN handlers still see the flag
+        setTimeout(() => finishSignUpProcess(), 1500);
+      } catch (err) {
+        finishSignUpProcess();
+        toast.error(err?.message || "Something went wrong during sign up.");
+      } finally {
+        setSubmitting(false);
       }
     } else {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast.error(`Error logging in: ${error.message}`);
-      } else {
-        setUser(data.user);
-        navigate('/home');
+      setSubmitting(true);
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          toast.error(`Error logging in: ${error.message}`);
+        } else {
+          setUser(data.user);
+          navigate('/home');
+        }
+      } catch (err) {
+        toast.error(err?.message || "Something went wrong during sign in.");
+      } finally {
+        setSubmitting(false);
       }
     }
   };
@@ -352,20 +422,27 @@ function Welcome() {
                 Create, customise, and practice your own decks — with modes that make studying stick.
               </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-welcome-rise-delayed-2">
+              <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 animate-welcome-rise-delayed-2">
                 <BackgroundButton
                   text="Get Started"
                   onClick={() => setShowLogin(true)}
                   bgColor="bg-purple-500 hover:bg-purple-400"
-                  wWidth="w-full sm:w-auto"
+                  wWidth="w-full sm:w-fit"
                 />
                 <BackgroundButton
-                  text="See what’s inside"
-                  onClick={scrollToFeatures}
+                  text="Explore free subjects"
+                  onClick={() => navigate('/discover')}
                   bgColor="bg-green-500 hover:bg-green-400"
-                  wWidth="w-full sm:w-auto"
+                  wWidth="w-full sm:w-fit"
                 />
               </div>
+              <button
+                type="button"
+                onClick={scrollToFeatures}
+                className="mt-4 text-sm font-semibold text-gray-500 dark:text-gray-400 underline-offset-4 hover:underline animate-welcome-rise-delayed-2 text-left"
+              >
+                See what’s inside
+              </button>
             </div>
 
             <div className="relative w-full sm:w-[52%] flex items-end sm:items-center justify-center sm:justify-end pb-6 sm:pb-0 animate-welcome-float">
@@ -542,6 +619,32 @@ function Welcome() {
                   </div>
                 )}
 
+                {isSignUp && (
+                  <div>
+                    <label htmlFor="username" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
+                      Username
+                    </label>
+                    <FancyInput
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) =>
+                        setUsername(
+                          e.target.value
+                            .toLowerCase()
+                            .replace(/[^a-z0-9_]/g, '')
+                            .slice(0, 20)
+                        )
+                      }
+                      placeholder="your_username"
+                      autoComplete="username"
+                    />
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 ml-3">
+                      Unique · shown on Discover when you publish
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 ml-3 mb-1">
                     Email
@@ -605,8 +708,13 @@ function Welcome() {
 
                 <div className="pt-2">
                   <BackgroundButton
-                    text={isSignUp ? 'Create account' : 'Start learning'}
-                    onClick={handleAuth}
+                    type="submit"
+                    text={
+                      submitting
+                        ? (isSignUp ? 'Creating…' : 'Signing in…')
+                        : (isSignUp ? 'Create account' : 'Start learning')
+                    }
+                    disabled={submitting}
                     bgColor={isSignUp ? 'bg-purple-500 hover:bg-purple-400' : 'bg-green-500 hover:bg-green-400'}
                     wWidth="w-full"
                   />

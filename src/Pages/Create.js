@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
 import { useNavigate } from 'react-router-dom';
-import { fetchCards, upsertCard, deleteCard, restoreCard, sortCardsById, updateCardsSortOrder } from '../components/Card/CardManipulation';
+import { fetchCards, upsertCard, bulkInsertCards, deleteCard, restoreCard, sortCardsById, updateCardsSortOrder } from '../components/Card/CardManipulation';
 import TitleBar from '../components/Navigation/TitleBar';
 import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
@@ -29,6 +29,7 @@ import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 function Create() {
   const [cards, setCards] = useState([]);
+  const cardsRef = useRef([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
@@ -39,12 +40,19 @@ function Create() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasMoreCards, setHasMoreCards] = useState(true);
+  const [loadingMoreCards, setLoadingMoreCards] = useState(false);
+
+  const PAGE_SIZE = 100;
+  const cardsOffsetRef = useRef(0);
+  const hasMoreCardsRef = useRef(true);
+  const loadingMoreCardsRef = useRef(false);
 
   const navigate = useNavigate();
   const { subject, loadingSubject } = useSubjectFromRoute();
   const isTutorialSubject = subject?.id === TUTORIAL_SUBJECT_ID;
 
-  const { user, theme, profile } = useUser();
+  const { user, theme, profile, setProfile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow } = theme;
 
   const tour = usePageTour({
@@ -64,9 +72,14 @@ function Create() {
     (async () => {
       setLoading(true);
       try {
-        const data = await fetchCards(subject.id);
+        const data = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
         sortCardsById(data);
-        if (isMounted) setCards(data);
+        if (isMounted) {
+          setCards(data);
+          cardsOffsetRef.current = data.length;
+          setHasMoreCards(data.length === PAGE_SIZE);
+          hasMoreCardsRef.current = data.length === PAGE_SIZE;
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -78,6 +91,52 @@ function Create() {
     };
   }, [subject?.id, loadingSubject]);
 
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
+
+  useEffect(() => {
+    hasMoreCardsRef.current = hasMoreCards;
+  }, [hasMoreCards]);
+
+  useEffect(() => {
+    loadingMoreCardsRef.current = loadingMoreCards;
+  }, [loadingMoreCards]);
+
+  const loadMoreCards = async () => {
+    if (!subject?.id) return false;
+    if (loadingMoreCardsRef.current || !hasMoreCardsRef.current) return false;
+
+    const offset = cardsOffsetRef.current || 0;
+
+    setLoadingMoreCards(true);
+    loadingMoreCardsRef.current = true;
+
+    const more = await fetchCards(subject.id, { limit: PAGE_SIZE, offset });
+    sortCardsById(more);
+
+    if (!more?.length) {
+      setHasMoreCards(false);
+      hasMoreCardsRef.current = false;
+      setLoadingMoreCards(false);
+      loadingMoreCardsRef.current = false;
+      return false;
+    }
+
+    setCards((prev) => [...prev, ...more]);
+
+    const nextOffset = offset + more.length;
+    cardsOffsetRef.current = nextOffset;
+
+    const nextHasMore = more.length === PAGE_SIZE;
+    setHasMoreCards(nextHasMore);
+    hasMoreCardsRef.current = nextHasMore;
+
+    setLoadingMoreCards(false);
+    loadingMoreCardsRef.current = false;
+    return true;
+  };
+
   const handleUpsertCard = async (cardData, file) => {
     if (isTutorialSubject) {
       toast.info('Sample subject cards are read only');
@@ -85,12 +144,48 @@ function Create() {
     }
     const isNewCard = !cardData.id;
     await upsertCard(cardData, file);
-    const updatedCards = await fetchCards(subject.id);
+    const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
     sortCardsById(updatedCards);
     setCards(updatedCards);
+    cardsOffsetRef.current = updatedCards.length;
+    setHasMoreCards(updatedCards.length === PAGE_SIZE);
+    hasMoreCardsRef.current = updatedCards.length === PAGE_SIZE;
     if (isNewCard) {
       setCurrentCardIndex(updatedCards.length - 1);
     }
+  };
+
+  /** Batch import / AI generate — one insert path + one refetch */
+  const handleBulkImportCards = async (importedCards) => {
+    if (isTutorialSubject) {
+      toast.info('Sample subject cards are read only');
+      return [];
+    }
+    if (!importedCards?.length) return [];
+
+    const cardsToImport = importedCards.map((card) => ({
+      ...card,
+      subject_id: subject.id,
+      user_id: subject.user_id || user.id,
+    }));
+
+    await bulkInsertCards(cardsToImport);
+
+    if (typeof setProfile === 'function' && profile) {
+      setProfile({
+        ...profile,
+        flashcard_count: (profile.flashcard_count || 0) + cardsToImport.length,
+      });
+    }
+
+    const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
+    sortCardsById(updatedCards);
+    setCards(updatedCards);
+    cardsOffsetRef.current = updatedCards.length;
+    setHasMoreCards(updatedCards.length === PAGE_SIZE);
+    hasMoreCardsRef.current = updatedCards.length === PAGE_SIZE;
+    setCurrentCardIndex(Math.max(updatedCards.length - 1, 0));
+    return cardsToImport;
   };
 
   const handleDeleteCard = async (cardId) => {
@@ -110,9 +205,12 @@ function Create() {
             onClick={async () => {
               const restored = await restoreCard(deleted);
               if (restored) {
-                const updated = await fetchCards(subject.id);
+                const updated = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
                 sortCardsById(updated);
                 setCards(updated);
+                cardsOffsetRef.current = updated.length;
+                setHasMoreCards(updated.length === PAGE_SIZE);
+                hasMoreCardsRef.current = updated.length === PAGE_SIZE;
                 toast.success('Card restored');
               }
               closeToast();
@@ -243,15 +341,13 @@ function Create() {
       const text = await response.text();
       const generated = parseGeneratedFlashcards(text);
 
-      const cardsToImport = generated.map((card) => ({
-        ...card,
-        subject_id: subject.id,
-        user_id: subject.user_id,
-      }));
-
-      for (const card of cardsToImport) {
-        await handleUpsertCard(card);
-      }
+      await handleBulkImportCards(
+        generated.map((card) => ({
+          ...card,
+          subject_id: subject.id,
+          user_id: subject.user_id,
+        }))
+      );
 
       await saveProfile(
         profile.id,
@@ -306,18 +402,20 @@ function Create() {
               </PageEmptyState>
             ) : cards.length > 0 ? (
               <>
-                <div className="w-full lg:w-[70%] px-5 h-3/5 mt-5 sm:mt-14">
-                  <Card
-                    card={cards[currentCardIndex]}
-                    flipped={flipped}
-                    setFlipped={setFlipped}
-                    animateFlip={animateFlip}
-                    cardId={cards[currentCardIndex]?.id}
-                    onDeleteCard={isTutorialSubject ? undefined : handleDeleteCard}
-                    edit={!isTutorialSubject}
-                    onUpsertCard={handleUpsertCard}
-                    dataTour="create-card-flip"
-                  />
+                <div className="w-full lg:w-[70%] px-5 mt-5 sm:mt-14 flex flex-col">
+                  <div className="w-full h-[50vh] sm:h-[55vh] lg:h-[60vh] min-h-[16rem]">
+                    <Card
+                      card={cards[currentCardIndex]}
+                      flipped={flipped}
+                      setFlipped={setFlipped}
+                      animateFlip={animateFlip}
+                      cardId={cards[currentCardIndex]?.id}
+                      onDeleteCard={isTutorialSubject ? undefined : handleDeleteCard}
+                      edit={!isTutorialSubject}
+                      onUpsertCard={handleUpsertCard}
+                      dataTour="create-card-flip"
+                    />
+                  </div>
                   <CardControls
                     currentCardIndex={currentCardIndex + 1}
                     totalCards={cards.length}
@@ -326,11 +424,16 @@ function Create() {
                         currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1
                       )
                     }
-                    onNextClick={() =>
-                      setCurrentCardIndex(
-                        currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0
-                      )
-                    }
+                    onNextClick={async () => {
+                      if (currentCardIndex < cards.length - 1) {
+                        setCurrentCardIndex((i) => i + 1);
+                        return;
+                      }
+
+                      const loaded = await loadMoreCards();
+                      if (loaded) setCurrentCardIndex((i) => i + 1);
+                      else setCurrentCardIndex(0);
+                    }}
                     create
                     readOnly={isTutorialSubject}
                     themeText={theme.textClass}
@@ -340,6 +443,7 @@ function Create() {
                     generateClick={openGenerate}
                     onGenerate={handleGenerate}
                     onUpsertCard={handleUpsertCard}
+                    onBulkImport={handleBulkImportCards}
                     subject={subject}
                     isGenerateModalOpen={featureFlags.aiGenerate && isGenerateModalOpen}
                     setIsGenerateModalOpen={setIsGenerateModalOpen}
@@ -347,7 +451,7 @@ function Create() {
                   />
                 </div>
 
-                <div className="w-full lg:w-[30%] mt-20 lg:mt-0 pr-5 lg:pr-6 pl-4 lg:pl-2" data-tour="create-card-list">
+                <div className="w-full lg:w-[30%] mt-8 lg:mt-0 pr-5 lg:pr-6 pl-4 lg:pl-2 pb-8" data-tour="create-card-list">
                   <CardList
                     cards={cards}
                     onCardClick={handleCardClick}
@@ -456,7 +560,14 @@ function Create() {
           <ImportModal
             isOpen={isImportModalOpen}
             onClose={() => setIsImportModalOpen(false)}
-            onImport={handleUpsertCard}
+            onImport={async (importedCards) => {
+              try {
+                await handleBulkImportCards(importedCards);
+                toast.success(`Successfully imported ${importedCards.length} cards`);
+              } catch (error) {
+                toast.error('Error importing cards: ' + error.message);
+              }
+            }}
             subject={subject}
           />
 
@@ -465,13 +576,13 @@ function Create() {
               <NotesGeneratePanel
                 onGenerated={async (text) => {
                   const generated = parseGeneratedFlashcards(text);
-                  for (const card of generated) {
-                    await handleUpsertCard({
+                  await handleBulkImportCards(
+                    generated.map((card) => ({
                       ...card,
                       subject_id: subject.id,
                       user_id: subject.user_id,
-                    });
-                  }
+                    }))
+                  );
                 }}
               />
             </div>

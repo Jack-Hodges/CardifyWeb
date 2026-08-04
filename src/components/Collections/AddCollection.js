@@ -44,21 +44,28 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
     if (!isVisible && !isClosing) return null;
 
     return ReactDOM.createPortal(
-        <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`fixed inset-0 flex items-center justify-center z-50 p-0 sm:p-6 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}>
+            <div className="absolute inset-0 bg-black/50 transition-opacity duration-300" onClick={handleClose} />
+            <div
+                className={`relative flex flex-col w-full h-full sm:h-auto sm:max-w-lg max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden
+                    bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
+                    sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
+                    transform transition-all duration-300 ease-in-out
+                    ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex-none px-5 sm:px-8 pt-5 sm:pt-6 pb-4 border-b border-white/15">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                        {text}
+                    </h2>
+                </div>
 
-
-            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onClick={handleClose}></div>
-            <div className={`flex flex-col justify-between relative bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl sm:rounded-xl p-8 w-full h-full sm:w-3/4 sm:max-w-2xl sm:h-auto transform transition-all duration-300 ease-in-out border border-white/20 shadow-2xl shadow-black/30 ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}>
-                <h2 className="text-2xl font-semibold mb-6 text-white">
-                    {text}
-                </h2>
-
-                <div className="mb-6">
-                    <label htmlFor="subjectName" className="block text-lg font-medium mb-2 text-white/90">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 py-5">
+                    <label htmlFor="collectionName" className="block text-lg font-medium mb-2 text-white/90">
                         Collection Name
                     </label>
                     <input
-                        id="subjectName"
+                        id="collectionName"
                         type="text"
                         value={collectionName}
                         onChange={(e) => setLocalCollectionName(e.target.value)}
@@ -68,9 +75,11 @@ function AddCollection({ isOpen, onClose, onSave, collection, text, user }) {
                     />
                 </div>
 
-                <div className="flex flex-col items-center sm:flex-row sm:justify-end sm:space-x-4">
-                    <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" wWidth='w-full' onClick={handleClose} />
-                    <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full mt-2 sm:mt-0' onClick={handleSave} />
+                <div className="flex-none px-5 sm:px-8 py-4 border-t border-white/15 bg-black/10">
+                    <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
+                        <BackgroundButton text="Cancel" bgColor="bg-red-500 hover:bg-red-400" wWidth='w-full sm:w-auto' onClick={handleClose} />
+                        <BackgroundButton text="Save" bgColor="bg-blue-500 hover:bg-blue-400" wWidth='w-full sm:w-auto' onClick={handleSave} />
+                    </div>
                 </div>
             </div>
         </div>,

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";
 import { useEffect, useState, useMemo } from "react";
-import { fetchSubjects, saveSubject } from "../components/Subject/SubjectManipulation";
+import { fetchSubjects, saveSubject, saveLibrarySubjectPrefs } from "../components/Subject/SubjectManipulation";
 import getColors from "../components/Functions/getColors";
 import TitleBar from "../components/Navigation/TitleBar";
 import SubjectBlock from "../components/Subject/SubjectBlock";
@@ -125,7 +125,11 @@ function Home() {
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [subjectPage, setSubjectPage] = useState('create');
   const [loading, setLoading] = useState(true);
-  const pinnedSubjects = subjects.filter(subject => subject.pinned && subject.permission == null);
+  const pinnedSubjects = subjects.filter(
+    (subject) =>
+      subject.pinned &&
+      (subject.isFromDiscover || (!subject.isShared && subject.permission == null))
+  );
 
   const tour = usePageTour({
     key: 'home_popup',
@@ -176,6 +180,32 @@ function Home() {
     }
 
     const handleSaveSubject = async (id, subjectName, subjectColor, subjectIntensity, up_to_index, collectionId, pinned) => {
+      const existing = id ? subjects.find((s) => s.id === id) : null;
+
+      if (existing?.isFromDiscover) {
+        const data = await saveLibrarySubjectPrefs(user.id, id, {
+          colourText: subjectColor,
+          colourIntensity: subjectIntensity,
+          collectionId,
+          pinned: pinned ?? existing.pinned ?? false,
+        });
+        if (!data) return;
+        setSubjects((current) =>
+          current.map((subject) =>
+            subject.id === id
+              ? {
+                  ...subject,
+                  colourText: subjectColor,
+                  colourIntensity: subjectIntensity,
+                  collection_id: collectionId,
+                  pinned: pinned ?? subject.pinned ?? false,
+                }
+              : subject
+          )
+        );
+        return;
+      }
+
       const data = await saveSubject(id, subjectName, subjectColor, subjectIntensity, user.id, up_to_index, collectionId, pinned);
       if (data && !id) {
         setSubjects([...subjects, ...data]);

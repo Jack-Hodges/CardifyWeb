@@ -2,27 +2,43 @@
 import supabase from '../../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import { compressAndConvertToBlob } from '../Functions/compressImage';
+import { cachedAsync } from '../../utils/asyncCache';
 
-// Fetches all cards for a given subject (excludes soft-deleted).
-export const fetchCards = async (subjectId) => {
-  try {
-    const { data, error } = await supabase
-      .from('flashcards')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true, nullsFirst: false })
-      .order('id', { ascending: true });
+// Fetches cards for a given subject (excludes soft-deleted).
+// If `limit` is provided, returns a single "page" using the same ordering.
+export const fetchCards = async (subjectId, { limit = null, offset = 0 } = {}) => {
+  const key = `flashcards:${subjectId}:${limit == null ? 'all' : limit}:${offset}`;
+  return cachedAsync(
+    key,
+    async () => {
+      try {
+        let query = supabase
+          .from('flashcards')
+          .select('*')
+          .eq('subject_id', subjectId)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: true, nullsFirst: false })
+          .order('id', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching flashcards:', error);
-      return [];
-    }
-    return data;
-  } catch (error) {
-    console.error('Unexpected error fetching flashcards:', error);
-    return [];
-  }
+        if (limit != null) {
+          const from = Math.max(0, offset || 0);
+          const to = from + Math.max(0, limit) - 1;
+          query = query.range(from, to);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error fetching flashcards:', error);
+          return [];
+        }
+        return data;
+      } catch (error) {
+        console.error('Unexpected error fetching flashcards:', error);
+        return [];
+      }
+    },
+    60_000
+  );
 };
 
 /** Soft-delete a card; returns the deleted card for undo. */
@@ -234,4 +250,69 @@ export const upsertCard = async (card, imageFile) => {
     console.error('Unexpected error in upsertCard:', err);
     return null;
   }
+};
+
+const BULK_INSERT_CHUNK = 100;
+
+/**
+ * Insert many new cards in chunked batches (no images).
+ * One sort_order lookup, one profile count RPC — used by import / AI generate.
+ */
+export const bulkInsertCards = async (cards) => {
+  if (!cards?.length) return [];
+
+  const subjectId = cards[0].subject_id;
+  const userId = cards[0].user_id;
+  if (!subjectId || !userId) {
+    throw new Error('Each card needs subject_id and user_id');
+  }
+
+  const { data: maxRow, error: maxError } = await supabase
+    .from('flashcards')
+    .select('sort_order')
+    .eq('subject_id', subjectId)
+    .is('deleted_at', null)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (maxError) {
+    console.error('Error reading max sort_order:', maxError);
+    throw maxError;
+  }
+
+  let nextOrder = (maxRow?.sort_order || 0) + 1;
+  const payloads = cards.map((card) => ({
+    user_id: card.user_id,
+    question: card.question,
+    answer: card.answer,
+    subject_id: card.subject_id,
+    image_url: card.image_url || null,
+    frontMode: card.frontMode ?? 0,
+    backMode: card.backMode ?? 0,
+    sort_order: card.sort_order != null ? card.sort_order : nextOrder++,
+  }));
+
+  const inserted = [];
+  for (let i = 0; i < payloads.length; i += BULK_INSERT_CHUNK) {
+    const chunk = payloads.slice(i, i + BULK_INSERT_CHUNK);
+    const { data, error } = await supabase.from('flashcards').insert(chunk).select();
+    if (error) {
+      console.error('Error bulk inserting cards:', error);
+      throw error;
+    }
+    inserted.push(...(data || []));
+  }
+
+  if (inserted.length > 0) {
+    const { error: profileError } = await supabase.rpc('increment_flashcard_count_by', {
+      user_id: userId,
+      amount: inserted.length,
+    });
+    if (profileError) {
+      console.error('Error updating profile flashcard count:', profileError);
+    }
+  }
+
+  return inserted;
 };

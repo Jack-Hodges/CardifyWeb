@@ -94,6 +94,62 @@ export const saveProfile = async (id, firstName, theme, sort_preference = 0, car
   }
 };
 
+const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
+
+export const normalizeUsername = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_');
+
+export const isValidUsernameFormat = (value) => USERNAME_RE.test(normalizeUsername(value));
+
+/**
+ * Set Discover username. Required, unique (case-insensitive).
+ */
+export const saveUsername = async (userId, username) => {
+  try {
+    const normalized = normalizeUsername(username);
+
+    if (!normalized) {
+      return { ok: false, error: 'Username is required.' };
+    }
+
+    if (!USERNAME_RE.test(normalized)) {
+      return {
+        ok: false,
+        error: 'Username must be 3–20 characters: lowercase letters, numbers, or underscores.',
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ username: normalized })
+      .eq('id', userId)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      if (error.code === '23505') {
+        return { ok: false, error: 'That username is already taken.' };
+      }
+      if (error.code === '23514') {
+        return {
+          ok: false,
+          error: 'Username must be 3–20 characters: lowercase letters, numbers, or underscores.',
+        };
+      }
+      console.error('saveUsername', error);
+      return { ok: false, error: error.message || 'Could not save username.' };
+    }
+
+    return { ok: true, profile: data };
+  } catch (error) {
+    console.error('Unexpected error saving username:', error);
+    return { ok: false, error: 'Could not save username.' };
+  }
+};
+
 export const uploadProfilePicture = async (userId, imageFile) => {
   try {
     const blob = await compressAndConvertToBlob(

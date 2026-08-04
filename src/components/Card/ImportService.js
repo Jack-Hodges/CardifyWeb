@@ -47,6 +47,30 @@ const parseJSON = async (file) => {
   });
 };
 
+const HEADER_ALIASES = new Set([
+  'question',
+  'question prompt',
+  'prompt',
+  'front',
+  'q',
+  'answer',
+  'back',
+  'a',
+]);
+
+const looksLikeHeaderRow = (question, answer) => {
+  const q = String(question || '').trim().toLowerCase();
+  const a = String(answer || '').trim().toLowerCase();
+  return HEADER_ALIASES.has(q) && HEADER_ALIASES.has(a);
+};
+
+const normalizeImportedCard = (question, answer) => ({
+  question: String(question || '').trim(),
+  answer: String(answer || '').trim(),
+  frontMode: 0,
+  backMode: 0,
+});
+
 const parseCSV = async (file) => {
   return new Promise((resolve, reject) => {
     Papa.parse(file, {
@@ -54,16 +78,12 @@ const parseCSV = async (file) => {
         try {
           const cards = results.data
             .filter(row => row.length >= 2 && row[0] && row[1])
-            .map(row => ({
-              question: row[0].trim(),
-              answer: row[1].trim(),
-              frontMode: 0,
-              backMode: 0
-            }));
+            .map(row => normalizeImportedCard(row[0], row[1]))
+            .filter(card => !looksLikeHeaderRow(card.question, card.answer));
           validateCards(cards);
           resolve(cards);
         } catch (error) {
-          reject(new Error('Invalid CSV format'));
+          reject(new Error(error.message || 'Invalid CSV format'));
         }
       },
       error: (error) => reject(new Error('Error parsing CSV')),
@@ -79,16 +99,12 @@ export const parseCSVString = async (text) => {
         try {
           const cards = results.data
             .filter(row => row.length >= 2 && row[0] && row[1])
-            .map(row => ({
-              question: row[0].trim(),
-              answer: row[1].trim(),
-              frontMode: 0,
-              backMode: 0
-            }));
+            .map(row => normalizeImportedCard(row[0], row[1]))
+            .filter(card => !looksLikeHeaderRow(card.question, card.answer));
           validateCards(cards);
           resolve(cards);
         } catch (error) {
-          reject(new Error('Invalid CSV format'));
+          reject(new Error(error.message || 'Invalid CSV format'));
         }
       },
       error: () => reject(new Error('Error parsing CSV')),
@@ -141,12 +157,8 @@ const parseXLSX = async (file) => {
         
         const cards = jsonData
           .filter(row => row.length >= 2 && row[0] && row[1])
-          .map(row => ({
-            question: String(row[0]).trim(),
-            answer: String(row[1]).trim(),
-            frontMode: 0,
-            backMode: 0
-          }));
+          .map(row => normalizeImportedCard(row[0], row[1]))
+          .filter(card => !looksLikeHeaderRow(card.question, card.answer));
         
         validateCards(cards);
         resolve(cards);

@@ -65,7 +65,7 @@ function GenerateModal({ isOpen, onClose, onGenerate, isGenerating }) {
         onClick={isGenerating ? undefined : handleClose}
       />
       <div
-        className={`relative w-full sm:max-w-lg h-full sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col
+        className={`relative w-full sm:max-w-lg h-full sm:h-auto max-h-[100dvh] sm:max-h-[90dvh] overflow-hidden flex flex-col
           bg-gradient-to-t from-black/30 via-black/15 to-transparent backdrop-blur-xl
           sm:rounded-2xl border border-white/20 shadow-2xl shadow-black/30
           ${isClosing ? 'animate-pop-down' : 'animate-pop-up'}`}
@@ -90,7 +90,7 @@ function GenerateModal({ isOpen, onClose, onGenerate, isGenerating }) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-7 py-5">
           {isGenerating ? (
             <div className="py-12 flex flex-col items-center justify-center text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-purple-400 mb-4" />
