@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { ChevronRight, Compass, Search, ThumbsDown, ThumbsUp, TrendingUp } from 'lucide-react';
 import TitleBar from '../components/Navigation/TitleBar';
@@ -40,17 +40,28 @@ const CATEGORY_LABELS = {
   other: 'Other',
 };
 
+const VALID_CATEGORY_SET = new Set(CATEGORY_ORDER);
+
+const parseCategoryParam = (value) => {
+  if (!value) return 'all';
+  const key = String(value).trim().toLowerCase();
+  return VALID_CATEGORY_SET.has(key) ? key : 'all';
+};
+
 /**
  * Browse free published subjects. Guests can practice; signed-in users can add to library.
  */
 function Discover() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, theme } = useUser();
   const { primaryColor, secondaryColor, textClass, shadow } = theme || {};
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState(() =>
+    parseCategoryParam(searchParams.get('category'))
+  );
   const [libraryIds, setLibraryIds] = useState(() => new Set());
   const [addingId, setAddingId] = useState(null);
   const [votingId, setVotingId] = useState(null);
@@ -70,6 +81,25 @@ function Discover() {
     );
     return () => clearTimeout(t);
   }, [searchTerm, selectedCategory, loadListings]);
+
+  useEffect(() => {
+    const categoryFromUrl = parseCategoryParam(searchParams.get('category'));
+    if (categoryFromUrl !== selectedCategory) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [searchParams, selectedCategory]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (selectedCategory === 'all') nextParams.delete('category');
+    else nextParams.set('category', selectedCategory);
+
+    const current = searchParams.toString();
+    const next = nextParams.toString();
+    if (current !== next) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [selectedCategory, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!user?.id) {
@@ -171,6 +201,44 @@ function Discover() {
 
   const chipCategories = useMemo(() => CATEGORY_ORDER, []);
 
+  const discoverMeta = useMemo(() => {
+    const categoryLabel =
+      selectedCategory === 'all' ? 'All categories' : CATEGORY_LABELS[selectedCategory];
+    const title =
+      selectedCategory === 'all'
+        ? 'Discover - Cardify | Free published flashcard subjects'
+        : `${categoryLabel} Flashcards - Discover | Cardify`;
+    const description =
+      selectedCategory === 'all'
+        ? 'Browse free published flashcard subjects on Cardify. Practice without an account, or sign in to save them to your dashboard.'
+        : `Browse free ${categoryLabel.toLowerCase()} flashcard subjects on Cardify. Practice instantly or save decks to your dashboard.`;
+    const canonical =
+      selectedCategory === 'all'
+        ? 'https://cardify.app/discover'
+        : `https://cardify.app/discover?category=${selectedCategory}`;
+    return { title, description, canonical };
+  }, [selectedCategory]);
+
+  const discoverStructuredData = useMemo(() => {
+    const topItems = listings.slice(0, 20).map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: `https://cardify.app/discover/${item.id}`,
+      name: item.name,
+    }));
+    return JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: discoverMeta.title,
+      description: discoverMeta.description,
+      url: discoverMeta.canonical,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: topItems,
+      },
+    });
+  }, [discoverMeta, listings]);
+
   const renderCard = (item) => {
     const isOwn = Boolean(user && item.publisher_id === user.id);
     const inLibrary = libraryIds.has(item.id) || libraryIds.has(Number(item.id));
@@ -224,12 +292,20 @@ function Discover() {
       style={{ ...getThemeBackgroundStyle(theme?.image) }}
     >
       <Helmet>
-        <title>Discover - Cardify | Free published flashcard subjects</title>
-        <meta
-          name="description"
-          content="Browse free published flashcard subjects on Cardify. Practice without an account, or sign in to save them to your dashboard."
-        />
-        <link rel="canonical" href="https://cardify.app/discover" />
+        <title>{discoverMeta.title}</title>
+        <meta name="description" content={discoverMeta.description} />
+        <meta property="og:title" content={discoverMeta.title} />
+        <meta property="og:description" content={discoverMeta.description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={discoverMeta.canonical} />
+        <meta property="og:image" content="https://cardify.app/logo512.png" />
+        <meta property="og:image:alt" content="Cardify Discover flashcard marketplace" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={discoverMeta.title} />
+        <meta name="twitter:description" content={discoverMeta.description} />
+        <meta name="twitter:image" content="https://cardify.app/logo512.png" />
+        <link rel="canonical" href={discoverMeta.canonical} />
+        <script type="application/ld+json">{discoverStructuredData}</script>
       </Helmet>
 
       <div

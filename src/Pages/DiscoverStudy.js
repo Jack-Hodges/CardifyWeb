@@ -145,6 +145,12 @@ function DiscoverStudy() {
     : error
       ? 'Subject unavailable | Cardify'
       : 'Discover | Cardify';
+  const pageDescription = subject?.name
+    ? `Practice “${subject.name}” from Cardify Discover. Free, no account required.`
+    : 'Practice a free published subject on Cardify Discover.';
+  const canonicalUrl = subjectId
+    ? `https://cardify.app/discover/${subjectId}`
+    : 'https://cardify.app/discover';
 
   const headingClass = textClass || 'text-white';
   const backToDiscover = () => navigate('/discover');
@@ -164,14 +170,18 @@ function DiscoverStudy() {
     >
       <Helmet>
         <title>{pageTitle}</title>
-        <meta
-          name="description"
-          content={
-            subject?.name
-              ? `Practice “${subject.name}” from Cardify Discover. Free, no account required.`
-              : 'Practice a free published subject on Cardify Discover.'
-          }
-        />
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content="https://cardify.app/logo512.png" />
+        <meta property="og:image:alt" content="Cardify flashcard deck preview" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://cardify.app/logo512.png" />
+        <link rel="canonical" href={canonicalUrl} />
       </Helmet>
 
       <ThemeBackground />
