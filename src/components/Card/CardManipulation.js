@@ -2,27 +2,43 @@
 import supabase from '../../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import { compressAndConvertToBlob } from '../Functions/compressImage';
+import { cachedAsync } from '../../utils/asyncCache';
 
-// Fetches all cards for a given subject (excludes soft-deleted).
-export const fetchCards = async (subjectId) => {
-  try {
-    const { data, error } = await supabase
-      .from('flashcards')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true, nullsFirst: false })
-      .order('id', { ascending: true });
+// Fetches cards for a given subject (excludes soft-deleted).
+// If `limit` is provided, returns a single "page" using the same ordering.
+export const fetchCards = async (subjectId, { limit = null, offset = 0 } = {}) => {
+  const key = `flashcards:${subjectId}:${limit == null ? 'all' : limit}:${offset}`;
+  return cachedAsync(
+    key,
+    async () => {
+      try {
+        let query = supabase
+          .from('flashcards')
+          .select('*')
+          .eq('subject_id', subjectId)
+          .is('deleted_at', null)
+          .order('sort_order', { ascending: true, nullsFirst: false })
+          .order('id', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching flashcards:', error);
-      return [];
-    }
-    return data;
-  } catch (error) {
-    console.error('Unexpected error fetching flashcards:', error);
-    return [];
-  }
+        if (limit != null) {
+          const from = Math.max(0, offset || 0);
+          const to = from + Math.max(0, limit) - 1;
+          query = query.range(from, to);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('Error fetching flashcards:', error);
+          return [];
+        }
+        return data;
+      } catch (error) {
+        console.error('Unexpected error fetching flashcards:', error);
+        return [];
+      }
+    },
+    60_000
+  );
 };
 
 /** Soft-delete a card; returns the deleted card for undo. */

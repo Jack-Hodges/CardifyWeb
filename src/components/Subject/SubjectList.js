@@ -21,6 +21,8 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const { secondaryColor } = theme;
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
     const [sortBy, setSortBy] = useState('Most Cards');
+    const PAGE_SIZE = 30;
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
     const selectRef = useRef(null);
 
     useBodyScrollLock(isOpen);
@@ -49,6 +51,10 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
 
         loadData();
     }, [user, profile]);
+
+    useEffect(() => {
+      if (isOpen) setVisibleCount(PAGE_SIZE);
+    }, [isOpen, PAGE_SIZE]);
 
     const goToDashboard = () => {
         navigate('/dashboard');
@@ -147,49 +153,67 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
                       ))}
                     </div>
                   ) : subjects.length > 0 ? (
-                    sortedCombinedList.map((item) => {
-                      if (item.type === 'subject') {
-                        const isSharedViewer = item.permission === 'viewer' && !item.isFromDiscover;
-                        const isContentReadOnly = item.isFromDiscover || isSharedViewer;
-                        // Create requires edit access; practice/games allow library + shared viewers
-                        if (page === 'create' && isContentReadOnly) {
-                          return null;
+                    <>
+                      {sortedCombinedList.slice(0, visibleCount).map((item) => {
+                        if (item.type === 'subject') {
+                          const isSharedViewer = item.permission === 'viewer' && !item.isFromDiscover;
+                          const isContentReadOnly = item.isFromDiscover || isSharedViewer;
+                          // Create requires edit access; practice/games allow library + shared viewers
+                          if (page === 'create' && isContentReadOnly) {
+                            return null;
+                          }
+                          return (
+                            <SubjectRow
+                              key={`subject-${item.id}`}
+                              subject={item}
+                              page={page}
+                              onClose={onClose}
+                              themeShadow={'background-shadow-new'}
+                              onEdit={
+                                isSharedViewer
+                                  ? undefined
+                                  : () => {
+                                      setEditingSubject(item);
+                                      setIsAddOpen(true);
+                                    }
+                              }
+                              onDelete={
+                                isContentReadOnly
+                                  ? undefined
+                                  : () => setConfirmDeleteSubject(item)
+                              }
+                            />
+                          );
+                        } else if (item.type === 'collection') {
+                          return (
+                            <CollectionRow
+                              key={`collection-${item.id}`}
+                              collection={item}
+                              subjects={item.subjects}
+                              onClick={() => setSelectedCollection(item)}
+                              themeShadow={'background-shadow-new'}
+                            />
+                          );
                         }
-                        return (
-                          <SubjectRow
-                            key={`subject-${item.id}`}
-                            subject={item}
-                            page={page}
-                            onClose={onClose}
-                            themeShadow={'background-shadow-new'}
-                            onEdit={
-                              isSharedViewer
-                                ? undefined
-                                : () => {
-                                    setEditingSubject(item);
-                                    setIsAddOpen(true);
-                                  }
+                        return null;
+                      })}
+
+                      {visibleCount < sortedCombinedList.length && (
+                        <div className="mt-6 flex justify-center">
+                          <BackgroundButton
+                            text="Load more"
+                            bgColor={
+                              theme
+                                ? `${secondaryColor.bgClass} ${secondaryColor.hoverClass}`
+                                : 'bg-purple-500 hover:bg-purple-400'
                             }
-                            onDelete={
-                              isContentReadOnly
-                                ? undefined
-                                : () => setConfirmDeleteSubject(item)
+                            onClick={() =>
+                              setVisibleCount((n) => Math.min(n + PAGE_SIZE, sortedCombinedList.length))
                             }
                           />
-                        );
-                      } else if (item.type === 'collection') {
-                        return (
-                          <CollectionRow 
-                            key={`collection-${item.id}`} 
-                            collection={item} 
-                            subjects={item.subjects} 
-                            onClick={() => setSelectedCollection(item)} 
-                            themeShadow={'background-shadow-new'}
-                          />
-                        );
-                      }
-                      return null;
-                    })
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="text-center text-lg text-white/80 mt-10 flex flex-col items-center px-4">
                       <p className="mb-2 font-bold text-xl text-white">No subjects yet</p>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import CardList from '../components/Card/CardList';
@@ -29,6 +29,7 @@ import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
 function Create() {
   const [cards, setCards] = useState([]);
+  const cardsRef = useRef([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [animateFlip] = useState(true);
@@ -39,6 +40,13 @@ function Create() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [hasMoreCards, setHasMoreCards] = useState(true);
+  const [loadingMoreCards, setLoadingMoreCards] = useState(false);
+
+  const PAGE_SIZE = 100;
+  const cardsOffsetRef = useRef(0);
+  const hasMoreCardsRef = useRef(true);
+  const loadingMoreCardsRef = useRef(false);
 
   const navigate = useNavigate();
   const { subject, loadingSubject } = useSubjectFromRoute();
@@ -64,9 +72,14 @@ function Create() {
     (async () => {
       setLoading(true);
       try {
-        const data = await fetchCards(subject.id);
+        const data = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
         sortCardsById(data);
-        if (isMounted) setCards(data);
+        if (isMounted) {
+          setCards(data);
+          cardsOffsetRef.current = data.length;
+          setHasMoreCards(data.length === PAGE_SIZE);
+          hasMoreCardsRef.current = data.length === PAGE_SIZE;
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -78,6 +91,52 @@ function Create() {
     };
   }, [subject?.id, loadingSubject]);
 
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
+
+  useEffect(() => {
+    hasMoreCardsRef.current = hasMoreCards;
+  }, [hasMoreCards]);
+
+  useEffect(() => {
+    loadingMoreCardsRef.current = loadingMoreCards;
+  }, [loadingMoreCards]);
+
+  const loadMoreCards = async () => {
+    if (!subject?.id) return false;
+    if (loadingMoreCardsRef.current || !hasMoreCardsRef.current) return false;
+
+    const offset = cardsOffsetRef.current || 0;
+
+    setLoadingMoreCards(true);
+    loadingMoreCardsRef.current = true;
+
+    const more = await fetchCards(subject.id, { limit: PAGE_SIZE, offset });
+    sortCardsById(more);
+
+    if (!more?.length) {
+      setHasMoreCards(false);
+      hasMoreCardsRef.current = false;
+      setLoadingMoreCards(false);
+      loadingMoreCardsRef.current = false;
+      return false;
+    }
+
+    setCards((prev) => [...prev, ...more]);
+
+    const nextOffset = offset + more.length;
+    cardsOffsetRef.current = nextOffset;
+
+    const nextHasMore = more.length === PAGE_SIZE;
+    setHasMoreCards(nextHasMore);
+    hasMoreCardsRef.current = nextHasMore;
+
+    setLoadingMoreCards(false);
+    loadingMoreCardsRef.current = false;
+    return true;
+  };
+
   const handleUpsertCard = async (cardData, file) => {
     if (isTutorialSubject) {
       toast.info('Sample subject cards are read only');
@@ -85,9 +144,12 @@ function Create() {
     }
     const isNewCard = !cardData.id;
     await upsertCard(cardData, file);
-    const updatedCards = await fetchCards(subject.id);
+    const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
     sortCardsById(updatedCards);
     setCards(updatedCards);
+    cardsOffsetRef.current = updatedCards.length;
+    setHasMoreCards(updatedCards.length === PAGE_SIZE);
+    hasMoreCardsRef.current = updatedCards.length === PAGE_SIZE;
     if (isNewCard) {
       setCurrentCardIndex(updatedCards.length - 1);
     }
@@ -116,9 +178,12 @@ function Create() {
       });
     }
 
-    const updatedCards = await fetchCards(subject.id);
+    const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
     sortCardsById(updatedCards);
     setCards(updatedCards);
+    cardsOffsetRef.current = updatedCards.length;
+    setHasMoreCards(updatedCards.length === PAGE_SIZE);
+    hasMoreCardsRef.current = updatedCards.length === PAGE_SIZE;
     setCurrentCardIndex(Math.max(updatedCards.length - 1, 0));
     return cardsToImport;
   };
@@ -140,9 +205,12 @@ function Create() {
             onClick={async () => {
               const restored = await restoreCard(deleted);
               if (restored) {
-                const updated = await fetchCards(subject.id);
+                const updated = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
                 sortCardsById(updated);
                 setCards(updated);
+                cardsOffsetRef.current = updated.length;
+                setHasMoreCards(updated.length === PAGE_SIZE);
+                hasMoreCardsRef.current = updated.length === PAGE_SIZE;
                 toast.success('Card restored');
               }
               closeToast();
@@ -356,11 +424,16 @@ function Create() {
                         currentCardIndex > 0 ? currentCardIndex - 1 : cards.length - 1
                       )
                     }
-                    onNextClick={() =>
-                      setCurrentCardIndex(
-                        currentCardIndex < cards.length - 1 ? currentCardIndex + 1 : 0
-                      )
-                    }
+                    onNextClick={async () => {
+                      if (currentCardIndex < cards.length - 1) {
+                        setCurrentCardIndex((i) => i + 1);
+                        return;
+                      }
+
+                      const loaded = await loadMoreCards();
+                      if (loaded) setCurrentCardIndex((i) => i + 1);
+                      else setCurrentCardIndex(0);
+                    }}
                     create
                     readOnly={isTutorialSubject}
                     themeText={theme.textClass}

@@ -20,7 +20,7 @@ const DiscoverStudy = lazy(() => import('./Pages/DiscoverStudy'));
 function App() {
   return (
     <div
-      className="w-screen min-h-screen"
+      className="w-full min-h-screen overflow-x-hidden"
       style={{
         backgroundColor: 'transparent',
       }}

@@ -35,6 +35,7 @@ function Dashboard() {
   const [selectedSort, setSelectedSort] = useState('Most Cards');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollection, setSelectedCollection] = useState(null);
+  const MAX_ITEMS = 100;
 
   const { modals, openModal, closeModal } = useModals({
     addSubject:        false,
@@ -273,7 +274,8 @@ function Dashboard() {
 
     return {
       ...collection,
-      subjects: sortedCollectionSubjects
+      // Cap the number of subjects shown per collection block.
+      subjects: sortedCollectionSubjects.slice(0, MAX_ITEMS)
     };
   });
 
@@ -301,8 +303,8 @@ function Dashboard() {
   });
 
   // Separate the sorted list back into collections and subjects
-  const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection');
-  const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject');
+  const sortedCollections = sortedCombinedList.filter(item => item.type === 'collection').slice(0, MAX_ITEMS);
+  const sortedUnassignedSubjects = sortedCombinedList.filter(item => item.type === 'subject').slice(0, MAX_ITEMS);
 
   const sortSubjectList = (list) =>
     [...list].sort((a, b) => {
@@ -319,11 +321,11 @@ function Dashboard() {
       return 0;
     });
 
-  const sortedSharedSubjects = sortSubjectList(sharedSubjects);
+  const sortedSharedSubjects = sortSubjectList(sharedSubjects).slice(0, MAX_ITEMS);
   // From Discover: only library subjects not filed into a personal collection
   const sortedDiscoverSubjects = sortSubjectList(
     discoverSubjects.filter((subject) => !subject.collection_id)
-  );
+  ).slice(0, MAX_ITEMS);
 
   const handleRemoveFromLibrary = (subjectId) => {
     setSubjects((current) => current.filter((subject) => subject.id !== subjectId));

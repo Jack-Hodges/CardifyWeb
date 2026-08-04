@@ -1,21 +1,25 @@
 import supabase from '../../supabaseClient';
+import { cachedAsync } from '../../utils/asyncCache';
 
 // Fetch subjects
 export const fetchCollections = async (userId) => {
-  try {
-    const { data, error } = await supabase
-      .from('collections') // Table name in Supabase
-      .select('*')
-      .eq('user_id', userId);
-    if (error) {
-      console.error('Error fetching collections:', error);
+  const key = `collections:${userId}`;
+  return cachedAsync(key, async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections') // Table name in Supabase
+        .select('*')
+        .eq('user_id', userId);
+      if (error) {
+        console.error('Error fetching collections:', error);
+        return [];
+      }
+      return data;
+    } catch (error) {
+      console.error('Unexpected error fetching collections:', error);
       return [];
     }
-    return data;
-  } catch (error) {
-    console.error('Unexpected error fetching collections:', error);
-    return [];
-  }
+  }, 30_000);
 };
 
 // Add or update subject

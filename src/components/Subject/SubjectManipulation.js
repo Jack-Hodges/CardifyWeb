@@ -1,139 +1,132 @@
 import supabase from '../../supabaseClient';
 import { saveProfile } from '../Profile/ProfileManipulation';
+import { cachedAsync } from '../../utils/asyncCache';
 
 const TUTORIAL_SUBJECT_ID = Number(process.env.REACT_APP_TUTORIAL_SUBJECT_ID || 136);
 
 // Fetch subjects
 export const fetchSubjects = async (user, profile = null) => {
-  try {
-    // Own subjects + shares + library membership in parallel
-    const [
-      { data: ownSubjects, error: ownError },
-      { data: permissions, error: permissionsError },
-      { data: libraryRows, error: libraryError },
-    ] = await Promise.all([
-      supabase
-        .from('subjects')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null),
-      supabase
-        .from('subject_permissions')
-        .select('subject_id, permission')
-        .eq('recipient_email', user.email),
-      supabase
-        .from('subject_library')
-        .select('subject_id, added_at, colour_text, colour_intensity, collection_id, pinned')
-        .eq('user_id', user.id),
-    ]);
-
-    if (ownError) {
-      console.error('Error fetching own subjects:', ownError);
-      return [];
-    }
-
-    if (permissionsError) {
-      console.error('Error fetching subject permissions:', permissionsError);
-    }
-
-    // If we have permissions, fetch the corresponding subjects
-    let sharedSubjects = [];
-    if (permissions && permissions.length > 0) {
-      const subjectIds = permissions.map(p => p.subject_id);
-      const { data: sharedData, error: sharedError } = await supabase
-        .from('subjects')
-        .select('*')
-        .in('id', subjectIds)
-        .is('deleted_at', null);
-      
-      if (sharedError) {
-        console.error('Error fetching shared subjects:', sharedError);
-      } else {
-        // Add permission information to shared subjects
-        sharedSubjects = (sharedData || []).map(subject => {
-          const permission = permissions.find(p => p.subject_id === subject.id);
-          return {
-            ...subject,
-            permission: permission?.permission || 'viewer',
-            isShared: true,
-          };
-        });
-      }
-    }
-
-    
-
-    const ownIds = new Set((ownSubjects || []).map((s) => s.id));
-    const sharedIds = new Set(sharedSubjects.map((s) => s.id));
-
-    // Discover library (reference — not owned copies; personal prefs on membership row)
-    let discoverSubjects = [];
-    if (libraryError) {
-      console.error('Error fetching subject library:', libraryError);
-    } else if (libraryRows?.length) {
-      const prefsBySubjectId = new Map(
-        libraryRows.map((row) => [row.subject_id, row])
-      );
-      const libraryIds = libraryRows
-        .map((r) => r.subject_id)
-        .filter((id) => !ownIds.has(id) && !sharedIds.has(id));
-
-      if (libraryIds.length > 0) {
-        const { data: librarySubjects, error: libSubError } = await supabase
+  const key = `subjects:${user?.id}:${Boolean(profile?.tutorial_subject === false)}`;
+  return cachedAsync(key, async () => {
+    try {
+      // Own subjects + shares + library membership in parallel
+      const [
+        { data: ownSubjects, error: ownError },
+        { data: permissions, error: permissionsError },
+        { data: libraryRows, error: libraryError },
+      ] = await Promise.all([
+        supabase
           .from('subjects')
           .select('*')
-          .in('id', libraryIds)
+          .eq('user_id', user.id)
+          .is('deleted_at', null),
+        supabase
+          .from('subject_permissions')
+          .select('subject_id, permission')
+          .eq('recipient_email', user.email),
+        supabase
+          .from('subject_library')
+          .select('subject_id, added_at, colour_text, colour_intensity, collection_id, pinned')
+          .eq('user_id', user.id),
+      ]);
+
+      if (ownError) {
+        console.error('Error fetching own subjects:', ownError);
+        return [];
+      }
+
+      if (permissionsError) {
+        console.error('Error fetching subject permissions:', permissionsError);
+      }
+
+      // If we have permissions, fetch the corresponding subjects
+      let sharedSubjects = [];
+      if (permissions && permissions.length > 0) {
+        const subjectIds = permissions.map((p) => p.subject_id);
+        const { data: sharedData, error: sharedError } = await supabase
+          .from('subjects')
+          .select('*')
+          .in('id', subjectIds)
           .is('deleted_at', null);
 
-        if (libSubError) {
-          console.error('Error fetching discover subjects:', libSubError);
+        if (sharedError) {
+          console.error('Error fetching shared subjects:', sharedError);
         } else {
-          discoverSubjects = (librarySubjects || []).map((subject) => {
-            const prefs = prefsBySubjectId.get(subject.id);
+          // Add permission information to shared subjects
+          sharedSubjects = (sharedData || []).map((subject) => {
+            const permission = permissions.find((p) => p.subject_id === subject.id);
             return {
               ...subject,
-              colourText:
-                prefs?.colour_text != null ? prefs.colour_text : subject.colourText,
-              colourIntensity:
-                prefs?.colour_intensity != null
-                  ? prefs.colour_intensity
-                  : subject.colourIntensity,
-              collection_id: prefs?.collection_id ?? null,
-              pinned: prefs?.pinned != null ? prefs.pinned : false,
-              isFromDiscover: true,
-              permission: 'viewer',
+              permission: permission?.permission || 'viewer',
+              isShared: true,
             };
           });
         }
       }
-    }
 
-    // Combine own subjects with shared + discover library
-    let allSubjects = [
-      ...(ownSubjects || []),
-      ...sharedSubjects,
-      ...discoverSubjects,
-    ];
+      const ownIds = new Set((ownSubjects || []).map((s) => s.id));
+      const sharedIds = new Set(sharedSubjects.map((s) => s.id));
 
-    // Check if user needs tutorial subject (tutorial_subject is false)
-    if (profile && profile.tutorial_subject === false && TUTORIAL_SUBJECT_ID) {
-      const { data: tutorialSubject, error: tutorialError } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('id', TUTORIAL_SUBJECT_ID)
-        .is('deleted_at', null)
-        .maybeSingle();
+      // Discover library (reference — not owned copies; personal prefs on membership row)
+      let discoverSubjects = [];
+      if (libraryError) {
+        console.error('Error fetching subject library:', libraryError);
+      } else if (libraryRows?.length) {
+        const prefsBySubjectId = new Map(libraryRows.map((row) => [row.subject_id, row]));
+        const libraryIds = libraryRows
+          .map((r) => r.subject_id)
+          .filter((id) => !ownIds.has(id) && !sharedIds.has(id));
 
-      if (!tutorialError && tutorialSubject) {
-        allSubjects = [tutorialSubject, ...allSubjects];
+        if (libraryIds.length > 0) {
+          const { data: librarySubjects, error: libSubError } = await supabase
+            .from('subjects')
+            .select('*')
+            .in('id', libraryIds)
+            .is('deleted_at', null);
+
+          if (libSubError) {
+            console.error('Error fetching discover subjects:', libSubError);
+          } else {
+            discoverSubjects = (librarySubjects || []).map((subject) => {
+              const prefs = prefsBySubjectId.get(subject.id);
+              return {
+                ...subject,
+                colourText: prefs?.colour_text != null ? prefs.colour_text : subject.colourText,
+                colourIntensity:
+                  prefs?.colour_intensity != null ? prefs.colour_intensity : subject.colourIntensity,
+                collection_id: prefs?.collection_id ?? null,
+                pinned: prefs?.pinned != null ? prefs.pinned : false,
+                isFromDiscover: true,
+                permission: 'viewer',
+              };
+            });
+          }
+        }
       }
-    }
 
-    return allSubjects;
-  } catch (error) {
-    console.error('Unexpected error fetching subjects:', error);
-    return [];
-  }
+      // Combine own subjects with shared + discover library
+      let allSubjects = [...(ownSubjects || []), ...sharedSubjects, ...discoverSubjects];
+
+      // Check if user needs tutorial subject (tutorial_subject is false)
+      if (profile && profile.tutorial_subject === false && TUTORIAL_SUBJECT_ID) {
+        const { data: tutorialSubject, error: tutorialError } = await supabase
+          .from('subjects')
+          .select('*')
+          .eq('id', TUTORIAL_SUBJECT_ID)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (!tutorialError && tutorialSubject) {
+          allSubjects = [tutorialSubject, ...allSubjects];
+        }
+      }
+
+      return allSubjects;
+    } catch (error) {
+      console.error('Unexpected error fetching subjects:', error);
+      return [];
+    }
+  }, 10_000);
 };
 
 export { TUTORIAL_SUBJECT_ID };
@@ -498,6 +491,29 @@ export const listDiscoverSubjects = async (search = '', category = null) => {
   return Array.isArray(data) ? data : [];
 };
 
+export const setDiscoverVote = async (subjectId, voteValue) => {
+  const { data, error } = await supabase.rpc('set_discover_vote', {
+    p_subject_id: subjectId,
+    p_vote_value: voteValue,
+  });
+  if (error) {
+    console.error('setDiscoverVote', error);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, ...(data || {}) };
+};
+
+export const clearDiscoverVote = async (subjectId) => {
+  const { data, error } = await supabase.rpc('clear_discover_vote', {
+    p_subject_id: subjectId,
+  });
+  if (error) {
+    console.error('clearDiscoverVote', error);
+    return { ok: false, error: error.message };
+  }
+  return { ok: true, ...(data || {}) };
+};
+
 export const getDiscoverSubject = async (subjectId) => {
   const { data, error } = await supabase.rpc('get_discover_subject', {
     p_subject_id: subjectId,
@@ -536,35 +552,49 @@ export const removeFromLibrary = async (subjectId, userId) => {
 
 export const fetchLibrarySubjectIds = async (userId) => {
   if (!userId) return new Set();
-  const { data, error } = await supabase
-    .from('subject_library')
-    .select('subject_id')
-    .eq('user_id', userId);
-  if (error) {
-    console.error('fetchLibrarySubjectIds', error);
-    return new Set();
-  }
-  return new Set(
-    (data || []).flatMap((row) => {
-      const id = row.subject_id;
-      return id == null ? [] : [id, Number(id)];
-    })
+  const key = `libraryIds:${userId}`;
+  return cachedAsync(
+    key,
+    async () => {
+      const { data, error } = await supabase
+        .from('subject_library')
+        .select('subject_id')
+        .eq('user_id', userId);
+      if (error) {
+        console.error('fetchLibrarySubjectIds', error);
+        return new Set();
+      }
+      return new Set(
+        (data || []).flatMap((row) => {
+          const id = row.subject_id;
+          return id == null ? [] : [id, Number(id)];
+        })
+      );
+    },
+    30_000
   );
 };
 
 export const isInLibrary = async (subjectId, userId) => {
   if (!userId || !subjectId) return false;
-  const { data, error } = await supabase
-    .from('subject_library')
-    .select('subject_id')
-    .eq('subject_id', subjectId)
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (error) {
-    console.error('isInLibrary', error);
-    return false;
-  }
-  return Boolean(data);
+  const key = `isInLibrary:${userId}:${subjectId}`;
+  return cachedAsync(
+    key,
+    async () => {
+      const { data, error } = await supabase
+        .from('subject_library')
+        .select('subject_id')
+        .eq('subject_id', subjectId)
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (error) {
+        console.error('isInLibrary', error);
+        return false;
+      }
+      return Boolean(data);
+    },
+    15_000
+  );
 };
 
 // Save or update subject share permissions

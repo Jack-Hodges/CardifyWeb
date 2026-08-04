@@ -55,9 +55,13 @@ const DEFAULT_SRS_FILTERS = {
   easy: true,
 };
 
+const PAGE_SIZE = 100;
+
 function Practice() {
   const [cards, setCards] = useState([]);
+  const cardsRef = useRef(cards);
   const [queue, setQueue] = useState([]);
+  const queueRef = useRef(queue);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -78,6 +82,8 @@ function Practice() {
   const [finished, setFinished] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [hasMoreCards, setHasMoreCards] = useState(true);
+  const [loadingMoreCards, setLoadingMoreCards] = useState(false);
 
   const { subject, loadingSubject } = useSubjectFromRoute();
   const { user, getUser, theme, profile, setProfile } = useUser();
@@ -106,8 +112,20 @@ function Practice() {
   const modeRef = useRef(mode);
   const subjectRef = useRef(subject);
   const userRef = useRef(user);
+  const cardsOffsetRef = useRef(0);
+  const hasMoreCardsRef = useRef(true);
+  const loadingMoreCardsRef = useRef(false);
+  const srsFiltersRef = useRef(srsFilters);
   const subjectId = subject?.id;
   const userId = user?.id;
+
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
+
+  useEffect(() => {
+    queueRef.current = queue;
+  }, [queue]);
 
   useEffect(() => {
     currentCardIndexRef.current = currentCardIndex;
@@ -136,6 +154,15 @@ function Practice() {
   useEffect(() => {
     userRef.current = user;
   }, [user]);
+  useEffect(() => {
+    hasMoreCardsRef.current = hasMoreCards;
+  }, [hasMoreCards]);
+  useEffect(() => {
+    loadingMoreCardsRef.current = loadingMoreCards;
+  }, [loadingMoreCards]);
+  useEffect(() => {
+    srsFiltersRef.current = srsFilters;
+  }, [srsFilters]);
 
   useEffect(() => {
     if (!modeMenuOpen) return undefined;
@@ -236,6 +263,55 @@ function Practice() {
     [buildQueue, userId, subjectId]
   );
 
+  const loadMoreCards = useCallback(async () => {
+    if (!subjectId) return false;
+    if (loadingMoreCardsRef.current || !hasMoreCardsRef.current) return false;
+
+    const offset = cardsOffsetRef.current;
+    if (offset == null) return false;
+
+    setLoadingMoreCards(true);
+    loadingMoreCardsRef.current = true;
+
+    const more = await fetchCards(subjectId, { limit: PAGE_SIZE, offset });
+    sortCardsById(more);
+
+    if (!more?.length) {
+      setHasMoreCards(false);
+      hasMoreCardsRef.current = false;
+      setLoadingMoreCards(false);
+      loadingMoreCardsRef.current = false;
+      return false;
+    }
+
+    setCards((prev) => [...prev, ...more]);
+
+    const nextOffset = offset + more.length;
+    cardsOffsetRef.current = nextOffset;
+
+    const nextHasMore = more.length === PAGE_SIZE;
+    setHasMoreCards(nextHasMore);
+    hasMoreCardsRef.current = nextHasMore;
+
+    // Keep queue + activeCards consistent with the current mode.
+    if (modeRef.current === 'srs') {
+      const currentCardId = queueRef.current[currentCardIndexRef.current]?.id;
+      const nextDeck = [...cardsRef.current, ...more];
+      const ordered = buildQueue(nextDeck, 'srs', srsFiltersRef.current);
+      setQueue(ordered);
+
+      const nextIndex = currentCardId ? ordered.findIndex((c) => c.id === currentCardId) : 0;
+      setCurrentCardIndex(nextIndex >= 0 ? nextIndex : 0);
+    } else {
+      // Classic mode: queue === deck (buildQueue returns deck for non-srs)
+      setQueue((prev) => [...prev, ...more]);
+    }
+
+    setLoadingMoreCards(false);
+    loadingMoreCardsRef.current = false;
+    return true;
+  }, [buildQueue, subjectId]);
+
   useEffect(() => {
     if (!userId) {
       getUser();
@@ -256,13 +332,46 @@ function Practice() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const data = await fetchCards(subjectId);
+      const data = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: 0 });
       sortCardsById(data);
       if (cancelled) return;
-      setCards(data);
+      let deck = data;
+      let hasMore = data.length === PAGE_SIZE;
+      let nextOffset = data.length;
+
+      // If the user had an in-progress classic session beyond the first page,
+      // prefetch enough pages so resuming doesn't land on a missing card index.
+      const upToIndex = subject?.up_to_index;
+      const shouldPrefetch =
+        mode === 'classic' &&
+        upToIndex != null &&
+        Number.isFinite(upToIndex) &&
+        upToIndex >= deck.length &&
+        String(subject?.user_id ?? '') === String(userId);
+
+      if (shouldPrefetch) {
+        const targetCount = upToIndex + 1;
+        while (deck.length < targetCount && hasMore) {
+          const more = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: nextOffset });
+          sortCardsById(more);
+          if (!more?.length) {
+            hasMore = false;
+            break;
+          }
+
+          deck = [...deck, ...more];
+          nextOffset += more.length;
+          hasMore = more.length === PAGE_SIZE;
+        }
+      }
+
+      setCards(deck);
 
       loadedKeyRef.current = key;
-      await beginSession(data, mode, srsFilters);
+      cardsOffsetRef.current = deck.length;
+      setHasMoreCards(hasMore);
+      hasMoreCardsRef.current = hasMore;
+      await beginSession(deck, mode, srsFilters);
       if (!cancelled) setLoading(false);
     })();
 
@@ -330,9 +439,15 @@ function Practice() {
     const go = () => {
       if (currentCardIndex < activeCards.length - 1) {
         setCurrentCardIndex(currentCardIndex + 1);
-      } else {
-        completeSession(statsRef.current);
+        return;
       }
+
+      // End of loaded page: attempt to load the next page.
+      (async () => {
+        const loaded = await loadMoreCards();
+        if (loaded) setCurrentCardIndex((i) => i + 1);
+        else completeSession(statsRef.current);
+      })();
     };
     if (flipped) {
       setFlipped(false);
@@ -386,11 +501,17 @@ function Practice() {
 
     setFlipped(false);
     setTimeout(() => {
-      if (currentCardIndex < activeCards.length - 1) {
-        setCurrentCardIndex((i) => i + 1);
-      } else {
-        completeSession(nextStats);
-      }
+      (async () => {
+        if (currentCardIndex < activeCards.length - 1) {
+          setCurrentCardIndex((i) => i + 1);
+          return;
+        }
+
+        // End of loaded queue: attempt to load the next page.
+        const loaded = await loadMoreCards();
+        if (loaded) setCurrentCardIndex((i) => i + 1);
+        else completeSession(nextStats);
+      })();
     }, 200);
   };
 
