@@ -10,6 +10,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 import SafeMarkdown from '../components/Functions/SafeMarkdown';
 import getColors from '../components/Functions/getColors';
 import { useUser } from '../UserContext';
+import Ad from '../components/Advertisement/Ad';
 import {
   getDiscoverSubject,
   addToLibrary,
@@ -38,6 +39,7 @@ function DiscoverStudy() {
   const [inLibrary, setInLibrary] = useState(false);
   const [adding, setAdding] = useState(false);
   const [viewVisibleCount, setViewVisibleCount] = useState(VIEW_PAGE_SIZE);
+  const [adShown, setAdShown] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -60,6 +62,19 @@ function DiscoverStudy() {
   useEffect(() => {
     setViewVisibleCount(VIEW_PAGE_SIZE);
   }, [subjectId, mode]);
+
+  // Reset guest ad when starting a new subject / mode.
+  useEffect(() => {
+    setAdShown(false);
+  }, [subjectId, mode]);
+
+  useEffect(() => {
+    if (user?.id) return;
+    if (mode !== 'practice') return;
+    if (adShown) return;
+    if (index < 4) return;
+    setAdShown(true);
+  }, [user?.id, mode, index, adShown]);
 
   useEffect(() => {
     if (!user?.id || !subjectId) {
@@ -145,6 +160,12 @@ function DiscoverStudy() {
     : error
       ? 'Subject unavailable | Cardify'
       : 'Discover | Cardify';
+  const pageDescription = subject?.name
+    ? `Practice “${subject.name}” from Cardify Discover. Free, no account required.`
+    : 'Practice a free published subject on Cardify Discover.';
+  const canonicalUrl = subjectId
+    ? `https://cardify.app/discover/${subjectId}`
+    : 'https://cardify.app/discover';
 
   const headingClass = textClass || 'text-white';
   const backToDiscover = () => navigate('/discover');
@@ -164,14 +185,18 @@ function DiscoverStudy() {
     >
       <Helmet>
         <title>{pageTitle}</title>
-        <meta
-          name="description"
-          content={
-            subject?.name
-              ? `Practice “${subject.name}” from Cardify Discover. Free, no account required.`
-              : 'Practice a free published subject on Cardify Discover.'
-          }
-        />
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content="https://cardify.app/logo512.png" />
+        <meta property="og:image:alt" content="Cardify flashcard deck preview" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content="https://cardify.app/logo512.png" />
+        <link rel="canonical" href={canonicalUrl} />
       </Helmet>
 
       <ThemeBackground />
@@ -323,6 +348,17 @@ function DiscoverStudy() {
                   onClick={goNext}
                 />
               </div>
+
+              {!user && adShown && (
+                <div className="mt-6 flex justify-center">
+                  <div className="w-full max-w-md rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide mb-2 opacity-75 text-white">
+                      Sponsored
+                    </p>
+                    <Ad />
+                  </div>
+                </div>
+              )}
 
               <div className="mt-8 max-w-lg mx-auto rounded-2xl bg-white/35 border border-black/10 backdrop-blur-sm px-5 py-5 text-center">
                 {user ? (
