@@ -8,6 +8,7 @@ import LoadingSpinner from '../components/Elements/LoadingSpinner';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import CardArtOverlay from '../components/Elements/CardArtOverlay';
+import Ad from '../components/Advertisement/Ad';
 import { useUser } from '../UserContext';
 import {
   listDiscoverSubjects,
@@ -259,6 +260,16 @@ function Discover() {
     );
   };
 
+  const isGuest = !user;
+  const [adsAllowed, setAdsAllowed] = useState(false);
+
+  // Load ads a moment after the page is shown (guest-only).
+  useEffect(() => {
+    if (!isGuest) return;
+    const t = setTimeout(() => setAdsAllowed(true), 1500);
+    return () => clearTimeout(t);
+  }, [isGuest]);
+
   const header = user ? (
     <TitleBar text="Discover" />
   ) : (
@@ -411,6 +422,14 @@ function Discover() {
             </PageEmptyState>
           ) : showSections ? (
             <div className="flex flex-col gap-8">
+              {isGuest && adsAllowed && (
+                <section aria-label="Advertisement" className="rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-3">
+                  <p className={`text-xs font-bold uppercase tracking-wide mb-2 opacity-75 ${textClass || 'text-white'}`}>
+                    Sponsored
+                  </p>
+                  <Ad />
+                </section>
+              )}
               {topRatedItems.length > 0 && (
                 <section aria-labelledby="discover-top-rated">
                   <div className="flex items-baseline justify-between gap-3 mb-3">
@@ -473,9 +492,19 @@ function Discover() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
-              {listings.map((item) => renderCard(item))}
-            </div>
+            <>
+              {isGuest && adsAllowed && (
+                <section aria-label="Advertisement" className="rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-3 mb-4">
+                  <p className={`text-xs font-bold uppercase tracking-wide mb-2 opacity-75 ${textClass || 'text-white'}`}>
+                    Sponsored
+                  </p>
+                  <Ad />
+                </section>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-4">
+                {listings.map((item) => renderCard(item))}
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -10,6 +10,7 @@ import TitleBar from '../components/Navigation/TitleBar';
 import SafeMarkdown from '../components/Functions/SafeMarkdown';
 import getColors from '../components/Functions/getColors';
 import { useUser } from '../UserContext';
+import Ad from '../components/Advertisement/Ad';
 import {
   getDiscoverSubject,
   addToLibrary,
@@ -38,6 +39,7 @@ function DiscoverStudy() {
   const [inLibrary, setInLibrary] = useState(false);
   const [adding, setAdding] = useState(false);
   const [viewVisibleCount, setViewVisibleCount] = useState(VIEW_PAGE_SIZE);
+  const [adShown, setAdShown] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -60,6 +62,19 @@ function DiscoverStudy() {
   useEffect(() => {
     setViewVisibleCount(VIEW_PAGE_SIZE);
   }, [subjectId, mode]);
+
+  // Reset guest ad when starting a new subject / mode.
+  useEffect(() => {
+    setAdShown(false);
+  }, [subjectId, mode]);
+
+  useEffect(() => {
+    if (user?.id) return;
+    if (mode !== 'practice') return;
+    if (adShown) return;
+    if (index < 4) return;
+    setAdShown(true);
+  }, [user?.id, mode, index, adShown]);
 
   useEffect(() => {
     if (!user?.id || !subjectId) {
@@ -333,6 +348,17 @@ function DiscoverStudy() {
                   onClick={goNext}
                 />
               </div>
+
+              {!user && adShown && (
+                <div className="mt-6 flex justify-center">
+                  <div className="w-full max-w-md rounded-xl bg-black/20 backdrop-blur-sm border border-white/10 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide mb-2 opacity-75 text-white">
+                      Sponsored
+                    </p>
+                    <Ad />
+                  </div>
+                </div>
+              )}
 
               <div className="mt-8 max-w-lg mx-auto rounded-2xl bg-white/35 border border-black/10 backdrop-blur-sm px-5 py-5 text-center">
                 {user ? (
