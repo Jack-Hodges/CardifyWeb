@@ -155,7 +155,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept=".json,.csv,.txt,.xlsx"
+              accept=".json,.csv,.txt,.xlsx,.apkg,.colpkg"
               className="hidden"
             />
             <Upload className="w-8 h-8 text-gray-700 dark:text-white" />
@@ -163,7 +163,7 @@ function ImportModal({ isOpen, onClose, onImport, subject }) {
               {loading ? 'Reading file...' : 'Click to select a file'}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-300">
-              JSON, CSV, TXT, or XLSX
+              JSON, CSV, TXT, XLSX, or Anki APKG
             </p>
           </button>
 

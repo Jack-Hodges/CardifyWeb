@@ -50,9 +50,47 @@ export function rateLimit(key, { limit = 20, windowMs = 60_000 } = {}) {
 export async function getProfileGenerationState(admin, userId) {
   const { data, error } = await admin
     .from('profiles')
-    .select('id, pro, generation_count')
+    .select('id, pro, unlimited, generation_count')
     .eq('id', userId)
     .single();
   if (error) throw error;
   return data;
+}
+
+export function generationDailyLimit(profile) {
+  return profile?.pro || profile?.unlimited ? 60 : 20;
+}
+
+/** Atomically consume generation quota. Throws { status: 403 } when over the cap. */
+export async function consumeGenerationQuota(admin, userId, amount) {
+  const profile = await getProfileGenerationState(admin, userId);
+  const dailyLimit = generationDailyLimit(profile);
+  const used = profile.generation_count || 0;
+  if (used + amount > dailyLimit) {
+    const err = new Error(
+      `Daily limit exceeded. You can generate ${Math.max(0, dailyLimit - used)} more cards today.`
+    );
+    err.status = 403;
+    throw err;
+  }
+
+  let query = admin
+    .from('profiles')
+    .update({ generation_count: used + amount })
+    .eq('id', userId);
+
+  if (profile.generation_count == null) {
+    query = query.is('generation_count', null);
+  } else {
+    query = query.eq('generation_count', used);
+  }
+
+  const { data, error } = await query.select('generation_count').maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    const err = new Error('Daily limit exceeded. Please try again.');
+    err.status = 403;
+    throw err;
+  }
+  return data.generation_count;
 }

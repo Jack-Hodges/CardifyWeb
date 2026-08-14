@@ -6,12 +6,13 @@ import { getThemeAssets, getThemesByCategory, normalizeThemeKey } from '../Funct
 import { getCardArtAssets, getCardArtByCategory, normalizeCardArtKey } from '../Functions/getCardArt';
 import { saveProfile, saveUsername, uploadProfilePicture, removeProfilePicture } from './ProfileManipulation';
 import { getShares, fetchSubjects, removeShare, saveShare, fetchPendingShareInvites, respondShareInvite } from '../Subject/SubjectManipulation';
-import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail } from 'lucide-react';
+import { Cog, LogOut, Share2, Palette, Sparkles, Layers, X, Image as ImageIcon, Mail, Award } from 'lucide-react';
 import Modal from '../Modals/Modal';
 import GlassPanel from '../Modals/GlassPanel';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
 import ProfileAvatar from './ProfileAvatar';
 import { toast } from '../Toast';
+import { badgeList, saveDailyGoal } from '../Study/xp';
 
 function assetBackground(url) {
     if (!url) return undefined;
@@ -41,6 +42,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
     const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
     const [isCardArtModalOpen, setIsCardArtModalOpen] = useState(false);
     const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+    const [dailyGoalDraft, setDailyGoalDraft] = useState('20');
     const photoInputRef = useRef(null);
     const themeAssets = getThemeAssets();
     const themeSections = getThemesByCategory();
@@ -52,11 +54,12 @@ function ProfileModal({ isOpen, onClose, logout }) {
         if (isOpen) {
             setIsVisible(true);
             setIsClosing(false);
+            setDailyGoalDraft(String(profile?.daily_goal || 20));
         } else {
             setIsVisible(false);
             setIsClosing(false);
         }
-    }, [isOpen]);
+    }, [isOpen, profile?.daily_goal]);
 
     useBodyScrollLock(isVisible || isClosing);
 
@@ -87,8 +90,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 profile.first_name,
                 themeKey,
                 profile.sort_preference,
-                profile.card_art,
-                profile.generation_count
+                profile.card_art
             );
             if (updated) setProfile(updated);
             else setProfile({ ...profile, theme: themeKey });
@@ -105,8 +107,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 profile.first_name,
                 profile.theme,
                 profile.sort_preference,
-                cardArtKey,
-                profile.generation_count
+                cardArtKey
             );
             if (updated) setProfile(updated);
             else setProfile({ ...profile, card_art: cardArtKey });
@@ -323,8 +324,7 @@ function ProfileModal({ isOpen, onClose, logout }) {
                 newFirstName,
                 profile.theme,
                 profile.sort_preference,
-                profile.card_art,
-                profile.generation_count
+                profile.card_art
             );
 
             const usernameResult = await saveUsername(profile.id, newUsername);
@@ -450,6 +450,43 @@ function ProfileModal({ isOpen, onClose, logout }) {
                                         max={genLimit}
                                         barClass="bg-purple-400"
                                     />
+                                </div>
+                            </section>
+
+                            <section>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Award size={20} className="text-white/90" />
+                                    <h3 className="text-lg font-bold text-white">Progress</h3>
+                                </div>
+                                <p className="text-sm font-bold text-white/90 mb-3">{profile.xp || 0} XP</p>
+                                <div className="mb-4">
+                                    <label className="text-sm font-bold text-white/90" htmlFor="daily-goal">
+                                        Daily card goal
+                                    </label>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <input
+                                            id="daily-goal"
+                                            type="number"
+                                            min={5}
+                                            max={200}
+                                            value={dailyGoalDraft}
+                                            onChange={(e) => setDailyGoalDraft(e.target.value)}
+                                            onBlur={() => saveDailyGoal(profile, setProfile, dailyGoalDraft)}
+                                            className="w-24 rounded-xl bg-white text-gray-800 px-3 py-2 font-bold"
+                                        />
+                                        <span className="text-sm text-white/70">cards per day</span>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {badgeList(profile).map((badge) => (
+                                        <div
+                                            key={badge.id}
+                                            className={`rounded-2xl p-3 ${badge.earned ? 'bg-white/20' : 'bg-white/5 opacity-60'}`}
+                                        >
+                                            <p className="text-sm font-bold text-white">{badge.name}</p>
+                                            <p className="text-xs text-white/70">{badge.hint}</p>
+                                        </div>
+                                    ))}
                                 </div>
                             </section>
 

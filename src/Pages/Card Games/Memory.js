@@ -16,6 +16,7 @@ import GameSettings, {
   SettingToggle,
 } from '../../components/Games/GameSettings';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
+import useGameStudySession from '../../hooks/useGameStudySession';
 import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
 const MIN_CARDS = 2;
@@ -73,6 +74,7 @@ function getGridClass(tileCount) {
 function Memory() {
   const { subject } = useSubjectFromRoute();
   const { user, getUser, theme } = useUser();
+  const study = useGameStudySession('memory');
   const { textClass, secondaryColor, shadow } = theme || {};
   const navigate = useNavigate();
 
@@ -247,6 +249,7 @@ function Memory() {
     setStarted(true);
     setIsTimerRunning(true);
     startRound(pool, 0, perRound, peekEnabled);
+    study.begin(subjectId);
   };
 
   const playAgain = () => {
@@ -285,6 +288,17 @@ function Memory() {
       roundTimeoutRef.current = null;
     }, ROUND_TRANSITION_MS);
   };
+
+  useEffect(() => {
+    if (!finished || !started) return undefined;
+    study.finish({
+      correct: Math.max(0, moves - misses),
+      incorrect: misses,
+      cards_seen: sessionCards.length,
+      weak_card_ids: [],
+    });
+    return undefined;
+  }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCardClick = (tile) => {
     if (

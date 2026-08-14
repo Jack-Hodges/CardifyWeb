@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCollections } from '../Collections/CollectionManipulation';
 import BackgroundButton from '../Elements/BackgroundButton';
 import { useUser } from '../../UserContext';
+import { adjustLocalFlashcardCount } from '../Profile/ProfileManipulation';
 import AddSubject from '../Subject/AddSubject';
 import { X, Plus, MoreVertical, ArrowUpDown } from 'lucide-react';
 import useBodyScrollLock from '../../hooks/useBodyScrollLock';
@@ -17,7 +18,7 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState(null);
-    const { theme, profile } = useUser();
+    const { theme, profile, setProfile } = useUser();
     const { secondaryColor } = theme;
     const [confirmDeleteSubject, setConfirmDeleteSubject] = useState(null);
     const [sortBy, setSortBy] = useState('Most Cards');
@@ -28,7 +29,9 @@ function SubjectList({ isOpen, onClose, user, page = "practice" }) {
     useBodyScrollLock(isOpen);
 
     const handleRemove = async (id) => {
+      const removed = subjects.find((subject) => subject.id === id);
       await removeSubject(id);
+      adjustLocalFlashcardCount(setProfile, -(removed?.flashcard_count || 0));
       const refreshed = await fetchSubjects(user, profile);
       setSubjects(refreshed);
     };

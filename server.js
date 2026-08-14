@@ -72,17 +72,32 @@ async function createApp() {
 
       const { data: profile, error: profileError } = await admin
         .from('profiles')
-        .select('pro, generation_count')
+        .select('pro, unlimited, generation_count')
         .eq('id', user.id)
         .single();
       if (profileError) throw profileError;
 
-      const dailyLimit = profile.pro ? 60 : 20;
+      const dailyLimit = profile.pro || profile.unlimited ? 60 : 20;
       const used = profile.generation_count || 0;
       if (used + n > dailyLimit) {
         return res.status(403).json({
           error: `Daily limit exceeded. You can generate ${Math.max(0, dailyLimit - used)} more cards today.`,
         });
+      }
+
+      let consumeQuery = admin
+        .from('profiles')
+        .update({ generation_count: used + n })
+        .eq('id', user.id);
+      consumeQuery = profile.generation_count == null
+        ? consumeQuery.is('generation_count', null)
+        : consumeQuery.eq('generation_count', used);
+      const { data: consumed, error: consumeError } = await consumeQuery
+        .select('generation_count')
+        .maybeSingle();
+      if (consumeError) throw consumeError;
+      if (!consumed) {
+        return res.status(403).json({ error: 'Daily limit exceeded. Please try again.' });
       }
 
       const prompt = `Generate exactly ${n} flashcards about ${topic}. 

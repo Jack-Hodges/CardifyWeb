@@ -7,6 +7,7 @@ import GenerateModal from '../Modals/GenerateModal';
 import ShareSubjectModal from '../Modals/ShareSubjectModal';
 import { useState } from 'react';
 import { toast } from '../Toast';
+import { adjustLocalFlashcardCount } from '../Profile/ProfileManipulation';
 import featureFlags from '../../config/featureFlags';
 import { TUTORIAL_SUBJECT_ID } from '../Subject/SubjectManipulation';
 
@@ -28,7 +29,7 @@ function CardControls({
   isGenerating,
   readOnly = false,
 }) {
-  const { theme, profile, setProfile } = useUser();
+  const { theme, setProfile } = useUser();
   const { shadow, primaryColor, secondaryColor } = theme;
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -65,11 +66,8 @@ function CardControls({
         for (const card of cardsToImport) {
           await onUpsertCard(card);
         }
-        if (typeof setProfile === 'function' && profile) {
-          setProfile({
-            ...profile,
-            flashcard_count: (profile.flashcard_count || 0) + cardsToImport.length,
-          });
+        if (typeof setProfile === 'function') {
+          adjustLocalFlashcardCount(setProfile, cardsToImport.length);
         }
       }
 

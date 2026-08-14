@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { requireUser, rateLimit, getProfileGenerationState, getAdminClient } from './_auth.js';
+import { requireUser, rateLimit, consumeGenerationQuota, getAdminClient } from './_auth.js';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -35,13 +35,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid count or topic' });
     }
 
-    const profile = await getProfileGenerationState(admin || getAdminClient(), user.id);
-    const dailyLimit = profile.pro ? 60 : 20;
-    const used = profile.generation_count || 0;
-    if (used + n > dailyLimit) {
-      return res.status(403).json({
-        error: `Daily limit exceeded. You can generate ${Math.max(0, dailyLimit - used)} more cards today.`,
-      });
+    const adminClient = admin || getAdminClient();
+    try {
+      await consumeGenerationQuota(adminClient, user.id, n);
+    } catch (quotaError) {
+      if (quotaError.status === 403) {
+        return res.status(403).json({ error: quotaError.message });
+      }
+      throw quotaError;
     }
 
     const prompt = `Generate exactly ${n} flashcards about ${topic}. 

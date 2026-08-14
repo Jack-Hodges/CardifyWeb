@@ -184,7 +184,7 @@ export const PRACTICE_STEPS = [
     id: 'practice-mode',
     selector: '[data-tour="practice-mode"]',
     title: 'Study mode',
-    body: 'Classic flips through cards in order. Spaced (SM-2) uses ratings to schedule reviews.',
+    body: 'Classic is one subject in order. Spaced is due cards from that subject. Mixed review pulls due cards from all your subjects. Then tap Start.',
     placement: 'bottom',
     advanceOn: 'next',
   },

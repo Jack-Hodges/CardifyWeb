@@ -14,7 +14,7 @@ import EditModal from '../components/Card/EditModal';
 import ImportModal from '../components/Modals/ImportModal';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
-import { saveProfile } from '../components/Profile/ProfileManipulation';
+import { adjustLocalFlashcardCount } from '../components/Profile/ProfileManipulation';
 import featureFlags from '../config/featureFlags';
 import NotesGeneratePanel from '../components/Card/NotesGeneratePanel';
 import { parseGeneratedFlashcards } from '../components/Card/ImportService';
@@ -143,7 +143,12 @@ function Create() {
       return;
     }
     const isNewCard = !cardData.id;
-    await upsertCard(cardData, file);
+    try {
+      await upsertCard(cardData, file);
+    } catch (error) {
+      toast.error(error.message || 'Could not save card.');
+      throw error;
+    }
     const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
     sortCardsById(updatedCards);
     setCards(updatedCards);
@@ -151,6 +156,7 @@ function Create() {
     setHasMoreCards(updatedCards.length === PAGE_SIZE);
     hasMoreCardsRef.current = updatedCards.length === PAGE_SIZE;
     if (isNewCard) {
+      adjustLocalFlashcardCount(setProfile, 1);
       setCurrentCardIndex(updatedCards.length - 1);
     }
   };
@@ -171,12 +177,7 @@ function Create() {
 
     await bulkInsertCards(cardsToImport);
 
-    if (typeof setProfile === 'function' && profile) {
-      setProfile({
-        ...profile,
-        flashcard_count: (profile.flashcard_count || 0) + cardsToImport.length,
-      });
-    }
+    adjustLocalFlashcardCount(setProfile, cardsToImport.length);
 
     const updatedCards = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
     sortCardsById(updatedCards);
@@ -195,6 +196,7 @@ function Create() {
     }
     const deleted = await deleteCard(cards, cardId, currentCardIndex, setCards, setCurrentCardIndex);
     if (!deleted) return;
+    adjustLocalFlashcardCount(setProfile, -1);
     toast.info(
       ({ closeToast }) => (
         <div className="flex items-center gap-3">
@@ -203,15 +205,20 @@ function Create() {
             type="button"
             className="underline font-bold text-blue-300 hover:text-blue-200"
             onClick={async () => {
-              const restored = await restoreCard(deleted);
-              if (restored) {
-                const updated = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
-                sortCardsById(updated);
-                setCards(updated);
-                cardsOffsetRef.current = updated.length;
-                setHasMoreCards(updated.length === PAGE_SIZE);
-                hasMoreCardsRef.current = updated.length === PAGE_SIZE;
-                toast.success('Card restored');
+              try {
+                const restored = await restoreCard(deleted);
+                if (restored) {
+                  adjustLocalFlashcardCount(setProfile, 1);
+                  const updated = await fetchCards(subject.id, { limit: PAGE_SIZE, offset: 0 });
+                  sortCardsById(updated);
+                  setCards(updated);
+                  cardsOffsetRef.current = updated.length;
+                  setHasMoreCards(updated.length === PAGE_SIZE);
+                  hasMoreCardsRef.current = updated.length === PAGE_SIZE;
+                  toast.success('Card restored');
+                }
+              } catch (error) {
+                toast.error(error.message || 'Could not restore card.');
               }
               closeToast();
             }}
@@ -349,14 +356,13 @@ function Create() {
         }))
       );
 
-      await saveProfile(
-        profile.id,
-        profile.first_name,
-        profile.theme,
-        profile.sort_preference,
-        profile.card_art,
-        profile.generation_count + generated.length
-      );
+      setProfile((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          generation_count: (current.generation_count || 0) + count,
+        };
+      });
 
       toast.success(`Successfully generated ${generated.length} cards about ${topic}`);
       setIsGenerateModalOpen(false);

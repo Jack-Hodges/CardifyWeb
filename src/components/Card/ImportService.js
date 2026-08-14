@@ -13,6 +13,9 @@ export const parseImportFile = async (file) => {
         return await parseTXT(file);
       case 'xlsx':
         return await parseXLSX(file);
+      case 'apkg':
+      case 'colpkg':
+        return await parseApkg(file);
       default:
         throw new Error('Unsupported file format');
     }
@@ -189,6 +192,13 @@ export const parseGeneratedFlashcards = (text) => {
   } catch (error) {
     throw new Error(`Error parsing generated flashcards: ${error.message}`);
   }
+};
+
+const parseApkg = async (file) => {
+  const { parseApkgFile } = await import('./parseApkg');
+  const cards = await parseApkgFile(file);
+  validateCards(cards);
+  return cards;
 };
 
 const validateCards = (cards) => {

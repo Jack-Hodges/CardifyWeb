@@ -13,6 +13,7 @@ function SessionSummary({
   cardsSeen = 0,
   durationSec = 0,
   onStudyAgain,
+  onRetryWeak,
   onHome,
   weakCount = 0,
 }) {
@@ -51,6 +52,14 @@ function SessionSummary({
                   : 'bg-blue-500 hover:bg-blue-400'
               }
               onClick={onStudyAgain}
+              wWidth="w-full sm:w-auto"
+            />
+          )}
+          {onRetryWeak && weakCount > 0 && (
+            <BackgroundButton
+              text="Retry weak cards"
+              bgColor="bg-orange-500 hover:bg-orange-400"
+              onClick={onRetryWeak}
               wWidth="w-full sm:w-auto"
             />
           )}

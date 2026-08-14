@@ -3,10 +3,10 @@ import { fetchCards, sortCardsById } from '../components/Card/CardManipulation';
 import Card from '../components/Card/Card';
 import CardControls from '../components/Card/CardControls';
 import TitleBar from '../components/Navigation/TitleBar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../UserContext';
 import SubjectList from '../components/Subject/SubjectList';
-import { saveSubjectProgress, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
+import { fetchSubjects, saveSubjectProgress, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import NoSelectionModal from '../components/Modals/NoSelectionModal';
 import PageEmptyState from '../components/Elements/PageEmptyState';
 import SessionSummary from '../components/Study/SessionSummary';
@@ -15,17 +15,23 @@ import {
   startStudySession,
   endStudySession,
   recordStudyActivity,
+  applyPersonalSrs,
 } from '../components/Study/studyApi';
+import { fetchMixedReview } from '../components/Study/mixedReview';
 import { isDue, srsFromCard, srsFilterBucket } from '../components/Study/sm2';
+import { playableCard } from '../components/Study/gradeAnswer';
 import useSubjectFromRoute from '../hooks/useSubjectFromRoute';
 import { Helmet } from 'react-helmet-async';
 import BackgroundButton from '../components/Elements/BackgroundButton';
-import { ChevronDown, CirclePlay, Share2 } from 'lucide-react';
+import TickSelector from '../components/Elements/TickSelector';
+import { CirclePlay, Share2 } from 'lucide-react';
 import SpotlightTour from '../components/Tutorial/SpotlightTour';
 import usePageTour from '../components/Tutorial/usePageTour';
 import { PRACTICE_STEPS } from '../components/Tutorial/tourSteps';
 import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 import ShareSubjectModal from '../components/Modals/ShareSubjectModal';
+import PracticeModeMenu, { goToPracticeMode, PRACTICE_MODE_OPTIONS } from '../components/Study/PracticeModeMenu';
+import GameSettings, { SettingToggle } from '../components/Games/GameSettings';
 
 const GRADE_LABELS = [
   { q: 0, label: 'Again', color: 'bg-red-500 hover:bg-red-400' },
@@ -33,11 +39,6 @@ const GRADE_LABELS = [
   { q: 2, label: 'Good', color: 'bg-green-500 hover:bg-green-400' },
   { q: 3, label: 'Easy', color: 'bg-blue-500 hover:bg-blue-400' },
 ];
-
-const MODE_LABELS = {
-  classic: 'Classic',
-  srs: 'Spaced (SM-2)',
-};
 
 const SRS_FILTERS = [
   { id: 'new', label: 'New' },
@@ -56,20 +57,85 @@ const DEFAULT_SRS_FILTERS = {
 };
 
 const PAGE_SIZE = 100;
+const MIXED_MAX_CARDS = 80;
+
+function shuffleCards(list) {
+  const next = [...list];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
+  }
+  return next;
+}
+
+function initialPracticeMode(location) {
+  if (location.pathname === '/review' || location.state?.mixed) return 'mixed';
+  if (location.state?.practiceMode === 'srs') return 'srs';
+  return 'classic';
+}
+
+function PracticeModePicker({ mode, onChange, primaryColor, labelTone, shadow }) {
+  const selected = PRACTICE_MODE_OPTIONS.find((option) => option.id === mode);
+  return (
+    <div className="w-full max-w-md mx-auto mb-4 px-1 sm:px-0" data-tour="practice-mode">
+      <p className={`text-sm font-bold mb-2 ${labelTone} ${shadow ? 'drop-shadow-custom' : ''}`}>
+        Mode
+      </p>
+      <div className="flex flex-wrap gap-2 mb-2">
+        {PRACTICE_MODE_OPTIONS.map((option) => {
+          const active = mode === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => onChange(option.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold background-shadow-new background-hover
+                ${active
+                  ? `${primaryColor?.bgClass || 'bg-green-500'} text-white`
+                  : 'bg-white text-gray-800'}`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+      {selected?.hint ? (
+        <p className={`text-sm font-semibold opacity-80 ${labelTone} ${shadow ? 'drop-shadow-custom' : ''}`}>
+          {selected.hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 function Practice() {
+  const { subject, loadingSubject } = useSubjectFromRoute();
+  const { user, getUser, theme, profile, setProfile } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mixed = location.pathname === '/review' || Boolean(location.state?.mixed);
+  const autoStartMixed = Boolean(location.state?.autoStart);
+  const routeRetryIds = location.state?.retryCardIds;
+
   const [cards, setCards] = useState([]);
   const cardsRef = useRef(cards);
   const [queue, setQueue] = useState([]);
   const queueRef = useRef(queue);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !(mixed && !autoStartMixed));
   const [animateFlip] = useState(true);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
-  const [mode, setMode] = useState('classic');
-  const [modeMenuOpen, setModeMenuOpen] = useState(false);
+  const [mode, setMode] = useState(() => initialPracticeMode(location));
   const [srsFilters, setSrsFilters] = useState(DEFAULT_SRS_FILTERS);
+  const [started, setStarted] = useState(false);
+  const [cardCount, setCardCount] = useState(
+    typeof location.state?.cardCount === 'number' ? location.state.cardCount : 40
+  );
+  const [shuffleOn, setShuffleOn] = useState(location.state?.shuffle !== false);
+  const [retryFocusIds, setRetryFocusIds] = useState(() =>
+    Array.isArray(routeRetryIds) ? routeRetryIds : []
+  );
   const [sessionId, setSessionId] = useState(null);
   const [sessionStartedAt, setSessionStartedAt] = useState(null);
   const [stats, setStats] = useState({
@@ -84,11 +150,10 @@ function Practice() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [hasMoreCards, setHasMoreCards] = useState(true);
   const [loadingMoreCards, setLoadingMoreCards] = useState(false);
+  const [reverse, setReverse] = useState(Boolean(location.state?.reverse));
 
-  const { subject, loadingSubject } = useSubjectFromRoute();
-  const { user, getUser, theme, profile, setProfile } = useUser();
-  const navigate = useNavigate();
-  const { primaryColor } = theme;
+  const { primaryColor, textClass, shadow } = theme;
+  const labelTone = textClass || 'textColor';
 
   const canShareSubject =
     subject &&
@@ -108,7 +173,6 @@ function Practice() {
   const sessionStartedAtRef = useRef(null);
   const finishedRef = useRef(false);
   const loadedKeyRef = useRef(null);
-  const modeMenuRef = useRef(null);
   const modeRef = useRef(mode);
   const subjectRef = useRef(subject);
   const userRef = useRef(user);
@@ -116,6 +180,8 @@ function Practice() {
   const hasMoreCardsRef = useRef(true);
   const loadingMoreCardsRef = useRef(false);
   const srsFiltersRef = useRef(srsFilters);
+  const startedRef = useRef(false);
+  const sessionLimitedRef = useRef(false);
   const subjectId = subject?.id;
   const userId = user?.id;
 
@@ -163,17 +229,9 @@ function Practice() {
   useEffect(() => {
     srsFiltersRef.current = srsFilters;
   }, [srsFilters]);
-
   useEffect(() => {
-    if (!modeMenuOpen) return undefined;
-    const onDoc = (e) => {
-      if (modeMenuRef.current && !modeMenuRef.current.contains(e.target)) {
-        setModeMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [modeMenuOpen]);
+    startedRef.current = started;
+  }, [started]);
 
   const handleClose = () => {
     setIsModalOpen(false);
@@ -209,25 +267,34 @@ function Practice() {
       const payload = { ...finalStats, duration_sec: durationSec };
       await endStudySession(sessionIdRef.current, payload);
       if (profile) {
-        const updated = await recordStudyActivity(profile, durationSec);
+        const updated = await recordStudyActivity(profile, durationSec, {
+          cardsSeen: payload.cards_seen || 0,
+          correct: payload.correct || 0,
+          mode: mixed ? 'mixed' : modeRef.current,
+        });
         if (updated && setProfile) setProfile(updated);
       }
       return durationSec;
     },
-    [profile, setProfile]
+    [profile, setProfile, mixed]
   );
 
   useEffect(() => {
     if (
+      !started &&
+      !loading &&
+      cards.length > 0 &&
       subject &&
       subject.up_to_index != null &&
       user &&
-      subject.user_id === user.id &&
+      String(subject.user_id) === String(user.id) &&
       mode === 'classic'
     ) {
       setIsModalOpen(true);
+    } else if (started || mode !== 'classic') {
+      setIsModalOpen(false);
     }
-  }, [subjectId, mode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [subjectId, mode, started, loading, cards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const buildQueue = useCallback((deck, practiceMode, filters) => {
     if (practiceMode !== 'srs') return deck;
@@ -241,8 +308,15 @@ function Practice() {
   }, []);
 
   const beginSession = useCallback(
-    async (deck, practiceMode, filters) => {
-      const ordered = buildQueue(deck, practiceMode, filters);
+    async (deck, practiceMode, filters, options = {}) => {
+      let ordered = buildQueue(deck, practiceMode, filters);
+      if (options.shuffle) ordered = shuffleCards(ordered);
+      if (options.limit && ordered.length > options.limit) {
+        ordered = ordered.slice(0, options.limit);
+        sessionLimitedRef.current = true;
+      } else {
+        sessionLimitedRef.current = Boolean(options.limit && options.limit < (deck?.length || 0));
+      }
       setQueue(ordered);
       setCurrentCardIndex(0);
       setFlipped(false);
@@ -251,20 +325,21 @@ function Practice() {
       setStats({ correct: 0, incorrect: 0, cards_seen: 0, weak_card_ids: [], duration_sec: 0 });
       statsRef.current = { correct: 0, incorrect: 0, cards_seen: 0, weak_card_ids: [], duration_sec: 0 };
 
-      if (!userId || !subjectId) return;
+      if (!userId || (!subjectId && !mixed)) return;
       const session = await startStudySession(
         userId,
-        subjectId,
-        practiceMode === 'srs' ? 'practice_srs' : 'practice'
+        subjectId || null,
+        mixed ? 'mixed' : practiceMode === 'srs' ? 'practice_srs' : 'practice'
       );
       setSessionId(session?.id || null);
       setSessionStartedAt(Date.now());
     },
-    [buildQueue, userId, subjectId]
+    [buildQueue, userId, subjectId, mixed]
   );
 
   const loadMoreCards = useCallback(async () => {
     if (!subjectId) return false;
+    if (sessionLimitedRef.current) return false;
     if (loadingMoreCardsRef.current || !hasMoreCardsRef.current) return false;
 
     const offset = cardsOffsetRef.current;
@@ -317,90 +392,133 @@ function Practice() {
       getUser();
       return;
     }
-    if (loadingSubject || !subjectId) {
+    if (!mixed && (loadingSubject || !subjectId)) {
       if (!subjectId && !loadingSubject) {
         setCards([]);
         setQueue([]);
+        setStarted(false);
         setLoading(false);
       }
       return;
     }
 
-    const key = `${userId}:${subjectId}`;
+    // Mixed settings: wait for Start unless this navigation already confirmed Start.
+    if (mixed && !autoStartMixed) {
+      if (!startedRef.current) {
+        setStarted(false);
+        setLoading(false);
+      }
+      return;
+    }
+
+    const retryKey = Array.isArray(routeRetryIds) ? routeRetryIds.join(',') : '';
+    const key = mixed ? `${userId}:mixed:${cardCount}` : `${userId}:${subjectId}:${retryKey}`;
     if (loadedKeyRef.current === key) return;
 
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const data = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: 0 });
-      sortCardsById(data);
-      if (cancelled) return;
-      let deck = data;
-      let hasMore = data.length === PAGE_SIZE;
-      let nextOffset = data.length;
+      setStarted(false);
+      setFinished(false);
+      let deck = [];
+      let hasMore = false;
+      if (mixed) {
+        const requested = typeof location.state?.cardCount === 'number' ? location.state.cardCount : cardCount || 40;
+        const limit = Math.min(Math.max(1, requested), MIXED_MAX_CARDS);
+        const subjects = await fetchSubjects(user, profile);
+        deck = await fetchMixedReview(userId, subjects, { limit });
+        if (location.state?.shuffle !== false) deck = shuffleCards(deck);
+        setMode('srs');
+      } else {
+        const data = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: 0 });
+        sortCardsById(data);
+        deck = await applyPersonalSrs(userId, data);
+        hasMore = data.length === PAGE_SIZE;
+        let nextOffset = data.length;
 
-      // If the user had an in-progress classic session beyond the first page,
-      // prefetch enough pages so resuming doesn't land on a missing card index.
-      const upToIndex = subject?.up_to_index;
-      const shouldPrefetch =
-        mode === 'classic' &&
-        upToIndex != null &&
-        Number.isFinite(upToIndex) &&
-        upToIndex >= deck.length &&
-        String(subject?.user_id ?? '') === String(userId);
+        const upToIndex = subject?.up_to_index;
+        const shouldPrefetch =
+          mode === 'classic' &&
+          upToIndex != null &&
+          Number.isFinite(upToIndex) &&
+          upToIndex >= deck.length &&
+          String(subject?.user_id ?? '') === String(userId);
 
-      if (shouldPrefetch) {
-        const targetCount = upToIndex + 1;
-        while (deck.length < targetCount && hasMore) {
-          const more = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: nextOffset });
-          sortCardsById(more);
-          if (!more?.length) {
-            hasMore = false;
-            break;
+        if (shouldPrefetch) {
+          const targetCount = upToIndex + 1;
+          while (deck.length < targetCount && hasMore) {
+            const more = await fetchCards(subjectId, { limit: PAGE_SIZE, offset: nextOffset });
+            sortCardsById(more);
+            if (!more?.length) {
+              hasMore = false;
+              break;
+            }
+            deck = await applyPersonalSrs(userId, [...deck, ...more]);
+            nextOffset += more.length;
+            hasMore = more.length === PAGE_SIZE;
           }
-
-          deck = [...deck, ...more];
-          nextOffset += more.length;
-          hasMore = more.length === PAGE_SIZE;
         }
       }
 
-      setCards(deck);
+      if (cancelled) return;
+      if (Array.isArray(routeRetryIds) && routeRetryIds.length) {
+        const retrySet = new Set(routeRetryIds.map(String));
+        const filtered = deck.filter((card) => retrySet.has(String(card.id)));
+        if (filtered.length) deck = filtered;
+        setMode('srs');
+        setRetryFocusIds(routeRetryIds);
+      }
 
+      setCards(deck);
+      if (!mixed) setCardCount(Math.max(1, deck.length || 1));
       loadedKeyRef.current = key;
       cardsOffsetRef.current = deck.length;
       setHasMoreCards(hasMore);
       hasMoreCardsRef.current = hasMore;
-      await beginSession(deck, mode, srsFilters);
+
+      if (mixed && autoStartMixed) {
+        const requested = typeof location.state?.cardCount === 'number' ? location.state.cardCount : cardCount;
+        const limit = Math.min(Math.max(1, requested || 40), MIXED_MAX_CARDS);
+        await beginSession(deck, 'srs', srsFilters, { limit });
+        setStarted(true);
+      }
       if (!cancelled) setLoading(false);
     })();
 
     return () => {
       cancelled = true;
-      if (!finishedRef.current) {
+      if (startedRef.current && !finishedRef.current && !mixed) {
         persistClassicProgress(currentCardIndexRef.current, cardsLengthRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId, userId, loadingSubject]);
+    // eslint-disable-line react-hooks/exhaustive-deps
+  }, [subjectId, userId, loadingSubject, mixed, autoStartMixed]);
 
   // Keep Home "In Progress" updated while studying classic
   useEffect(() => {
-    if (loading || finished || mode !== 'classic') return;
+    if (!started || loading || finished || mode !== 'classic') return;
     if (!cards.length) return;
     persistClassicProgress(currentCardIndex, queue.length || cards.length);
-  }, [currentCardIndex, mode, loading, finished, cards.length, queue.length, persistClassicProgress]);
+  }, [started, currentCardIndex, mode, loading, finished, cards.length, queue.length, persistClassicProgress]);
 
   const applyMode = async (nextMode) => {
-    if (nextMode === mode) {
-      setModeMenuOpen(false);
+    if (nextMode === 'mixed' || nextMode === 'learn' || nextMode === 'true') {
+      goToPracticeMode(navigate, nextMode, subject);
       return;
     }
+    if (mixed) {
+      goToPracticeMode(navigate, nextMode, subject);
+      return;
+    }
+    if (!subject?.id) {
+      setIsSubjectListModalOpen(true);
+      return;
+    }
+    if (nextMode === mode) return;
     if (mode === 'classic') {
       persistClassicProgress(currentCardIndexRef.current, cardsLengthRef.current);
     }
     setMode(nextMode);
-    setModeMenuOpen(false);
     await beginSession(cards, nextMode, srsFilters);
   };
 
@@ -409,8 +527,79 @@ function Practice() {
   };
 
   const applySrsFilters = async () => {
-    setModeMenuOpen(false);
     await beginSession(cards, 'srs', srsFilters);
+  };
+
+  const focusDeck = (deck) => {
+    if (!Array.isArray(retryFocusIds) || !retryFocusIds.length) return deck;
+    const retrySet = new Set(retryFocusIds.map(String));
+    const filtered = deck.filter((card) => retrySet.has(String(card.id)));
+    return filtered.length ? filtered : deck;
+  };
+
+  const chooseStartMode = (nextMode) => {
+    setMode(nextMode);
+    if (nextMode === 'mixed') {
+      setCardCount((n) => Math.min(Math.max(1, n), MIXED_MAX_CARDS));
+    }
+  };
+
+  const handleStart = async () => {
+    if (mode === 'learn' || mode === 'true') {
+      if (!subject?.id) {
+        setIsSubjectListModalOpen(true);
+        return;
+      }
+      goToPracticeMode(navigate, mode, subject, {
+        autoStart: true,
+        reverse,
+        shuffle: shuffleOn,
+        cardCount,
+      });
+      return;
+    }
+
+    if (mode === 'mixed' && !mixed) {
+      navigate('/review', {
+        state: {
+          mixed: true,
+          autoStart: true,
+          reverse,
+          shuffle: shuffleOn,
+          cardCount: Math.min(Math.max(1, cardCount), MIXED_MAX_CARDS),
+        },
+      });
+      return;
+    }
+
+    if (mode === 'mixed' && mixed) {
+      const limit = Math.min(Math.max(1, cardCount), MIXED_MAX_CARDS);
+      setLoading(true);
+      const subjects = await fetchSubjects(user, profile);
+      let deck = await fetchMixedReview(userId, subjects, { limit });
+      deck = focusDeck(deck);
+      if (shuffleOn) deck = shuffleCards(deck);
+      setCards(deck);
+      setMode('srs');
+      await beginSession(deck, 'srs', srsFilters, { limit });
+      setRetryFocusIds([]);
+      setStarted(true);
+      setLoading(false);
+      return;
+    }
+
+    if (!subject?.id) {
+      setIsSubjectListModalOpen(true);
+      return;
+    }
+
+    const deck = focusDeck(cards);
+    await beginSession(deck, mode, srsFilters, {
+      shuffle: mode === 'classic' && shuffleOn,
+      limit: cardCount < deck.length ? cardCount : undefined,
+    });
+    setRetryFocusIds([]);
+    setStarted(true);
   };
 
   const activeCards = queue.length ? queue : mode === 'classic' ? cards : [];
@@ -473,7 +662,7 @@ function Practice() {
 
   const handleGrade = async (quality) => {
     if (!currentCard || !user || finishedRef.current) return;
-    const updated = await upsertCardSrs(currentCard.id, quality, srsFromCard(currentCard));
+    const updated = await upsertCardSrs(currentCard.id, quality, { ...srsFromCard(currentCard), ...currentCard }, userId);
     const patch = {
       srs_ease: updated.srs_ease ?? updated.ease,
       srs_interval: updated.srs_interval ?? updated.interval,
@@ -517,7 +706,7 @@ function Practice() {
 
   useEffect(() => {
     const onKey = (e) => {
-      if (finished || loading || !activeCards.length) return;
+      if (finished || loading || !started || !activeCards.length) return;
       const tag = e.target?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
@@ -535,16 +724,36 @@ function Practice() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [finished, loading, activeCards.length, flipped, mode, currentCardIndex]);
+  }, [finished, loading, started, activeCards.length, flipped, mode, currentCardIndex]);
 
-  const studyAgain = async () => {
-    await beginSession(cards, mode, srsFilters);
+  const studyAgain = () => {
+    setRetryFocusIds([]);
+    setFinished(false);
+    setStarted(false);
+  };
+
+  const retryWeak = () => {
+    const ids = stats.weak_card_ids || [];
+    if (ids.length) {
+      setRetryFocusIds(ids);
+      setMode('srs');
+      setCardCount(Math.max(1, ids.length));
+    }
+    setFinished(false);
+    setStarted(false);
   };
 
   const filterCounts = SRS_FILTERS.reduce((acc, f) => {
     acc[f.id] = cards.filter((c) => srsFilterBucket(c) === f.id).length;
     return acc;
   }, {});
+
+  const showCardCount = mode === 'mixed' || mode === 'classic' || mode === 'srs' || mode === 'true' || mode === 'learn';
+  const showShuffle = mode === 'mixed' || mode === 'classic' || mode === 'true';
+  const showReverse = mode === 'mixed' || mode === 'classic' || mode === 'srs' || mode === 'true' || mode === 'learn';
+  const showSrsFilters = mode === 'srs';
+  const settingsMaxCards = mode === 'mixed' ? MIXED_MAX_CARDS : Math.max(1, cards.length || 1);
+  const boundedCardCount = Math.min(Math.max(1, cardCount), settingsMaxCards);
 
   return (
     <div
@@ -585,81 +794,42 @@ function Practice() {
         />
 
         <div className="flex-1 min-h-0 sm:overflow-y-auto">
-          {subject && !finished && !isModalOpen && (
-            <div className="flex justify-center mt-3 px-4 relative z-40" ref={modeMenuRef} data-tour="practice-mode">
-              <div className="relative inline-block text-left">
-                <BackgroundButton
-                  text={MODE_LABELS[mode]}
-                  bgColor={
-                    theme
-                      ? `${primaryColor.bgClass} ${primaryColor.hoverClass}`
-                      : 'bg-blue-500 hover:bg-blue-400'
-                  }
-                  wWidth="w-52"
-                  image={<ChevronDown size={18} />}
-                  flip
-                  onClick={() => setModeMenuOpen((o) => !o)}
-                />
-
-                <div
-                  className={`absolute left-1/2 -translate-x-1/2 mt-2 w-[min(92vw,22rem)] ${primaryColor.bgClass} background-shadow-new rounded-3xl p-2 text-white transform transition-all duration-300 origin-top ${
-                    modeMenuOpen
-                      ? 'scale-y-100 opacity-100 pointer-events-auto'
-                      : 'scale-y-0 opacity-0 pointer-events-none'
-                  }`}
-                  style={{ transformOrigin: 'top' }}
-                >
-                  <button
-                    type="button"
-                    className={`w-full text-left font-bold text-lg px-3 py-2 rounded-2xl ${primaryColor.hoverClass} ${mode === 'classic' ? 'bg-black/20' : ''}`}
-                    onClick={() => applyMode('classic')}
-                  >
-                    Classic
-                  </button>
-                  <button
-                    type="button"
-                    className={`w-full text-left font-bold text-lg px-3 py-2 rounded-2xl ${primaryColor.hoverClass} ${mode === 'srs' ? 'bg-black/20' : ''}`}
-                    onClick={() => applyMode('srs')}
-                  >
-                    Spaced (SM-2)
-                  </button>
-
-                  {mode === 'srs' && (
-                    <div className="mt-2 pt-2 border-t border-white/20">
-                      <p className="px-3 text-sm font-semibold text-white/80 mb-2">
-                        Include in SM-2 session
-                      </p>
-                      <div className="space-y-1 px-1 mb-3">
-                        {SRS_FILTERS.map((f) => (
-                          <label
-                            key={f.id}
-                            className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl hover:bg-black/15 cursor-pointer"
-                          >
-                            <span className="flex items-center gap-2 text-sm font-semibold">
-                              <input
-                                type="checkbox"
-                                className="rounded"
-                                checked={Boolean(srsFilters[f.id])}
-                                onChange={() => toggleSrsFilter(f.id)}
-                              />
-                              {f.label}
-                            </span>
-                            <span className="text-xs opacity-70">{filterCounts[f.id] || 0}</span>
-                          </label>
-                        ))}
-                      </div>
-                      <BackgroundButton
-                        text="Apply filters"
-                        bgColor="bg-green-500 hover:bg-green-400"
-                        wWidth="w-full"
-                        disabled={!Object.values(srsFilters).some(Boolean)}
-                        onClick={applySrsFilters}
+          {started && !finished && !isModalOpen && !loading && (
+            <PracticeModeMenu current={mixed ? 'mixed' : mode} subject={subject} onSelect={applyMode}>
+              <button
+                type="button"
+                className={`w-full text-left font-bold text-lg px-3 py-2 rounded-2xl ${primaryColor.hoverClass} ${reverse ? 'bg-black/20' : ''}`}
+                onClick={() => setReverse((value) => !value)}
+              >
+                Other way {reverse ? 'on' : 'off'}
+              </button>
+              {mode === 'srs' && (
+                <div className="mt-2 pt-2 border-t border-white/20">
+                  <p className="px-3 text-sm font-semibold text-white/80 mb-2">
+                    Include in SM-2 session
+                  </p>
+                  <div className="space-y-1 px-1 mb-3">
+                    {SRS_FILTERS.map((f) => (
+                      <TickSelector
+                        key={f.id}
+                        checked={Boolean(srsFilters[f.id])}
+                        onChange={() => toggleSrsFilter(f.id)}
+                        label={f.label}
+                        hint={filterCounts[f.id] || 0}
+                        className="px-2 rounded-xl"
                       />
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                  <BackgroundButton
+                    text="Apply filters"
+                    bgColor="bg-green-500 hover:bg-green-400"
+                    wWidth="w-full"
+                    disabled={!Object.values(srsFilters).some(Boolean)}
+                    onClick={applySrsFilters}
+                  />
                 </div>
-              </div>
-            </div>
+              )}
+            </PracticeModeMenu>
           )}
 
           {!finished ? (
@@ -671,29 +841,117 @@ function Practice() {
                   text1="Yes, continue"
                   text2="No, start over"
                   icon={<CirclePlay size={44} strokeWidth={2.5} />}
-                  action1={() => {
+                  action1={async () => {
+                    await beginSession(cards, 'classic', srsFilters);
                     setCurrentCardIndex(subject?.up_to_index || 0);
+                    setStarted(true);
                     handleClose();
                   }}
                   action2={() => {
-                    setCurrentCardIndex(0);
                     persistClassicProgress(0, 0, { clear: true });
                     handleClose();
                   }}
                 />
               </PageEmptyState>
-            ) : loading || loadingSubject ? (
+            ) : loading || (loadingSubject && !mixed) ? (
               <PageEmptyState>
                 <div className="animate-pulse flex flex-col space-y-4 w-full max-w-2xl">
                   <div className="bg-gray-300 dark:bg-gray-600 h-48 w-full rounded-lg" />
                   <div className="bg-gray-300 dark:bg-gray-600 h-8 w-3/4 rounded" />
                 </div>
               </PageEmptyState>
+            ) : !started ? (
+              !mixed && !subject && mode !== 'mixed' ? (
+                <PageEmptyState>
+                  <PracticeModePicker
+                    mode={mode}
+                    onChange={chooseStartMode}
+                    primaryColor={primaryColor}
+                    labelTone={labelTone}
+                    shadow={shadow}
+                  />
+                  <NoSelectionModal
+                    text="No subject selected"
+                    subtext="Pick a subject to start practicing, or choose Mixed review above."
+                    text1="Select a subject to practice"
+                    action1={() => setIsSubjectListModalOpen(true)}
+                    dataTour="practice-pick-subject"
+                  />
+                </PageEmptyState>
+              ) : !mixed && subject && cards.length === 0 && mode !== 'mixed' ? (
+                <PageEmptyState>
+                  <PracticeModePicker
+                    mode={mode}
+                    onChange={chooseStartMode}
+                    primaryColor={primaryColor}
+                    labelTone={labelTone}
+                    shadow={shadow}
+                  />
+                  <NoSelectionModal
+                    text={`${subject.name} has no flashcards`}
+                    subtext="Add some flashcards to this subject to start practicing."
+                    text1={`Add Flashcards to ${subject.name}`}
+                    action1={() => navigate(`/create/${subject.id}`, { state: { subject } })}
+                  />
+                </PageEmptyState>
+              ) : (
+                <PageEmptyState>
+                  <PracticeModePicker
+                    mode={mode}
+                    onChange={chooseStartMode}
+                    primaryColor={primaryColor}
+                    labelTone={labelTone}
+                    shadow={shadow}
+                  />
+                  <GameSettings
+                    cardCount={showCardCount ? boundedCardCount : undefined}
+                    setCardCount={showCardCount ? setCardCount : undefined}
+                    maxCards={settingsMaxCards}
+                    shuffle={showShuffle ? shuffleOn : undefined}
+                    setShuffle={showShuffle ? setShuffleOn : undefined}
+                    showTimer={false}
+                    onStart={handleStart}
+                  >
+                    {showSrsFilters && (
+                      <div className="mb-4">
+                        <p className={`text-sm font-bold mb-2 ${labelTone} ${shadow ? 'drop-shadow-custom' : ''}`}>
+                          Include in SM-2 session
+                        </p>
+                        <div className="space-y-1 mb-1">
+                          {SRS_FILTERS.map((f) => (
+                            <TickSelector
+                              key={f.id}
+                              checked={Boolean(srsFilters[f.id])}
+                              onChange={() => toggleSrsFilter(f.id)}
+                              label={f.label}
+                              hint={filterCounts[f.id] || 0}
+                              className={labelTone}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {showReverse && (
+                      <SettingToggle
+                        label="Study the other way"
+                        description="Prompt from the back of the card"
+                        checked={reverse}
+                        onChange={setReverse}
+                      />
+                    )}
+                  </GameSettings>
+                </PageEmptyState>
+              )
             ) : activeCards.length > 0 && currentCard ? (
               <div className="w-full sm:w-4/5 flex flex-col mt-5 mx-auto px-5 pb-8">
+                {mixed && currentCard?._subjectName ? (
+                  <p className={`text-center text-sm font-semibold mb-2 ${theme.textClass} ${shadow ? 'drop-shadow-custom' : ''}`}>
+                    From {currentCard._subjectName}
+                  </p>
+                ) : null}
                 <div className="w-full h-[50vh] sm:h-[60vh]" data-tour="practice-card">
                   <Card
-                    card={currentCard}
+                    card={playableCard(currentCard, reverse)}
                     flipped={flipped}
                     setFlipped={setFlipped}
                     animateFlip={animateFlip}
@@ -734,29 +992,36 @@ function Practice() {
               </div>
             ) : (
               <PageEmptyState>
-                {subject ? (
+                {subject || mixed ? (
                   <NoSelectionModal
                     text={
-                      cards.length === 0
+                      mixed
+                        ? 'No due cards right now'
+                        : cards.length === 0
                         ? `${subject.name} has no flashcards`
                         : 'No cards match these filters'
                     }
                     subtext={
-                      cards.length === 0
+                      mixed
+                        ? 'Study a subject first, then come back for a mixed review across your decks.'
+                        : cards.length === 0
                         ? 'Add some flashcards to this subject to start practicing.'
-                        : 'Open the mode menu and enable New / Again / Hard / Good / Easy, then Apply.'
+                        : 'Go back to settings and enable New / Again / Hard / Good / Easy.'
                     }
                     text1={
-                      cards.length === 0
+                      mixed
+                        ? 'Back to Home'
+                        : cards.length === 0
                         ? `Add Flashcards to ${subject.name}`
-                        : 'Open filters'
+                        : 'Back to settings'
                     }
                     action1={() => {
-                      if (cards.length === 0) {
+                      if (mixed) {
+                        navigate('/home');
+                      } else if (cards.length === 0) {
                         navigate(`/create/${subject.id}`, { state: { subject } });
                       } else {
-                        setMode('srs');
-                        setModeMenuOpen(true);
+                        setStarted(false);
                       }
                     }}
                   />
@@ -779,6 +1044,7 @@ function Practice() {
               durationSec={stats.duration_sec || 0}
               weakCount={stats.weak_card_ids?.length || 0}
               onStudyAgain={studyAgain}
+              onRetryWeak={retryWeak}
               onHome={() => navigate('/home')}
             />
           ) : null}

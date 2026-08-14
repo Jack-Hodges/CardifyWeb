@@ -13,10 +13,12 @@ import NoSelectionModal from '../../components/Modals/NoSelectionModal';
 import PageEmptyState from '../../components/Elements/PageEmptyState';
 import LoadingSpinner from '../../components/Elements/LoadingSpinner';
 import SessionSummary from '../../components/Study/SessionSummary';
-import GameSettings from '../../components/Games/GameSettings';
+import GameSettings, { SettingToggle } from '../../components/Games/GameSettings';
 import GameHUD, { hudIcons } from '../../components/Games/GameHUD';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
+import useGameStudySession from '../../hooks/useGameStudySession';
 import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
+import { playableCard } from '../../components/Study/gradeAnswer';
 
 function quizMessage(percentage) {
   if (percentage >= 90) return 'Outstanding work';
@@ -40,13 +42,16 @@ function Quiz() {
   const [sessionStartedAt, setSessionStartedAt] = useState(() => Date.now());
   const [cardCount, setCardCount] = useState(10);
   const [shuffleOn, setShuffleOn] = useState(true);
+  const [reverse, setReverse] = useState(false);
   const [started, setStarted] = useState(false);
+  const [retryIds, setRetryIds] = useState([]);
 
   const navigate = useNavigate();
   const { subject } = useSubjectFromRoute();
   const { user, getUser, theme, profile } = useUser();
   const { primaryColor, secondaryColor, tertiaryColor, shadow, textClass } = theme;
   const textTone = textClass || 'textColor';
+  const study = useGameStudySession('quiz');
 
   const handleSwitchToCreate = () => {
     if (subject) navigate(`/create/${subject.id}`, { state: { subject } });
@@ -93,8 +98,13 @@ function Quiz() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId, userId]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     let pool = [...allCards];
+    if (retryIds.length) {
+      const focused = pool.filter((card) => retryIds.includes(card.id));
+      if (focused.length) pool = focused;
+    }
+    pool = pool.map((card) => playableCard(card, reverse));
     if (shuffleOn) pool = [...pool].sort(() => 0.5 - Math.random());
     pool = pool.slice(0, Math.min(cardCount, pool.length));
     setCards(pool);
@@ -104,6 +114,8 @@ function Quiz() {
     setSessionStartedAt(Date.now());
     setFinished(false);
     setStarted(true);
+    setRetryIds([]);
+    await study.begin(subjectId);
   };
 
   const randomizeOptions = (cardsPool) => {
@@ -175,6 +187,35 @@ function Quiz() {
     message = quizMessage(percentage);
   }
 
+  const quizWeakIds = finished
+    ? cards
+        .filter((card, index) => {
+          const selectedOption = selectedAnswers[index];
+          const mode = card.frontMode === 1 || card.backMode === 1 ? 1 : card.backMode;
+          const correctOption =
+            mode === 2 || mode === 3
+              ? { mode, content: card.image_url }
+              : { mode, content: card.answer };
+          return !(
+            selectedOption &&
+            selectedOption.content === correctOption.content &&
+            selectedOption.mode === correctOption.mode
+          );
+        })
+        .map((card) => card.id)
+    : [];
+
+  useEffect(() => {
+    if (!finished || !started) return undefined;
+    study.finish({
+      correct: correctCount,
+      incorrect: incorrectCount,
+      cards_seen: cards.length,
+      weak_card_ids: quizWeakIds,
+    });
+    return undefined;
+  }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const answeredCount = Object.keys(selectedAnswers).length;
   const liveCorrect = Object.entries(selectedAnswers).reduce((acc, [idx, selected]) => {
     const card = cards[Number(idx)];
@@ -215,7 +256,14 @@ function Quiz() {
                 setShuffle={setShuffleOn}
                 showTimer={false}
                 onStart={handleStart}
-              />
+              >
+                <SettingToggle
+                  label="Study the other way"
+                  description="Prompt from the back of the card"
+                  checked={reverse}
+                  onChange={setReverse}
+                />
+              </GameSettings>
             </PageEmptyState>
           ) : !finished ? (
             <div className="flex-1 min-h-0 flex flex-col px-3 sm:px-5 pb-3">
@@ -321,6 +369,18 @@ function Quiz() {
                   setShowAd(true);
                 }
               }}
+              onRetryWeak={
+                quizWeakIds.length
+                  ? () => {
+                      setRetryIds(quizWeakIds);
+                      setCardCount(Math.max(1, quizWeakIds.length));
+                      setFinished(false);
+                      setStarted(false);
+                      setCurrentCardIndex(0);
+                      setSelectedAnswers({});
+                    }
+                  : undefined
+              }
               onStudyAgain={() => {
                 if (profile.pro) {
                   setFinished(false);

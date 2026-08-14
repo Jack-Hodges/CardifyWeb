@@ -5,7 +5,7 @@ import BackgroundButton from '../components/Elements/BackgroundButton';
 import AddSubject from '../components/Subject/AddSubject';
 import { fetchSubjects, saveSubject, saveLibrarySubjectPrefs, removeSubject, restoreSubject, dismissTutorialSubject, TUTORIAL_SUBJECT_ID } from '../components/Subject/SubjectManipulation';
 import { toast } from '../components/Toast';
-import { saveProfile } from '../components/Profile/ProfileManipulation';
+import { saveProfile, adjustLocalFlashcardCount } from '../components/Profile/ProfileManipulation';
 import { fetchCollections, removeCollection } from '../components/Collections/CollectionManipulation';
 import { useUser } from '../UserContext';
 import SubjectBlock from '../components/Subject/SubjectBlock';
@@ -153,9 +153,11 @@ function Dashboard() {
   };
 
   const handleRemoveSubject = async (subjectId) => {
+    const removed = subjects.find((subject) => subject.id === subjectId);
     const success = await removeSubject(subjectId);
     if (success) {
       setSubjects(subjects.filter((subject) => subject.id !== subjectId));
+      adjustLocalFlashcardCount(setProfile, -(removed?.flashcard_count || 0));
 
       toast.info(
         ({ closeToast }) => (
@@ -167,9 +169,12 @@ function Dashboard() {
               onClick={async () => {
                 const restored = await restoreSubject(subjectId);
                 if (restored) {
+                  adjustLocalFlashcardCount(setProfile, removed?.flashcard_count || 0);
                   const refreshed = await fetchSubjects(user, profile);
                   setSubjects(refreshed);
                   toast.success('Subject restored');
+                } else {
+                  toast.error('Could not restore subject. You may be at your card limit.');
                 }
                 closeToast();
               }}
@@ -353,8 +358,7 @@ function Dashboard() {
         profile.first_name,
         profile.theme,
         sortPreferenceMap[newSort],
-        profile.card_art,
-        profile.generation_count
+        profile.card_art
       );
     }
   };

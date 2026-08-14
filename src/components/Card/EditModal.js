@@ -150,6 +150,7 @@ function EditModal({
       await handleUpsertCard(cardToSave, selectedFile);
     } catch (error) {
       console.error('Error in handleSave:', error);
+      return;
     }
 
     // Treat as clean so close never trips the unsaved prompt

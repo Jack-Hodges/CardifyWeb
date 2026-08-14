@@ -72,13 +72,6 @@ export const deleteCard = async (
     return null;
   }
 
-  const { error: profileError } = await supabase.rpc('decrement_flashcard_count', {
-    user_id: cardToDelete.user_id,
-  });
-  if (profileError) {
-    console.error('Error updating profile flashcard count:', profileError);
-  }
-
   return cardToDelete;
 };
 
@@ -91,10 +84,10 @@ export const restoreCard = async (card) => {
     .select()
     .single();
   if (error) {
-    console.error('Error restoring card:', error);
-    return null;
+    const err = new Error(error.message || 'Error restoring card');
+    err.code = error.code;
+    throw err;
   }
-  await supabase.rpc('increment_flashcard_count', { user_id: card.user_id });
   return data;
 };
 
@@ -228,27 +221,17 @@ export const upsertCard = async (card, imageFile) => {
         .select();
 
       if (error) {
-        console.error('Error inserting new card:', error);
-        return null;
+        const err = new Error(error.message || 'Error inserting new card');
+        err.code = error.code;
+        throw err;
       }
       result = data?.[0] || null;
-
-      // If this was a new card, increment the flashcard_count in the user's profile
-      if (result) {
-        const { error: profileError } = await supabase.rpc('increment_flashcard_count', {
-          user_id: card.user_id
-        });
-
-        if (profileError) {
-          console.error('Error updating profile flashcard count:', profileError);
-        }
-      }
     }
 
     return result;
   } catch (err) {
     console.error('Unexpected error in upsertCard:', err);
-    return null;
+    throw err;
   }
 };
 
@@ -256,7 +239,7 @@ const BULK_INSERT_CHUNK = 100;
 
 /**
  * Insert many new cards in chunked batches (no images).
- * One sort_order lookup, one profile count RPC — used by import / AI generate.
+ * One sort_order lookup — used by import / AI generate.
  */
 export const bulkInsertCards = async (cards) => {
   if (!cards?.length) return [];
@@ -298,20 +281,11 @@ export const bulkInsertCards = async (cards) => {
     const chunk = payloads.slice(i, i + BULK_INSERT_CHUNK);
     const { data, error } = await supabase.from('flashcards').insert(chunk).select();
     if (error) {
-      console.error('Error bulk inserting cards:', error);
-      throw error;
+      const err = new Error(error.message || 'Error bulk inserting cards');
+      err.code = error.code;
+      throw err;
     }
     inserted.push(...(data || []));
-  }
-
-  if (inserted.length > 0) {
-    const { error: profileError } = await supabase.rpc('increment_flashcard_count_by', {
-      user_id: userId,
-      amount: inserted.length,
-    });
-    if (profileError) {
-      console.error('Error updating profile flashcard count:', profileError);
-    }
   }
 
   return inserted;

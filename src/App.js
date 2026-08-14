@@ -16,6 +16,10 @@ const Match = lazy(() => import('./Pages/Card Games/Match'));
 const PublicStudy = lazy(() => import('./Pages/PublicStudy'));
 const Discover = lazy(() => import('./Pages/Discover'));
 const DiscoverStudy = lazy(() => import('./Pages/DiscoverStudy'));
+const Learn = lazy(() => import('./Pages/Card Games/Learn'));
+const Cipher = lazy(() => import('./Pages/Card Games/Cipher'));
+const TrueFalse = lazy(() => import('./Pages/Card Games/True'));
+const Admin = lazy(() => import('./Pages/Admin'));
 
 function App() {
   return (
@@ -43,6 +47,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/discover" element={<Discover />} />
             <Route path="/discover/:subjectId" element={<DiscoverStudy />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/memory" element={<Memory />} />
             <Route path="/memory/:subjectId" element={<Memory />} />
             <Route path="/quiz" element={<Quiz />} />
@@ -53,6 +58,13 @@ function App() {
             <Route path="/dash/:subjectId" element={<Dash />} />
             <Route path="/type" element={<Type />} />
             <Route path="/type/:subjectId" element={<Type />} />
+            <Route path="/learn" element={<Learn />} />
+            <Route path="/learn/:subjectId" element={<Learn />} />
+            <Route path="/cipher" element={<Cipher />} />
+            <Route path="/cipher/:subjectId" element={<Cipher />} />
+            <Route path="/true" element={<TrueFalse />} />
+            <Route path="/true/:subjectId" element={<TrueFalse />} />
+            <Route path="/review" element={<Practice />} />
             <Route path="/match" element={<Match />} />
             <Route path="/match/:subjectId" element={<Match />} />
             <Route path="/study/:token" element={<PublicStudy />} />

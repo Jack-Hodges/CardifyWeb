@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../UserContext";
 import ProfileModal from "../Profile/ProfileModal";
 import ProfileAvatar from "../Profile/ProfileAvatar";
-import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, Compass } from 'lucide-react';
+import { House, BookCopy, BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, Compass, Shield, KeyRound } from 'lucide-react';
 
 function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
 
@@ -43,6 +43,8 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
     Scramble: <Shuffle />,
     Memory: Cards,
     Type: <BookText />,
+    Cipher: <KeyRound />,
+    Admin: <Shield />,
   };
   
   var firstImg = images[text] || null;
@@ -77,7 +79,7 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
           <div
             role="menu"
             aria-label="Page navigation"
-            className={`p-1 absolute text-white text-xl font-bold left-0 ${!home ? 'ml-12' : ''} mt-12 w-44 ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
+            className={`p-1 absolute text-white text-xl font-bold left-0 ${!home ? 'ml-12' : ''} mt-12 w-44 max-h-[70vh] overflow-y-auto ${primaryColor.bgClass} background-shadow-new rounded-3xl transform transition-all duration-300 origin-top ${
               menuOpen ? 'scale-y-100 opacity-100 pointer-events-auto' : 'scale-y-0 opacity-0 pointer-events-none'
             }`}
             style={{ transformOrigin: 'top', zIndex: forceMenuOpen ? 70 : undefined }}
@@ -92,6 +94,10 @@ function TitleBar({ text, content, home = false, forceMenuOpen = false }) {
             <LinkButton text="Quiz" img={<NotebookText />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Scramble" img={<Shuffle />} hoverClass={primaryColor.hoverClass}/>
             <LinkButton text="Type" img={<BookText />} hoverClass={primaryColor.hoverClass}/>
+            <LinkButton text="Cipher" img={<KeyRound />} hoverClass={primaryColor.hoverClass}/>
+            {profile?.admin && (
+              <LinkButton text="Admin" img={<Shield />} hoverClass={primaryColor.hoverClass}/>
+            )}
           </div>
         </div>
         

@@ -33,7 +33,18 @@ export const fetchProfile = async (userId) => {
   }
 };
 
-export const saveProfile = async (id, firstName, theme, sort_preference = 0, card_art = 'none', generation_count = 0, tutorial_subject = null) => {
+export const adjustLocalFlashcardCount = (setProfile, delta) => {
+  if (typeof setProfile !== 'function' || !delta) return;
+  setProfile((current) => {
+    if (!current) return current;
+    return {
+      ...current,
+      flashcard_count: Math.max(0, (current.flashcard_count || 0) + delta),
+    };
+  });
+};
+
+export const saveProfile = async (id, firstName, theme, sort_preference = 0, card_art = 'none', tutorial_subject = null) => {
   try {
     if (id) {
       // Update existing profile
@@ -42,7 +53,6 @@ export const saveProfile = async (id, firstName, theme, sort_preference = 0, car
         theme: theme, 
         sort_preference: sort_preference, 
         card_art: card_art, 
-        generation_count: generation_count 
       };
       
       // Only include tutorial_subject in update if it's provided

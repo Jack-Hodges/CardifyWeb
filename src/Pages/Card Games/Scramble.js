@@ -14,6 +14,7 @@ import GameComplete from '../../components/Elements/GameComplete';
 import GameSettings from '../../components/Games/GameSettings';
 import GameHUD, { hudIcons } from '../../components/Games/GameHUD';
 import useSubjectFromRoute from '../../hooks/useSubjectFromRoute';
+import useGameStudySession from '../../hooks/useGameStudySession';
 import { getThemeBackgroundStyle } from '../../components/Functions/getTheme';
 
 const splitIntoChunks = (text, maxChunks = 5) => {
@@ -113,6 +114,7 @@ const DragDropGame = () => {
 
   const { subject } = useSubjectFromRoute();
   const { user, getUser, theme } = useUser();
+  const study = useGameStudySession('scramble');
   const { secondaryColor, tertiaryColor, textClass, shadow } = theme;
   const textTone = textClass || 'textColor';
   const navigate = useNavigate();
@@ -211,6 +213,7 @@ const DragDropGame = () => {
     setFinished(false);
     setStarted(true);
     roundSetupKeyRef.current = '';
+    study.begin(subjectId);
   };
 
   const playAgain = () => {
@@ -220,6 +223,17 @@ const DragDropGame = () => {
     setCheckedCount(0);
     setPerfectCount(0);
   };
+
+  useEffect(() => {
+    if (!finished || !started) return undefined;
+    study.finish({
+      correct: perfectCount,
+      incorrect: Math.max(0, checkedCount - perfectCount),
+      cards_seen: cards.length,
+      weak_card_ids: [],
+    });
+    return undefined;
+  }, [finished]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getItemsByArea = (area) => {
     if (area === 'question') return questionArea;

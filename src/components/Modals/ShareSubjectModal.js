@@ -17,12 +17,13 @@ import {
   unpublishFromDiscover,
 } from '../Subject/SubjectManipulation';
 import { toast } from '../Toast';
+import { unlockBadge } from '../Study/xp';
 
 /**
  * Invite collaborators + public study link + Discover publish for a subject you own.
  */
 function ShareSubjectModal({ isOpen, onClose, subject }) {
-  const { profile, theme } = useUser();
+  const { profile, setProfile, theme } = useUser();
   const { secondaryColor } = theme || {};
   const [shareEmail, setShareEmail] = useState('');
   const [shareRole, setShareRole] = useState('viewer');
@@ -88,6 +89,7 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
       setShareRole('viewer');
       await refreshSubjectShares();
       toast.success('Invite sent');
+      unlockBadge(profile, setProfile, 'first_share');
     } else {
       toast.error('Could not send invite');
     }
@@ -174,6 +176,7 @@ function ShareSubjectModal({ isOpen, onClose, subject }) {
     }
     setListing(data);
     toast.success('Published to Discover');
+    unlockBadge(profile, setProfile, 'publisher');
   };
 
   const handleUnpublishDiscover = async () => {

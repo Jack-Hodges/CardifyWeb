@@ -10,7 +10,7 @@ import SubjectList from "../components/Subject/SubjectList";
 import SpotlightTour from "../components/Tutorial/SpotlightTour";
 import usePageTour from "../components/Tutorial/usePageTour";
 import { HOME_STEPS } from "../components/Tutorial/tourSteps";
-import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText } from 'lucide-react';
+import { BadgePlus, CirclePlay, NotebookText, Shuffle, BookText, KeyRound } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { getThemeBackgroundStyle } from '../components/Functions/getTheme';
 
@@ -121,6 +121,11 @@ function Home() {
   
   const { primaryColor, secondaryColor, textColor, shadow } = theme;
   const jumpColors = useMemo(() => getJumpInColors(theme), [theme]);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const lastStudy = profile?.last_study_date ? String(profile.last_study_date).slice(0, 10) : '';
+  const studiedToday = lastStudy === todayKey ? (profile?.cards_studied_today || 0) : 0;
+  const dailyGoal = profile?.daily_goal || 20;
+  const goalPct = Math.min(100, Math.round((studiedToday / dailyGoal) * 100));
   const [subjects, setSubjects] = useState([]);
   const [isSubjectListModalOpen, setIsSubjectListModalOpen] = useState(false);
   const [subjectPage, setSubjectPage] = useState('create');
@@ -281,6 +286,17 @@ function Home() {
                   {profile.study_minutes_total} min studied
                 </p>
               )}
+              <div className={`mt-3 max-w-xs ${shadow ? 'drop-shadow-custom' : ''}`}>
+                <p className="text-base sm:text-lg font-semibold opacity-90">
+                  {studiedToday}/{dailyGoal} cards today
+                </p>
+                <div className="mt-1 h-2.5 rounded-full bg-black/20 overflow-hidden">
+                  <div
+                    className={`h-full ${primaryColor?.bgClass || 'bg-green-500'}`}
+                    style={{ width: `${goalPct}%` }}
+                  />
+                </div>
+              </div>
             </div>
 
             {subjects.filter(subject => subject.up_to_index != null && subject.user_id === (profile?.id || user?.id)).length > 0 && (
@@ -305,12 +321,23 @@ function Home() {
                 <p>Jump In</p>
               </div>
               <div className="grid grid-cols-3 gap-2 sm:gap-0 pb-2 sm:flex sm:space-x-4 sm:pb-2 sm:px-5 px-4 w-full overflow-x-auto scrollbar-hide">
-                <JumpButton text="Create" img={<BadgePlus className="size-16 sm:size-[100px]" />} color={jumpColors[0]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Practice" img={<CirclePlay className="size-16 sm:size-[100px]" />} color={jumpColors[1]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Memory" img={Cards} color={jumpColors[2]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Quiz" img={<NotebookText className="size-16 sm:size-[100px]" />} color={jumpColors[3]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Scramble" img={<Shuffle className="size-16 sm:size-[100px]" />} color={jumpColors[4]} onClick={handleOpenSubjectListModal}/>
-                <JumpButton text="Type" img={<BookText className="size-16 sm:size-[100px]" />} color={jumpColors[5]} onClick={handleOpenSubjectListModal}/>
+                {[
+                  { text: 'Create', img: <BadgePlus className="size-16 sm:size-[100px]" /> },
+                  { text: 'Practice', img: <CirclePlay className="size-16 sm:size-[100px]" /> },
+                  { text: 'Memory', img: Cards },
+                  { text: 'Quiz', img: <NotebookText className="size-16 sm:size-[100px]" /> },
+                  { text: 'Scramble', img: <Shuffle className="size-16 sm:size-[100px]" /> },
+                  { text: 'Type', img: <BookText className="size-16 sm:size-[100px]" /> },
+                  { text: 'Cipher', img: <KeyRound className="size-16 sm:size-[100px]" /> },
+                ].map((item, index) => (
+                  <JumpButton
+                    key={item.text}
+                    text={item.text}
+                    img={item.img}
+                    color={jumpColors[index % jumpColors.length]}
+                    onClick={handleOpenSubjectListModal}
+                  />
+                ))}
               </div>
             </div>
 

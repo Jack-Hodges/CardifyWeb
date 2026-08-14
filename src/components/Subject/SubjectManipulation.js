@@ -140,7 +140,6 @@ export const dismissTutorialSubject = async (profile) => {
     profile.theme,
     profile.sort_preference,
     profile.card_art,
-    profile.generation_count,
     true
   );
 
@@ -234,36 +233,15 @@ export const saveSubjectProgress = async (subjectId, upToIndex) => {
 export const removeSubject = async (subjectId) => {
   try {
     const now = new Date().toISOString();
-    const { data: cards, error: countError } = await supabase
+    const { error: cardError } = await supabase
       .from('flashcards')
-      .select('id, user_id')
+      .update({ deleted_at: now })
       .eq('subject_id', subjectId)
       .is('deleted_at', null);
 
-    if (countError) {
-      console.error('Error fetching cards for subject:', countError);
+    if (cardError) {
+      console.error('Error soft-deleting subject cards:', cardError);
       return false;
-    }
-
-    if (cards && cards.length > 0) {
-      const userId = cards[0].user_id;
-      const cardCount = cards.length;
-
-      const { error: profileError } = await supabase.rpc('decrement_flashcard_count_by', {
-        user_id: userId,
-        amount: cardCount,
-      });
-
-      if (profileError) {
-        console.error('Error updating profile flashcard count:', profileError);
-        return false;
-      }
-
-      await supabase
-        .from('flashcards')
-        .update({ deleted_at: now })
-        .eq('subject_id', subjectId)
-        .is('deleted_at', null);
     }
 
     const { error } = await supabase
@@ -284,6 +262,15 @@ export const removeSubject = async (subjectId) => {
 
 export const restoreSubject = async (subjectId) => {
   try {
+    const { error: cardError } = await supabase
+      .from('flashcards')
+      .update({ deleted_at: null })
+      .eq('subject_id', subjectId);
+    if (cardError) {
+      console.error('Error restoring subject cards:', cardError);
+      return false;
+    }
+
     const { error } = await supabase
       .from('subjects')
       .update({ deleted_at: null })
@@ -292,10 +279,6 @@ export const restoreSubject = async (subjectId) => {
       console.error('Error restoring subject:', error);
       return false;
     }
-    await supabase
-      .from('flashcards')
-      .update({ deleted_at: null })
-      .eq('subject_id', subjectId);
     return true;
   } catch (error) {
     console.error('Unexpected error restoring subject:', error);
